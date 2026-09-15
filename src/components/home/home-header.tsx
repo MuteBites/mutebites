@@ -2,7 +2,6 @@
 
 import { useTransition } from "react";
 import { LogOut } from "lucide-react";
-import { signOut } from "@/app/actions";
 import { BrandLogo } from "@/components/brand-logo";
 import {
   DropdownMenu,
@@ -14,6 +13,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { formatStoredMobile } from "@/lib/phone";
+import { signOutAndClearCart } from "@/lib/sign-out";
 
 function initials(name: string) {
   const parts = name.trim().split(/\s+/);
@@ -60,7 +60,7 @@ export function HomeHeader({
           <DropdownMenuItem
             variant="destructive"
             disabled={signingOut}
-            onClick={() => startSignOut(() => signOut())}
+            onClick={() => startSignOut(() => signOutAndClearCart())}
             className="px-2 py-2"
           >
             <LogOut />

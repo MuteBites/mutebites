@@ -1,6 +1,4 @@
 import type { Metadata } from "next";
-import { LogOut } from "lucide-react";
-import { signOut } from "@/app/actions";
 import { TabBar } from "@/components/nav/tab-bar";
 import { ThemeIconToggle } from "@/components/theme/theme-icon-toggle";
 import { ThemeSegmented } from "@/components/theme/theme-segmented";
@@ -9,6 +7,7 @@ import { requireProfile } from "@/lib/profile";
 import { EditableName } from "./editable-name";
 import { EditablePhone } from "./editable-phone";
 import { ACTIVE_ORDER_PHONE_LOCK_MESSAGE, BANNED_PHONE_LOCK_MESSAGE } from "./phone-lock";
+import { SignOutButton } from "./sign-out-button";
 
 export const metadata: Metadata = { title: "Profile · MuteBites" };
 
@@ -89,15 +88,9 @@ export default async function ProfilePage() {
         </span>
       </p>
 
-      <form action={signOut} className="mt-6 border-t pt-4">
-        <button
-          type="submit"
-          className="flex w-full items-center justify-between font-semibold text-destructive outline-none hover:underline focus-visible:ring-2 focus-visible:ring-destructive/30"
-        >
-          Sign out
-          <LogOut className="size-4" />
-        </button>
-      </form>
+      <div className="mt-6 border-t pt-4">
+        <SignOutButton />
+      </div>
 
       <TabBar />
     </main>
