@@ -114,7 +114,10 @@ export function OrderTracking({ initialOrder }: { initialOrder: OrderDetail }) {
                 )}
               </div>
               <div className={cn("pb-6", step.state === "upcoming" && "opacity-50")}>
-                <p className={cn("font-semibold", step.state === "current" && "text-primary")}>{step.label}</p>
+                <p className={cn("font-semibold", step.state === "current" && "text-primary")}>
+                  {step.label}
+                  {step.state === "current" && " (pending)"}
+                </p>
                 {i === 0 && <p className="text-sm text-muted-foreground">{formatTime(initialOrder.createdAt)}</p>}
                 {step.state === "current" && step.label.startsWith("Preparing") && (
                   <p className="text-sm text-muted-foreground">We&apos;ll call you when we reach the gate.</p>
