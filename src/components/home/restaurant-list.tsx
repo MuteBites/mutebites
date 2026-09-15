@@ -5,7 +5,13 @@ import { Search } from "lucide-react";
 import type { Restaurant } from "@/lib/data/types";
 import { RestaurantCard } from "./restaurant-card";
 
-export function RestaurantList({ restaurants }: { restaurants: Restaurant[] }) {
+export function RestaurantList({
+  restaurants,
+  orderingEnabled,
+}: {
+  restaurants: Restaurant[];
+  orderingEnabled: boolean;
+}) {
   const [query, setQuery] = useState("");
 
   const q = query.trim().toLowerCase();
@@ -53,7 +59,7 @@ export function RestaurantList({ restaurants }: { restaurants: Restaurant[] }) {
         <ul className="mt-4 flex flex-col gap-5">
           {visible.map((r) => (
             <li key={r.id}>
-              <RestaurantCard restaurant={r} />
+              <RestaurantCard restaurant={r} orderingEnabled={orderingEnabled} />
             </li>
           ))}
         </ul>

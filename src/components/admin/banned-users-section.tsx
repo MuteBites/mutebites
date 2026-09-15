@@ -1,0 +1,197 @@
+"use client";
+
+import { useEffect, useState, useTransition } from "react";
+import { Loader2, Search } from "lucide-react";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
+import { searchStudents, setStudentBanned, type StudentSearchResult } from "@/lib/admin/actions";
+import type { BannedUser } from "@/lib/data/admin";
+import { formatOrderTimestamp } from "@/lib/date";
+import { formatStoredMobile } from "@/lib/phone";
+
+export function BannedUsersSection({ bannedUsers }: { bannedUsers: BannedUser[] }) {
+  const [banned, setBanned] = useState(bannedUsers);
+  const [error, setError] = useState<string | null>(null);
+  const [pending, startTransition] = useTransition();
+
+  function unban(id: string) {
+    startTransition(async () => {
+      const result = await setStudentBanned(id, false);
+      if (result.ok) {
+        setBanned((list) => list.filter((u) => u.id !== id));
+        setError(null);
+      } else {
+        setError(result.error);
+      }
+    });
+  }
+
+  function onBanned(user: StudentSearchResult) {
+    setBanned((list) => [
+      { id: user.id, fullName: user.fullName, phone: user.phone, bannedAt: new Date().toISOString() },
+      ...list,
+    ]);
+  }
+
+  return (
+    <div className="flex flex-col gap-4">
+      <BanStudentSearch onBanned={onBanned} />
+
+      {error && <p className="text-sm text-destructive">{error}</p>}
+
+      {banned.length === 0 ? (
+        <p className="rounded-2xl border bg-card p-6 text-center text-muted-foreground">
+          No one is currently banned.
+        </p>
+      ) : (
+        <div className="flex flex-col gap-2">
+          {banned.map((user) => (
+            <div
+              key={user.id}
+              className="flex items-center justify-between gap-3 rounded-2xl border bg-card p-4"
+            >
+              <div className="min-w-0">
+                <p className="truncate font-semibold">{user.fullName}</p>
+                <p className="text-sm text-muted-foreground">
+                  {formatStoredMobile(user.phone)}
+                  {user.bannedAt && ` · Banned ${formatOrderTimestamp(user.bannedAt)}`}
+                </p>
+              </div>
+              <button
+                type="button"
+                disabled={pending}
+                onClick={() => unban(user.id)}
+                className="shrink-0 rounded-xl bg-success px-3.5 py-2 text-sm font-bold text-white uppercase outline-none hover:bg-success/90 focus-visible:ring-3 focus-visible:ring-ring/40 disabled:opacity-70"
+              >
+                Unban
+              </button>
+            </div>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}
+
+function BanStudentSearch({ onBanned }: { onBanned: (user: StudentSearchResult) => void }) {
+  const [query, setQuery] = useState("");
+  const [results, setResults] = useState<StudentSearchResult[]>([]);
+  const [searching, setSearching] = useState(false);
+  const [target, setTarget] = useState<StudentSearchResult | null>(null);
+  const [error, setError] = useState<string | null>(null);
+  const [banPending, startBan] = useTransition();
+
+  useEffect(() => {
+    const term = query.trim();
+    // Nothing is rendered below 2 characters (see the guard in the JSX),
+    // so there's no need to touch results/searching state for this case.
+    if (term.length < 2) return;
+
+    const timeout = setTimeout(async () => {
+      setSearching(true);
+      const result = await searchStudents(term);
+      setSearching(false);
+      if (result.ok) setResults(result.results);
+    }, 300);
+    return () => clearTimeout(timeout);
+  }, [query]);
+
+  function confirmBan() {
+    if (!target) return;
+    startBan(async () => {
+      const result = await setStudentBanned(target.id, true);
+      if (result.ok) {
+        onBanned(target);
+        setResults((list) => list.filter((u) => u.id !== target.id));
+        setError(null);
+        setTarget(null);
+      } else {
+        setError(result.error);
+      }
+    });
+  }
+
+  return (
+    <div className="rounded-2xl border bg-card p-4">
+      <label className="relative block">
+        <span className="sr-only">Search students to ban</span>
+        <Search
+          className="pointer-events-none absolute top-1/2 left-3.5 size-4 -translate-y-1/2 text-muted-foreground"
+          aria-hidden="true"
+        />
+        <input
+          type="search"
+          value={query}
+          onChange={(e) => setQuery(e.target.value)}
+          placeholder="Search by name, phone, or reg. number to ban a student…"
+          className="h-11 w-full rounded-xl bg-secondary pr-4 pl-10 outline-none placeholder:text-muted-foreground focus-visible:ring-2 focus-visible:ring-ring/30"
+        />
+      </label>
+
+      {query.trim().length >= 2 && (
+        <div className="mt-3 flex flex-col gap-2">
+          {searching && <p className="text-sm text-muted-foreground">Searching…</p>}
+          {!searching && results.length === 0 && (
+            <p className="text-sm text-muted-foreground">No students match “{query.trim()}”.</p>
+          )}
+          {results.map((user) => (
+            <div
+              key={user.id}
+              className="flex items-center justify-between gap-3 rounded-xl border px-3.5 py-2.5"
+            >
+              <div className="min-w-0">
+                <p className="truncate font-semibold">{user.fullName}</p>
+                <p className="text-sm text-muted-foreground">{formatStoredMobile(user.phone)}</p>
+              </div>
+              {user.isBanned ? (
+                <span className="shrink-0 text-xs font-semibold text-destructive uppercase">
+                  Already banned
+                </span>
+              ) : (
+                <button
+                  type="button"
+                  onClick={() => setTarget(user)}
+                  className="shrink-0 text-xs font-semibold text-destructive outline-none hover:underline"
+                >
+                  Ban
+                </button>
+              )}
+            </div>
+          ))}
+        </div>
+      )}
+
+      <AlertDialog open={target !== null} onOpenChange={(open) => !open && setTarget(null)}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Ban {target?.fullName}?</AlertDialogTitle>
+            <AlertDialogDescription>
+              {target &&
+                `This blocks new orders from ${formatStoredMobile(target.phone)} campus-wide — including any other account signed in with the same number. You can unban at any time.`}
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          {error && <p className="text-sm text-destructive">{error}</p>}
+          <AlertDialogFooter>
+            <AlertDialogCancel disabled={banPending}>Cancel</AlertDialogCancel>
+            <AlertDialogAction
+              disabled={banPending}
+              onClick={confirmBan}
+              className="bg-destructive text-white hover:bg-destructive/90"
+            >
+              {banPending && <Loader2 className="size-4 animate-spin" />}
+              Ban student
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+    </div>
+  );
+}

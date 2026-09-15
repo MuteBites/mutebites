@@ -33,6 +33,37 @@ export function statusBadge(status: OrderStatus): { label: string; className: st
   }
 }
 
+/**
+ * The two admin-driven jumps: confirm with the restaurant, then mark
+ * delivered. `preparing`/`out_for_delivery` stay valid enum values (and
+ * still show on the student timeline) but aren't clicked through
+ * individually — delivery timing runs on fixed ETA slots, not admin
+ * clicks, so there's nothing for a "start preparing" / "out for delivery"
+ * button to actually decide.
+ */
+export const STATUS_FLOW: OrderStatus[] = ["pending", "confirmed", "delivered"];
+
+/** The next status after `status` in STATUS_FLOW, or null if there isn't one (delivered/cancelled). */
+export function nextStatus(status: OrderStatus): OrderStatus | null {
+  const i = STATUS_FLOW.indexOf(status);
+  return i === -1 || i === STATUS_FLOW.length - 1 ? null : STATUS_FLOW[i + 1];
+}
+
+/** Button copy for advancing *out of* `status`, or null once there's nowhere left to advance to. */
+export function advanceLabel(status: OrderStatus): string | null {
+  switch (status) {
+    case "pending":
+      return "Confirm with restaurant";
+    case "confirmed":
+      return "Mark delivered";
+    case "preparing":
+    case "out_for_delivery":
+    case "delivered":
+    case "cancelled":
+      return null;
+  }
+}
+
 export type TimelineStepState = "done" | "current" | "upcoming";
 export type TimelineStep = { label: string; state: TimelineStepState };
 

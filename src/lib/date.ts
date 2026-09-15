@@ -57,3 +57,29 @@ export function estimatedDelivery(iso: string): string {
   if (minutesOfDay <= 18 * 60) return "Delivery between 7:00 PM – 7:30 PM";
   return "Delivery before 8:20 PM";
 }
+
+/**
+ * The literal end-of-slot instant for an order, based on when it was
+ * placed (IST wall-clock) — the same three windows as estimatedDelivery()
+ * above, just as a real Date instead of display text, so admin bulk
+ * actions can gate on "has this slot actually ended" rather than go by
+ * status alone.
+ */
+export function slotEndTime(iso: string): Date {
+  const placed = new Date(iso);
+  const [h, m] = hourMinuteFmt.format(placed).split(":").map(Number);
+  const minutesOfDay = h * 60 + m;
+
+  const [endHour, endMinute] =
+    minutesOfDay < 12 * 60 + 40 ? [13, 30] : minutesOfDay <= 18 * 60 ? [19, 30] : [20, 20];
+
+  const [year, month, day] = dayKeyFmt.format(placed).split("-").map(Number);
+  // IST is a fixed UTC+5:30 offset (no DST) — subtract it from the
+  // wall-clock time to get the actual UTC instant it corresponds to.
+  return new Date(Date.UTC(year, month - 1, day, endHour, endMinute) - (5 * 60 + 30) * 60_000);
+}
+
+/** True once an order's delivery slot has actually ended (now >= slot end). */
+export function isPastDeliverySlot(iso: string, now: Date = new Date()): boolean {
+  return now.getTime() >= slotEndTime(iso).getTime();
+}

@@ -2,20 +2,27 @@ import Link from "next/link";
 import type { Restaurant } from "@/lib/data/types";
 import { cn } from "@/lib/utils";
 
-export function RestaurantCard({ restaurant }: { restaurant: Restaurant }) {
-  const open = restaurant.is_active;
+export function RestaurantCard({
+  restaurant,
+  orderingEnabled,
+}: {
+  restaurant: Restaurant;
+  orderingEnabled: boolean;
+}) {
+  const active = restaurant.is_active;
+  // Fully orderable only when both this restaurant and the campus-wide
+  // switch say yes. "paused" (active but the switch is off) gets its own
+  // tag rather than being lumped in with "closed" — the restaurant itself
+  // didn't do anything, campus ordering is just off right now.
+  const open = active && orderingEnabled;
+  const paused = active && !orderingEnabled;
 
   return (
     <Link
       href={`/restaurants/${restaurant.id}`}
       className="group block overflow-hidden rounded-3xl border bg-card outline-none transition-shadow hover:shadow-md focus-visible:ring-3 focus-visible:ring-ring/40"
     >
-      <div
-        className={cn(
-          "relative aspect-[5/2] bg-stripes",
-          !open && "opacity-60 grayscale",
-        )}
-      >
+      <div className={cn("relative aspect-[5/2] bg-stripes", !active && "opacity-60 grayscale")}>
         <span
           className={cn(
             "absolute right-4 bottom-4 inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-sm font-semibold",
@@ -26,7 +33,7 @@ export function RestaurantCard({ restaurant }: { restaurant: Restaurant }) {
             className={cn("size-1.5 rounded-full", open ? "bg-success" : "bg-muted-foreground")}
             aria-hidden="true"
           />
-          {open ? "OPEN" : "CLOSED"}
+          {!active ? "CLOSED" : paused ? "PAUSED" : "OPEN"}
         </span>
       </div>
 
@@ -52,7 +59,7 @@ export function RestaurantCard({ restaurant }: { restaurant: Restaurant }) {
           </ul>
         ) : (
           <p className="mt-3 rounded-xl bg-secondary px-4 py-2.5 text-sm">
-            Closed right now · menu still browsable
+            {!active ? "Closed right now · menu still browsable" : "Browse menu · ordering paused"}
           </p>
         )}
       </div>

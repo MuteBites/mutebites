@@ -14,11 +14,14 @@ import { CartSheet } from "./cart-sheet";
 export function CartBar({
   profilePhone,
   currentRestaurantId,
+  orderingEnabled,
   hasTabBar = false,
 }: {
   profilePhone: string;
   /** On a menu page: names the cart's restaurant when it's a different one. */
   currentRestaurantId?: string;
+  /** Campus-wide kill switch — disables checkout in the cart sheet when off. */
+  orderingEnabled: boolean;
   /** True on pages that also render <TabBar/> below — stacks the bar above it. */
   hasTabBar?: boolean;
 }) {
@@ -58,7 +61,12 @@ export function CartBar({
           </div>
         </>
       )}
-      <CartSheet open={open} onOpenChange={setOpen} profilePhone={profilePhone} />
+      <CartSheet
+        open={open}
+        onOpenChange={setOpen}
+        profilePhone={profilePhone}
+        orderingEnabled={orderingEnabled}
+      />
     </>
   );
 }

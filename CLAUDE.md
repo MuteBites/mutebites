@@ -36,7 +36,18 @@ Defined in [`supabase/migrations/20260915000000_init_schema.sql`](supabase/migra
 [`supabase/migrations/20260915050000_place_order_function.sql`](supabase/migrations/20260915050000_place_order_function.sql),
 [`supabase/migrations/20260915060000_seed_restaurants.sql`](supabase/migrations/20260915060000_seed_restaurants.sql)
 (data only — the 3 real partner restaurants and their menus),
-and [`supabase/migrations/20260915070000_guard_phone_changes.sql`](supabase/migrations/20260915070000_guard_phone_changes.sql).
+[`supabase/migrations/20260915070000_guard_phone_changes.sql`](supabase/migrations/20260915070000_guard_phone_changes.sql),
+[`supabase/migrations/20260915080000_admin_dashboard.sql`](supabase/migrations/20260915080000_admin_dashboard.sql),
+[`supabase/migrations/20260915090000_fix_users_role_column_rename.sql`](supabase/migrations/20260915090000_fix_users_role_column_rename.sql)
+(fixes a live drift — the `role` column got renamed to `student` by
+accident via the Table Editor UI, not through any migration — back to
+match every migration and the app code),
+[`supabase/migrations/20260915100000_admin_users_and_ban.sql`](supabase/migrations/20260915100000_admin_users_and_ban.sql),
+[`supabase/migrations/20260915110000_reapply_place_order_ordering_check.sql`](supabase/migrations/20260915110000_reapply_place_order_ordering_check.sql)
+(re-applies `place_order()` unchanged — the `ordering_enabled` check from
+`080000` likely never actually went live, probably split off into its own
+SQL editor tab and skipped when that migration was applied by hand),
+and [`supabase/migrations/20260915120000_banned_at.sql`](supabase/migrations/20260915120000_banned_at.sql).
 Migrations are applied by hand in the Supabase SQL editor (no CLI setup).
 
 All orders are handed over at **VIT-AP Main Gate** — there is no room
@@ -50,8 +61,14 @@ on `orders`).
   one per phone). Stored as `+91XXXXXXXXXX` — the app normalizes every
   input to that one shape (`src/lib/phone.ts`), since bans match by exact
   phone. Also `registration_number`, `role` (`user_role` enum: `student` |
-  `admin`, default `student`), `is_banned` (default `false` — admin sets this manually,
-  e.g. for repeat no-shows). No `public.users` row is auto-created on
+  `admin`, default `student`), `is_banned` (default `false` — an admin
+  flips this from the admin dashboard's Banned Users section, e.g. for
+  repeat no-shows; `role` itself is still only ever changed by hand in the
+  database, never through the app), `banned_at` (nullable timestamptz, kept
+  correct by the `set_banned_at` trigger — set to `now()` whenever
+  `is_banned` flips true, cleared back to `null` when it flips false again,
+  regardless of whether the change came through the app or the SQL editor).
+  No `public.users` row is auto-created on
   OAuth sign-in — the app creates it itself, once, when the first-login
   form (full name + phone) is submitted; that's also how the app tells
   first-time vs. returning users apart (row exists or not).
@@ -67,6 +84,10 @@ on `orders`).
 - **`order_items`** — snapshots `dish_name` and `unit_price` at order time
   (quantity, generated `subtotal`), so later menu edits never rewrite past
   order history. `dish_id` is `on delete set null` for the same reason.
+- **`app_settings`** — single-row table (`id boolean primary key default
+  true check (id)` caps it at one row) holding `ordering_enabled`, the
+  campus-wide kill switch the admin dashboard flips. Public-read (the
+  student app needs to know ordering is paused), admin-only update.
 
 RLS is enabled on every table:
 - `restaurants` / `dish_categories` / `dishes` are public-read (browsing the
@@ -83,12 +104,20 @@ RLS is enabled on every table:
   contact phone format, restaurant `is_active`, and every dish belonging to
   the restaurant and `is_available`; snapshots dish name/price from
   `dishes` (never from the client); leaves `status` at `pending`; and
-  computes `total_amount` itself. It raises short error keys
-  (`banned`, `restaurant_closed`, `dish_unavailable`, …) that
+  computes `total_amount` itself. It also checks `app_settings.ordering_enabled`
+  before anything else (raising `ordering_paused` if the admin kill switch
+  is off) — enforced in the function itself, not just hidden in the UI,
+  since a direct PostgREST call would otherwise bypass an app-level check.
+  It raises short error keys
+  (`banned`, `restaurant_closed`, `dish_unavailable`, `ordering_paused`, …) that
   `src/lib/orders/actions.ts` maps to messages. Admins
-  can additionally update any `orders` row (e.g. changing `status`) — that
-  policy covers the whole row, not just `status`, since Postgres RLS can't
-  restrict to a single column without a trigger.
+  can additionally update any `orders` row (e.g. changing `status`) and read
+  every `orders` row, every `users` row, and every `order_items` row (not
+  just their own — needed for the admin dashboard's order list, stat
+  counts, and showing who placed each order) — the orders update policy
+  covers the whole row, not just `status`, since Postgres RLS can't
+  restrict to a single column without a trigger. Admins can also update
+  any `users` row (needed for the ban toggle — see below).
 - Ban enforcement is by **phone number, not account**: `place_order()`
   calls `public.current_user_is_banned()`, which — despite the
   name — checks whether *any* `users` row sharing the calling account's
@@ -101,13 +130,21 @@ RLS is enabled on every table:
   The cart shows a friendly message when an order is refused for a ban.
 - There is no admin login system: a user becomes an admin by manually
   setting their own `users.role` to `'admin'` in the database after signing
-  up normally, and gets unbanned/banned the same manual way. A trigger
+  up normally — `role` stays changeable only that way, never through the
+  API, admin included. `is_banned` **can** now be changed through the API,
+  but only by an admin (the dashboard's Banned Users section — search a
+  student to ban them, or unban from the banned list — on any student's
+  row; a student still can't touch their own `is_banned`). A trigger
   (`prevent_role_self_escalation`, despite the name it now guards `role`,
-  `is_banned`, **and `phone`**) blocks changes to those columns when made
-  through the API (PostgREST), so the existing "update own profile" policy
-  can't be used to self-promote, self-unban, or (for `phone`) dodge a ban
-  or change the delivery contact mid-order — direct DB access (SQL editor,
-  migrations) is unaffected and remains the only way around them.
+  `is_banned`, **and `phone`**) enforces both: it blocks any API change to
+  `role` outright, and blocks an API change to `is_banned` unless the
+  caller is an admin (`public.is_admin()`) — so the existing "update own
+  profile" policy can't be used to self-promote or self-unban, and the new
+  "admins can update any user" policy can't be used by a student (it only
+  grants anything to `role = 'admin'` callers to begin with). For `phone`,
+  the trigger still blocks the change outright via the API regardless of
+  admin status — direct DB access (SQL editor, migrations) is unaffected
+  and remains the only way around any of these.
   Specifically for `phone`: the trigger raises if the account is currently
   `is_banned` (permanent — bans match by live phone at order time, so
   letting a banned student change it would let them escape the ban
@@ -120,8 +157,7 @@ RLS is enabled on every table:
   app entirely.
 
 Known TODOs (not yet decided, don't assume either way without asking):
-restricting `users.email` to a VIT-AP domain; admins currently can't browse
-other students' `users` rows (no policy for that).
+restricting `users.email` to a VIT-AP domain.
 
 ## Hard rule: schema changes
 

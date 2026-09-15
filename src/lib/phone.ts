@@ -21,3 +21,10 @@ export function formatStoredMobile(stored: string): string {
   const local = stored.replace(/^\+91/, "");
   return `+91 ${formatLocalMobile(local)}`;
 }
+
+/** "+919032563455" → "https://wa.me/919032563455" (optionally with a prefilled message). */
+export function whatsAppLink(stored: string, message?: string): string {
+  const digits = stored.replace(/\D/g, "");
+  const base = `https://wa.me/${digits}`;
+  return message ? `${base}?text=${encodeURIComponent(message)}` : base;
+}

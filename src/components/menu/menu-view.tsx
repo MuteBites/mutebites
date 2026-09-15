@@ -25,10 +25,13 @@ export function MenuView({
   restaurant,
   sections,
   profilePhone,
+  orderingEnabled,
 }: {
   restaurant: Restaurant;
   sections: MenuSection[];
   profilePhone: string;
+  /** Campus-wide kill switch — dishes become un-addable when off, same as a closed restaurant. */
+  orderingEnabled: boolean;
 }) {
   const cart = useCart();
   const [filter, setFilter] = useState(ALL);
@@ -96,7 +99,7 @@ export function MenuView({
               key={dish.id}
               dish={dish}
               quantity={quantityOf(dish.id)}
-              orderable={restaurant.is_active}
+              orderable={restaurant.is_active && orderingEnabled}
               onAdd={() => handleAdd(dish)}
               onChangeQuantity={(q) => setQuantity(dish.id, q)}
             />
@@ -104,7 +107,11 @@ export function MenuView({
         </section>
       ))}
 
-      <CartBar profilePhone={profilePhone} currentRestaurantId={restaurant.id} />
+      <CartBar
+        profilePhone={profilePhone}
+        currentRestaurantId={restaurant.id}
+        orderingEnabled={orderingEnabled}
+      />
 
       <AlertDialog open={pendingDish !== null} onOpenChange={(open) => !open && setPendingDish(null)}>
         <AlertDialogContent>

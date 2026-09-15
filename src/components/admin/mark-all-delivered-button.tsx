@@ -1,0 +1,98 @@
+"use client";
+
+import { useState, useTransition } from "react";
+import { useRouter } from "next/navigation";
+import { Loader2 } from "lucide-react";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
+import { markAllConfirmedDelivered } from "@/lib/admin/actions";
+
+/**
+ * Bulk "confirmed → delivered", but only for orders whose delivery slot
+ * has actually ended — a confirmed order still inside its window is left
+ * alone. `confirmedCount` and `eligibleCount` come from the page, computed
+ * against "now" at render time; the server re-checks eligibility itself
+ * regardless (see markAllConfirmedDelivered).
+ */
+export function MarkAllDeliveredButton({
+  confirmedCount,
+  eligibleCount,
+}: {
+  confirmedCount: number;
+  eligibleCount: number;
+}) {
+  const router = useRouter();
+  const [open, setOpen] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [pending, startTransition] = useTransition();
+
+  if (eligibleCount === 0) return null;
+
+  const stillWaiting = confirmedCount - eligibleCount;
+  const label =
+    stillWaiting > 0
+      ? `Mark all delivered (${eligibleCount} of ${confirmedCount})`
+      : `Mark all delivered (${eligibleCount})`;
+
+  function confirm() {
+    startTransition(async () => {
+      const result = await markAllConfirmedDelivered();
+      if (result.ok) {
+        setError(null);
+        setOpen(false);
+        router.refresh();
+      } else {
+        setError(result.error);
+      }
+    });
+  }
+
+  return (
+    <AlertDialog open={open} onOpenChange={(next) => (pending ? null : setOpen(next))}>
+      <AlertDialogTrigger
+        render={
+          <button
+            type="button"
+            className="rounded-xl bg-success px-3.5 py-2 text-xs font-bold text-white uppercase outline-none hover:bg-success/90 focus-visible:ring-3 focus-visible:ring-ring/40"
+          />
+        }
+      >
+        {label}
+      </AlertDialogTrigger>
+      <AlertDialogContent>
+        <AlertDialogHeader>
+          <AlertDialogTitle>Mark {eligibleCount} orders delivered?</AlertDialogTitle>
+          <AlertDialogDescription>
+            Every confirmed order whose delivery slot has already ended will jump straight to
+            delivered.
+            {stillWaiting > 0 &&
+              ` ${stillWaiting} other confirmed order${stillWaiting === 1 ? "" : "s"} ${
+                stillWaiting === 1 ? "hasn't reached its" : "haven't reached their"
+              } delivery window yet and will be left as confirmed.`}
+          </AlertDialogDescription>
+        </AlertDialogHeader>
+        {error && <p className="text-sm text-destructive">{error}</p>}
+        <AlertDialogFooter>
+          <AlertDialogCancel disabled={pending}>Cancel</AlertDialogCancel>
+          <AlertDialogAction
+            disabled={pending}
+            onClick={confirm}
+            className="bg-success text-white hover:bg-success/90"
+          >
+            {pending && <Loader2 className="size-4 animate-spin" />}
+            Mark all delivered
+          </AlertDialogAction>
+        </AlertDialogFooter>
+      </AlertDialogContent>
+    </AlertDialog>
+  );
+}

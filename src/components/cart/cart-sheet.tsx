@@ -27,11 +27,14 @@ export function CartSheet({
   open,
   onOpenChange,
   profilePhone,
+  orderingEnabled,
 }: {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   /** Stored "+91XXXXXXXXXX" — the default contact number for the order. */
   profilePhone: string;
+  /** Campus-wide kill switch — disables the "Place order" button when off. */
+  orderingEnabled: boolean;
 }) {
   const cart = useCart();
   const empty = cart.lines.length === 0;
@@ -65,7 +68,12 @@ export function CartSheet({
         {empty ? (
           <EmptyCart onBrowse={() => onOpenChange(false)} />
         ) : (
-          <CartContents cart={cart} profilePhone={profilePhone} onPlaced={() => onOpenChange(false)} />
+          <CartContents
+            cart={cart}
+            profilePhone={profilePhone}
+            orderingEnabled={orderingEnabled}
+            onPlaced={() => onOpenChange(false)}
+          />
         )}
       </SheetContent>
     </Sheet>
@@ -96,10 +104,12 @@ function EmptyCart({ onBrowse }: { onBrowse: () => void }) {
 function CartContents({
   cart,
   profilePhone,
+  orderingEnabled,
   onPlaced,
 }: {
   cart: Cart;
   profilePhone: string;
+  orderingEnabled: boolean;
   onPlaced: () => void;
 }) {
   const router = useRouter();
@@ -216,6 +226,12 @@ function CartContents({
           Cash on delivery at the gate. Please carry exact change.
         </p>
 
+        {!orderingEnabled && (
+          <p className="mt-3 rounded-2xl bg-secondary px-4 py-3 text-center text-sm">
+            Ordering is paused campus-wide right now. Try again in a bit.
+          </p>
+        )}
+
         {error && (
           <p role="alert" className="mt-3 text-center text-sm text-destructive">
             {error}
@@ -225,7 +241,7 @@ function CartContents({
         <button
           type="button"
           onClick={submit}
-          disabled={placing}
+          disabled={placing || !orderingEnabled}
           className="mt-3 flex h-14 w-full items-center justify-center gap-2 rounded-2xl bg-primary font-heading text-lg font-bold text-primary-foreground outline-none hover:bg-primary/90 focus-visible:ring-3 focus-visible:ring-ring/40 disabled:opacity-70"
         >
           {placing && <Loader2 className="size-5 animate-spin" />}
