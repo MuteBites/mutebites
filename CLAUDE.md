@@ -33,11 +33,24 @@ Food delivery site for VIT-AP University students.
 ## Project structure
 
 - `src/app` — routes (App Router)
+- `src/app/(home)/page.tsx` — the `/` route. It lives in a `(home)` route
+  group (the parens don't affect the URL) specifically so its
+  `loading.tsx` stays scoped to just `/`. A `loading.tsx` placed directly
+  in `src/app` would become the fallback for *every* route that doesn't
+  have its own — including `/login`, `/admin`, etc. — since the app root
+  is an ancestor of all of them. Don't move `page.tsx` back out to
+  `src/app` without either dropping its `loading.tsx` or being fine with
+  that.
 - `src/components/ui` — shadcn/ui components
 - `src/lib/supabase/client.ts` — browser Supabase client
 - `src/lib/supabase/server.ts` — server Supabase client (Server Components/Actions)
 - `src/lib/supabase/middleware.ts` — session-refresh helper used by `middleware.ts`
 - `supabase/migrations/` — hand-written SQL migrations (see rule below)
+
+`loading.tsx` exists for the restaurant list (`(home)`), the menu page
+(`restaurants/[id]`), and both order pages (`orders`, `orders/[id]`) —
+plain skeletons built from `src/components/ui/skeleton.tsx`, roughly
+mirroring each page's real layout so nothing visibly jumps.
 
 ## Database schema
 
@@ -62,9 +75,11 @@ match every migration and the app code),
 SQL editor tab and skipped when that migration was applied by hand),
 [`supabase/migrations/20260915120000_banned_at.sql`](supabase/migrations/20260915120000_banned_at.sql),
 and [`supabase/migrations/20260915130000_enable_realtime_orders.sql`](supabase/migrations/20260915130000_enable_realtime_orders.sql)
-(adds `orders` to the `supabase_realtime` publication — the order
-tracking page subscribes to its own order's row for live status updates;
-existing RLS still governs who can actually receive them).
+(adds `orders` to the `supabase_realtime` publication —
+`src/components/orders/order-tracking.tsx`, a client component, subscribes
+to its own order's row for live status updates on top of the normal
+server-fetched page; existing RLS still governs who can actually receive
+them, and a plain page refresh still shows the true status either way).
 Migrations are applied by hand in the Supabase SQL editor (no CLI setup).
 
 All orders are handed over at **VIT-AP Main Gate** — there is no room
