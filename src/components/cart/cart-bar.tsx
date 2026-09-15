@@ -1,0 +1,64 @@
+"use client";
+
+import { useState } from "react";
+import { ArrowRight } from "lucide-react";
+import { cartTotals, useCart } from "@/lib/cart/store";
+import { formatRupees } from "@/lib/format";
+import { cn } from "@/lib/utils";
+import { CartSheet } from "./cart-sheet";
+
+/**
+ * Floating "N items · ₹X · View cart" bar plus the cart sheet it opens.
+ * Hidden while the cart is empty (the sheet stays open if you empty it).
+ */
+export function CartBar({
+  profilePhone,
+  currentRestaurantId,
+  hasTabBar = false,
+}: {
+  profilePhone: string;
+  /** On a menu page: names the cart's restaurant when it's a different one. */
+  currentRestaurantId?: string;
+  /** True on pages that also render <TabBar/> below — stacks the bar above it. */
+  hasTabBar?: boolean;
+}) {
+  const cart = useCart();
+  const [open, setOpen] = useState(false);
+  const totals = cartTotals(cart);
+  const cartIsElsewhere = cart.restaurantId !== null && cart.restaurantId !== currentRestaurantId;
+
+  return (
+    <>
+      {totals.items > 0 && (
+        <>
+          {/* Spacer so page content isn't hidden behind the bar. */}
+          <div className="h-28" aria-hidden="true" />
+          <div
+            className={cn(
+              "fixed inset-x-0 z-20 mx-auto w-full max-w-md px-4",
+              hasTabBar ? "bottom-20 pb-0" : "bottom-0 pb-[max(1rem,env(safe-area-inset-bottom))]",
+            )}
+          >
+            <div className="flex items-center gap-3 rounded-3xl bg-ink p-3 pl-5 text-ink-foreground shadow-xl">
+              <div className="min-w-0 flex-1">
+                <p className="truncate text-sm opacity-75">
+                  {totals.items} {totals.items === 1 ? "item" : "items"}
+                  {cartIsElsewhere && ` · ${cart.restaurantName}`}
+                </p>
+                <p className="font-heading text-2xl font-bold">{formatRupees(totals.amount)}</p>
+              </div>
+              <button
+                type="button"
+                onClick={() => setOpen(true)}
+                className="flex h-14 items-center gap-2 rounded-2xl bg-primary px-6 font-heading text-lg font-bold text-primary-foreground outline-none hover:bg-primary/90 focus-visible:ring-3 focus-visible:ring-white/60"
+              >
+                View cart <ArrowRight className="size-5" />
+              </button>
+            </div>
+          </div>
+        </>
+      )}
+      <CartSheet open={open} onOpenChange={setOpen} profilePhone={profilePhone} />
+    </>
+  );
+}
