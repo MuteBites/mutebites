@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { Search } from "lucide-react";
 import { CartBar } from "@/components/cart/cart-bar";
 import {
   AlertDialog,
@@ -12,6 +13,7 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
+import { VegMark } from "@/components/veg-mark";
 import { addToCart, conflictsWithCart, setQuantity, useCart } from "@/lib/cart/store";
 import type { Dish, MenuSection, Restaurant } from "@/lib/data/types";
 import { cn } from "@/lib/utils";
@@ -35,6 +37,8 @@ export function MenuView({
 }) {
   const cart = useCart();
   const [filter, setFilter] = useState(ALL);
+  const [vegOnly, setVegOnly] = useState(false);
+  const [query, setQuery] = useState("");
   // Dish waiting on "replace your cart?" confirmation.
   const [pendingDish, setPendingDish] = useState<Dish | null>(null);
 
@@ -49,7 +53,19 @@ export function MenuView({
     else addToCart(cartRestaurant, dish);
   }
 
-  const visible = filter === ALL ? sections : sections.filter((s) => sectionKey(s) === filter);
+  const q = query.trim().toLowerCase();
+  // Searching looks across the whole menu, not just the selected category
+  // chip — a student searching usually doesn't know (or care) which
+  // category something's in.
+  const byCategory = q || filter === ALL ? sections : sections.filter((s) => sectionKey(s) === filter);
+  const byVeg = vegOnly
+    ? byCategory.map((s) => ({ ...s, dishes: s.dishes.filter((d) => d.is_veg) })).filter((s) => s.dishes.length > 0)
+    : byCategory;
+  const visible = q
+    ? byVeg
+        .map((s) => ({ ...s, dishes: s.dishes.filter((d) => d.name.toLowerCase().includes(q)) }))
+        .filter((s) => s.dishes.length > 0)
+    : byVeg;
 
   return (
     <>
@@ -82,8 +98,47 @@ export function MenuView({
         </nav>
       )}
 
+      {sections.length > 0 && (
+        <div className="mt-4 flex items-center gap-2">
+          <label className="relative min-w-0 flex-1">
+            <span className="sr-only">Search dishes</span>
+            <Search
+              className="pointer-events-none absolute top-1/2 left-3 size-4 -translate-y-1/2 text-muted-foreground"
+              aria-hidden="true"
+            />
+            <input
+              type="search"
+              value={query}
+              onChange={(e) => setQuery(e.target.value)}
+              placeholder="Search dishes…"
+              className="h-10 w-full rounded-full bg-secondary pr-3 pl-9 text-sm outline-none placeholder:text-muted-foreground focus-visible:ring-2 focus-visible:ring-ring/30"
+            />
+          </label>
+          <button
+            type="button"
+            onClick={() => setVegOnly((v) => !v)}
+            aria-pressed={vegOnly}
+            className={cn(
+              "flex h-9 shrink-0 items-center gap-2 rounded-full border px-3.5 text-sm font-semibold outline-none transition-colors focus-visible:ring-3 focus-visible:ring-ring/40",
+              vegOnly
+                ? "border-success bg-success-soft text-success"
+                : "bg-card text-muted-foreground hover:bg-secondary",
+            )}
+          >
+            <VegMark isVeg className="size-4" />
+            Veg only
+          </button>
+        </div>
+      )}
+
       {sections.length === 0 && (
         <p className="py-16 text-center text-muted-foreground">No dishes on the menu yet.</p>
+      )}
+
+      {sections.length > 0 && visible.length === 0 && (
+        <p className="py-16 text-center text-muted-foreground">
+          {q ? `No dishes match “${query.trim()}”.` : "No veg dishes in this category."}
+        </p>
       )}
 
       {visible.map((section) => (

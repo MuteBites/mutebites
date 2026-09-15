@@ -60,7 +60,11 @@ match every migration and the app code),
 (re-applies `place_order()` unchanged — the `ordering_enabled` check from
 `080000` likely never actually went live, probably split off into its own
 SQL editor tab and skipped when that migration was applied by hand),
-and [`supabase/migrations/20260915120000_banned_at.sql`](supabase/migrations/20260915120000_banned_at.sql).
+[`supabase/migrations/20260915120000_banned_at.sql`](supabase/migrations/20260915120000_banned_at.sql),
+and [`supabase/migrations/20260915130000_enable_realtime_orders.sql`](supabase/migrations/20260915130000_enable_realtime_orders.sql)
+(adds `orders` to the `supabase_realtime` publication — the order
+tracking page subscribes to its own order's row for live status updates;
+existing RLS still governs who can actually receive them).
 Migrations are applied by hand in the Supabase SQL editor (no CLI setup).
 
 All orders are handed over at **VIT-AP Main Gate** — there is no room
