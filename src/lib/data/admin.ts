@@ -51,6 +51,7 @@ export type AdminOrder = {
   createdAt: string;
   contactPhone: string;
   notes: string | null;
+  restaurantId: string;
   restaurantName: string;
   userId: string;
   studentName: string;
@@ -66,6 +67,7 @@ type AdminOrderRow = {
   contact_phone: string;
   notes: string | null;
   user_id: string;
+  restaurant_id: string;
   restaurants: { name: string } | null;
   users: { full_name: string; is_banned: boolean } | null;
   order_items: { dish_name: string; quantity: number }[];
@@ -81,7 +83,7 @@ export async function getAdminOrders(): Promise<AdminOrder[]> {
   const { data, error } = await supabase
     .from("orders")
     .select(
-      "id, status, total_amount, created_at, contact_phone, notes, user_id, restaurants(name), users(full_name, is_banned), order_items(dish_name, quantity)",
+      "id, status, total_amount, created_at, contact_phone, notes, user_id, restaurant_id, restaurants(name), users(full_name, is_banned), order_items(dish_name, quantity)",
     )
     .order("created_at", { ascending: false })
     .limit(RECENT_ORDERS_LIMIT)
@@ -97,6 +99,7 @@ export async function getAdminOrders(): Promise<AdminOrder[]> {
     contactPhone: o.contact_phone,
     notes: o.notes,
     userId: o.user_id,
+    restaurantId: o.restaurant_id,
     restaurantName: o.restaurants?.name ?? "Restaurant",
     studentName: o.users?.full_name ?? "Student",
     studentBanned: o.users?.is_banned ?? false,

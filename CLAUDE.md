@@ -17,6 +17,19 @@ Food delivery site for VIT-AP University students.
   payment provider anywhere in this codebase. Don't add any.
 - **Hosting**: Vercel
 
+## Admin access
+
+`/admin` has two layers, both required, neither optional:
+1. `requireAdmin()` (`src/lib/admin/guard.ts`) — signed in via Google, and
+   `users.role = 'admin'` (see Database schema below for how that's set).
+2. A separate passcode, checked in `src/app/admin/layout.tsx` after (1)
+   passes. The passcode lives only in the `ADMIN_PASSCODE` env var —
+   never hardcoded, never committed. Entering it right sets an httpOnly,
+   `/admin`-scoped session cookie (`src/lib/admin/passcode.ts` /
+   `passcode-actions.ts`); no `ADMIN_PASSCODE` set means the gate **fails
+   closed** — nobody gets in, admin role or not — rather than silently
+   letting everyone through.
+
 ## Project structure
 
 - `src/app` — routes (App Router)
@@ -83,6 +96,14 @@ on `orders`).
 - **`orders`** — `user_id`, `restaurant_id`, `status` (`order_status` enum:
   `pending → confirmed → preparing → out_for_delivery → delivered`, or
   `cancelled`), `contact_phone`, `notes`, `total_amount`. No payment fields — COD only.
+  The admin dashboard only ever drives two of those transitions directly —
+  `pending → confirmed` and `confirmed → delivered` (`preparing` /
+  `out_for_delivery` stay valid enum values but nothing in the app sets
+  them; delivery timing runs on fixed ETA slots, not admin clicks) — plus
+  a side-path to `cancelled` from any non-terminal status, each one
+  compare-and-swapped on the status the admin's screen showed, so a stale
+  screen or two admins clicking at once can't skip a step or act on a
+  status that's already changed.
 - **`order_items`** — snapshots `dish_name` and `unit_price` at order time
   (quantity, generated `subtotal`), so later menu edits never rewrite past
   order history. `dish_id` is `on delete set null` for the same reason.

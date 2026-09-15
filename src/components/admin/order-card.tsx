@@ -2,8 +2,19 @@
 
 import { useState, useTransition } from "react";
 import { Loader2, MessageCircle } from "lucide-react";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
 import { Badge } from "@/components/ui/badge";
-import { advanceOrderStatus } from "@/lib/admin/actions";
+import { advanceOrderStatus, cancelOrder } from "@/lib/admin/actions";
 import type { AdminOrder } from "@/lib/data/admin";
 import { formatOrderTimestamp } from "@/lib/date";
 import { formatRupees } from "@/lib/format";
@@ -25,10 +36,13 @@ export function OrderCard({ order }: { order: AdminOrder }) {
   }
   const [error, setError] = useState<string | null>(null);
   const [advancing, startAdvance] = useTransition();
+  const [cancelOpen, setCancelOpen] = useState(false);
+  const [cancelling, startCancel] = useTransition();
 
   const badge = statusBadge(status);
   const label = advanceLabel(status);
   const isFinalStep = status === "confirmed"; // → delivered
+  const cancellable = status !== "delivered" && status !== "cancelled";
 
   function advance() {
     startAdvance(async () => {
@@ -36,6 +50,19 @@ export function OrderCard({ order }: { order: AdminOrder }) {
       if (result.ok) {
         setError(null);
         setStatus((s) => nextStatus(s) ?? s);
+      } else {
+        setError(result.error);
+      }
+    });
+  }
+
+  function confirmCancel() {
+    startCancel(async () => {
+      const result = await cancelOrder(order.id, status);
+      if (result.ok) {
+        setError(null);
+        setStatus("cancelled");
+        setCancelOpen(false);
       } else {
         setError(result.error);
       }
@@ -101,6 +128,41 @@ export function OrderCard({ order }: { order: AdminOrder }) {
           {advancing && <Loader2 className="size-4 animate-spin" />}
           {label}
         </button>
+      )}
+
+      {cancellable && (
+        <AlertDialog open={cancelOpen} onOpenChange={(next) => (cancelling ? null : setCancelOpen(next))}>
+          <AlertDialogTrigger
+            render={
+              <button
+                type="button"
+                className="mt-2 w-full text-center text-xs font-medium text-muted-foreground outline-none hover:text-destructive hover:underline"
+              />
+            }
+          >
+            Cancel order
+          </AlertDialogTrigger>
+          <AlertDialogContent>
+            <AlertDialogHeader>
+              <AlertDialogTitle>Cancel this order?</AlertDialogTitle>
+              <AlertDialogDescription>
+                {order.studentName}&apos;s order {orderReference(order.id)} from {order.restaurantName}{" "}
+                will be marked cancelled. This can&apos;t be undone from here.
+              </AlertDialogDescription>
+            </AlertDialogHeader>
+            <AlertDialogFooter>
+              <AlertDialogCancel disabled={cancelling}>Keep order</AlertDialogCancel>
+              <AlertDialogAction
+                disabled={cancelling}
+                onClick={confirmCancel}
+                className="bg-destructive text-white hover:bg-destructive/90"
+              >
+                {cancelling && <Loader2 className="size-4 animate-spin" />}
+                Cancel order
+              </AlertDialogAction>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialog>
       )}
     </div>
   );

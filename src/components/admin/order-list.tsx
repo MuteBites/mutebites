@@ -1,20 +1,156 @@
-import type { AdminOrder } from "@/lib/data/admin";
+"use client";
+
+import { useMemo, useState, type ReactNode } from "react";
+import { ChevronDown, Search } from "lucide-react";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuRadioGroup,
+  DropdownMenuRadioItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import type { AdminOrder, AdminRestaurant } from "@/lib/data/admin";
+import { orderReference } from "@/lib/orders/status";
+import { cn } from "@/lib/utils";
+import { ExportOrdersButton } from "./export-orders-button";
 import { OrderCard } from "./order-card";
 
-export function OrderList({ orders }: { orders: AdminOrder[] }) {
-  if (orders.length === 0) {
-    return (
-      <p className="rounded-2xl border bg-card p-6 text-center text-muted-foreground">
-        No orders yet.
-      </p>
-    );
-  }
+const ALL_RESTAURANTS = "all";
+
+type StatusFilter = "all" | "confirmed" | "delivered" | "cancelled";
+
+// "delivered" is what's stored; "Completed" is what the admin sees, same
+// wording as the stat card at the top of the page.
+const STATUS_OPTIONS: { value: StatusFilter; label: string }[] = [
+  { value: "all", label: "All Statuses" },
+  { value: "confirmed", label: "Confirmed" },
+  { value: "delivered", label: "Completed" },
+  { value: "cancelled", label: "Cancelled" },
+];
+
+export function OrderList({
+  orders,
+  restaurants,
+}: {
+  orders: AdminOrder[];
+  restaurants: AdminRestaurant[];
+}) {
+  const [restaurantFilter, setRestaurantFilter] = useState(ALL_RESTAURANTS);
+  const [statusFilter, setStatusFilter] = useState<StatusFilter>("all");
+  const [query, setQuery] = useState("");
+
+  const q = query.trim().toLowerCase();
+  const filtered = useMemo(() => {
+    return orders.filter((o) => {
+      if (restaurantFilter !== ALL_RESTAURANTS && o.restaurantId !== restaurantFilter) return false;
+      if (statusFilter !== "all" && o.status !== statusFilter) return false;
+      if (q) {
+        const haystack = `${orderReference(o.id)} ${o.studentName} ${o.contactPhone}`.toLowerCase();
+        if (!haystack.includes(q)) return false;
+      }
+      return true;
+    });
+  }, [orders, restaurantFilter, statusFilter, q]);
+
+  const restaurantLabel =
+    restaurantFilter === ALL_RESTAURANTS
+      ? "All Restaurants"
+      : (restaurants.find((r) => r.id === restaurantFilter)?.name ?? "All Restaurants");
+  const statusLabel = STATUS_OPTIONS.find((s) => s.value === statusFilter)?.label ?? "All Statuses";
 
   return (
-    <div className="flex flex-col gap-3">
-      {orders.map((order) => (
-        <OrderCard key={order.id} order={order} />
-      ))}
+    <div className="flex flex-col gap-4">
+      <div className="flex gap-2 overflow-x-auto pb-1 [scrollbar-width:none]">
+        <RestaurantTab active={restaurantFilter === ALL_RESTAURANTS} onClick={() => setRestaurantFilter(ALL_RESTAURANTS)}>
+          All Restaurants
+        </RestaurantTab>
+        {restaurants.map((r) => (
+          <RestaurantTab key={r.id} active={restaurantFilter === r.id} onClick={() => setRestaurantFilter(r.id)}>
+            {r.name}
+          </RestaurantTab>
+        ))}
+      </div>
+
+      <div className="flex flex-wrap items-center gap-2">
+        <label className="relative min-w-40 flex-1">
+          <span className="sr-only">Search orders by ID, name, or phone</span>
+          <Search
+            className="pointer-events-none absolute top-1/2 left-3 size-4 -translate-y-1/2 text-muted-foreground"
+            aria-hidden="true"
+          />
+          <input
+            type="search"
+            value={query}
+            onChange={(e) => setQuery(e.target.value)}
+            placeholder="Search ID, name, phone…"
+            className="h-10 w-full rounded-xl bg-secondary pr-3 pl-9 text-sm outline-none placeholder:text-muted-foreground focus-visible:ring-2 focus-visible:ring-ring/30"
+          />
+        </label>
+
+        <DropdownMenu>
+          <DropdownMenuTrigger className="flex h-10 shrink-0 items-center gap-1.5 rounded-xl border bg-card px-3 text-sm font-semibold outline-none focus-visible:ring-3 focus-visible:ring-ring/40">
+            {statusLabel}
+            <ChevronDown className="size-4 text-muted-foreground" aria-hidden="true" />
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="end">
+            <DropdownMenuRadioGroup
+              value={statusFilter}
+              onValueChange={(value) => setStatusFilter(value as StatusFilter)}
+            >
+              {STATUS_OPTIONS.map((opt) => (
+                <DropdownMenuRadioItem key={opt.value} value={opt.value}>
+                  {opt.label}
+                </DropdownMenuRadioItem>
+              ))}
+            </DropdownMenuRadioGroup>
+          </DropdownMenuContent>
+        </DropdownMenu>
+
+        <ExportOrdersButton orders={filtered} />
+      </div>
+
+      <p className="text-sm text-muted-foreground">
+        Showing <strong className="font-semibold text-foreground">{filtered.length}</strong> order
+        {filtered.length === 1 ? "" : "s"} for{" "}
+        <strong className="font-semibold text-foreground">{restaurantLabel}</strong>
+        {statusFilter !== "all" && ` · ${statusLabel}`}
+      </p>
+
+      {filtered.length === 0 ? (
+        <p className="rounded-2xl border bg-card p-6 text-center text-muted-foreground">
+          No orders found matching the selected filter.
+        </p>
+      ) : (
+        <div className="flex flex-col gap-3">
+          {filtered.map((order) => (
+            <OrderCard key={order.id} order={order} />
+          ))}
+        </div>
+      )}
     </div>
+  );
+}
+
+function RestaurantTab({
+  active,
+  onClick,
+  children,
+}: {
+  active: boolean;
+  onClick: () => void;
+  children: ReactNode;
+}) {
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      aria-pressed={active}
+      className={cn(
+        "h-9 shrink-0 rounded-full px-4 text-sm font-medium whitespace-nowrap outline-none transition-colors focus-visible:ring-3 focus-visible:ring-ring/40",
+        active ? "bg-ink text-ink-foreground" : "bg-secondary text-secondary-foreground hover:bg-border",
+      )}
+    >
+      {children}
+    </button>
   );
 }

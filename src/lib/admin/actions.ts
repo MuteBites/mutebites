@@ -89,6 +89,37 @@ export async function advanceOrderStatus(
 }
 
 /**
+ * Cancels one order. Only orders that haven't already finished one way or
+ * the other can be cancelled — `currentStatus` is compare-and-swapped the
+ * same way advanceOrderStatus() is, so a stale screen can't cancel an
+ * order that's since been delivered (or already cancelled) out from
+ * under it.
+ */
+export async function cancelOrder(orderId: string, currentStatus: OrderStatus): Promise<AdminActionResult> {
+  const denied = await assertAdmin();
+  if (denied) return denied;
+
+  if (currentStatus === "delivered" || currentStatus === "cancelled") {
+    return { ok: false, error: "This order can't be cancelled." };
+  }
+
+  const supabase = await createClient();
+  const { data, error } = await supabase
+    .from("orders")
+    .update({ status: "cancelled" })
+    .eq("id", orderId)
+    .eq("status", currentStatus)
+    .select("id");
+  if (error) return { ok: false, error: "Couldn't cancel that order. Please try again." };
+  if (!data || data.length === 0) {
+    return { ok: false, error: "That order just changed — refresh and try again." };
+  }
+
+  revalidatePath("/admin");
+  return { ok: true };
+}
+
+/**
  * Bans or unbans one student. See current_user_is_banned() for how a ban
  * actually matches (by phone number, not this specific account) — this
  * just flips the flag on the row the admin picked.

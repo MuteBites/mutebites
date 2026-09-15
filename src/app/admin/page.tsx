@@ -1,5 +1,4 @@
 import { BannedUsersSection } from "@/components/admin/banned-users-section";
-import { ExportOrdersButton } from "@/components/admin/export-orders-button";
 import { MarkAllDeliveredButton } from "@/components/admin/mark-all-delivered-button";
 import { OrderingKillSwitch } from "@/components/admin/ordering-kill-switch";
 import { OrderList } from "@/components/admin/order-list";
@@ -48,15 +47,12 @@ export default async function AdminPage() {
           <h2 className="font-mono text-xs font-semibold tracking-[0.1em] text-muted-foreground uppercase">
             Orders
           </h2>
-          <div className="flex flex-wrap items-center gap-2">
-            <MarkAllDeliveredButton
-              confirmedCount={confirmedOrders.length}
-              eligibleCount={eligibleForDelivery}
-            />
-            <ExportOrdersButton orders={orders} />
-          </div>
+          <MarkAllDeliveredButton
+            confirmedCount={confirmedOrders.length}
+            eligibleCount={eligibleForDelivery}
+          />
         </div>
-        <OrderList orders={orders} />
+        <OrderList orders={orders} restaurants={restaurants} />
       </section>
 
       <section>
