@@ -100,6 +100,7 @@ export function MenuView({
               dish={dish}
               quantity={quantityOf(dish.id)}
               orderable={restaurant.is_active && orderingEnabled}
+              pausedOnly={restaurant.is_active && !orderingEnabled}
               onAdd={() => handleAdd(dish)}
               onChangeQuantity={(q) => setQuantity(dish.id, q)}
             />

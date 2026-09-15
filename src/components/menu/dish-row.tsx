@@ -11,13 +11,16 @@ export function DishRow({
   dish,
   quantity,
   orderable,
+  pausedOnly = false,
   onAdd,
   onChangeQuantity,
 }: {
   dish: Dish;
   quantity: number;
-  /** false when the restaurant is closed — dishes are browse-only. */
+  /** false when the restaurant is closed, or campus-wide ordering is paused — dishes are browse-only. */
   orderable: boolean;
+  /** True when `orderable` is false only because of the campus-wide pause, not this restaurant's own status. */
+  pausedOnly?: boolean;
   onAdd: () => void;
   onChangeQuantity: (quantity: number) => void;
 }) {
@@ -52,7 +55,7 @@ export function DishRow({
           </span>
         ) : !orderable ? (
           <span className="flex h-11 w-full items-center justify-center rounded-xl border border-dashed text-sm text-muted-foreground">
-            Closed
+            {pausedOnly ? "Paused" : "Closed"}
           </span>
         ) : quantity === 0 ? (
           <button

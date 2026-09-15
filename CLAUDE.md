@@ -58,7 +58,9 @@ on `orders`).
   on delete). `full_name` and `phone` are both `not null`; `phone` is
   **not unique** — multiple Google accounts can share a phone number
   (`email` stays `not null unique`, one row per Google account, just not
-  one per phone). Stored as `+91XXXXXXXXXX` — the app normalizes every
+  one per phone). No domain restriction on `email` — decided: any Google
+  account can sign up, not only VIT-AP student addresses. Stored
+  as `+91XXXXXXXXXX` — the app normalizes every
   input to that one shape (`src/lib/phone.ts`), since bans match by exact
   phone. Also `registration_number`, `role` (`user_role` enum: `student` |
   `admin`, default `student`), `is_banned` (default `false` — an admin
@@ -156,8 +158,7 @@ RLS is enabled on every table:
   directly via PostgREST with a student's own access token, bypassing the
   app entirely.
 
-Known TODOs (not yet decided, don't assume either way without asking):
-restricting `users.email` to a VIT-AP domain.
+No open schema TODOs right now.
 
 ## Hard rule: schema changes
 
