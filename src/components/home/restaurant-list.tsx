@@ -40,18 +40,18 @@ export function RestaurantList({
         />
       </label>
 
-      <div className="mt-4 divide-y divide-primary/15 rounded-2xl border border-primary/20 bg-brand-soft text-brand-soft-foreground">
-        <p className="flex items-center gap-2 px-5 py-3">
+      <div className="mt-4 divide-y divide-primary/15 rounded-xl border border-primary/20 bg-brand-soft text-sm text-brand-soft-foreground">
+        <p className="flex items-center gap-2 px-4 py-2">
           <span aria-hidden="true">📍</span>
           <span>
             Handover at <strong className="font-semibold text-foreground">VIT-AP Main Gate</strong>
           </span>
         </p>
-        <p className="flex items-center gap-2 px-5 py-3">
+        <p className="flex items-center gap-2 px-4 py-2">
           <span aria-hidden="true">💸</span>
           <strong className="font-semibold text-foreground">Cash on delivery</strong>
         </p>
-        <p className="flex items-center gap-2 px-5 py-3">
+        <p className="flex items-center gap-2 px-4 py-2">
           <span aria-hidden="true">📱</span>
           <strong className="font-semibold text-foreground">Scan and pay through UPI too</strong>
         </p>

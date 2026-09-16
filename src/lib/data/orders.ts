@@ -47,9 +47,7 @@ type OrderSummaryRow = {
 };
 
 function summarizeItems(items: { dish_name: string; quantity: number }[]): string {
-  const names = items.map((i) => (i.quantity > 1 ? `${i.quantity}× ${i.dish_name}` : i.dish_name));
-  if (names.length <= 2) return names.join(", ");
-  return `${names.slice(0, 2).join(", ")} +${names.length - 2} more`;
+  return items.map((i) => (i.quantity > 1 ? `${i.quantity}× ${i.dish_name}` : i.dish_name)).join(", ");
 }
 
 /**

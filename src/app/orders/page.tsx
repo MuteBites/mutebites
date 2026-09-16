@@ -84,7 +84,7 @@ function OrderCard({ order }: { order: OrderSummary }) {
       <p className="mt-1 text-sm text-muted-foreground">
         {formatOrderTimestamp(order.createdAt)} · {formatOrderNumber(order.dailyNumber)}
       </p>
-      <p className="mt-0.5 truncate text-sm text-foreground/80">{order.itemsSummary}</p>
+      <p className="mt-0.5 text-sm font-bold text-primary">{order.itemsSummary}</p>
       <div className="mt-3 flex items-center justify-between gap-3">
         <p className="font-heading text-xl font-bold">{formatRupees(order.totalAmount)}</p>
         {active ? (

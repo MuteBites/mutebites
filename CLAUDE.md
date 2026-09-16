@@ -43,7 +43,9 @@ orders (IST calendar day) — the stat cards at the top are scoped the same
 way (`getOrderCounts(startOfTodayIST())`). Every order ever placed lives
 at `/admin/history` instead, grouped by day (newest first), reusing the
 same `OrderList` component in a `groupByDate` mode rather than a separate
-one-off component.
+one-off component. Banned Users management similarly lives on its own
+page, `/admin/banned`, reached via a button next to "Order history" —
+not inline on the main dashboard.
 
 ## Project structure
 
@@ -138,7 +140,7 @@ on `orders`).
   input to that one shape (`src/lib/phone.ts`), since bans match by exact
   phone. Also `registration_number`, `role` (`user_role` enum: `student` |
   `admin`, default `student`), `is_banned` (default `false` — an admin
-  flips this from the admin dashboard's Banned Users section, e.g. for
+  flips this from the admin `/admin/banned` page, e.g. for
   repeat no-shows; `role` itself is still only ever changed by hand in the
   database, never through the app), `banned_at` (nullable timestamptz, kept
   correct by the `set_banned_at` trigger — set to `now()` whenever
@@ -235,7 +237,7 @@ RLS is enabled on every table:
   setting their own `users.role` to `'admin'` in the database after signing
   up normally — `role` stays changeable only that way, never through the
   API, admin included. `is_banned` **can** now be changed through the API,
-  but only by an admin (the dashboard's Banned Users section — search a
+  but only by an admin (the `/admin/banned` page — search a
   student to ban them, or unban from the banned list — on any student's
   row; a student still can't touch their own `is_banned`). A trigger
   (`prevent_role_self_escalation`, despite the name it now guards `role`,

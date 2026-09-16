@@ -1,22 +1,20 @@
 import Link from "next/link";
-import { History } from "lucide-react";
-import { BannedUsersSection } from "@/components/admin/banned-users-section";
+import { History, ShieldBan } from "lucide-react";
 import { MarkAllDeliveredButton } from "@/components/admin/mark-all-delivered-button";
 import { OrderingKillSwitch } from "@/components/admin/ordering-kill-switch";
 import { OrderList } from "@/components/admin/order-list";
 import { RestaurantToggleList } from "@/components/admin/restaurant-toggle-list";
 import { StatCards } from "@/components/admin/stat-cards";
-import { getAdminOrders, getAdminRestaurants, getBannedUsers, getOrderCounts } from "@/lib/data/admin";
+import { getAdminOrders, getAdminRestaurants, getOrderCounts } from "@/lib/data/admin";
 import { isPastDeliverySlot, startOfTodayIST } from "@/lib/date";
 import { getOrderingEnabled } from "@/lib/data/settings";
 
 export default async function AdminPage() {
-  const [restaurants, orderCounts, orderingEnabled, orders, bannedUsers] = await Promise.all([
+  const [restaurants, orderCounts, orderingEnabled, orders] = await Promise.all([
     getAdminRestaurants(),
     getOrderCounts(startOfTodayIST()),
     getOrderingEnabled(),
     getAdminOrders(),
-    getBannedUsers(),
   ]);
 
   const activeRestaurants = restaurants.filter((r) => r.is_active).length;
@@ -61,16 +59,16 @@ export default async function AdminPage() {
               <History className="size-3.5" />
               Order history
             </Link>
+            <Link
+              href="/admin/banned"
+              className="flex h-9 items-center gap-1.5 rounded-xl border bg-card px-3 text-sm font-semibold outline-none hover:bg-secondary focus-visible:ring-3 focus-visible:ring-ring/40"
+            >
+              <ShieldBan className="size-3.5" />
+              Banned users
+            </Link>
           </div>
         </div>
         <OrderList orders={orders} restaurants={restaurants} />
-      </section>
-
-      <section>
-        <h2 className="mb-3 font-mono text-xs font-semibold tracking-[0.1em] text-muted-foreground uppercase">
-          Banned users
-        </h2>
-        <BannedUsersSection bannedUsers={bannedUsers} />
       </section>
     </>
   );

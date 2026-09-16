@@ -27,9 +27,9 @@ export function AdminHeader() {
         type="button"
         disabled={signingOut}
         onClick={() => startSignOut(() => signOutAndClearCart())}
-        className="flex shrink-0 items-center gap-1.5 rounded-lg px-2.5 py-2 text-sm font-medium text-muted-foreground outline-none hover:bg-muted hover:text-foreground focus-visible:ring-3 focus-visible:ring-ring/40 disabled:opacity-60"
+        className="flex h-9 shrink-0 items-center gap-1.5 rounded-xl border bg-card px-3 text-sm font-semibold outline-none hover:bg-secondary focus-visible:ring-3 focus-visible:ring-ring/40 disabled:opacity-60"
       >
-        <LogOut className="size-4" />
+        <LogOut className="size-3.5" />
         <span className="hidden sm:inline">{signingOut ? "Signing out…" : "Sign out"}</span>
       </button>
     </header>
