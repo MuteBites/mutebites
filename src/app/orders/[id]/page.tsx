@@ -2,13 +2,9 @@ import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { OrderTracking } from "@/components/orders/order-tracking";
 import { getOrder } from "@/lib/data/orders";
-import { orderReference } from "@/lib/orders/status";
 import { requireProfile } from "@/lib/profile";
 
-export async function generateMetadata({ params }: PageProps<"/orders/[id]">): Promise<Metadata> {
-  const { id } = await params;
-  return { title: `Order ${orderReference(id)} · MuteBites` };
-}
+export const metadata: Metadata = { title: "Order details · MuteBites" };
 
 export default async function OrderDetailPage({ params, searchParams }: PageProps<"/orders/[id]">) {
   const profile = await requireProfile();

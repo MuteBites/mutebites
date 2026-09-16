@@ -13,6 +13,7 @@ export type OrderSummary = {
   restaurantId: string;
   restaurantName: string;
   itemCount: number;
+  dailyNumber: number;
 };
 
 export type OrderItem = { dishName: string; unitPrice: number; quantity: number; subtotal: number };
@@ -29,6 +30,7 @@ export type OrderDetail = {
   restaurantName: string;
   restaurantPhone: string;
   items: OrderItem[];
+  dailyNumber: number;
 };
 
 type OrderSummaryRow = {
@@ -39,6 +41,7 @@ type OrderSummaryRow = {
   restaurant_id: string;
   restaurants: { name: string } | null;
   order_items: { quantity: number }[];
+  daily_number: number;
 };
 
 /**
@@ -51,7 +54,7 @@ export async function getOrderHistory(userId: string): Promise<OrderSummary[]> {
   const { data, error } = await supabase
     .from("orders")
     .select(
-      "id, status, total_amount, created_at, restaurant_id, restaurants(name), order_items(quantity)",
+      "id, status, total_amount, created_at, restaurant_id, restaurants(name), order_items(quantity), daily_number",
     )
     .eq("user_id", userId)
     .order("created_at", { ascending: false })
@@ -67,6 +70,7 @@ export async function getOrderHistory(userId: string): Promise<OrderSummary[]> {
     restaurantId: o.restaurant_id,
     restaurantName: o.restaurants?.name ?? "Restaurant",
     itemCount: o.order_items.reduce((sum, item) => sum + item.quantity, 0),
+    dailyNumber: o.daily_number,
   }));
 }
 
@@ -81,6 +85,7 @@ type OrderDetailRow = {
   restaurant_id: string;
   restaurants: { name: string; phone: string } | null;
   order_items: { dish_name: string; unit_price: number; quantity: number; subtotal: number }[];
+  daily_number: number;
 };
 
 /**
@@ -162,7 +167,7 @@ export const getOrder = cache(async function getOrder(
   const { data, error } = await supabase
     .from("orders")
     .select(
-      "id, status, total_amount, created_at, updated_at, contact_phone, notes, restaurant_id, restaurants(name, phone), order_items(dish_name, unit_price, quantity, subtotal)",
+      "id, status, total_amount, created_at, updated_at, contact_phone, notes, restaurant_id, restaurants(name, phone), order_items(dish_name, unit_price, quantity, subtotal), daily_number",
     )
     .eq("id", id)
     .eq("user_id", userId)
@@ -188,5 +193,6 @@ export const getOrder = cache(async function getOrder(
       quantity: i.quantity,
       subtotal: i.subtotal,
     })),
+    dailyNumber: data.daily_number,
   };
 });

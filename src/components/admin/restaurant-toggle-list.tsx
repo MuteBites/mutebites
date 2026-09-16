@@ -8,9 +8,21 @@ import { setRestaurantActive } from "@/lib/admin/actions";
 import { toast } from "@/lib/toast/store";
 import { cn } from "@/lib/utils";
 
-function RestaurantToggleCard({ restaurant }: { restaurant: AdminRestaurant }) {
+function RestaurantToggleCard({
+  restaurant,
+  orderingEnabled,
+}: {
+  restaurant: AdminRestaurant;
+  /** Campus-wide kill switch — a restaurant can be individually "open" and still not actually take orders while this is off. */
+  orderingEnabled: boolean;
+}) {
   const [active, setActive] = useState(restaurant.is_active);
   const [pending, startTransition] = useTransition();
+  // This restaurant itself is open, but campus-wide ordering is off — its
+  // own toggle didn't do this, so it gets a distinct label rather than
+  // being shown as plain "Open" (which would read as taking orders right
+  // now) or "Closed" (which would misattribute the pause to this restaurant).
+  const paused = active && !orderingEnabled;
 
   function toggle() {
     const next = !active;
@@ -31,13 +43,25 @@ function RestaurantToggleCard({ restaurant }: { restaurant: AdminRestaurant }) {
         <p className="truncate font-semibold">{restaurant.name}</p>
         <div className="mt-1 flex items-center gap-1.5">
           <span
-            className={cn("size-1.5 rounded-full", active ? "bg-success" : "bg-muted-foreground")}
+            className={cn(
+              "size-1.5 rounded-full",
+              !active ? "bg-destructive" : paused ? "bg-primary" : "bg-success",
+            )}
             aria-hidden="true"
           />
-          <Badge variant={active ? "outline" : "secondary"} className="uppercase">
-            Status: {active ? "Open" : "Closed"}
+          <Badge
+            variant={!active ? "destructive" : paused ? "default" : "outline"}
+            className={cn(
+              "uppercase",
+              active && !paused && "border-transparent bg-success-soft text-success",
+            )}
+          >
+            Status: {!active ? "Closed" : paused ? "Paused" : "Open"}
           </Badge>
         </div>
+        {paused && (
+          <p className="mt-1 text-xs text-muted-foreground">Campus ordering is paused — see above.</p>
+        )}
       </div>
 
       <button
@@ -58,11 +82,21 @@ function RestaurantToggleCard({ restaurant }: { restaurant: AdminRestaurant }) {
   );
 }
 
-export function RestaurantToggleList({ restaurants }: { restaurants: AdminRestaurant[] }) {
+export function RestaurantToggleList({
+  restaurants,
+  orderingEnabled,
+}: {
+  restaurants: AdminRestaurant[];
+  orderingEnabled: boolean;
+}) {
   return (
     <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
       {restaurants.map((restaurant) => (
-        <RestaurantToggleCard key={restaurant.id} restaurant={restaurant} />
+        <RestaurantToggleCard
+          key={restaurant.id}
+          restaurant={restaurant}
+          orderingEnabled={orderingEnabled}
+        />
       ))}
     </div>
   );

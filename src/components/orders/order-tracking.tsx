@@ -12,7 +12,7 @@ import type { OrderStatus } from "@/lib/data/types";
 import { estimatedDelivery, formatTime } from "@/lib/date";
 import { formatRupees } from "@/lib/format";
 import { NAV_TRANSITION } from "@/lib/nav-transition";
-import { orderReference, orderTimeline, type TimelineStepState } from "@/lib/orders/status";
+import { formatOrderNumber, orderTimeline, type TimelineStepState } from "@/lib/orders/status";
 import { createClient } from "@/lib/supabase/client";
 import { cn } from "@/lib/utils";
 
@@ -133,7 +133,7 @@ export function OrderTracking({
           <p className="animate-pop-in mt-5 font-heading text-2xl font-bold">Order placed!</p>
           <p className="mt-1 text-ink-foreground/70">Show this token at the gate</p>
           <p className="animate-pop-in mt-4 font-heading text-7xl font-bold tracking-tight text-primary">
-            {orderReference(initialOrder.id)}
+            {formatOrderNumber(initialOrder.dailyNumber)}
           </p>
           <p className="mt-6 text-sm text-ink-foreground/50">Tap to continue</p>
         </div>
@@ -172,7 +172,7 @@ export function OrderTracking({
               </div>
             )}
             <p className={cn("font-heading text-4xl font-bold tracking-tight", cancelled ? "mt-4" : "mt-1")}>
-              {orderReference(initialOrder.id)}
+              {formatOrderNumber(initialOrder.dailyNumber)}
             </p>
             <p className="mt-4 inline-flex items-center gap-2 rounded-xl bg-white/10 px-4 py-2.5 text-sm">
               <span aria-hidden="true">📍</span> Collect at VIT-AP Main Gate

@@ -1,6 +1,7 @@
 import "server-only";
 
 import { createClient } from "@/lib/supabase/server";
+import { startOfTodayIST } from "@/lib/date";
 import type { OrderStatus } from "./types";
 
 export type AdminRestaurant = { id: string; name: string; is_active: boolean };
@@ -24,14 +25,30 @@ export type OrderCounts = { total: number; confirmed: number; completed: number 
  * this stays cheap as order history grows. "Confirmed" is status =
  * 'confirmed' only (not preparing/out_for_delivery too) — those can become
  * their own stats later if needed. "Completed" is status = 'delivered'.
+ * `since` scopes all three to orders created at or after that instant —
+ * the admin dashboard passes today's IST midnight, so these read as
+ * "today's" counts, matching the order list below it.
  */
-export async function getOrderCounts(): Promise<OrderCounts> {
+export async function getOrderCounts(since?: Date): Promise<OrderCounts> {
   const supabase = await createClient();
-  const [total, confirmed, completed] = await Promise.all([
-    supabase.from("orders").select("id", { count: "exact", head: true }),
-    supabase.from("orders").select("id", { count: "exact", head: true }).eq("status", "confirmed"),
-    supabase.from("orders").select("id", { count: "exact", head: true }).eq("status", "delivered"),
-  ]);
+  const sinceIso = since?.toISOString();
+
+  let totalQuery = supabase.from("orders").select("id", { count: "exact", head: true });
+  let confirmedQuery = supabase
+    .from("orders")
+    .select("id", { count: "exact", head: true })
+    .eq("status", "confirmed");
+  let completedQuery = supabase
+    .from("orders")
+    .select("id", { count: "exact", head: true })
+    .eq("status", "delivered");
+  if (sinceIso) {
+    totalQuery = totalQuery.gte("created_at", sinceIso);
+    confirmedQuery = confirmedQuery.gte("created_at", sinceIso);
+    completedQuery = completedQuery.gte("created_at", sinceIso);
+  }
+
+  const [total, confirmed, completed] = await Promise.all([totalQuery, confirmedQuery, completedQuery]);
 
   if (total.error) throw total.error;
   if (confirmed.error) throw confirmed.error;
@@ -57,6 +74,7 @@ export type AdminOrder = {
   studentName: string;
   studentBanned: boolean;
   items: { dishName: string; quantity: number }[];
+  dailyNumber: number;
 };
 
 type AdminOrderRow = {
@@ -65,6 +83,7 @@ type AdminOrderRow = {
   total_amount: number;
   created_at: string;
   contact_phone: string;
+  daily_number: number;
   notes: string | null;
   user_id: string;
   restaurant_id: string;
@@ -73,25 +92,11 @@ type AdminOrderRow = {
   order_items: { dish_name: string; quantity: number }[];
 };
 
-// Newest first, capped so the dashboard stays cheap to load as order
-// history grows — a "load more" / date filter can come later if needed.
-const RECENT_ORDERS_LIMIT = 200;
+const ADMIN_ORDER_COLUMNS =
+  "id, status, total_amount, created_at, contact_phone, notes, user_id, restaurant_id, restaurants(name), users(full_name, is_banned), order_items(dish_name, quantity), daily_number";
 
-/** Every order across every student, for the admin orders list. */
-export async function getAdminOrders(): Promise<AdminOrder[]> {
-  const supabase = await createClient();
-  const { data, error } = await supabase
-    .from("orders")
-    .select(
-      "id, status, total_amount, created_at, contact_phone, notes, user_id, restaurant_id, restaurants(name), users(full_name, is_banned), order_items(dish_name, quantity)",
-    )
-    .order("created_at", { ascending: false })
-    .limit(RECENT_ORDERS_LIMIT)
-    .returns<AdminOrderRow[]>();
-
-  if (error) throw error;
-
-  return (data ?? []).map((o) => ({
+function toAdminOrder(o: AdminOrderRow): AdminOrder {
+  return {
     id: o.id,
     status: o.status,
     totalAmount: o.total_amount,
@@ -104,7 +109,45 @@ export async function getAdminOrders(): Promise<AdminOrder[]> {
     studentName: o.users?.full_name ?? "Student",
     studentBanned: o.users?.is_banned ?? false,
     items: o.order_items.map((i) => ({ dishName: i.dish_name, quantity: i.quantity })),
-  }));
+    dailyNumber: o.daily_number,
+  };
+}
+
+/**
+ * Today's orders (IST calendar day) across every student, for the main
+ * admin dashboard's order list — the day resets are what "today" means to
+ * whoever's standing at the gate, so this always matches their intuition
+ * without needing a filter. See getAdminOrderHistory() for every past day.
+ */
+export async function getAdminOrders(): Promise<AdminOrder[]> {
+  const supabase = await createClient();
+  const { data, error } = await supabase
+    .from("orders")
+    .select(ADMIN_ORDER_COLUMNS)
+    .gte("created_at", startOfTodayIST().toISOString())
+    .order("created_at", { ascending: false })
+    .returns<AdminOrderRow[]>();
+
+  if (error) throw error;
+  return (data ?? []).map(toAdminOrder);
+}
+
+// Capped so the history page stays cheap to load as order history grows —
+// a "load more" / date-range picker can come later if needed.
+const HISTORY_ORDERS_LIMIT = 2000;
+
+/** Every order ever placed, most recent first — for the admin order-history page (grouped by day there). */
+export async function getAdminOrderHistory(): Promise<AdminOrder[]> {
+  const supabase = await createClient();
+  const { data, error } = await supabase
+    .from("orders")
+    .select(ADMIN_ORDER_COLUMNS)
+    .order("created_at", { ascending: false })
+    .limit(HISTORY_ORDERS_LIMIT)
+    .returns<AdminOrderRow[]>();
+
+  if (error) throw error;
+  return (data ?? []).map(toAdminOrder);
 }
 
 export type BannedUser = {

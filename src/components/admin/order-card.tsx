@@ -18,7 +18,7 @@ import { advanceOrderStatus, cancelOrder } from "@/lib/admin/actions";
 import type { AdminOrder } from "@/lib/data/admin";
 import { formatOrderTimestamp } from "@/lib/date";
 import { formatRupees } from "@/lib/format";
-import { advanceLabel, nextStatus, orderReference, statusBadge } from "@/lib/orders/status";
+import { advanceLabel, formatOrderNumber, nextStatus, statusBadge } from "@/lib/orders/status";
 import { formatStoredMobile, whatsAppLink } from "@/lib/phone";
 import { toast } from "@/lib/toast/store";
 import { cn } from "@/lib/utils";
@@ -70,14 +70,14 @@ export function OrderCard({ order }: { order: AdminOrder }) {
   }
 
   const itemsSummary = order.items.map((i) => `${i.dishName} x${i.quantity}`).join(", ");
-  const whatsAppMessage = `Hi ${order.studentName.split(" ")[0]}, this is MuteBites — confirming your order ${orderReference(order.id)} from ${order.restaurantName} (${formatRupees(order.totalAmount)}). Do you want to go ahead with this order? Reply yes to confirm.`;
+  const whatsAppMessage = `Hi ${order.studentName.split(" ")[0]}, this is MuteBites — confirming your order ${formatOrderNumber(order.dailyNumber)} from ${order.restaurantName} (${formatRupees(order.totalAmount)}). Do you want to go ahead with this order? Reply yes to confirm.`;
 
   return (
     <div className="rounded-2xl border bg-card p-4">
       <div className="flex items-start justify-between gap-2">
         <div>
           <span className="font-mono text-sm font-semibold text-muted-foreground">
-            {orderReference(order.id)}
+            {formatOrderNumber(order.dailyNumber)}
           </span>
           <span className="ml-2 text-sm text-muted-foreground">{formatOrderTimestamp(order.createdAt)}</span>
         </div>
@@ -144,7 +144,7 @@ export function OrderCard({ order }: { order: AdminOrder }) {
             <AlertDialogHeader>
               <AlertDialogTitle>Cancel this order?</AlertDialogTitle>
               <AlertDialogDescription>
-                {order.studentName}&apos;s order {orderReference(order.id)} from {order.restaurantName}{" "}
+                {order.studentName}&apos;s order {formatOrderNumber(order.dailyNumber)} from {order.restaurantName}{" "}
                 will be marked cancelled. This can&apos;t be undone from here.
               </AlertDialogDescription>
             </AlertDialogHeader>

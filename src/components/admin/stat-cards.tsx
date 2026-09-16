@@ -53,7 +53,7 @@ export function StatCards({
       <StatCard
         icon={<ShoppingBag />}
         iconClassName="bg-brand-soft text-brand-soft-foreground"
-        label="Total orders"
+        label="Today's orders"
         value={totalOrders}
       />
       <StatCard

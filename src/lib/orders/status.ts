@@ -1,12 +1,14 @@
 import type { OrderStatus } from "@/lib/data/types";
 
 /**
- * Short display reference from an order's uuid (e.g. "#4F2A"). Cosmetic
- * only — not stored, not guaranteed unique, never used to look up an
- * order (routes use the full id for that).
+ * The order's display token, e.g. "#3" — its `daily_number` (position
+ * that IST calendar day, campus-wide, reset every midnight — see
+ * `orders.daily_number` / `set_daily_order_number` trigger). Shown to
+ * both the student (pickup) and the admin (order list), so they always
+ * agree; never used to look up an order (routes use the full id for that).
  */
-export function orderReference(id: string): string {
-  return `#${id.replace(/-/g, "").slice(-4).toUpperCase()}`;
+export function formatOrderNumber(dailyNumber: number): string {
+  return `#${dailyNumber}`;
 }
 
 export const ACTIVE_STATUSES: OrderStatus[] = ["pending", "confirmed", "preparing", "out_for_delivery"];

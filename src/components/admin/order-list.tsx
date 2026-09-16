@@ -10,7 +10,8 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import type { AdminOrder, AdminRestaurant } from "@/lib/data/admin";
-import { orderReference } from "@/lib/orders/status";
+import { formatAdminDay, istDayKey } from "@/lib/date";
+import { formatOrderNumber } from "@/lib/orders/status";
 import { cn } from "@/lib/utils";
 import { ExportOrdersButton } from "./export-orders-button";
 import { OrderCard } from "./order-card";
@@ -31,9 +32,12 @@ const STATUS_OPTIONS: { value: StatusFilter; label: string }[] = [
 export function OrderList({
   orders,
   restaurants,
+  groupByDate = false,
 }: {
   orders: AdminOrder[];
   restaurants: AdminRestaurant[];
+  /** Section the (filtered) list by IST calendar day, newest first — for the order-history page. */
+  groupByDate?: boolean;
 }) {
   const [restaurantFilter, setRestaurantFilter] = useState(ALL_RESTAURANTS);
   const [statusFilter, setStatusFilter] = useState<StatusFilter>("all");
@@ -45,12 +49,26 @@ export function OrderList({
       if (restaurantFilter !== ALL_RESTAURANTS && o.restaurantId !== restaurantFilter) return false;
       if (statusFilter !== "all" && o.status !== statusFilter) return false;
       if (q) {
-        const haystack = `${orderReference(o.id)} ${o.studentName} ${o.contactPhone}`.toLowerCase();
+        const haystack = `${formatOrderNumber(o.dailyNumber)} ${o.studentName} ${o.contactPhone}`.toLowerCase();
         if (!haystack.includes(q)) return false;
       }
       return true;
     });
   }, [orders, restaurantFilter, statusFilter, q]);
+
+  // Newest day first; each day's own orders stay in the newest-first order
+  // they already arrive in from the data layer.
+  const groups = useMemo(() => {
+    if (!groupByDate) return null;
+    const byDay = new Map<string, AdminOrder[]>();
+    for (const order of filtered) {
+      const key = istDayKey(order.createdAt);
+      const existing = byDay.get(key);
+      if (existing) existing.push(order);
+      else byDay.set(key, [order]);
+    }
+    return [...byDay.entries()].sort(([a], [b]) => b.localeCompare(a));
+  }, [filtered, groupByDate]);
 
   const restaurantLabel =
     restaurantFilter === ALL_RESTAURANTS
@@ -120,6 +138,24 @@ export function OrderList({
         <p className="rounded-2xl border bg-card p-6 text-center text-muted-foreground">
           No orders found matching the selected filter.
         </p>
+      ) : groups ? (
+        <div className="flex flex-col gap-6">
+          {groups.map(([dayKey, dayOrders]) => (
+            <div key={dayKey}>
+              <div className="mb-2 flex items-baseline justify-between gap-2">
+                <h3 className="font-heading text-lg font-bold">{formatAdminDay(dayOrders[0].createdAt)}</h3>
+                <span className="shrink-0 text-sm text-muted-foreground">
+                  {dayOrders.length} order{dayOrders.length === 1 ? "" : "s"}
+                </span>
+              </div>
+              <div className="flex flex-col gap-3">
+                {dayOrders.map((order) => (
+                  <OrderCard key={order.id} order={order} />
+                ))}
+              </div>
+            </div>
+          ))}
+        </div>
       ) : (
         <div className="flex flex-col gap-3">
           {filtered.map((order) => (

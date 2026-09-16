@@ -4,7 +4,7 @@ import { Download } from "lucide-react";
 import type { AdminOrder } from "@/lib/data/admin";
 import { formatOrderTimestamp } from "@/lib/date";
 import { formatRupees } from "@/lib/format";
-import { orderReference, statusBadge } from "@/lib/orders/status";
+import { formatOrderNumber, statusBadge } from "@/lib/orders/status";
 import { formatStoredMobile } from "@/lib/phone";
 
 const COLUMNS = ["Order", "Date", "Student", "Phone", "Restaurant", "Items", "Amount", "Status"];
@@ -19,7 +19,7 @@ function csvField(value: string): string {
 function ordersToCsv(orders: AdminOrder[]): string {
   const rows = orders.map((o) =>
     [
-      orderReference(o.id),
+      formatOrderNumber(o.dailyNumber),
       formatOrderTimestamp(o.createdAt),
       o.studentName,
       formatStoredMobile(o.contactPhone),

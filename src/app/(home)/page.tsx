@@ -27,13 +27,8 @@ export default async function Home() {
     <main className="mx-auto w-full max-w-md px-6 pt-6 pb-28">
       <ViewTransition {...NAV_TRANSITION}>
         <ViewTransition {...REVEAL_ENTER}>
-          <HomeHeader
-            fullName={profile.full_name}
-            email={profile.email}
-            phone={profile.phone}
-            timeOfDay={timeOfDay}
-          />
-          {usual && <YourUsualChip usual={usual} />}
+          <HomeHeader fullName={profile.full_name} timeOfDay={timeOfDay} />
+          {usual && orderingEnabled && <YourUsualChip usual={usual} />}
           {thursdaySpecial && <ThursdayNudge special={thursdaySpecial} />}
           {!orderingEnabled && <OrderingPausedBanner />}
           <RestaurantList restaurants={restaurants} orderingEnabled={orderingEnabled} />

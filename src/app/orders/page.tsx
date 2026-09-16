@@ -7,7 +7,7 @@ import { getOrderHistory, type OrderSummary } from "@/lib/data/orders";
 import { formatOrderTimestamp } from "@/lib/date";
 import { formatRupees } from "@/lib/format";
 import { NAV_TRANSITION, REVEAL_ENTER } from "@/lib/nav-transition";
-import { isActiveStatus, orderReference, statusBadge } from "@/lib/orders/status";
+import { formatOrderNumber, isActiveStatus, statusBadge } from "@/lib/orders/status";
 import { requireProfile } from "@/lib/profile";
 import { cn } from "@/lib/utils";
 
@@ -82,7 +82,7 @@ function OrderCard({ order }: { order: OrderSummary }) {
       </div>
       <p className="mt-1 text-sm text-muted-foreground">
         {formatOrderTimestamp(order.createdAt)} · {order.itemCount} {order.itemCount === 1 ? "item" : "items"} ·{" "}
-        {orderReference(order.id)}
+        {formatOrderNumber(order.dailyNumber)}
       </p>
       <div className="mt-3 flex items-center justify-between">
         <p className="font-heading text-xl font-bold">{formatRupees(order.totalAmount)}</p>

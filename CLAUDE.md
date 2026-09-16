@@ -14,7 +14,15 @@ Food delivery site for VIT-AP University students.
   `public.users` row yet), the app collects full name + mobile number
   before continuing; returning users skip straight in.
 - **Payments**: Cash on delivery only — there are no payment fields or
-  payment provider anywhere in this codebase. Don't add any.
+  payment provider anywhere in this codebase. Don't add any. The "About
+  MuteBites" popup (see below) also mentions UPI as accepted at pickup —
+  that's real, but purely physical, an informal option between the runner
+  and student handled entirely outside the app, the same as cash; it's
+  not tracked, processed, or reconciled by anything here, so it doesn't
+  contradict the rule above. Don't build actual UPI integration (a QR
+  code, a payment record, verification) without this being revisited
+  first — that would be a real payment provider, which this app
+  deliberately doesn't have.
 - **Hosting**: Vercel
 
 ## Admin access
@@ -30,6 +38,13 @@ Food delivery site for VIT-AP University students.
    closed** — nobody gets in, admin role or not — rather than silently
    letting everyone through.
 
+The main `/admin` dashboard's order list only ever shows **today's**
+orders (IST calendar day) — the stat cards at the top are scoped the same
+way (`getOrderCounts(startOfTodayIST())`). Every order ever placed lives
+at `/admin/history` instead, grouped by day (newest first), reusing the
+same `OrderList` component in a `groupByDate` mode rather than a separate
+one-off component.
+
 ## Project structure
 
 - `src/app` — routes (App Router)
@@ -41,7 +56,12 @@ Food delivery site for VIT-AP University students.
   is an ancestor of all of them. Don't move `page.tsx` back out to
   `src/app` without either dropping its `loading.tsx` or being fine with
   that.
-- `src/components/ui` — shadcn/ui components
+- `src/components/ui` — shadcn/ui components. Two modal-style primitives:
+  `alert-dialog.tsx` (confirmations — "Cancel this order?", "Turn off
+  ordering?") and `dialog.tsx` (plain popups with no confirm/cancel
+  semantics — currently just the "About MuteBites" card from the Home
+  logo). Both wrap `@base-ui/react`; reach for whichever already matches
+  what you're building rather than hand-rolling a third.
 - `src/lib/supabase/client.ts` — browser Supabase client
 - `src/lib/supabase/server.ts` — server Supabase client (Server Components/Actions)
 - `src/lib/supabase/middleware.ts` — session-refresh helper used by `middleware.ts`
@@ -94,10 +114,12 @@ SQL editor tab and skipped when that migration was applied by hand),
 to its own order's row for live status updates on top of the normal
 server-fetched page; existing RLS still governs who can actually receive
 them, and a plain page refresh still shows the true status either way),
-and [`supabase/migrations/20260915140000_seed_new_restaurants.sql`](supabase/migrations/20260915140000_seed_new_restaurants.sql)
+[`supabase/migrations/20260915140000_seed_new_restaurants.sql`](supabase/migrations/20260915140000_seed_new_restaurants.sql)
 (data only — two more partner restaurants, **MuteBites Chinese** (5
 categories, 24 dishes) and **MuteBites Fresh Fruits** (1 category, 13
-dishes, priced per 500 g/1 kg pack), bringing the total to 5 restaurants).
+dishes, priced per 500 g/1 kg pack), bringing the total to 5 restaurants),
+and [`supabase/migrations/20260915150000_daily_order_numbers.sql`](supabase/migrations/20260915150000_daily_order_numbers.sql)
+(adds `orders.daily_number` — see below).
 Migrations are applied by hand in the Supabase SQL editor (no CLI setup).
 
 All orders are handed over at **VIT-AP Main Gate** — there is no room
@@ -140,7 +162,26 @@ on `orders`).
   a side-path to `cancelled` from any non-terminal status, each one
   compare-and-swapped on the status the admin's screen showed, so a stale
   screen or two admins clicking at once can't skip a step or act on a
-  status that's already changed.
+  status that's already changed. Also `daily_number` (`not null int`) —
+  the order's position that IST calendar day, campus-wide across every
+  restaurant, starting over at 1 each day — this is the "token"/order
+  number shown to both the student (pickup) and the admin (order list),
+  so the two must always agree. Assigned once, atomically, by the
+  `set_daily_order_number` trigger (`before insert on orders`) via the
+  `daily_order_counters` table below — never derived by counting/ranking
+  on read, so concurrent orders in the same second can't collide or show
+  differently to student vs. admin. `orderReference()` (the old
+  hash-of-uuid cosmetic token, e.g. "#4F2A") is gone; every display now
+  reads `daily_number` directly.
+- **`daily_order_counters`** — `order_day` (date, primary key), `last_number`.
+  One row per day, upserted by the trigger above (`on conflict (order_day)
+  do update set last_number = last_number + 1 returning ... into
+  new.daily_number`) — the atomic counter that makes `daily_number`
+  race-free. The app never reads or writes this table directly; RLS is
+  enabled with no policies (locks it out entirely), and the trigger's
+  writes succeed anyway since they run inside `place_order()`'s
+  security-definer context, the same way `place_order()` itself writes to
+  `orders`/`order_items` without student-facing insert policies.
 - **`order_items`** — snapshots `dish_name` and `unit_price` at order time
   (quantity, generated `subtotal`), so later menu edits never rewrite past
   order history. `dish_id` is `on delete set null` for the same reason.
