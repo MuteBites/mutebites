@@ -13,8 +13,8 @@ export function CravingsSolved({ count, streakDays }: { count: number; streakDay
   const progress = atThreshold ? 1 : count / REGULAR_THRESHOLD;
 
   return (
-    <div className="mt-1">
-      <div className="flex flex-wrap items-center gap-x-1.5 gap-y-1">
+    <div className="mt-1.5">
+      <div className="flex flex-wrap items-center gap-x-1.5 gap-y-1.5">
         <Flame className="size-4 text-primary" aria-hidden="true" />
         <p className="text-muted-foreground">
           <span className="font-heading font-bold text-foreground tabular-nums">{count}</span>{" "}
@@ -27,7 +27,7 @@ export function CravingsSolved({ count, streakDays }: { count: number; streakDay
         )}
       </div>
       {!atThreshold && (
-        <div className="mt-1.5 flex items-center gap-2">
+        <div className="mt-2 flex items-center gap-2">
           <div className="h-1.5 w-24 overflow-hidden rounded-full bg-secondary">
             <div
               className="h-full rounded-full bg-primary transition-[width]"

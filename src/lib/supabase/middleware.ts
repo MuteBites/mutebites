@@ -2,7 +2,9 @@ import { createServerClient } from "@supabase/ssr";
 import { NextResponse, type NextRequest } from "next/server";
 
 // Routes a signed-out visitor may open. Everything else bounces to /login.
-const PUBLIC_PATHS = ["/login", "/auth"];
+// /privacy and /terms must stay public — Google's OAuth consent-screen
+// review fetches them signed out.
+const PUBLIC_PATHS = ["/login", "/auth", "/privacy", "/terms"];
 
 function isPublicPath(pathname: string) {
   return PUBLIC_PATHS.some(

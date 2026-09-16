@@ -86,8 +86,8 @@ export default async function ProfilePage() {
           lockedReason={phoneLockReason}
           banned={profile.is_banned}
         />
-        <div className="flex items-center justify-between px-5 py-4">
-          <div>
+        <div className="flex items-center justify-between gap-3 px-5 py-4">
+          <div className="min-w-0">
             <p className="font-mono text-xs font-semibold tracking-[0.1em] text-muted-foreground uppercase">
               Email · signed in with Google
             </p>

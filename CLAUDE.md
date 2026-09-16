@@ -50,6 +50,11 @@ not inline on the main dashboard.
 ## Project structure
 
 - `src/app` — routes (App Router)
+- `src/app/privacy`, `src/app/terms` — static, unauthenticated pages
+  required for the Google OAuth consent-screen review. Listed in
+  `PUBLIC_PATHS` (`src/lib/supabase/middleware.ts`) alongside `/login` and
+  `/auth` so `src/proxy.ts` doesn't bounce a signed-out visitor — or
+  Google's review bot — to `/login` before they can load them.
 - `src/app/(home)/page.tsx` — the `/` route. It lives in a `(home)` route
   group (the parens don't affect the URL) specifically so its
   `loading.tsx` stays scoped to just `/`. A `loading.tsx` placed directly
@@ -66,7 +71,10 @@ not inline on the main dashboard.
   what you're building rather than hand-rolling a third.
 - `src/lib/supabase/client.ts` — browser Supabase client
 - `src/lib/supabase/server.ts` — server Supabase client (Server Components/Actions)
-- `src/lib/supabase/middleware.ts` — session-refresh helper used by `middleware.ts`
+- `src/lib/supabase/middleware.ts` — session-refresh helper used by
+  `src/proxy.ts` — this Next.js version renamed `middleware.ts`/
+  `middleware()` to `proxy.ts`/`proxy()`; same route-matcher config,
+  different filename and export name.
 - `supabase/migrations/` — hand-written SQL migrations (see rule below)
 - `public/MuteBites/` — restaurant/dish photos, one subfolder per restaurant
   (plus `covers/` for the hero banners) — matched to database rows by name
