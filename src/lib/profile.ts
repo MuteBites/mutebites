@@ -11,6 +11,7 @@ export type Profile = {
   phone: string;
   role: "student" | "admin";
   is_banned: boolean;
+  created_at: string;
 };
 
 /**
@@ -28,7 +29,7 @@ export const getSessionProfile = cache(async () => {
 
   const { data: profile } = await supabase
     .from("users")
-    .select("id, email, full_name, phone, role, is_banned")
+    .select("id, email, full_name, phone, role, is_banned, created_at")
     .eq("id", user.id)
     .maybeSingle<Profile>();
 

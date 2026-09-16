@@ -29,12 +29,15 @@ export function MenuView({
   sections,
   profilePhone,
   orderingEnabled,
+  favoriteDishId,
 }: {
   restaurant: Restaurant;
   sections: MenuSection[];
   profilePhone: string;
   /** Campus-wide kill switch — dishes become un-addable when off, same as a closed restaurant. */
   orderingEnabled: boolean;
+  /** This student's most-ordered dish at this restaurant, or null — tags it "Your favorite". */
+  favoriteDishId: string | null;
 }) {
   const cart = useCart();
   const [filter, setFilter] = useState(ALL);
@@ -164,6 +167,7 @@ export function MenuView({
               quantity={quantityOf(dish.id)}
               orderable={restaurant.is_active && orderingEnabled}
               pausedOnly={restaurant.is_active && !orderingEnabled}
+              isFavorite={dish.id === favoriteDishId}
               onAdd={() => handleAdd(dish)}
               onChangeQuantity={(q) => setQuantity(dish.id, q)}
             />

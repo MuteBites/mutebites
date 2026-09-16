@@ -1,7 +1,7 @@
 "use client";
 
 import { useMemo, useState, type ReactNode } from "react";
-import { ChevronDown, Search } from "lucide-react";
+import { ChevronDown, Search, X } from "lucide-react";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -101,8 +101,18 @@ export function OrderList({
             value={query}
             onChange={(e) => setQuery(e.target.value)}
             placeholder="Search ID, name, phone…"
-            className="h-10 w-full rounded-xl bg-secondary pr-3 pl-9 text-sm outline-none placeholder:text-muted-foreground focus-visible:ring-2 focus-visible:ring-ring/30"
+            className="h-10 w-full rounded-xl bg-secondary pr-9 pl-9 text-sm outline-none placeholder:text-muted-foreground focus-visible:ring-2 focus-visible:ring-ring/30"
           />
+          {query && (
+            <button
+              type="button"
+              onClick={() => setQuery("")}
+              aria-label="Clear search"
+              className="absolute top-1/2 right-2 flex size-6 -translate-y-1/2 items-center justify-center rounded-full text-muted-foreground outline-none hover:bg-border focus-visible:ring-2 focus-visible:ring-ring/40"
+            >
+              <X className="size-3.5" />
+            </button>
+          )}
         </label>
 
         <DropdownMenu>

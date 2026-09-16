@@ -7,7 +7,7 @@ import { BlurImage } from "@/components/blur-image";
 import { MenuProgress } from "@/components/menu/menu-progress";
 import { MenuView } from "@/components/menu/menu-view";
 import { getRestaurantCoverPhoto } from "@/lib/data/dish-photos";
-import { getDishesTried } from "@/lib/data/orders";
+import { getDishesTried, getFavoriteDishId } from "@/lib/data/orders";
 import { getRestaurantMenu } from "@/lib/data/restaurants";
 import { getOrderingEnabled } from "@/lib/data/settings";
 import { NAV_TRANSITION, REVEAL_ENTER } from "@/lib/nav-transition";
@@ -25,10 +25,11 @@ export async function generateMetadata({
 export default async function RestaurantPage({ params }: PageProps<"/restaurants/[id]">) {
   const profile = await requireProfile();
   const { id } = await params;
-  const [menu, orderingEnabled, dishesTried] = await Promise.all([
+  const [menu, orderingEnabled, dishesTried, favoriteDishId] = await Promise.all([
     getRestaurantMenu(id),
     getOrderingEnabled(),
     getDishesTried(profile.id, id),
+    getFavoriteDishId(profile.id, id),
   ]);
   if (!menu) notFound();
 
@@ -122,6 +123,7 @@ export default async function RestaurantPage({ params }: PageProps<"/restaurants
               sections={sections}
               profilePhone={profile.phone}
               orderingEnabled={orderingEnabled}
+              favoriteDishId={favoriteDishId}
             />
           </div>
         </ViewTransition>

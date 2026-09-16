@@ -1,6 +1,7 @@
 import "server-only";
 
 import { cache } from "react";
+import { istDayKey } from "@/lib/date";
 import { createClient } from "@/lib/supabase/server";
 import { ACTIVE_STATUSES } from "@/lib/orders/status";
 import type { OrderStatus } from "./types";
@@ -96,22 +97,45 @@ type OrderDetailRow = {
 };
 
 /**
+ * Consecutive IST calendar days, ending today or yesterday, with at least
+ * one delivered order — "yesterday" still counts so the streak doesn't
+ * look broken before the student has had a chance to order today.
+ */
+function computeStreakDays(deliveredTimestamps: string[]): number {
+  const days = new Set(deliveredTimestamps.map(istDayKey));
+  const DAY_MS = 24 * 60 * 60 * 1000;
+
+  let cursor = new Date();
+  if (!days.has(istDayKey(cursor.toISOString()))) {
+    cursor = new Date(cursor.getTime() - DAY_MS);
+  }
+
+  let streak = 0;
+  while (days.has(istDayKey(cursor.toISOString()))) {
+    streak++;
+    cursor = new Date(cursor.getTime() - DAY_MS);
+  }
+  return streak;
+}
+
+/**
  * All the profile screen's order-derived numbers in one query: "cravings
  * solved" (delivered orders), the milestone badges ("First Bite", "Regular",
- * "Campus Explorer"), and the "N pickups, N no-shows" line. There's no dedicated
- * no-show status — `cancelled` is the closest thing the schema tracks (an
- * admin cancels an order that isn't going to be collected), so it's used
- * as that proxy.
+ * "Campus Explorer"), the ordering streak, and the "N pickups, N no-shows"
+ * line. There's no dedicated no-show status — `cancelled` is the closest
+ * thing the schema tracks (an admin cancels an order that isn't going to
+ * be collected), so it's used as that proxy.
  */
 export async function getOrderStats(userId: string): Promise<{
   deliveredCount: number;
   cancelledCount: number;
   restaurantsVisited: number;
+  streakDays: number;
 }> {
   const supabase = await createClient();
   const { data, error } = await supabase
     .from("orders")
-    .select("restaurant_id, status")
+    .select("restaurant_id, status, created_at")
     .eq("user_id", userId);
 
   if (error) throw error;
@@ -122,6 +146,7 @@ export async function getOrderStats(userId: string): Promise<{
     deliveredCount: delivered.length,
     cancelledCount: cancelled.length,
     restaurantsVisited: new Set(delivered.map((r) => r.restaurant_id)).size,
+    streakDays: computeStreakDays(delivered.map((r) => r.created_at)),
   };
 }
 
@@ -144,6 +169,35 @@ export async function getDishesTried(userId: string, restaurantId: string): Prom
   if (error) throw error;
   const dishIds = (data ?? []).flatMap((o) => o.order_items.map((i) => i.dish_id));
   return new Set(dishIds.filter((id): id is string => id !== null)).size;
+}
+
+/**
+ * This student's most-ordered dish (by total quantity) at a restaurant,
+ * among delivered orders — powers the menu's "Your favorite" tag. Ties
+ * keep whichever dish happens to sort first; not worth a tiebreak rule
+ * for a cosmetic badge.
+ */
+export async function getFavoriteDishId(userId: string, restaurantId: string): Promise<string | null> {
+  const supabase = await createClient();
+  const { data, error } = await supabase
+    .from("orders")
+    .select("order_items(dish_id, quantity)")
+    .eq("user_id", userId)
+    .eq("restaurant_id", restaurantId)
+    .eq("status", "delivered")
+    .returns<{ order_items: { dish_id: string | null; quantity: number }[] }[]>();
+
+  if (error) throw error;
+
+  const totals = new Map<string, number>();
+  for (const order of data ?? []) {
+    for (const item of order.order_items) {
+      if (!item.dish_id) continue;
+      totals.set(item.dish_id, (totals.get(item.dish_id) ?? 0) + item.quantity);
+    }
+  }
+  if (totals.size === 0) return null;
+  return [...totals.entries()].sort((a, b) => b[1] - a[1])[0][0];
 }
 
 /**

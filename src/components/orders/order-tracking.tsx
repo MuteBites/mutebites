@@ -4,7 +4,16 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { ViewTransition } from "react";
-import { ArrowLeft, Check, ChefHat, CookingPot, Phone, Receipt, type LucideIcon } from "lucide-react";
+import {
+  ArrowLeft,
+  Check,
+  ChefHat,
+  CookingPot,
+  Phone,
+  Receipt,
+  Share2,
+  type LucideIcon,
+} from "lucide-react";
 import { BrandLogo } from "@/components/brand-logo";
 import { ConfettiBurst } from "@/components/orders/confetti-burst";
 import type { OrderDetail } from "@/lib/data/orders";
@@ -15,7 +24,27 @@ import { NAV_TRANSITION } from "@/lib/nav-transition";
 import { formatOrderNumber, orderTimeline, type TimelineStepState } from "@/lib/orders/status";
 import { playOrderPlacedSound } from "@/lib/sound/play";
 import { createClient } from "@/lib/supabase/client";
+import { toast } from "@/lib/toast/store";
 import { cn } from "@/lib/utils";
+
+/** Native share sheet when available (mostly mobile); clipboard copy otherwise. */
+async function shareOrderToken(token: string) {
+  const text = `My MuteBites order token: ${token}`;
+  if (navigator.share) {
+    try {
+      await navigator.share({ text });
+      return;
+    } catch {
+      // Cancelled, or unsupported despite the feature check — fall through to copying.
+    }
+  }
+  try {
+    await navigator.clipboard.writeText(token);
+    toast.success("Token copied!");
+  } catch {
+    toast.error("Couldn't copy — try selecting it manually.");
+  }
+}
 
 // Confetti plays once ever, on whichever order happens to be the first
 // this device sees placed — remembered locally, not tied to the account,
@@ -173,9 +202,19 @@ export function OrderTracking({
                 </p>
               </div>
             )}
-            <p className={cn("font-heading text-4xl font-bold tracking-tight", cancelled ? "mt-4" : "mt-1")}>
-              {formatOrderNumber(initialOrder.dailyNumber)}
-            </p>
+            <div className={cn("flex items-center gap-2", cancelled ? "mt-4" : "mt-1")}>
+              <p className="font-heading text-4xl font-bold tracking-tight">
+                {formatOrderNumber(initialOrder.dailyNumber)}
+              </p>
+              <button
+                type="button"
+                onClick={() => shareOrderToken(formatOrderNumber(initialOrder.dailyNumber))}
+                aria-label="Share order token"
+                className="flex size-9 shrink-0 items-center justify-center rounded-full bg-white/10 outline-none hover:bg-white/20 focus-visible:ring-2 focus-visible:ring-white"
+              >
+                <Share2 className="size-4" />
+              </button>
+            </div>
             <p className="mt-4 inline-flex items-center gap-2 rounded-xl bg-white/10 px-4 py-2.5 text-sm">
               <span aria-hidden="true">📍</span> Collect at VIT-AP Main Gate
             </p>

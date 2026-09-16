@@ -1,13 +1,15 @@
 import type { Metadata } from "next";
 import { TabBar } from "@/components/nav/tab-bar";
 import { CravingsSolved } from "@/components/profile/cravings-solved";
-import { MilestoneBadges } from "@/components/profile/milestone-badges";
+import { getUnlockedMilestones, MilestoneBadges } from "@/components/profile/milestone-badges";
+import { MilestoneUnlockWatcher } from "@/components/profile/milestone-unlock-watcher";
 import { PickupStats } from "@/components/profile/pickup-stats";
 import { SoundToggle } from "@/components/profile/sound-toggle";
 import { ThemeIconToggle } from "@/components/theme/theme-icon-toggle";
 import { ThemeSegmented } from "@/components/theme/theme-segmented";
 import { getOrderStats, hasActiveOrder } from "@/lib/data/orders";
 import { getRestaurantCount } from "@/lib/data/restaurants";
+import { formatMonthYear } from "@/lib/date";
 import { requireProfile } from "@/lib/profile";
 import { EditableName } from "./editable-name";
 import { EditablePhone } from "./editable-phone";
@@ -38,6 +40,12 @@ export default async function ProfilePage() {
       ? ACTIVE_ORDER_PHONE_LOCK_MESSAGE
       : null;
 
+  const unlockedMilestones = getUnlockedMilestones(
+    orderStats.deliveredCount,
+    orderStats.restaurantsVisited,
+    totalRestaurants,
+  );
+
   return (
     <main className="mx-auto w-full max-w-md px-6 pt-6 pb-28">
       <div className="flex items-start justify-between gap-3">
@@ -47,7 +55,7 @@ export default async function ProfilePage() {
           </div>
           <div className="min-w-0">
             <h1 className="truncate font-heading text-2xl font-bold">{profile.full_name}</h1>
-            <CravingsSolved count={orderStats.deliveredCount} />
+            <CravingsSolved count={orderStats.deliveredCount} streakDays={orderStats.streakDays} />
           </div>
         </div>
         <ThemeIconToggle />
@@ -58,6 +66,7 @@ export default async function ProfilePage() {
         restaurantsVisited={orderStats.restaurantsVisited}
         totalRestaurants={totalRestaurants}
       />
+      <MilestoneUnlockWatcher unlockedCsv={unlockedMilestones.join(",")} />
       {(orderStats.deliveredCount > 0 || orderStats.cancelledCount > 0) && (
         <PickupStats pickups={orderStats.deliveredCount} noShows={orderStats.cancelledCount} />
       )}
@@ -83,6 +92,12 @@ export default async function ProfilePage() {
           <span className="shrink-0 font-mono text-xs font-semibold tracking-[0.1em] text-muted-foreground uppercase">
             Locked
           </span>
+        </div>
+        <div className="flex items-center justify-between px-5 py-4">
+          <p className="font-mono text-xs font-semibold tracking-[0.1em] text-muted-foreground uppercase">
+            Member since
+          </p>
+          <p className="font-semibold">{formatMonthYear(profile.created_at)}</p>
         </div>
       </div>
 

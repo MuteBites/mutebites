@@ -4,6 +4,21 @@ import { cn } from "@/lib/utils";
 
 export const REGULAR_THRESHOLD = 10;
 
+export type MilestoneKey = "first_bite" | "regular" | "campus_explorer";
+
+/** Shared unlock logic — used both to render the badges and (in profile/page.tsx) to detect a newly-unlocked one for the toast. */
+export function getUnlockedMilestones(
+  deliveredCount: number,
+  restaurantsVisited: number,
+  totalRestaurants: number,
+): MilestoneKey[] {
+  const unlocked: MilestoneKey[] = [];
+  if (deliveredCount >= 1) unlocked.push("first_bite");
+  if (deliveredCount >= REGULAR_THRESHOLD) unlocked.push("regular");
+  if (totalRestaurants > 0 && restaurantsVisited >= totalRestaurants) unlocked.push("campus_explorer");
+  return unlocked;
+}
+
 export function MilestoneBadges({
   deliveredCount,
   restaurantsVisited,
@@ -16,6 +31,8 @@ export function MilestoneBadges({
   /** Restaurants on the platform right now — Campus Explorer needs all of them. */
   totalRestaurants: number;
 }) {
+  const unlocked = new Set(getUnlockedMilestones(deliveredCount, restaurantsVisited, totalRestaurants));
+
   return (
     <section className="mt-6">
       <p className="font-mono text-xs font-semibold tracking-[0.18em] text-muted-foreground uppercase">
@@ -26,19 +43,20 @@ export function MilestoneBadges({
           icon={<UtensilsCrossed className="size-5" aria-hidden="true" />}
           label="First Bite"
           hint="Place your first order"
-          unlocked={deliveredCount >= 1}
+          unlocked={unlocked.has("first_bite")}
         />
         <BadgeTile
           icon={<Repeat className="size-5" aria-hidden="true" />}
           label="Regular"
           hint={`${REGULAR_THRESHOLD} orders delivered`}
-          unlocked={deliveredCount >= REGULAR_THRESHOLD}
+          unlocked={unlocked.has("regular")}
         />
         <BadgeTile
           icon={<Compass className="size-5" aria-hidden="true" />}
           label="Campus Explorer"
           hint="Order from every restaurant"
-          unlocked={totalRestaurants > 0 && restaurantsVisited >= totalRestaurants}
+          unlocked={unlocked.has("campus_explorer")}
+          progress={{ current: restaurantsVisited, total: totalRestaurants }}
         />
       </div>
     </section>
@@ -50,12 +68,17 @@ function BadgeTile({
   label,
   hint,
   unlocked,
+  progress,
 }: {
   icon: ReactNode;
   label: string;
   hint: string;
   unlocked: boolean;
+  /** Optional X/total progress bar, shown only while locked. */
+  progress?: { current: number; total: number };
 }) {
+  const showProgress = !unlocked && progress && progress.total > 0;
+
   return (
     <div
       className={cn(
@@ -80,6 +103,14 @@ function BadgeTile({
       >
         {label}
       </span>
+      {showProgress && (
+        <div className="h-1 w-full overflow-hidden rounded-full bg-secondary">
+          <div
+            className="h-full rounded-full bg-primary"
+            style={{ width: `${Math.min(100, (progress.current / progress.total) * 100)}%` }}
+          />
+        </div>
+      )}
     </div>
   );
 }

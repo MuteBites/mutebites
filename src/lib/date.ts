@@ -116,6 +116,17 @@ export function startOfTodayIST(now: Date = new Date()): Date {
   return new Date(Date.UTC(year, month - 1, day, 0, 0, 0) - (5 * 60 + 30) * 60_000);
 }
 
+const monthYearFmt = new Intl.DateTimeFormat("en-IN", {
+  timeZone: IST,
+  month: "long",
+  year: "numeric",
+});
+
+/** "January 2026" — for the profile's "Member since" line. */
+export function formatMonthYear(iso: string): string {
+  return monthYearFmt.format(new Date(iso));
+}
+
 export type TimeOfDay = "morning" | "afternoon" | "evening" | "night";
 
 /**
