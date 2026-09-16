@@ -124,8 +124,10 @@ dishes, priced per 500 g/1 kg pack), bringing the total to 5 restaurants),
 (adds `orders.daily_number` — see below),
 [`supabase/migrations/20260916000000_trending_leaderboard.sql`](supabase/migrations/20260916000000_trending_leaderboard.sql)
 (adds `trending_dishes()` / `trending_restaurants()` — see below),
-and [`supabase/migrations/20260917000000_my_weekly_rank.sql`](supabase/migrations/20260917000000_my_weekly_rank.sql)
-(adds `my_weekly_rank()` — see below).
+[`supabase/migrations/20260917000000_my_weekly_rank.sql`](supabase/migrations/20260917000000_my_weekly_rank.sql)
+(adds `my_weekly_rank()` — see below),
+and [`supabase/migrations/20260917010000_drop_unused_trending_restaurants.sql`](supabase/migrations/20260917010000_drop_unused_trending_restaurants.sql)
+(drops `trending_restaurants()` again — never called by the app).
 Migrations are applied by hand in the Supabase SQL editor (no CLI setup).
 
 All orders are handed over at **VIT-AP Main Gate** — there is no room
@@ -277,10 +279,10 @@ RLS is enabled on every table:
   ordered what.
 
 `trending_restaurants(days_back int default 7, result_limit int default 3)`
-also exists in the database (same migration, same pattern) but nothing in
-the app calls it anymore — the "Top restaurants" leaderboard was removed
-from the UI. Left in place rather than dropped without a separate
-approved migration, per the schema-change rule below.
+was added in the same migration (same pattern) for a "Top restaurants"
+leaderboard that got removed from the UI before shipping, then dropped in
+[`20260917010000_drop_unused_trending_restaurants.sql`](supabase/migrations/20260917010000_drop_unused_trending_restaurants.sql)
+once confirmed unused — it no longer exists in the database.
 
 - **`my_weekly_rank(days_back int default 7)`** — security definer,
   callable by `authenticated` only. Returns only the *calling* student's
