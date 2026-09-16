@@ -4,6 +4,7 @@ import { useState, useTransition, type FormEvent } from "react";
 import { useRouter } from "next/navigation";
 import { Loader2, Lock } from "lucide-react";
 import { verifyAdminPasscode } from "@/lib/admin/passcode-actions";
+import { toast } from "@/lib/toast/store";
 import { cn } from "@/lib/utils";
 
 /**
@@ -25,6 +26,7 @@ export function AdminPasscodeGate() {
         router.refresh();
       } else {
         setError(result.error);
+        toast.error(result.error);
       }
     });
   }
@@ -51,12 +53,17 @@ export function AdminPasscodeGate() {
           }}
           placeholder="Passcode"
           aria-invalid={!!error || undefined}
+          aria-describedby={error ? "passcode-error" : undefined}
           className={cn(
             "h-14 w-full rounded-2xl border bg-card px-5 text-lg outline-none focus-visible:ring-2 focus-visible:ring-ring/30",
             error && "border-destructive",
           )}
         />
-        {error && <p className="mt-2 text-sm text-destructive">{error}</p>}
+        {error && (
+          <p id="passcode-error" role="alert" className="mt-2 text-sm text-destructive">
+            {error}
+          </p>
+        )}
         <button
           type="submit"
           disabled={pending || passcode.length === 0}

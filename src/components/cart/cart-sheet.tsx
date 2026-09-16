@@ -3,22 +3,17 @@
 import { useState, useTransition } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { Loader2, MapPin, Minus, Phone, Plus, X } from "lucide-react";
+import { Loader2, MapPin, Phone, X } from "lucide-react";
+import { BrandLogo } from "@/components/brand-logo";
+import { CartLineRow } from "@/components/cart/cart-line-row";
 import { Sheet, SheetContent, SheetDescription, SheetTitle } from "@/components/ui/sheet";
 import { Textarea } from "@/components/ui/textarea";
-import { VegMark } from "@/components/veg-mark";
-import { MAX_NOTES, MAX_QUANTITY } from "@/lib/cart/limits";
-import {
-  cartTotals,
-  clearCart,
-  reconcileCart,
-  setQuantity,
-  useCart,
-  type Cart,
-} from "@/lib/cart/store";
+import { MAX_NOTES } from "@/lib/cart/limits";
+import { cartTotals, clearCart, reconcileCart, useCart, type Cart } from "@/lib/cart/store";
 import { formatRupees } from "@/lib/format";
 import { placeOrder } from "@/lib/orders/actions";
 import { formatLocalMobile, formatStoredMobile, normalizeIndianMobile } from "@/lib/phone";
+import { toast } from "@/lib/toast/store";
 import { cn } from "@/lib/utils";
 
 const eyebrow = "font-mono text-[0.7rem] font-semibold tracking-[0.18em] text-muted-foreground uppercase";
@@ -83,9 +78,7 @@ export function CartSheet({
 function EmptyCart({ onBrowse }: { onBrowse: () => void }) {
   return (
     <div className="flex flex-col items-center px-8 pt-16 pb-20 text-center">
-      <div className="flex size-24 items-center justify-center rounded-3xl border border-dashed border-primary/30 bg-brand-soft font-heading text-4xl font-bold text-primary">
-        0
-      </div>
+      <BrandLogo className="size-24 animate-bounce-idle" />
       <p className="mt-6 font-heading text-2xl font-bold">Nothing here yet</p>
       <p className="mt-2 text-muted-foreground">
         Pick a restaurant and add a few dishes — most orders take under a minute.
@@ -93,7 +86,7 @@ function EmptyCart({ onBrowse }: { onBrowse: () => void }) {
       <Link
         href="/"
         onClick={onBrowse}
-        className="mt-6 flex h-14 items-center rounded-2xl bg-ink px-8 font-heading text-lg font-bold text-ink-foreground outline-none hover:bg-ink/90 focus-visible:ring-3 focus-visible:ring-ring/40"
+        className="pressable surface-ink mt-6 flex h-14 items-center rounded-2xl bg-ink px-8 font-heading text-lg font-bold text-ink-foreground outline-none hover:brightness-95 focus-visible:ring-3 focus-visible:ring-ring/40"
       >
         Browse restaurants
       </Link>
@@ -131,13 +124,14 @@ function CartContents({
       if (result.ok) {
         clearCart();
         onPlaced();
-        router.push(`/orders/${result.orderId}`);
+        router.push(`/orders/${result.orderId}?placed=1`, { transitionTypes: ["nav-forward"] });
         return;
       }
       if (result.removedDishIds || result.updatedPrices) {
         reconcileCart(result.removedDishIds ?? [], result.updatedPrices ?? []);
       }
       setError(result.error);
+      toast.error(result.error);
     });
   }
 
@@ -146,36 +140,7 @@ function CartContents({
       <div className="min-h-0 flex-1 overflow-y-auto px-6">
         <ul>
           {cart.lines.map((line) => (
-            <li key={line.dishId} className="flex items-center gap-3 border-b py-4">
-              <VegMark isVeg={line.isVeg} />
-              <div className="min-w-0 flex-1">
-                <p className="leading-snug font-semibold">{line.name}</p>
-                <p className="text-sm text-muted-foreground">{formatRupees(line.price)} each</p>
-              </div>
-              <div className="flex h-11 items-center gap-1 rounded-xl border bg-card p-1">
-                <button
-                  type="button"
-                  onClick={() => setQuantity(line.dishId, line.quantity - 1)}
-                  aria-label={`Remove one ${line.name}`}
-                  className="flex size-8 items-center justify-center rounded-lg bg-secondary outline-none hover:bg-border focus-visible:ring-2 focus-visible:ring-ring/40"
-                >
-                  <Minus className="size-4" />
-                </button>
-                <span className="w-6 text-center font-semibold tabular-nums">{line.quantity}</span>
-                <button
-                  type="button"
-                  onClick={() => setQuantity(line.dishId, line.quantity + 1)}
-                  disabled={line.quantity >= MAX_QUANTITY}
-                  aria-label={`Add one more ${line.name}`}
-                  className="flex size-8 items-center justify-center rounded-lg bg-brand-soft text-primary outline-none hover:bg-primary/15 focus-visible:ring-2 focus-visible:ring-ring/40 disabled:opacity-40"
-                >
-                  <Plus className="size-4" />
-                </button>
-              </div>
-              <p className="w-16 text-right font-heading font-bold tabular-nums">
-                {formatRupees(line.price * line.quantity)}
-              </p>
-            </li>
+            <CartLineRow key={line.dishId} line={line} />
           ))}
         </ul>
 
@@ -233,7 +198,7 @@ function CartContents({
         )}
 
         {error && (
-          <p role="alert" className="mt-3 text-center text-sm text-destructive">
+          <p id="place-order-error" role="alert" className="mt-3 text-center text-sm text-destructive">
             {error}
           </p>
         )}
@@ -242,7 +207,8 @@ function CartContents({
           type="button"
           onClick={submit}
           disabled={placing || !orderingEnabled}
-          className="mt-3 flex h-14 w-full items-center justify-center gap-2 rounded-2xl bg-primary font-heading text-lg font-bold text-primary-foreground outline-none hover:bg-primary/90 focus-visible:ring-3 focus-visible:ring-ring/40 disabled:opacity-70"
+          aria-describedby={error ? "place-order-error" : undefined}
+          className="surface-primary mt-3 flex h-14 w-full items-center justify-center gap-2 rounded-2xl bg-primary font-heading text-lg font-bold text-primary-foreground outline-none hover:brightness-95 focus-visible:ring-3 focus-visible:ring-ring/40 disabled:opacity-70"
         >
           {placing && <Loader2 className="size-5 animate-spin" />}
           {placing ? "Placing order…" : `Place order · ${formatRupees(amount)}`}

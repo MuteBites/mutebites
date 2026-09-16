@@ -34,7 +34,8 @@ export type PlaceOrderResult =
  */
 export async function placeOrder(input: PlaceOrderInput): Promise<PlaceOrderResult> {
   const { user, profile } = await getSessionProfile();
-  if (!user || !profile) return { ok: false, error: "Please sign in again to place your order." };
+  if (!user || !profile)
+    return { ok: false, error: "Looks like you got signed out — sign in again to place your order." };
 
   // Shape checks — this is a public endpoint, don't trust the payload.
   if (
@@ -51,7 +52,7 @@ export async function placeOrder(input: PlaceOrderInput): Promise<PlaceOrderResu
     ) ||
     new Set(input.lines.map((l) => l.dishId)).size !== input.lines.length
   ) {
-    return { ok: false, error: "Something's off with your cart. Please review it and try again." };
+    return { ok: false, error: "Something's off with your cart — give it a quick look and try again." };
   }
 
   const contactPhone = normalizeIndianMobile(String(input.contactPhone ?? ""));
@@ -59,13 +60,13 @@ export async function placeOrder(input: PlaceOrderInput): Promise<PlaceOrderResu
 
   const notes = String(input.notes ?? "").trim();
   if (notes.length > MAX_NOTES) {
-    return { ok: false, error: `Order notes can be at most ${MAX_NOTES} characters.` };
+    return { ok: false, error: `That note's a bit long — keep it under ${MAX_NOTES} characters.` };
   }
 
   // App-side menu checks first: they can name what changed and fix the
   // cart. place_order() re-checks everything and has the final say.
   const menu = await getRestaurantMenu(input.restaurantId);
-  if (!menu) return { ok: false, error: "This restaurant isn't available anymore." };
+  if (!menu) return { ok: false, error: "This restaurant isn't around anymore — try another one?" };
   if (!menu.restaurant.is_active) {
     return {
       ok: false,
@@ -92,7 +93,7 @@ export async function placeOrder(input: PlaceOrderInput): Promise<PlaceOrderResu
   if (updatedPrices.length > 0) {
     return {
       ok: false,
-      error: "Some prices just changed. Your cart is updated — please check the new total.",
+      error: "Heads up — some prices just changed. Your cart's updated, take a peek at the new total.",
       updatedPrices,
     };
   }
@@ -111,19 +112,18 @@ export async function placeOrder(input: PlaceOrderInput): Promise<PlaceOrderResu
   return { ok: true, orderId };
 }
 
-const GENERIC_ERROR = "Couldn't place your order. Please try again.";
+const GENERIC_ERROR = "Couldn't place your order — mind trying again?";
 
 // Keys raised by public.place_order() → what the student sees.
 const PLACE_ORDER_ERRORS: Record<string, string> = {
-  not_authenticated: "Please sign in again to place your order.",
-  profile_missing: "Please sign in again to place your order.",
-  banned:
-    "Ordering is blocked for your phone number. Please call support if you think this is a mistake.",
-  ordering_paused: "Ordering is paused campus-wide right now. Please try again in a bit.",
+  not_authenticated: "Looks like you got signed out — sign in again to place your order.",
+  profile_missing: "Looks like you got signed out — sign in again to place your order.",
+  banned: "Ordering's blocked for this phone number. If that doesn't sound right, please reach out to support.",
+  ordering_paused: "Ordering's paused campus-wide right now — check back in a bit.",
   invalid_contact_phone: "Enter a valid 10-digit mobile number.",
-  notes_too_long: `Order notes can be at most ${MAX_NOTES} characters.`,
+  notes_too_long: `That note's a bit long — keep it under ${MAX_NOTES} characters.`,
   restaurant_closed: "This restaurant isn't taking orders right now.",
-  empty_cart: "Your cart is empty.",
-  invalid_items: "Something's off with your cart. Please review it and try again.",
-  dish_unavailable: "Something in your cart just sold out. Go back to the menu to update your cart.",
+  empty_cart: "Your cart's empty — go pick something tasty.",
+  invalid_items: "Something's off with your cart — give it a quick look and try again.",
+  dish_unavailable: "Something in your cart just sold out — hop back to the menu to swap it out.",
 };

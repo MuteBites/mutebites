@@ -1,0 +1,159 @@
+// Static photo lookup for restaurant covers and dish thumbnails. Deliberately
+// NOT a database column — these are just files under public/MuteBites/, and
+// matching them by (restaurant name, dish name) needs no schema change. Only
+// dishes with an unambiguous, correctly-matched photo are listed here — a
+// dish missing from a restaurant's map falls back to the plain placeholder
+// rather than showing a mismatched photo. A few "Single X Biryani" /
+// glass-vs-bottle entries intentionally reuse the same file as their
+// full-size counterpart: same dish, different serving size.
+
+const BASE = "/MuteBites";
+
+/**
+ * Restaurant name -> cover photo shown on the hero banner. The "-v2"
+ * filenames (vs. their original bare names still sitting in
+ * public/MuteBites/covers/) are deliberate: an intermediate cache
+ * somewhere between this server and at least one browser kept re-serving
+ * the original files by URL even after direct, verified-fresh server
+ * responses and full dev-server restarts — renaming forces a URL neither
+ * that cache nor any other has ever seen.
+ */
+export const RESTAURANT_COVER_PHOTOS: Record<string, string> = {
+  "Bheemasena Restaurant": `${BASE}/covers/bheemasena-v2.jpg`,
+  "A1 Biryani Point": `${BASE}/covers/a1-biryani-v2.jpg`,
+  "Bismillah Fruit Juice": `${BASE}/covers/bismillah-juice.jpg`,
+  "MuteBites Chinese": `${BASE}/covers/mutebites-chinese-v2.jpg`,
+  "MuteBites Fresh Fruits": `${BASE}/covers/mutebites-fresh-fruits.jpg`,
+};
+
+const BHEEMASENA = `${BASE}/Bheemasena`;
+const A1 = `${BASE}/A1 biryani`;
+const BISMILLAH = `${BASE}/Bismillah fruit juice`;
+const CHINESE = `${BASE}/MuteBites Chinese`;
+const FRUITS = `${BASE}/Mutebites fresh fruits`;
+
+/** Restaurant name -> { dish name -> thumbnail photo }. */
+export const DISH_PHOTOS: Record<string, Record<string, string>> = {
+  "Bheemasena Restaurant": {
+    "Veg Manchuria": `${BHEEMASENA}/Veg manchurian.jpg`,
+    "Chilli Mushroom": `${BHEEMASENA}/Chilli mushroom.jpg`,
+    "Crispy Baby Corn": `${BHEEMASENA}/Crispy babycorn.jpg`,
+    "Paneer 65": `${BHEEMASENA}/Paneer 65.jpg`,
+    "Paneer Majestic": `${BHEEMASENA}/Paneer majestic.jpg`,
+    "Chilli Chicken": `${BHEEMASENA}/Chilli chicken.jpg`,
+    "Chicken Manchuria": `${BHEEMASENA}/Chicken manchurian.jpg`,
+    "Chicken 65": `${BHEEMASENA}/Chicken 65.jpg`,
+    "Chicken Majestic": `${BHEEMASENA}/Chicken majestic.jpg`,
+    "Special Paneer Biryani": `${BHEEMASENA}/Special paneer biryani.jpg`,
+    "Special Mushroom Biryani": `${BHEEMASENA}/Special mushroom biryani.jpg`,
+    "Special Veg Biryani": `${BHEEMASENA}/Special veg biryani.jpg`,
+    "Ulavacharu Biryani": `${BHEEMASENA}/UlavaCharu Veg Biryani.jpg`,
+    "Kaju Biryani": `${BHEEMASENA}/Kaju biryani.jpg`,
+    "Special Kaju Biryani": `${BHEEMASENA}/Special kaju biryani.jpg`,
+    "Special Egg Biryani": `${BHEEMASENA}/Special egg biryani.jpg`,
+    "Chicken Dum Biryani": `${BHEEMASENA}/Chicken dum biryani.jpg`,
+    "Kundan Biryani": `${BHEEMASENA}/Kunda biryani.jpg`,
+    "Chicken Fry Biryani": `${BHEEMASENA}/Chicken fry biryani.jpg`,
+    "Special Chicken Biryani": `${BHEEMASENA}/Special chicken biryani .jpg`,
+    "Joint Biryani": `${BHEEMASENA}/Joint biryani.jpg`,
+    "Chicken Mughlai Biryani": `${BHEEMASENA}/Mughlai biryani.jpg`,
+    "Chicken Lollipop Biryani": `${BHEEMASENA}/Chicken lollipop biryani.jpg`,
+    "Gongura Chicken Fry Biryani": `${BHEEMASENA}/Gongura chicken fry biryani.jpg`,
+    // Single Biryani — same dish as its full-size counterpart above, smaller portion.
+    "Single Dum Biryani": `${BHEEMASENA}/Chicken dum biryani.jpg`,
+    "Single Fry Biryani": `${BHEEMASENA}/Chicken fry biryani.jpg`,
+    "Single Special Chicken Biryani": `${BHEEMASENA}/Special chicken biryani .jpg`,
+    "Single Paneer Biryani": `${BHEEMASENA}/Special paneer biryani.jpg`,
+    "Single Mushroom Biryani": `${BHEEMASENA}/Special mushroom biryani.jpg`,
+    "Single Mughlai Biryani": `${BHEEMASENA}/Mughlai biryani.jpg`,
+    "Single Gongura Biryani": `${BHEEMASENA}/Gongura chicken fry biryani.jpg`,
+    "Mixed Biryani": `${BHEEMASENA}/Mixed Biryani.jpg`,
+    "Butter Naan": `${BHEEMASENA}/Butter naan.jpg`,
+    Roti: `${BHEEMASENA}/Roti.jpg`,
+    "Paneer Butter Masala": `${BHEEMASENA}/Paneer butter masala .jpg`,
+    "Egg Burji": `${BHEEMASENA}/Egg bhurji.jpg`,
+    "Butter Chicken": `${BHEEMASENA}/Butter chicken.jpg`,
+    "Chicken Curry": `${BHEEMASENA}/Chicken Curry.jpg`,
+    "Chicken Tandoori Half": `${BHEEMASENA}/Chicken tandoori.jpeg`,
+    "Chicken Tandoori Full": `${BHEEMASENA}/Chicken tandoori.jpeg`,
+    // No photo: Kaju Paneer Butter Masala (visually distinct from plain
+    // Paneer Butter Masala — left on the placeholder rather than misrepresented).
+  },
+
+  "A1 Biryani Point": {
+    "A1 Biryani Dum Biryani": `${A1}/A1 Dum Biryani.jpg`,
+    "A1 Biryani Fry Pieces Biryani": `${A1}/A1 Fry Piece Biryani.jpg`,
+    "A1 Biryani Mixed Biryani": `${A1}/A1 mixed biryani .jpg`,
+  },
+
+  "Bismillah Fruit Juice": {
+    "Carrot Juice": `${BISMILLAH}/Carrot juice.jpg`,
+    "Beetroot Juice": `${BISMILLAH}/Beetroot juice.jpg`,
+    "Pineapple Juice": `${BISMILLAH}/Pineapple juice.jpg`,
+    "Grape Juice": `${BISMILLAH}/Grape juice.jpg`,
+    "Pomegranate Juice": `${BISMILLAH}/Pomegranate juice.jpg`,
+    "Apple Juice": `${BISMILLAH}/Apple juice.jpg`,
+    "Muskmelon Juice": `${BISMILLAH}/Muskmelon-Juice.jpg`,
+    "Watermelon Juice": `${BISMILLAH}/Watermelon juice.jpg`,
+    "Banana Juice": `${BISMILLAH}/Banana juice.jpg`,
+    "Sweet Lemon Juice (Mosambi)": `${BISMILLAH}/Sweet lemon mosambi juice.jpg`,
+    "Sugarcane Juice (Glass)": `${BISMILLAH}/Sugarcane juice.jpg`,
+    "Sugarcane Juice (1 Bottle)": `${BISMILLAH}/Sugarcane juice.jpg`,
+    // No photo: Any Fruit Juice Bottle, Bismillah Fruit Juice (Any Flavour)
+    // — flavour varies per order, no single photo represents them.
+  },
+
+  "MuteBites Chinese": {
+    "Veg Noodles": `${CHINESE}/Veg noodles.jpg`,
+    "Veg Manchurian Noodles": `${CHINESE}/Veg Manchurian Noodles.jpg`,
+    "Veg Paneer Noodles": `${CHINESE}/Veg paneer noodles.jpg`,
+    "Egg Noodles": `${CHINESE}/Egg Noodles.jpg`,
+    "Double Egg Noodles": `${CHINESE}/Double egg noodles.jpg`,
+    "Egg Manchurian Noodles": `${CHINESE}/Egg manchurian noodles.jpg`,
+    "Egg Paneer Noodles": `${CHINESE}/Egg paneer noodles.jpg`,
+    "Chicken Noodles": `${CHINESE}/Chicken noodles.jpg`,
+    "Veg Fried Rice": `${CHINESE}/Veg friedrice.jpg`,
+    "Veg Manchurian Fried Rice": `${CHINESE}/Veg manchurian friedrice.jpg`,
+    "Veg Paneer Fried Rice": `${CHINESE}/Veg paneer friedrice.jpg`,
+    "Egg Fried Rice": `${CHINESE}/Egg friedrice.jpg`,
+    "Double Egg Fried Rice": `${CHINESE}/Double egg friedrice.jpg`,
+    "Egg Manchurian Fried Rice": `${CHINESE}/Egg manchurian friedrice.jpg`,
+    "Egg Paneer Fried Rice": `${CHINESE}/Egg paneer friedrice.jpg`,
+    "Chicken Fried Rice": `${CHINESE}/Chicken friedrice.jpg`,
+    "Double Egg Chicken Fried Rice": `${CHINESE}/Double egg chicken friedrice.jpg`,
+    "Veg Manchurian": `${CHINESE}/Veg manchurian.jpg`,
+    "Egg Manchurian": `${CHINESE}/Egg manchurian.jpg`,
+    "Double Egg Manchurian": `${CHINESE}/Double egg manchurian.jpg`,
+    "Chicken Manchurian": `${CHINESE}/Chicken manchurian.jpg`,
+    "Chicken Chilli": `${CHINESE}/Chicken chilli.jpg`,
+    "4P Chicken Lollipop": `${CHINESE}/Chicken lollipop 4P.jpg`,
+    // No photo: Double Egg Chicken Noodles — no exact-match file (only the
+    // fried-rice version exists).
+  },
+
+  "MuteBites Fresh Fruits": {
+    "Pomegranate (500 g)": `${FRUITS}/Pomegranate 500g.jpg`,
+    "Pomegranate (1 kg)": `${FRUITS}/Pomegranate 1kg.jpg`,
+    "Apples (500 g)": `${FRUITS}/Apple 500g.jpg`,
+    "Apples (1 kg)": `${FRUITS}/Apple 1kg.jpg`,
+    "Bananas (30 g)": `${FRUITS}/Banana 30g.jpg`,
+    "Bananas (1 kg)": `${FRUITS}/Banana 1kg.jpg`,
+    "Guava (500 g)": `${FRUITS}/Guava 30g.jpg`, // filename typo upstream (30g), same photo
+    "Guava (1 kg)": `${FRUITS}/Guava 1kg.jpg`,
+    "Black Grapes (500 g)": `${FRUITS}/Grapes 500g.jpg`,
+    "Black Grapes (1 kg)": `${FRUITS}/Grapes 1kg.jpg`,
+    "Dragon Fruit (500 g)": `${FRUITS}/Dragon fruit 500g.jpg`,
+    "Dragon Fruit (1 kg)": `${FRUITS}/Dragon fruit 1kg.jpg`,
+    "Papaya (1 kg)": `${FRUITS}/Papaya 1kg.jpg`,
+  },
+};
+
+/** Cover photo for a restaurant's hero banner, or undefined for the placeholder. */
+export function getRestaurantCoverPhoto(restaurantName: string): string | undefined {
+  return RESTAURANT_COVER_PHOTOS[restaurantName];
+}
+
+/** Thumbnail photo for a dish, or undefined for the placeholder. */
+export function getDishPhoto(restaurantName: string, dishName: string): string | undefined {
+  return DISH_PHOTOS[restaurantName]?.[dishName];
+}

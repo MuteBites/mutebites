@@ -1,8 +1,11 @@
 import type { Metadata } from "next";
 import { TabBar } from "@/components/nav/tab-bar";
+import { MilestoneBadges } from "@/components/profile/milestone-badges";
+import { PickupStats } from "@/components/profile/pickup-stats";
 import { ThemeIconToggle } from "@/components/theme/theme-icon-toggle";
 import { ThemeSegmented } from "@/components/theme/theme-segmented";
-import { getOrderCount, hasActiveOrder } from "@/lib/data/orders";
+import { getOrderStats, hasActiveOrder } from "@/lib/data/orders";
+import { getRestaurantCount } from "@/lib/data/restaurants";
 import { requireProfile } from "@/lib/profile";
 import { EditableName } from "./editable-name";
 import { EditablePhone } from "./editable-phone";
@@ -18,9 +21,10 @@ function initials(name: string) {
 
 export default async function ProfilePage() {
   const profile = await requireProfile();
-  const [orderCount, orderInProgress] = await Promise.all([
-    getOrderCount(profile.id),
+  const [orderInProgress, orderStats, totalRestaurants] = await Promise.all([
     hasActiveOrder(profile.id),
+    getOrderStats(profile.id),
+    getRestaurantCount(),
   ]);
 
   // Mirrors the precedence in profile/actions.ts's updatePhone — that
@@ -42,12 +46,21 @@ export default async function ProfilePage() {
           <div className="min-w-0">
             <h1 className="truncate font-heading text-2xl font-bold">{profile.full_name}</h1>
             <p className="text-muted-foreground">
-              {orderCount} {orderCount === 1 ? "order" : "orders"} placed
+              {orderStats.totalCount} {orderStats.totalCount === 1 ? "order" : "orders"} placed
             </p>
           </div>
         </div>
         <ThemeIconToggle />
       </div>
+
+      <MilestoneBadges
+        deliveredCount={orderStats.deliveredCount}
+        restaurantsVisited={orderStats.restaurantsVisited}
+        totalRestaurants={totalRestaurants}
+      />
+      {(orderStats.deliveredCount > 0 || orderStats.cancelledCount > 0) && (
+        <PickupStats pickups={orderStats.deliveredCount} noShows={orderStats.cancelledCount} />
+      )}
 
       <p className="mt-6 font-mono text-xs font-semibold tracking-[0.18em] text-muted-foreground uppercase">
         Tap any field to edit

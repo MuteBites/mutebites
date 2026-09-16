@@ -15,12 +15,12 @@ import {
 } from "@/components/ui/alert-dialog";
 import { Badge } from "@/components/ui/badge";
 import { setOrderingEnabled } from "@/lib/admin/actions";
+import { toast } from "@/lib/toast/store";
 import { cn } from "@/lib/utils";
 
 export function OrderingKillSwitch({ initialEnabled }: { initialEnabled: boolean }) {
   const [enabled, setEnabled] = useState(initialEnabled);
   const [open, setOpen] = useState(false);
-  const [error, setError] = useState<string | null>(null);
   const [pending, startTransition] = useTransition();
 
   function confirm() {
@@ -29,10 +29,10 @@ export function OrderingKillSwitch({ initialEnabled }: { initialEnabled: boolean
       const result = await setOrderingEnabled(next);
       if (result.ok) {
         setEnabled(next);
-        setError(null);
         setOpen(false);
+        toast.success(next ? "Ordering turned back on campus-wide." : "Ordering paused campus-wide.");
       } else {
-        setError(result.error);
+        toast.error(result.error);
       }
     });
   }
@@ -97,7 +97,6 @@ export function OrderingKillSwitch({ initialEnabled }: { initialEnabled: boolean
                   : "Students will immediately be able to place new orders again at every open restaurant."}
               </AlertDialogDescription>
             </AlertDialogHeader>
-            {error && <p className="text-sm text-destructive">{error}</p>}
             <AlertDialogFooter>
               <AlertDialogCancel disabled={pending}>Cancel</AlertDialogCancel>
               <AlertDialogAction

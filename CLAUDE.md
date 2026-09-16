@@ -46,6 +46,20 @@ Food delivery site for VIT-AP University students.
 - `src/lib/supabase/server.ts` — server Supabase client (Server Components/Actions)
 - `src/lib/supabase/middleware.ts` — session-refresh helper used by `middleware.ts`
 - `supabase/migrations/` — hand-written SQL migrations (see rule below)
+- `public/MuteBites/` — restaurant/dish photos, one subfolder per restaurant
+  (plus `covers/` for the hero banners) — matched to database rows by name
+  in `src/lib/data/dish-photos.ts`, deliberately **not** a database column
+  (no schema change needed to add or swap a photo). `getRestaurantCoverPhoto()`
+  and `getDishPhoto()` look up by exact restaurant/dish name; anything
+  without a confident match — a dish with no distinct photo, a restaurant
+  with no cover yet — falls back to the existing flat placeholder
+  (`bg-stripes`) rather than showing a mismatched image. Cover photo
+  filenames carry a `-v2`-style suffix when replaced after the first
+  publish — an intermediate cache (outside this app, never fully
+  identified) kept re-serving an old file by its original URL even after
+  verified-fresh server responses and full dev-server restarts, so a
+  changed cover photo should get a new filename, not overwrite the old one
+  in place, to guarantee cache-safety.
 
 `loading.tsx` exists for the restaurant list (`(home)`), the menu page
 (`restaurants/[id]`), and both order pages (`orders`, `orders/[id]`) —
@@ -74,12 +88,16 @@ match every migration and the app code),
 `080000` likely never actually went live, probably split off into its own
 SQL editor tab and skipped when that migration was applied by hand),
 [`supabase/migrations/20260915120000_banned_at.sql`](supabase/migrations/20260915120000_banned_at.sql),
-and [`supabase/migrations/20260915130000_enable_realtime_orders.sql`](supabase/migrations/20260915130000_enable_realtime_orders.sql)
+[`supabase/migrations/20260915130000_enable_realtime_orders.sql`](supabase/migrations/20260915130000_enable_realtime_orders.sql)
 (adds `orders` to the `supabase_realtime` publication —
 `src/components/orders/order-tracking.tsx`, a client component, subscribes
 to its own order's row for live status updates on top of the normal
 server-fetched page; existing RLS still governs who can actually receive
-them, and a plain page refresh still shows the true status either way).
+them, and a plain page refresh still shows the true status either way),
+and [`supabase/migrations/20260915140000_seed_new_restaurants.sql`](supabase/migrations/20260915140000_seed_new_restaurants.sql)
+(data only — two more partner restaurants, **MuteBites Chinese** (5
+categories, 24 dishes) and **MuteBites Fresh Fruits** (1 category, 13
+dishes, priced per 500 g/1 kg pack), bringing the total to 5 restaurants).
 Migrations are applied by hand in the Supabase SQL editor (no CLI setup).
 
 All orders are handed over at **VIT-AP Main Gate** — there is no room

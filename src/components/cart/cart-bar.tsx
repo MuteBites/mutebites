@@ -38,14 +38,17 @@ export function CartBar({
           <div className="h-28" aria-hidden="true" />
           <div
             className={cn(
-              "fixed inset-x-0 z-20 mx-auto w-full max-w-md px-4",
+              "animate-slide-up-in fixed inset-x-0 z-20 mx-auto w-full max-w-md px-4",
               hasTabBar ? "bottom-20 pb-0" : "bottom-0 pb-[max(1rem,env(safe-area-inset-bottom))]",
             )}
           >
-            <div className="flex items-center gap-3 rounded-3xl bg-ink p-3 pl-5 text-ink-foreground shadow-xl">
+            <div className="surface-ink shadow-elevated-glow flex items-center gap-3 rounded-3xl bg-ink p-3 pl-5 text-ink-foreground">
               <div className="min-w-0 flex-1">
                 <p className="truncate text-sm opacity-75">
-                  {totals.items} {totals.items === 1 ? "item" : "items"}
+                  <span key={totals.items} className="animate-bounce-count inline-block">
+                    {totals.items}
+                  </span>{" "}
+                  {totals.items === 1 ? "item" : "items"}
                   {cartIsElsewhere && ` · ${cart.restaurantName}`}
                 </p>
                 <p className="font-heading text-2xl font-bold">{formatRupees(totals.amount)}</p>
@@ -53,7 +56,7 @@ export function CartBar({
               <button
                 type="button"
                 onClick={() => setOpen(true)}
-                className="flex h-14 items-center gap-2 rounded-2xl bg-primary px-6 font-heading text-lg font-bold text-primary-foreground outline-none hover:bg-primary/90 focus-visible:ring-3 focus-visible:ring-white/60"
+                className="surface-primary flex h-14 items-center gap-2 rounded-2xl bg-primary px-6 font-heading text-lg font-bold text-primary-foreground outline-none hover:brightness-95 focus-visible:ring-3 focus-visible:ring-white/60"
               >
                 View cart <ArrowRight className="size-5" />
               </button>

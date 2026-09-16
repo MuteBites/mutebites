@@ -16,20 +16,20 @@ import { searchStudents, setStudentBanned, type StudentSearchResult } from "@/li
 import type { BannedUser } from "@/lib/data/admin";
 import { formatOrderTimestamp } from "@/lib/date";
 import { formatStoredMobile } from "@/lib/phone";
+import { toast } from "@/lib/toast/store";
 
 export function BannedUsersSection({ bannedUsers }: { bannedUsers: BannedUser[] }) {
   const [banned, setBanned] = useState(bannedUsers);
-  const [error, setError] = useState<string | null>(null);
   const [pending, startTransition] = useTransition();
 
-  function unban(id: string) {
+  function unban(id: string, name: string) {
     startTransition(async () => {
       const result = await setStudentBanned(id, false);
       if (result.ok) {
         setBanned((list) => list.filter((u) => u.id !== id));
-        setError(null);
+        toast.success(`${name} unbanned.`);
       } else {
-        setError(result.error);
+        toast.error(result.error);
       }
     });
   }
@@ -44,8 +44,6 @@ export function BannedUsersSection({ bannedUsers }: { bannedUsers: BannedUser[] 
   return (
     <div className="flex flex-col gap-4">
       <BanStudentSearch onBanned={onBanned} />
-
-      {error && <p className="text-sm text-destructive">{error}</p>}
 
       {banned.length === 0 ? (
         <p className="rounded-2xl border bg-card p-6 text-center text-muted-foreground">
@@ -68,7 +66,7 @@ export function BannedUsersSection({ bannedUsers }: { bannedUsers: BannedUser[] 
               <button
                 type="button"
                 disabled={pending}
-                onClick={() => unban(user.id)}
+                onClick={() => unban(user.id, user.fullName)}
                 className="shrink-0 rounded-xl bg-success px-3.5 py-2 text-sm font-bold text-white uppercase outline-none hover:bg-success/90 focus-visible:ring-3 focus-visible:ring-ring/40 disabled:opacity-70"
               >
                 Unban
@@ -111,10 +109,12 @@ function BanStudentSearch({ onBanned }: { onBanned: (user: StudentSearchResult) 
       if (result.ok) {
         onBanned(target);
         setResults((list) => list.filter((u) => u.id !== target.id));
-        setError(null);
+        toast.success(`${target.fullName} banned.`);
         setTarget(null);
+        setError(null);
       } else {
         setError(result.error);
+        toast.error(result.error);
       }
     });
   }
@@ -178,7 +178,6 @@ function BanStudentSearch({ onBanned }: { onBanned: (user: StudentSearchResult) 
                 `This blocks new orders from ${formatStoredMobile(target.phone)} campus-wide — including any other account signed in with the same number. You can unban at any time.`}
             </AlertDialogDescription>
           </AlertDialogHeader>
-          {error && <p className="text-sm text-destructive">{error}</p>}
           <AlertDialogFooter>
             <AlertDialogCancel disabled={banPending}>Cancel</AlertDialogCancel>
             <AlertDialogAction

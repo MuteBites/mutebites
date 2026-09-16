@@ -90,8 +90,20 @@ export function conflictsWithCart(restaurantId: string) {
   return current.lines.length > 0 && current.restaurantId !== restaurantId;
 }
 
+/**
+ * Short haptic tick on add-to-cart. Only Android's `navigator.vibrate` ever
+ * fires — iOS Safari doesn't implement the API at all, so this is a no-op
+ * there without any platform sniffing.
+ */
+function vibrateAdd() {
+  if (typeof navigator !== "undefined" && "vibrate" in navigator) {
+    navigator.vibrate(15);
+  }
+}
+
 /** Adds one of a dish. Replaces the cart if it held another restaurant's items. */
 export function addToCart(restaurant: CartRestaurant, dish: CartDish) {
+  vibrateAdd();
   const current = getSnapshot();
   const base =
     current.restaurantId === restaurant.id
@@ -109,6 +121,16 @@ export function addToCart(restaurant: CartRestaurant, dish: CartDish) {
       ];
 
   write({ ...base, lines });
+}
+
+/** Replaces the whole cart with the given lines. Used by the "Your usual" quick-refill chip. */
+export function refillCart(restaurant: CartRestaurant, lines: CartLine[]) {
+  vibrateAdd();
+  write({
+    restaurantId: restaurant.id,
+    restaurantName: restaurant.name,
+    lines: lines.map((l) => ({ ...l, quantity: Math.min(l.quantity, MAX_QUANTITY) })),
+  });
 }
 
 /** Sets a line's quantity; 0 removes it. */

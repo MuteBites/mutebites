@@ -18,6 +18,49 @@ export async function getRestaurants(): Promise<Restaurant[]> {
 }
 
 /**
+ * Number of currently-active restaurants — the "all 3" in the profile's
+ * Campus Explorer badge. Deliberately excludes deactivated restaurants:
+ * counting them would make the badge permanently unreachable for every
+ * student the moment any one restaurant is ever retired, since
+ * `place_order()` only allows ordering from `is_active` restaurants.
+ */
+export async function getRestaurantCount(): Promise<number> {
+  const supabase = await createClient();
+  const { count, error } = await supabase
+    .from("restaurants")
+    .select("id", { count: "exact", head: true })
+    .eq("is_active", true);
+
+  if (error) throw error;
+  return count ?? 0;
+}
+
+export type ThursdaySpecial = { restaurantId: string; restaurantName: string; dishName: string };
+
+/**
+ * The first available Thursday-only dish (note contains "Thursday") at an
+ * open restaurant — powers Home's Thursday nudge banner. Not a dedicated
+ * flag on the dish; `note` is the only place "Thursday Only" is recorded,
+ * so that's what this matches against.
+ */
+export async function getThursdaySpecial(): Promise<ThursdaySpecial | null> {
+  const supabase = await createClient();
+  const { data, error } = await supabase
+    .from("dishes")
+    .select("name, sort_order, restaurant_id, restaurants!inner(name, is_active)")
+    .ilike("note", "%thursday%")
+    .eq("is_available", true)
+    .eq("restaurants.is_active", true)
+    .order("sort_order")
+    .limit(1)
+    .maybeSingle<{ name: string; restaurant_id: string; restaurants: { name: string } }>();
+
+  if (error) throw error;
+  if (!data) return null;
+  return { restaurantId: data.restaurant_id, restaurantName: data.restaurants.name, dishName: data.name };
+}
+
+/**
  * One restaurant plus its menu grouped into sections, or null if it
  * doesn't exist. Sold-out dishes are included (shown, not addable).
  */

@@ -57,8 +57,12 @@ export function RestaurantList({
 
       {visible.length > 0 ? (
         <ul className="mt-4 flex flex-col gap-5">
-          {visible.map((r) => (
-            <li key={r.id}>
+          {visible.map((r, i) => (
+            <li
+              key={r.id}
+              className="animate-slide-up-in"
+              style={{ animationDelay: `${Math.min(i, 6) * 70}ms` }}
+            >
               <RestaurantCard restaurant={r} orderingEnabled={orderingEnabled} />
             </li>
           ))}

@@ -83,3 +83,24 @@ export function slotEndTime(iso: string): Date {
 export function isPastDeliverySlot(iso: string, now: Date = new Date()): boolean {
   return now.getTime() >= slotEndTime(iso).getTime();
 }
+
+const weekdayFmt = new Intl.DateTimeFormat("en-US", { timeZone: IST, weekday: "long" });
+
+/** True on Thursdays, IST wall-clock — powers the Thursday-special nudge on Home. */
+export function isThursdayIST(now: Date = new Date()): boolean {
+  return weekdayFmt.format(now) === "Thursday";
+}
+
+export type TimeOfDay = "morning" | "afternoon" | "evening" | "night";
+
+/**
+ * IST wall-clock time-of-day bucket for the Home greeting — separate from
+ * the delivery-slot windows above, which are about order ETAs, not mood.
+ */
+export function getTimeOfDayIST(now: Date = new Date()): TimeOfDay {
+  const [h] = hourMinuteFmt.format(now).split(":").map(Number);
+  if (h >= 5 && h < 12) return "morning";
+  if (h >= 12 && h < 17) return "afternoon";
+  if (h >= 17 && h < 21) return "evening";
+  return "night";
+}

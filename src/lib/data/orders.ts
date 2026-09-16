@@ -83,16 +83,57 @@ type OrderDetailRow = {
   order_items: { dish_name: string; unit_price: number; quantity: number; subtotal: number }[];
 };
 
-/** Total number of orders this student has ever placed (for the profile screen). */
-export async function getOrderCount(userId: string): Promise<number> {
+/**
+ * All the profile screen's order-derived numbers in one query: total orders
+ * ever placed, the milestone badges ("First Bite", "Regular", "Campus
+ * Explorer"), and the "N pickups, N no-shows" line. There's no dedicated
+ * no-show status — `cancelled` is the closest thing the schema tracks (an
+ * admin cancels an order that isn't going to be collected), so it's used
+ * as that proxy.
+ */
+export async function getOrderStats(userId: string): Promise<{
+  totalCount: number;
+  deliveredCount: number;
+  cancelledCount: number;
+  restaurantsVisited: number;
+}> {
   const supabase = await createClient();
-  const { count, error } = await supabase
+  const { data, error } = await supabase
     .from("orders")
-    .select("id", { count: "exact", head: true })
+    .select("restaurant_id, status")
     .eq("user_id", userId);
 
   if (error) throw error;
-  return count ?? 0;
+  const rows = data ?? [];
+  const delivered = rows.filter((r) => r.status === "delivered");
+  const cancelled = rows.filter((r) => r.status === "cancelled");
+  return {
+    totalCount: rows.length,
+    deliveredCount: delivered.length,
+    cancelledCount: cancelled.length,
+    restaurantsVisited: new Set(delivered.map((r) => r.restaurant_id)).size,
+  };
+}
+
+/**
+ * Distinct dishes the student has been delivered at one restaurant — the
+ * menu page's "You've tried N of M" progress bar. Dishes ordered but
+ * later removed from the menu (`dish_id` goes null on delete) don't
+ * count, since they're not part of the current total either.
+ */
+export async function getDishesTried(userId: string, restaurantId: string): Promise<number> {
+  const supabase = await createClient();
+  const { data, error } = await supabase
+    .from("orders")
+    .select("order_items(dish_id)")
+    .eq("user_id", userId)
+    .eq("restaurant_id", restaurantId)
+    .eq("status", "delivered")
+    .returns<{ order_items: { dish_id: string | null }[] }[]>();
+
+  if (error) throw error;
+  const dishIds = (data ?? []).flatMap((o) => o.order_items.map((i) => i.dish_id));
+  return new Set(dishIds.filter((id): id is string => id !== null)).size;
 }
 
 /**

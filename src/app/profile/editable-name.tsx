@@ -2,6 +2,7 @@
 
 import { useActionState, useState } from "react";
 import { Loader2 } from "lucide-react";
+import { toast } from "@/lib/toast/store";
 import { cn } from "@/lib/utils";
 import { updateFullName, type FieldActionState } from "./actions";
 
@@ -17,6 +18,9 @@ export function EditableName({ initialValue }: { initialValue: string }) {
       if (!result.error) {
         setValue(String(formData.get("fullName") ?? "").trim().replace(/\s+/g, " "));
         setEditing(false);
+        toast.success("Got it — your name's updated.");
+      } else {
+        toast.error(result.error);
       }
       return result;
     },

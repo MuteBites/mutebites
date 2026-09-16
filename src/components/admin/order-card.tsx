@@ -20,6 +20,7 @@ import { formatOrderTimestamp } from "@/lib/date";
 import { formatRupees } from "@/lib/format";
 import { advanceLabel, nextStatus, orderReference, statusBadge } from "@/lib/orders/status";
 import { formatStoredMobile, whatsAppLink } from "@/lib/phone";
+import { toast } from "@/lib/toast/store";
 import { cn } from "@/lib/utils";
 
 export function OrderCard({ order }: { order: AdminOrder }) {
@@ -34,7 +35,6 @@ export function OrderCard({ order }: { order: AdminOrder }) {
     setPrevPropStatus(order.status);
     setStatus(order.status);
   }
-  const [error, setError] = useState<string | null>(null);
   const [advancing, startAdvance] = useTransition();
   const [cancelOpen, setCancelOpen] = useState(false);
   const [cancelling, startCancel] = useTransition();
@@ -48,10 +48,10 @@ export function OrderCard({ order }: { order: AdminOrder }) {
     startAdvance(async () => {
       const result = await advanceOrderStatus(order.id, status);
       if (result.ok) {
-        setError(null);
         setStatus((s) => nextStatus(s) ?? s);
+        toast.success(isFinalStep ? "Order marked delivered." : "Order confirmed with restaurant.");
       } else {
-        setError(result.error);
+        toast.error(result.error);
       }
     });
   }
@@ -60,11 +60,11 @@ export function OrderCard({ order }: { order: AdminOrder }) {
     startCancel(async () => {
       const result = await cancelOrder(order.id, status);
       if (result.ok) {
-        setError(null);
         setStatus("cancelled");
         setCancelOpen(false);
+        toast.success("Order cancelled.");
       } else {
-        setError(result.error);
+        toast.error(result.error);
       }
     });
   }
@@ -110,8 +110,6 @@ export function OrderCard({ order }: { order: AdminOrder }) {
           WhatsApp
         </a>
       </div>
-
-      {error && <p className="mt-2 text-sm text-destructive">{error}</p>}
 
       {label && (
         <button

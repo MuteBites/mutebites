@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { formatLocalMobile } from "@/lib/phone";
+import { toast } from "@/lib/toast/store";
 import { cn } from "@/lib/utils";
 import { createProfile, type WelcomeFormState } from "./actions";
 
@@ -14,7 +15,11 @@ const eyebrow =
 
 export function WelcomeForm({ defaultName }: { defaultName: string }) {
   const [state, formAction, pending] = useActionState<WelcomeFormState, FormData>(
-    createProfile,
+    async (prev, formData) => {
+      const result = await createProfile(prev, formData);
+      if (result.formError) toast.error(result.formError);
+      return result;
+    },
     {},
   );
   // Controlled so values survive a failed submit (React resets forms after actions).
@@ -98,11 +103,6 @@ export function WelcomeForm({ defaultName }: { defaultName: string }) {
       </div>
 
       <div className="sticky bottom-0 border-t bg-background/95 px-6 pt-4 pb-[max(1rem,env(safe-area-inset-bottom))] backdrop-blur">
-        {state.formError && (
-          <p role="alert" className="mb-3 text-center text-sm text-destructive">
-            {state.formError}
-          </p>
-        )}
         <Button
           type="submit"
           disabled={pending}

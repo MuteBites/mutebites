@@ -15,6 +15,7 @@ import {
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
 import { markAllConfirmedDelivered } from "@/lib/admin/actions";
+import { toast } from "@/lib/toast/store";
 
 /**
  * Bulk "confirmed → delivered", but only for orders whose delivery slot
@@ -32,7 +33,6 @@ export function MarkAllDeliveredButton({
 }) {
   const router = useRouter();
   const [open, setOpen] = useState(false);
-  const [error, setError] = useState<string | null>(null);
   const [pending, startTransition] = useTransition();
 
   if (eligibleCount === 0) return null;
@@ -47,11 +47,11 @@ export function MarkAllDeliveredButton({
     startTransition(async () => {
       const result = await markAllConfirmedDelivered();
       if (result.ok) {
-        setError(null);
         setOpen(false);
         router.refresh();
+        toast.success(`${eligibleCount} order${eligibleCount === 1 ? "" : "s"} marked delivered.`);
       } else {
-        setError(result.error);
+        toast.error(result.error);
       }
     });
   }
@@ -80,7 +80,6 @@ export function MarkAllDeliveredButton({
               } delivery window yet and will be left as confirmed.`}
           </AlertDialogDescription>
         </AlertDialogHeader>
-        {error && <p className="text-sm text-destructive">{error}</p>}
         <AlertDialogFooter>
           <AlertDialogCancel disabled={pending}>Cancel</AlertDialogCancel>
           <AlertDialogAction

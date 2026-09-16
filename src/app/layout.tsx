@@ -1,6 +1,7 @@
 import type { Metadata, Viewport } from "next";
 import { JetBrains_Mono, Outfit, Plus_Jakarta_Sans } from "next/font/google";
 import Script from "next/script";
+import { Toaster } from "@/components/toast/toaster";
 import { THEME_INIT_SCRIPT } from "@/lib/theme/init-script";
 import "./globals.css";
 
@@ -22,6 +23,11 @@ const jetbrainsMono = JetBrains_Mono({
 export const metadata: Metadata = {
   title: "MuteBites",
   description: "Good food. Campus mood. Food delivery for VIT-AP students.",
+  appleWebApp: {
+    capable: true,
+    title: "MuteBites",
+    statusBarStyle: "default",
+  },
 };
 
 export const viewport: Viewport = {
@@ -43,6 +49,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
           {THEME_INIT_SCRIPT}
         </Script>
         {children}
+        <Toaster />
       </body>
     </html>
   );

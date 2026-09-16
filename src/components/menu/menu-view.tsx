@@ -15,6 +15,7 @@ import {
 } from "@/components/ui/alert-dialog";
 import { VegMark } from "@/components/veg-mark";
 import { addToCart, conflictsWithCart, setQuantity, useCart } from "@/lib/cart/store";
+import { AllCategoriesIcon, getCuisineIcon } from "@/lib/cuisine-icons";
 import type { Dish, MenuSection, Restaurant } from "@/lib/data/types";
 import { cn } from "@/lib/utils";
 import { DishRow } from "./dish-row";
@@ -76,23 +77,27 @@ export function MenuView({
         >
           <ul className="flex gap-2 overflow-x-auto px-6 [scrollbar-width:none]">
             {[{ key: ALL, name: "All" }, ...sections.map((s) => ({ key: sectionKey(s), name: sectionName(s) }))].map(
-              (chip) => (
-                <li key={chip.key} className="shrink-0">
-                  <button
-                    type="button"
-                    onClick={() => setFilter(chip.key)}
-                    aria-pressed={filter === chip.key}
-                    className={cn(
-                      "h-10 rounded-full px-4 font-medium whitespace-nowrap outline-none transition-colors focus-visible:ring-3 focus-visible:ring-ring/40",
-                      filter === chip.key
-                        ? "bg-ink text-ink-foreground"
-                        : "bg-secondary text-secondary-foreground hover:bg-border",
-                    )}
-                  >
-                    {chip.name}
-                  </button>
-                </li>
-              ),
+              (chip) => {
+                const Icon = chip.key === ALL ? AllCategoriesIcon : getCuisineIcon(chip.name);
+                return (
+                  <li key={chip.key} className="shrink-0">
+                    <button
+                      type="button"
+                      onClick={() => setFilter(chip.key)}
+                      aria-pressed={filter === chip.key}
+                      className={cn(
+                        "flex h-10 items-center gap-1.5 rounded-full px-4 font-medium whitespace-nowrap outline-none transition-colors focus-visible:ring-3 focus-visible:ring-ring/40",
+                        filter === chip.key
+                          ? "bg-ink text-ink-foreground"
+                          : "bg-secondary text-secondary-foreground hover:bg-border",
+                      )}
+                    >
+                      <Icon className="size-4" aria-hidden="true" />
+                      {chip.name}
+                    </button>
+                  </li>
+                );
+              },
             )}
           </ul>
         </nav>
@@ -132,12 +137,14 @@ export function MenuView({
       )}
 
       {sections.length === 0 && (
-        <p className="py-16 text-center text-muted-foreground">No dishes on the menu yet.</p>
+        <p className="py-16 text-center text-muted-foreground">Nothing on the menu yet — check back soon.</p>
       )}
 
       {sections.length > 0 && visible.length === 0 && (
         <p className="py-16 text-center text-muted-foreground">
-          {q ? `No dishes match “${query.trim()}”.` : "No veg dishes in this category."}
+          {q
+            ? `No dishes match “${query.trim()}” — try a different search.`
+            : "No veg dishes in this category — try another one."}
         </p>
       )}
 
@@ -153,6 +160,7 @@ export function MenuView({
             <DishRow
               key={dish.id}
               dish={dish}
+              restaurantName={restaurant.name}
               quantity={quantityOf(dish.id)}
               orderable={restaurant.is_active && orderingEnabled}
               pausedOnly={restaurant.is_active && !orderingEnabled}

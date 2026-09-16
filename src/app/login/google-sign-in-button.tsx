@@ -22,7 +22,7 @@ export function GoogleSignInButton() {
     });
     // On success the browser is already navigating to Google.
     if (error) {
-      setError("Couldn't reach Google. Check your connection and try again.");
+      setError("Couldn't reach Google — check your connection and try again.");
       setPending(false);
     }
   }
@@ -32,7 +32,7 @@ export function GoogleSignInButton() {
       <Button
         onClick={signIn}
         disabled={pending}
-        className="h-14 w-full gap-3 rounded-2xl bg-ink text-base font-semibold text-ink-foreground hover:bg-ink/90"
+        className="surface-ink shadow-elevated-glow h-14 w-full gap-3 rounded-2xl bg-ink text-base font-semibold text-ink-foreground hover:brightness-95"
       >
         <span className="flex size-8 items-center justify-center rounded-full bg-white">
           {pending ? (

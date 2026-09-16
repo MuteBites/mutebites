@@ -3,6 +3,7 @@
 import { useActionState, useState } from "react";
 import { Loader2 } from "lucide-react";
 import { formatLocalMobile, formatStoredMobile, normalizeIndianMobile } from "@/lib/phone";
+import { toast } from "@/lib/toast/store";
 import { cn } from "@/lib/utils";
 import { updatePhone, type FieldActionState } from "./actions";
 
@@ -29,6 +30,9 @@ export function EditablePhone({
         const normalized = normalizeIndianMobile(String(formData.get("phone") ?? ""));
         if (normalized) setValue(normalized);
         setEditing(false);
+        toast.success("Got it — your number's updated.");
+      } else {
+        toast.error(result.error);
       }
       return result;
     },

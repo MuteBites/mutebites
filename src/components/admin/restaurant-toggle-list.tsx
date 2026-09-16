@@ -5,11 +5,11 @@ import { Loader2 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import type { AdminRestaurant } from "@/lib/data/admin";
 import { setRestaurantActive } from "@/lib/admin/actions";
+import { toast } from "@/lib/toast/store";
 import { cn } from "@/lib/utils";
 
 function RestaurantToggleCard({ restaurant }: { restaurant: AdminRestaurant }) {
   const [active, setActive] = useState(restaurant.is_active);
-  const [error, setError] = useState<string | null>(null);
   const [pending, startTransition] = useTransition();
 
   function toggle() {
@@ -18,9 +18,9 @@ function RestaurantToggleCard({ restaurant }: { restaurant: AdminRestaurant }) {
       const result = await setRestaurantActive(restaurant.id, next);
       if (result.ok) {
         setActive(next);
-        setError(null);
+        toast.success(`${restaurant.name} is now ${next ? "open" : "closed"}.`);
       } else {
-        setError(result.error);
+        toast.error(result.error);
       }
     });
   }
@@ -38,7 +38,6 @@ function RestaurantToggleCard({ restaurant }: { restaurant: AdminRestaurant }) {
             Status: {active ? "Open" : "Closed"}
           </Badge>
         </div>
-        {error && <p className="mt-1.5 text-sm text-destructive">{error}</p>}
       </div>
 
       <button
