@@ -36,14 +36,14 @@ export function RestaurantList({
           value={query}
           onChange={(e) => setQuery(e.target.value)}
           placeholder="Search biryani, juices…"
-          className="h-14 w-full rounded-2xl bg-secondary pr-12 pl-13 text-lg outline-none placeholder:text-muted-foreground focus-visible:ring-2 focus-visible:ring-ring/30"
+          className="h-14 w-full rounded-2xl bg-secondary pr-12 pl-13 text-lg outline-none placeholder:text-muted-foreground focus-visible:ring-2 focus-visible:ring-ring/30 [&::-webkit-search-cancel-button]:hidden"
         />
         {query && (
           <button
             type="button"
             onClick={() => setQuery("")}
             aria-label="Clear search"
-            className="absolute top-1/2 right-4 flex size-7 -translate-y-1/2 items-center justify-center rounded-full text-muted-foreground outline-none hover:bg-border focus-visible:ring-2 focus-visible:ring-ring/40"
+            className="absolute top-1/2 right-4 flex size-7 -translate-y-1/2 items-center justify-center rounded-full bg-border text-foreground outline-none hover:bg-ink hover:text-ink-foreground focus-visible:ring-2 focus-visible:ring-ring/40"
           >
             <X className="size-4" />
           </button>

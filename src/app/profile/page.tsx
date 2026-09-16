@@ -5,9 +5,11 @@ import { getUnlockedMilestones, MilestoneBadges } from "@/components/profile/mil
 import { MilestoneUnlockWatcher } from "@/components/profile/milestone-unlock-watcher";
 import { PickupStats } from "@/components/profile/pickup-stats";
 import { SoundToggle } from "@/components/profile/sound-toggle";
+import { WeeklyRankBadge } from "@/components/profile/weekly-rank-badge";
 import { ThemeIconToggle } from "@/components/theme/theme-icon-toggle";
 import { ThemeSegmented } from "@/components/theme/theme-segmented";
 import { getOrderStats, hasActiveOrder } from "@/lib/data/orders";
+import { getMyWeeklyRank } from "@/lib/data/rank";
 import { getRestaurantCount } from "@/lib/data/restaurants";
 import { formatMonthYear } from "@/lib/date";
 import { requireProfile } from "@/lib/profile";
@@ -25,10 +27,11 @@ function initials(name: string) {
 
 export default async function ProfilePage() {
   const profile = await requireProfile();
-  const [orderInProgress, orderStats, totalRestaurants] = await Promise.all([
+  const [orderInProgress, orderStats, totalRestaurants, weeklyRank] = await Promise.all([
     hasActiveOrder(profile.id),
     getOrderStats(profile.id),
     getRestaurantCount(),
+    getMyWeeklyRank(),
   ]);
 
   // Mirrors the precedence in profile/actions.ts's updatePhone — that
@@ -67,6 +70,7 @@ export default async function ProfilePage() {
         totalRestaurants={totalRestaurants}
       />
       <MilestoneUnlockWatcher unlockedCsv={unlockedMilestones.join(",")} />
+      <WeeklyRankBadge rank={weeklyRank} />
       {(orderStats.deliveredCount > 0 || orderStats.cancelledCount > 0) && (
         <PickupStats pickups={orderStats.deliveredCount} noShows={orderStats.cancelledCount} />
       )}

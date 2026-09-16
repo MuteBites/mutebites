@@ -122,8 +122,10 @@ categories, 24 dishes) and **MuteBites Fresh Fruits** (1 category, 13
 dishes, priced per 500 g/1 kg pack), bringing the total to 5 restaurants),
 [`supabase/migrations/20260915150000_daily_order_numbers.sql`](supabase/migrations/20260915150000_daily_order_numbers.sql)
 (adds `orders.daily_number` — see below),
-and [`supabase/migrations/20260916000000_trending_leaderboard.sql`](supabase/migrations/20260916000000_trending_leaderboard.sql)
-(adds `trending_dishes()` / `trending_restaurants()` — see below).
+[`supabase/migrations/20260916000000_trending_leaderboard.sql`](supabase/migrations/20260916000000_trending_leaderboard.sql)
+(adds `trending_dishes()` / `trending_restaurants()` — see below),
+and [`supabase/migrations/20260917000000_my_weekly_rank.sql`](supabase/migrations/20260917000000_my_weekly_rank.sql)
+(adds `my_weekly_rank()` — see below).
 Migrations are applied by hand in the Supabase SQL editor (no CLI setup).
 
 All orders are handed over at **VIT-AP Main Gate** — there is no room
@@ -279,6 +281,19 @@ also exists in the database (same migration, same pattern) but nothing in
 the app calls it anymore — the "Top restaurants" leaderboard was removed
 from the UI. Left in place rather than dropped without a separate
 approved migration, per the schema-change rule below.
+
+- **`my_weekly_rank(days_back int default 7)`** — security definer,
+  callable by `authenticated` only. Returns only the *calling* student's
+  own row (`where user_id = auth.uid()` inside the function) — order
+  count, rank, and percentile among everyone who ordered in the window —
+  never other students' counts or identities, unlike `trending_dishes()`
+  above which returns aggregate-only data with no user scoping at all.
+  Powers the profile's "Top N%" badge
+  (`src/components/profile/weekly-rank-badge.tsx`), shown only when
+  `percentile <= 50` and at least 5 students participated that week — a
+  UI-only choice (not a security one) so the badge stays flattering and
+  the percentile stays statistically meaningful, not a database
+  restriction.
 
 No other open schema TODOs right now.
 
