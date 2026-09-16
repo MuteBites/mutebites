@@ -1,5 +1,7 @@
 import { AboutMuteBitesDialog } from "@/components/home/about-mutebites-dialog";
+import { TrendingDialog } from "@/components/home/trending-dialog";
 import { BrandLogo } from "@/components/brand-logo";
+import type { TrendingDish } from "@/lib/data/trending";
 import type { TimeOfDay } from "@/lib/date";
 
 const MOOD: Record<TimeOfDay, { greeting: string; emoji: string; heading: string; glow: string }> = {
@@ -32,9 +34,11 @@ const MOOD: Record<TimeOfDay, { greeting: string; emoji: string; heading: string
 export function HomeHeader({
   fullName,
   timeOfDay,
+  trendingDishes,
 }: {
   fullName: string;
   timeOfDay: TimeOfDay;
+  trendingDishes: TrendingDish[];
 }) {
   const mood = MOOD[timeOfDay];
 
@@ -56,6 +60,7 @@ export function HomeHeader({
         </p>
         <h1 className="font-heading text-xl font-bold tracking-tight">{mood.heading}</h1>
       </div>
+      <TrendingDialog dishes={trendingDishes} />
     </header>
   );
 }

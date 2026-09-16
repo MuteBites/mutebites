@@ -2,7 +2,7 @@ import type { ReactNode } from "react";
 import { Compass, Repeat, UtensilsCrossed } from "lucide-react";
 import { cn } from "@/lib/utils";
 
-const REGULAR_THRESHOLD = 10;
+export const REGULAR_THRESHOLD = 10;
 
 export function MilestoneBadges({
   deliveredCount,

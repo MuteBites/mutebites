@@ -13,6 +13,8 @@ export type OrderSummary = {
   restaurantId: string;
   restaurantName: string;
   itemCount: number;
+  /** e.g. "2× Chicken Biryani, Veg Manchurian" — for the orders list, not the detail page. */
+  itemsSummary: string;
   dailyNumber: number;
 };
 
@@ -40,9 +42,15 @@ type OrderSummaryRow = {
   created_at: string;
   restaurant_id: string;
   restaurants: { name: string } | null;
-  order_items: { quantity: number }[];
+  order_items: { dish_name: string; quantity: number }[];
   daily_number: number;
 };
+
+function summarizeItems(items: { dish_name: string; quantity: number }[]): string {
+  const names = items.map((i) => (i.quantity > 1 ? `${i.quantity}× ${i.dish_name}` : i.dish_name));
+  if (names.length <= 2) return names.join(", ");
+  return `${names.slice(0, 2).join(", ")} +${names.length - 2} more`;
+}
 
 /**
  * The signed-in student's own orders, most recent first. RLS already
@@ -54,7 +62,7 @@ export async function getOrderHistory(userId: string): Promise<OrderSummary[]> {
   const { data, error } = await supabase
     .from("orders")
     .select(
-      "id, status, total_amount, created_at, restaurant_id, restaurants(name), order_items(quantity), daily_number",
+      "id, status, total_amount, created_at, restaurant_id, restaurants(name), order_items(dish_name, quantity), daily_number",
     )
     .eq("user_id", userId)
     .order("created_at", { ascending: false })
@@ -70,6 +78,7 @@ export async function getOrderHistory(userId: string): Promise<OrderSummary[]> {
     restaurantId: o.restaurant_id,
     restaurantName: o.restaurants?.name ?? "Restaurant",
     itemCount: o.order_items.reduce((sum, item) => sum + item.quantity, 0),
+    itemsSummary: summarizeItems(o.order_items),
     dailyNumber: o.daily_number,
   }));
 }
@@ -89,15 +98,14 @@ type OrderDetailRow = {
 };
 
 /**
- * All the profile screen's order-derived numbers in one query: total orders
- * ever placed, the milestone badges ("First Bite", "Regular", "Campus
- * Explorer"), and the "N pickups, N no-shows" line. There's no dedicated
+ * All the profile screen's order-derived numbers in one query: "cravings
+ * solved" (delivered orders), the milestone badges ("First Bite", "Regular",
+ * "Campus Explorer"), and the "N pickups, N no-shows" line. There's no dedicated
  * no-show status — `cancelled` is the closest thing the schema tracks (an
  * admin cancels an order that isn't going to be collected), so it's used
  * as that proxy.
  */
 export async function getOrderStats(userId: string): Promise<{
-  totalCount: number;
   deliveredCount: number;
   cancelledCount: number;
   restaurantsVisited: number;
@@ -113,7 +121,6 @@ export async function getOrderStats(userId: string): Promise<{
   const delivered = rows.filter((r) => r.status === "delivered");
   const cancelled = rows.filter((r) => r.status === "cancelled");
   return {
-    totalCount: rows.length,
     deliveredCount: delivered.length,
     cancelledCount: cancelled.length,
     restaurantsVisited: new Set(delivered.map((r) => r.restaurant_id)).size,

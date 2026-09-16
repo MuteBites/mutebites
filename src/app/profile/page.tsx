@@ -1,7 +1,9 @@
 import type { Metadata } from "next";
 import { TabBar } from "@/components/nav/tab-bar";
+import { CravingsSolved } from "@/components/profile/cravings-solved";
 import { MilestoneBadges } from "@/components/profile/milestone-badges";
 import { PickupStats } from "@/components/profile/pickup-stats";
+import { SoundToggle } from "@/components/profile/sound-toggle";
 import { ThemeIconToggle } from "@/components/theme/theme-icon-toggle";
 import { ThemeSegmented } from "@/components/theme/theme-segmented";
 import { getOrderStats, hasActiveOrder } from "@/lib/data/orders";
@@ -45,9 +47,7 @@ export default async function ProfilePage() {
           </div>
           <div className="min-w-0">
             <h1 className="truncate font-heading text-2xl font-bold">{profile.full_name}</h1>
-            <p className="text-muted-foreground">
-              {orderStats.totalCount} {orderStats.totalCount === 1 ? "order" : "orders"} placed
-            </p>
+            <CravingsSolved count={orderStats.deliveredCount} />
           </div>
         </div>
         <ThemeIconToggle />
@@ -89,6 +89,11 @@ export default async function ProfilePage() {
       <div className="mt-6 flex items-center justify-between">
         <p className="font-semibold text-muted-foreground">Appearance</p>
         <ThemeSegmented />
+      </div>
+
+      <div className="mt-4 flex items-center justify-between">
+        <p className="font-semibold text-muted-foreground">Order placed sound</p>
+        <SoundToggle />
       </div>
 
       <p className="mt-6 flex items-center gap-3 rounded-2xl border border-primary/20 bg-brand-soft px-5 py-4">

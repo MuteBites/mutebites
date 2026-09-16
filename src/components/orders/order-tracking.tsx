@@ -13,6 +13,7 @@ import { estimatedDelivery, formatTime } from "@/lib/date";
 import { formatRupees } from "@/lib/format";
 import { NAV_TRANSITION } from "@/lib/nav-transition";
 import { formatOrderNumber, orderTimeline, type TimelineStepState } from "@/lib/orders/status";
+import { playOrderPlacedSound } from "@/lib/sound/play";
 import { createClient } from "@/lib/supabase/client";
 import { cn } from "@/lib/utils";
 
@@ -68,6 +69,7 @@ export function OrderTracking({
     if (!showSuccess) return;
     // Strip ?placed=1 right away so a refresh doesn't replay the moment.
     router.replace(`/orders/${initialOrder.id}`);
+    playOrderPlacedSound();
     // Deferred a tick (not called synchronously in the effect body) so this
     // one-time browser-only check doesn't trigger a same-render setState.
     const toConfetti = setTimeout(() => {

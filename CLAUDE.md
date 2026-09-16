@@ -118,8 +118,10 @@ them, and a plain page refresh still shows the true status either way),
 (data only — two more partner restaurants, **MuteBites Chinese** (5
 categories, 24 dishes) and **MuteBites Fresh Fruits** (1 category, 13
 dishes, priced per 500 g/1 kg pack), bringing the total to 5 restaurants),
-and [`supabase/migrations/20260915150000_daily_order_numbers.sql`](supabase/migrations/20260915150000_daily_order_numbers.sql)
-(adds `orders.daily_number` — see below).
+[`supabase/migrations/20260915150000_daily_order_numbers.sql`](supabase/migrations/20260915150000_daily_order_numbers.sql)
+(adds `orders.daily_number` — see below),
+and [`supabase/migrations/20260916000000_trending_leaderboard.sql`](supabase/migrations/20260916000000_trending_leaderboard.sql)
+(adds `trending_dishes()` / `trending_restaurants()` — see below).
 Migrations are applied by hand in the Supabase SQL editor (no CLI setup).
 
 All orders are handed over at **VIT-AP Main Gate** — there is no room
@@ -257,7 +259,26 @@ RLS is enabled on every table:
   directly via PostgREST with a student's own access token, bypassing the
   app entirely.
 
-No open schema TODOs right now.
+- **`trending_dishes(days_back int default 7, result_limit int default 5)`**
+  — security definer, callable by `authenticated` only, same pattern as
+  `place_order()`. Powers Home's "Trending this week" popup
+  (`src/components/home/trending-dialog.tsx`, opened from a flame button in
+  `home-header.tsx` — same trigger/dialog pattern as the logo's "About
+  MuteBites" popup): top ordered dishes campus-wide over a rolling window
+  (`orders.status <> 'cancelled'`, restaurant `is_active`, dish
+  `is_available`). Needed because students can only read their *own*
+  orders/order_items under RLS — there's no other way to compute a
+  cross-student aggregate. Returns only aggregate counts (dish/restaurant
+  name + a number), never anything per-student, so nothing here leaks who
+  ordered what.
+
+`trending_restaurants(days_back int default 7, result_limit int default 3)`
+also exists in the database (same migration, same pattern) but nothing in
+the app calls it anymore — the "Top restaurants" leaderboard was removed
+from the UI. Left in place rather than dropped without a separate
+approved migration, per the schema-change rule below.
+
+No other open schema TODOs right now.
 
 ## Hard rule: schema changes
 

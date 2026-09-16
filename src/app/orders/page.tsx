@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { ViewTransition } from "react";
+import { ArrowRight, RotateCcw } from "lucide-react";
 import { BrandLogo } from "@/components/brand-logo";
 import { TabBar } from "@/components/nav/tab-bar";
 import { getOrderHistory, type OrderSummary } from "@/lib/data/orders";
@@ -81,32 +82,32 @@ function OrderCard({ order }: { order: OrderSummary }) {
         </span>
       </div>
       <p className="mt-1 text-sm text-muted-foreground">
-        {formatOrderTimestamp(order.createdAt)} · {order.itemCount} {order.itemCount === 1 ? "item" : "items"} ·{" "}
-        {formatOrderNumber(order.dailyNumber)}
+        {formatOrderTimestamp(order.createdAt)} · {formatOrderNumber(order.dailyNumber)}
       </p>
-      <div className="mt-3 flex items-center justify-between">
+      <p className="mt-0.5 truncate text-sm text-foreground/80">{order.itemsSummary}</p>
+      <div className="mt-3 flex items-center justify-between gap-3">
         <p className="font-heading text-xl font-bold">{formatRupees(order.totalAmount)}</p>
         {active ? (
           <Link
             href={`/orders/${order.id}`}
             transitionTypes={["nav-forward"]}
-            className="font-semibold text-primary outline-none hover:underline focus-visible:ring-2 focus-visible:ring-ring/40"
+            className="pressable flex h-10 shrink-0 items-center gap-1.5 rounded-full bg-primary px-4 text-sm font-bold text-primary-foreground outline-none hover:bg-primary/90 focus-visible:ring-2 focus-visible:ring-ring/40"
           >
-            Track order →
+            Track order <ArrowRight className="size-4" aria-hidden="true" />
           </Link>
         ) : order.status === "delivered" ? (
           <Link
             href={`/restaurants/${order.restaurantId}`}
             transitionTypes={["nav-forward"]}
-            className="font-semibold text-muted-foreground outline-none hover:underline focus-visible:ring-2 focus-visible:ring-ring/40"
+            className="pressable flex h-10 shrink-0 items-center gap-1.5 rounded-full border border-primary/30 bg-brand-soft px-4 text-sm font-bold text-primary outline-none hover:bg-brand-soft/70 focus-visible:ring-2 focus-visible:ring-ring/40"
           >
-            Reorder
+            <RotateCcw className="size-4" aria-hidden="true" /> Reorder
           </Link>
         ) : (
           <Link
             href={`/orders/${order.id}`}
             transitionTypes={["nav-forward"]}
-            className="font-semibold text-muted-foreground outline-none hover:underline focus-visible:ring-2 focus-visible:ring-ring/40"
+            className="pressable flex h-10 shrink-0 items-center rounded-full border bg-secondary px-4 text-sm font-bold text-muted-foreground outline-none hover:bg-border focus-visible:ring-2 focus-visible:ring-ring/40"
           >
             View details
           </Link>
