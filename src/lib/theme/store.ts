@@ -7,9 +7,9 @@ import { useSyncExternalStore } from "react";
 export type ThemePreference = "light" | "dark" | "system";
 
 const STORAGE_KEY = "mutebites.theme";
-// Product requirement: first-time visitors always see light, regardless of
-// their OS setting. Only an explicit choice moves them off it.
-const DEFAULT: ThemePreference = "light";
+// First-time visitors follow their OS's light/dark setting. Only an
+// explicit choice (the Appearance toggle) moves them off "system".
+const DEFAULT: ThemePreference = "system";
 
 function isValid(v: unknown): v is ThemePreference {
   return v === "light" || v === "dark" || v === "system";

@@ -7,7 +7,8 @@ export const THEME_INIT_SCRIPT = `
 (function () {
   try {
     var v = localStorage.getItem("mutebites.theme");
-    var dark = v === "dark" || (v === "system" && matchMedia("(prefers-color-scheme: dark)").matches);
+    var pref = (v === "light" || v === "dark" || v === "system") ? v : "system";
+    var dark = pref === "dark" || (pref === "system" && matchMedia("(prefers-color-scheme: dark)").matches);
     if (dark) {
       document.documentElement.classList.add("dark");
       document.documentElement.style.colorScheme = "dark";
