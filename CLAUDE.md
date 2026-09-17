@@ -307,12 +307,16 @@ once confirmed unused — it no longer exists in the database.
   count, rank, and percentile among everyone who ordered in the window —
   never other students' counts or identities, unlike `trending_dishes()`
   above which returns aggregate-only data with no user scoping at all.
-  Powers the profile's "Top N%" badge
+  Powers the profile's weekly-rank badge
   (`src/components/profile/weekly-rank-badge.tsx`), shown only when
   `percentile <= 50` and at least 5 students participated that week — a
   UI-only choice (not a security one) so the badge stays flattering and
   the percentile stays statistically meaningful, not a database
-  restriction.
+  restriction. The raw percentile is never shown directly — students found
+  "Top 40%" confusing, so the UI maps it to one of three tier labels
+  instead (Top orderer `<=10%`, Frequent orderer `<=25%`, Active orderer
+  `<=50%`); `percentile`/`rank`/`totalStudents` stay in the returned row
+  for that mapping and are the only reason the raw numbers still exist.
 
 - **`highly_reordered_dishes(min_repeat_students int default 3,
   result_limit int default 10)`** — security definer, callable by
