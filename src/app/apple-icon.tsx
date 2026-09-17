@@ -8,5 +8,5 @@ export const size = { width: 180, height: 180 };
 export const contentType = "image/png";
 
 export default function AppleIcon() {
-  return appIconResponse({ width: size.width, height: size.height, fontSize: 108 });
+  return appIconResponse({ width: size.width, height: size.height });
 }

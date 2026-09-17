@@ -1,21 +1,27 @@
 import { ImageResponse } from "next/og";
+import { readFile } from "node:fs/promises";
+import { join } from "node:path";
 
-const BRAND_ORANGE = "#f26419";
+// Doesn't depend on request data, so read once at module scope (same
+// pattern Next.js recommends for custom ImageResponse fonts).
+const logoData = await readFile(join(process.cwd(), "public/mutebites-logo.png"));
+// The file is actually JPEG-encoded despite its .png extension.
+const LOGO_SRC = `data:image/jpeg;base64,${logoData.toString("base64")}`;
 
 /**
- * Shared MuteBites app-icon mark ("M" on a brand-orange square) — used by
- * every generated icon route (app/icons/*, app/apple-icon.tsx) so the mark
- * and brand color only ever need updating in one place.
+ * Shared MuteBites app-icon mark (the real logo, full-bleed) — used by
+ * every generated icon route (app/icons/*, app/apple-icon.tsx) so the
+ * source image only ever needs updating in one place. The logo already
+ * has its brand circle inset from the canvas edge, so it's safe to use
+ * full-bleed even for the maskable icon (no extra padding needed).
  */
 export function appIconResponse({
   width,
   height,
-  fontSize,
   borderRadius = 0,
 }: {
   width: number;
   height: number;
-  fontSize: number;
   /** 0 (default) for full-bleed icons — maskable/apple-touch icons where the OS applies its own mask. */
   borderRadius?: number;
 }) {
@@ -26,13 +32,18 @@ export function appIconResponse({
           width: "100%",
           height: "100%",
           display: "flex",
-          alignItems: "center",
-          justifyContent: "center",
-          background: BRAND_ORANGE,
+          overflow: "hidden",
           borderRadius,
         }}
       >
-        <span style={{ fontSize, fontWeight: 800, color: "#fff" }}>M</span>
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img
+          src={LOGO_SRC}
+          alt=""
+          width={width}
+          height={height}
+          style={{ objectFit: "cover" }}
+        />
       </div>
     ),
     { width, height },

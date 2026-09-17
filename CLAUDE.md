@@ -97,6 +97,19 @@ not inline on the main dashboard.
   verified-fresh server responses and full dev-server restarts, so a
   changed cover photo should get a new filename, not overwrite the old one
   in place, to guarantee cache-safety.
+- `public/mutebites-logo.png` — the one source image behind every app
+  icon. `src/lib/app-icon.tsx` reads it once at module scope (it's
+  actually JPEG-encoded despite the `.png` name) and renders it full-bleed
+  for `apple-icon.tsx` and `icons/icon-192|512|512-maskable` — the logo's
+  own circular mark already sits inside the ~80%-diameter safe zone, so
+  the maskable icon needs no extra padding. `favicon.ico`
+  (`src/app/favicon.ico`) is the one exception: Next.js can't generate a
+  `favicon` from code, only `icon`/`apple-icon` support the route-handler
+  convention (see `node_modules/next/dist/docs/.../app-icons.md`), so it's
+  a static multi-resolution `.ico` (16/32/48/64px, RGBA PNG frames —
+  Next's ico decoder rejects non-RGBA) checked into the repo. If the logo
+  changes, regenerate it by hand (e.g. with `sharp`, already a
+  dependency) rather than editing the binary directly.
 
 `loading.tsx` exists for the restaurant list (`(home)`), the menu page
 (`restaurants/[id]`), both order pages (`orders`, `orders/[id]`), and
