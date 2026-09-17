@@ -92,9 +92,9 @@ not inline on the main dashboard.
   in place, to guarantee cache-safety.
 
 `loading.tsx` exists for the restaurant list (`(home)`), the menu page
-(`restaurants/[id]`), and both order pages (`orders`, `orders/[id]`) —
-plain skeletons built from `src/components/ui/skeleton.tsx`, roughly
-mirroring each page's real layout so nothing visibly jumps.
+(`restaurants/[id]`), both order pages (`orders`, `orders/[id]`), and
+`profile` — plain skeletons built from `src/components/ui/skeleton.tsx`,
+roughly mirroring each page's real layout so nothing visibly jumps.
 
 ## Database schema
 
