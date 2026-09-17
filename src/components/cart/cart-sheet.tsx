@@ -246,6 +246,9 @@ function ContactPhone({ value, onChange }: { value: string; onChange: (v: string
         <div className="min-w-0 flex-1">
           <p className={eyebrow}>Your number</p>
           <p className="font-semibold tabular-nums">{formatStoredMobile(value)}</p>
+          <p className="mt-1 text-sm text-muted-foreground">
+            Make sure this is your WhatsApp number before placing the order.
+          </p>
         </div>
         <button
           type="button"
