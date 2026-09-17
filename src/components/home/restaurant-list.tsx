@@ -50,22 +50,12 @@ export function RestaurantList({
         )}
       </label>
 
-      <div className="mt-4 divide-y divide-primary/15 rounded-xl border border-primary/20 bg-brand-soft text-sm text-brand-soft-foreground">
-        <p className="flex items-center gap-2 px-4 py-2">
-          <span aria-hidden="true">📍</span>
-          <span>
-            Handover at <strong className="font-semibold text-foreground">VIT-AP Main Gate</strong>
-          </span>
-        </p>
-        <p className="flex items-center gap-2 px-4 py-2">
-          <span aria-hidden="true">💸</span>
-          <strong className="font-semibold text-foreground">Cash on delivery</strong>
-        </p>
-        <p className="flex items-center gap-2 px-4 py-2">
-          <span aria-hidden="true">📱</span>
-          <strong className="font-semibold text-foreground">Scan and pay through UPI too</strong>
-        </p>
-      </div>
+      <p className="mt-4 flex items-center gap-2 rounded-xl border border-primary/20 bg-brand-soft px-4 py-2 text-sm text-brand-soft-foreground">
+        <span aria-hidden="true">📍</span>
+        <span>
+          Handover at <strong className="font-semibold text-foreground">VIT-AP Main Gate</strong>
+        </span>
+      </p>
 
       <div className="mt-8 flex items-baseline justify-between">
         <h2 className="font-mono text-xs font-semibold tracking-[0.18em] text-muted-foreground uppercase">

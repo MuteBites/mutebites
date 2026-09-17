@@ -185,15 +185,17 @@ function CartContents({
         </dl>
 
         <div className="mt-3 rounded-2xl border border-primary/20 bg-brand-soft px-4 py-3 text-sm text-brand-soft-foreground">
-          <p className="flex gap-3">
-            <span aria-hidden="true" className="font-bold text-primary">
+          <p className="flex items-start gap-3">
+            <span aria-hidden="true" className="w-4 shrink-0 text-center font-bold text-primary">
               ₹
             </span>
-            Cash on delivery at the gate. Please carry exact change.
+            <span>Cash on delivery at the gate. Please carry exact change.</span>
           </p>
-          <p className="mt-1.5 flex gap-3">
-            <span aria-hidden="true">📱</span>
-            Scan and pay through UPI too
+          <p className="mt-1.5 flex items-center gap-3">
+            <span aria-hidden="true" className="w-4 shrink-0 text-center">
+              📱
+            </span>
+            <span>Scan and pay through UPI too</span>
           </p>
         </div>
 
