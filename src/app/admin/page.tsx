@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { History, ShieldBan } from "lucide-react";
+import { History, Users } from "lucide-react";
 import { MarkAllDeliveredButton } from "@/components/admin/mark-all-delivered-button";
 import { OrderingKillSwitch } from "@/components/admin/ordering-kill-switch";
 import { OrderList } from "@/components/admin/order-list";
@@ -60,11 +60,11 @@ export default async function AdminPage() {
               Order history
             </Link>
             <Link
-              href="/admin/banned"
+              href="/admin/users"
               className="flex h-9 items-center gap-1.5 rounded-xl border bg-card px-3 text-sm font-semibold outline-none hover:bg-secondary focus-visible:ring-3 focus-visible:ring-ring/40"
             >
-              <ShieldBan className="size-3.5" />
-              Banned users
+              <Users className="size-3.5" />
+              Users
             </Link>
           </div>
         </div>

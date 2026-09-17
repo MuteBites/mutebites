@@ -50,9 +50,15 @@ orders (IST calendar day) — the stat cards at the top are scoped the same
 way (`getOrderCounts(startOfTodayIST())`). Every order ever placed lives
 at `/admin/history` instead, grouped by day (newest first), reusing the
 same `OrderList` component in a `groupByDate` mode rather than a separate
-one-off component. Banned Users management similarly lives on its own
-page, `/admin/banned`, reached via a button next to "Order history" —
-not inline on the main dashboard.
+one-off component. Every registered student is browsable (read-only, with
+a client-side search box) at `/admin/users`, reached via a "Users" button
+next to "Order history" — this replaced a "Banned users" button that used
+to sit directly on the main dashboard. Banned Users management itself
+still lives on its own page, `/admin/banned` (unchanged), but is now one
+level deeper — reached via a "Banned users" button on `/admin/users`
+instead of straight from the dashboard, and its back-link points to
+`/admin/users` accordingly (`BackToDashboardLink` takes optional
+`href`/`label` overrides for this).
 
 ## Project structure
 

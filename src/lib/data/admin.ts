@@ -150,6 +150,42 @@ export async function getAdminOrderHistory(): Promise<AdminOrder[]> {
   return (data ?? []).map(toAdminOrder);
 }
 
+export type AdminUser = {
+  id: string;
+  fullName: string;
+  phone: string;
+  email: string;
+  registrationNumber: string | null;
+  isBanned: boolean;
+  createdAt: string;
+};
+
+// Capped for the same reason as HISTORY_ORDERS_LIMIT above — keeps the
+// Users page cheap to load as the student base grows.
+const ALL_USERS_LIMIT = 5000;
+
+/** Every registered student, most recently joined first — for the admin Users page. */
+export async function getAllUsers(): Promise<AdminUser[]> {
+  const supabase = await createClient();
+  const { data, error } = await supabase
+    .from("users")
+    .select("id, full_name, phone, email, registration_number, is_banned, created_at")
+    .order("created_at", { ascending: false })
+    .limit(ALL_USERS_LIMIT);
+
+  if (error) throw error;
+
+  return (data ?? []).map((u) => ({
+    id: u.id,
+    fullName: u.full_name,
+    phone: u.phone,
+    email: u.email,
+    registrationNumber: u.registration_number,
+    isBanned: u.is_banned,
+    createdAt: u.created_at,
+  }));
+}
+
 export type BannedUser = {
   id: string;
   fullName: string;
