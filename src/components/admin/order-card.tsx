@@ -42,7 +42,9 @@ export function OrderCard({ order }: { order: AdminOrder }) {
   const badge = statusBadge(status);
   const label = advanceLabel(status);
   const isFinalStep = status === "confirmed"; // → delivered
-  const cancellable = status !== "delivered" && status !== "cancelled";
+  // Cancel only exists before confirmation — once an admin confirms with
+  // the restaurant, the only path forward is marking it delivered.
+  const cancellable = status === "pending";
 
   function advance() {
     startAdvance(async () => {
