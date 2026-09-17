@@ -28,12 +28,19 @@ function initials(name: string) {
 }
 
 export default async function ProfilePage() {
-  const profile = await requireProfile();
+  // Kicked off up front rather than after requireProfile() resolves —
+  // neither needs the profile, so there's no reason to make them wait
+  // behind that lookup instead of running alongside it.
+  const profilePromise = requireProfile();
+  const totalRestaurantsPromise = getRestaurantCount();
+  const weeklyRankPromise = getMyWeeklyRank();
+
+  const profile = await profilePromise;
   const [orderInProgress, orderStats, totalRestaurants, weeklyRank] = await Promise.all([
     hasActiveOrder(profile.id),
     getOrderStats(profile.id),
-    getRestaurantCount(),
-    getMyWeeklyRank(),
+    totalRestaurantsPromise,
+    weeklyRankPromise,
   ]);
 
   // Mirrors the precedence in profile/actions.ts's updatePhone — that

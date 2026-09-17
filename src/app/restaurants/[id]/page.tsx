@@ -23,11 +23,19 @@ export async function generateMetadata({
 }
 
 export default async function RestaurantPage({ params }: PageProps<"/restaurants/[id]">) {
-  const profile = await requireProfile();
+  // Kicked off up front rather than after requireProfile() resolves —
+  // getOrderingEnabled() needs neither the profile nor the restaurant id,
+  // so there's no reason to make it wait behind either lookup instead of
+  // running alongside them.
+  const profilePromise = requireProfile();
+  const orderingEnabledPromise = getOrderingEnabled();
   const { id } = await params;
+  const menuPromise = getRestaurantMenu(id);
+
+  const profile = await profilePromise;
   const [menu, orderingEnabled, dishesTried, favoriteDishId] = await Promise.all([
-    getRestaurantMenu(id),
-    getOrderingEnabled(),
+    menuPromise,
+    orderingEnabledPromise,
     getDishesTried(profile.id, id),
     getFavoriteDishId(profile.id, id),
   ]);

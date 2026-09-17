@@ -15,13 +15,22 @@ import { NAV_TRANSITION, REVEAL_ENTER } from "@/lib/nav-transition";
 import { requireProfile } from "@/lib/profile";
 
 export default async function Home() {
-  const profile = await requireProfile();
+  // Kicked off up front rather than after requireProfile() resolves —
+  // none of these need the profile, so there's no reason to make them
+  // wait behind that lookup instead of running alongside it.
+  const profilePromise = requireProfile();
+  const restaurantsPromise = getRestaurants();
+  const orderingEnabledPromise = getOrderingEnabled();
+  const trendingDishesPromise = getTrendingDishes();
+  const thursdaySpecialPromise = isThursdayIST() ? getThursdaySpecial() : Promise.resolve(null);
+
+  const profile = await profilePromise;
   const [restaurants, orderingEnabled, usual, thursdaySpecial, trendingDishes] = await Promise.all([
-    getRestaurants(),
-    getOrderingEnabled(),
+    restaurantsPromise,
+    orderingEnabledPromise,
     getUsualCart(profile.id),
-    isThursdayIST() ? getThursdaySpecial() : Promise.resolve(null),
-    getTrendingDishes(),
+    thursdaySpecialPromise,
+    trendingDishesPromise,
   ]);
   const timeOfDay = getTimeOfDayIST();
 
