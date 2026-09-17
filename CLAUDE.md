@@ -329,7 +329,49 @@ once confirmed unused — it no longer exists in the database.
   the existing "Your favorite" tag), fetched via
   `getHighlyReorderedDishIds()` in `src/lib/data/reorders.ts`.
 
-No other open schema TODOs right now.
+No other open schema TODOs right now (see "Pending decisions" below for
+one that will eventually need its own migration, once approved).
+
+## Pending decisions
+
+- **Fully automated WhatsApp order confirmation** — proposed
+  2026-09-18, not started. Today, the admin dashboard's WhatsApp button
+  (`src/components/admin/order-card.tsx`) just opens a `wa.me` link with
+  prefilled text that the admin has to manually send, then manually reads
+  the student's reply and clicks "Confirm" themselves. The plan is to
+  fully automate this end to end: the moment `placeOrder()`
+  (`src/lib/orders/actions.ts`) succeeds, the server sends the
+  confirmation message itself via the WhatsApp Business Platform (Cloud
+  API, directly or through a provider like Gupshup/AiSensy/Interakt), and
+  when the student replies "yes" a webhook auto-flips the order to
+  `confirmed` — no admin click at all for that step. The manual WhatsApp
+  button gets removed once this is live and verified working.
+
+  **Blocked on client confirmation before any implementation**, because
+  it has real, ongoing implications beyond this codebase:
+  - A recurring cost: Meta's current utility-message rate is ~₹0.115 +
+    18% GST per message (negligible at today's order volume — roughly
+    ₹100-200/month — but it's real money the client needs to knowingly
+    take on, plus a possible BSP markup/subscription if going through a
+    third-party provider instead of Meta directly).
+  - The number used (currently `8247075652`, see `src/lib/support.ts`)
+    would need to be dedicated to the WhatsApp Business Platform —
+    it can no longer double as a number someone checks in the normal
+    WhatsApp app; replies get read via the provider's web inbox instead.
+  - Meta business verification and message-template pre-approval, which
+    has its own turnaround time (hours to a few days) and requires the
+    client to sign off on the exact wording before it's submitted.
+  - A new webhook endpoint (security-sensitive — needs signature
+    verification) to receive replies and match them back to the right
+    pending order; a student with more than one pending order at once
+    needs a disambiguation rule that doesn't exist yet.
+
+  Next step: the dev asks the client about the three bullets above (cost,
+  giving up normal app access on that number, and template wording) and
+  confirms before any code or schema work starts. Once approved, this
+  will need its own migration (e.g. tracking a sent message's id/status
+  against an order) — subject to the schema-change hard rule below like
+  everything else.
 
 ## Hard rule: schema changes
 
