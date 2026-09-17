@@ -159,7 +159,7 @@ function BanStudentSearch({ onBanned }: { onBanned: (user: StudentSearchResult) 
                 <button
                   type="button"
                   onClick={() => setTarget(user)}
-                  className="shrink-0 text-xs font-semibold text-destructive outline-none hover:underline"
+                  className="shrink-0 rounded-xl bg-destructive px-3.5 py-2 text-sm font-bold text-white uppercase outline-none hover:bg-destructive/90 focus-visible:ring-3 focus-visible:ring-ring/40"
                 >
                   Ban
                 </button>
