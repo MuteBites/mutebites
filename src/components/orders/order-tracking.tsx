@@ -9,13 +9,13 @@ import {
   Check,
   ChefHat,
   CookingPot,
-  Phone,
   Receipt,
   Share2,
   type LucideIcon,
 } from "lucide-react";
 import { BrandLogo } from "@/components/brand-logo";
 import { ConfettiBurst } from "@/components/orders/confetti-burst";
+import { SupportButtons } from "@/components/support-buttons";
 import type { OrderDetail } from "@/lib/data/orders";
 import type { OrderStatus } from "@/lib/data/types";
 import { estimatedDelivery, formatTime } from "@/lib/date";
@@ -287,14 +287,11 @@ export function OrderTracking({
           <div className="mt-4 flex items-center justify-between rounded-2xl border bg-card px-5 py-4">
             <div>
               <p className="text-sm text-muted-foreground">Something wrong?</p>
-              <p className="font-semibold">Call MuteBites</p>
+              <p className="font-semibold">Contact MuteBites</p>
             </div>
-            <a
-              href={`tel:${initialOrder.restaurantPhone}`}
-              className="flex h-11 items-center gap-2 rounded-xl bg-ink px-4 font-semibold text-ink-foreground outline-none hover:bg-ink/90 focus-visible:ring-3 focus-visible:ring-ring/40"
-            >
-              <Phone className="size-4" /> Call
-            </a>
+            <SupportButtons
+              whatsappMessage={`Hi MuteBites, something's wrong with my order ${formatOrderNumber(initialOrder.dailyNumber)}.`}
+            />
           </div>
         </ViewTransition>
       </main>
