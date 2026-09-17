@@ -23,7 +23,14 @@ Food delivery site for VIT-AP University students.
   code, a payment record, verification) without this being revisited
   first — that would be a real payment provider, which this app
   deliberately doesn't have.
-- **Hosting**: Vercel
+- **Hosting**: Vercel. `vercel.json` pins the serverless function region to
+  `bom1` (Mumbai) to match the Supabase project's `ap-south-1` region —
+  found (2026-09-17) that Vercel's default function region is US-East,
+  so every DB/auth call was crossing from Virginia to Mumbai and back on
+  every request, which was the actual cause of slow page loads (far
+  bigger than the redundant `auth.getUser()` call fixed alongside it in
+  `src/lib/profile.ts`). If Supabase's region ever changes, update this
+  to match.
 
 ## Admin access
 
