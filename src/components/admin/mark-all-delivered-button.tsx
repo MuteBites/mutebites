@@ -16,6 +16,7 @@ import {
 } from "@/components/ui/alert-dialog";
 import { markAllConfirmedDelivered } from "@/lib/admin/actions";
 import { toast } from "@/lib/toast/store";
+import { cn } from "@/lib/utils";
 
 /**
  * Bulk "confirmed → delivered", but only for orders whose delivery slot
@@ -35,8 +36,7 @@ export function MarkAllDeliveredButton({
   const [open, setOpen] = useState(false);
   const [pending, startTransition] = useTransition();
 
-  if (eligibleCount === 0) return null;
-
+  const disabled = eligibleCount === 0;
   const stillWaiting = confirmedCount - eligibleCount;
   const label =
     stillWaiting > 0
@@ -62,7 +62,11 @@ export function MarkAllDeliveredButton({
         render={
           <button
             type="button"
-            className="rounded-xl bg-success px-3.5 py-2 text-xs font-bold text-white uppercase outline-none hover:bg-success/90 focus-visible:ring-3 focus-visible:ring-ring/40"
+            disabled={disabled}
+            className={cn(
+              "rounded-xl bg-success px-3.5 py-2 text-xs font-bold text-white uppercase outline-none hover:bg-success/90 focus-visible:ring-3 focus-visible:ring-ring/40",
+              disabled && "opacity-50 hover:bg-success",
+            )}
           />
         }
       >

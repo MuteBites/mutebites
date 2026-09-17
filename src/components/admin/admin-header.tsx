@@ -1,13 +1,17 @@
 "use client";
 
 import { useTransition } from "react";
-import { LogOut } from "lucide-react";
+import { useRouter } from "next/navigation";
+import { LogOut, RotateCw } from "lucide-react";
 import { BrandLogo } from "@/components/brand-logo";
 import { Badge } from "@/components/ui/badge";
 import { signOutAndClearCart } from "@/lib/sign-out";
+import { cn } from "@/lib/utils";
 
 export function AdminHeader() {
+  const router = useRouter();
   const [signingOut, startSignOut] = useTransition();
+  const [reloading, startReload] = useTransition();
 
   return (
     <header className="flex items-center gap-3">
@@ -23,6 +27,15 @@ export function AdminHeader() {
           Live operations · VIT-AP Main Gate
         </p>
       </div>
+      <button
+        type="button"
+        disabled={reloading}
+        onClick={() => startReload(() => router.refresh())}
+        className="flex h-9 shrink-0 items-center gap-1.5 rounded-xl border bg-card px-3 text-sm font-semibold outline-none hover:bg-secondary focus-visible:ring-3 focus-visible:ring-ring/40 disabled:opacity-60"
+      >
+        <RotateCw className={cn("size-3.5", reloading && "animate-spin")} />
+        <span className="hidden sm:inline">Reload</span>
+      </button>
       <button
         type="button"
         disabled={signingOut}

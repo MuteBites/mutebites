@@ -55,7 +55,7 @@ export function nextStatus(status: OrderStatus): OrderStatus | null {
 export function advanceLabel(status: OrderStatus): string | null {
   switch (status) {
     case "pending":
-      return "Confirm with restaurant";
+      return "Confirm";
     case "confirmed":
       return "Mark delivered";
     case "preparing":

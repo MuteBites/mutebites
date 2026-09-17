@@ -111,56 +111,60 @@ export function OrderCard({ order }: { order: AdminOrder }) {
         </a>
       </div>
 
-      {label && (
-        <button
-          type="button"
-          disabled={advancing}
-          onClick={advance}
-          className={cn(
-            "mt-3 flex h-10 w-full items-center justify-center gap-1.5 rounded-xl font-heading text-sm font-bold uppercase outline-none focus-visible:ring-3 focus-visible:ring-ring/40 disabled:opacity-70",
-            isFinalStep
-              ? "bg-success text-white hover:bg-success/90"
-              : "bg-primary text-primary-foreground hover:bg-primary/90",
+      {(label || cancellable) && (
+        <div className="mt-3 flex items-center gap-2">
+          {label && (
+            <button
+              type="button"
+              disabled={advancing}
+              onClick={advance}
+              className={cn(
+                "flex h-11 flex-1 items-center justify-center gap-1.5 rounded-xl font-heading text-sm font-bold uppercase outline-none focus-visible:ring-3 focus-visible:ring-ring/40 disabled:opacity-70",
+                isFinalStep
+                  ? "bg-success text-white hover:bg-success/90"
+                  : "bg-primary text-primary-foreground hover:bg-primary/90",
+              )}
+            >
+              {advancing && <Loader2 className="size-4 animate-spin" />}
+              {label}
+            </button>
           )}
-        >
-          {advancing && <Loader2 className="size-4 animate-spin" />}
-          {label}
-        </button>
-      )}
 
-      {cancellable && (
-        <AlertDialog open={cancelOpen} onOpenChange={(next) => (cancelling ? null : setCancelOpen(next))}>
-          <AlertDialogTrigger
-            render={
-              <button
-                type="button"
-                className="mt-2 w-full text-center text-xs font-medium text-muted-foreground outline-none hover:text-destructive hover:underline"
-              />
-            }
-          >
-            Cancel order
-          </AlertDialogTrigger>
-          <AlertDialogContent>
-            <AlertDialogHeader>
-              <AlertDialogTitle>Cancel this order?</AlertDialogTitle>
-              <AlertDialogDescription>
-                {order.studentName}&apos;s order {formatOrderNumber(order.dailyNumber)} from {order.restaurantName}{" "}
-                will be marked cancelled. This can&apos;t be undone from here.
-              </AlertDialogDescription>
-            </AlertDialogHeader>
-            <AlertDialogFooter>
-              <AlertDialogCancel disabled={cancelling}>Keep order</AlertDialogCancel>
-              <AlertDialogAction
-                disabled={cancelling}
-                onClick={confirmCancel}
-                className="bg-destructive text-white hover:bg-destructive/90"
+          {cancellable && (
+            <AlertDialog open={cancelOpen} onOpenChange={(next) => (cancelling ? null : setCancelOpen(next))}>
+              <AlertDialogTrigger
+                render={
+                  <button
+                    type="button"
+                    className="flex h-11 flex-1 items-center justify-center rounded-xl border border-destructive/30 bg-destructive/5 font-heading text-sm font-bold text-destructive uppercase outline-none hover:bg-destructive/10 focus-visible:ring-3 focus-visible:ring-ring/40"
+                  />
+                }
               >
-                {cancelling && <Loader2 className="size-4 animate-spin" />}
-                Cancel order
-              </AlertDialogAction>
-            </AlertDialogFooter>
-          </AlertDialogContent>
-        </AlertDialog>
+                Cancel
+              </AlertDialogTrigger>
+              <AlertDialogContent>
+                <AlertDialogHeader>
+                  <AlertDialogTitle>Cancel this order?</AlertDialogTitle>
+                  <AlertDialogDescription>
+                    {order.studentName}&apos;s order {formatOrderNumber(order.dailyNumber)} from{" "}
+                    {order.restaurantName} will be marked cancelled. This can&apos;t be undone from here.
+                  </AlertDialogDescription>
+                </AlertDialogHeader>
+                <AlertDialogFooter>
+                  <AlertDialogCancel disabled={cancelling}>Keep order</AlertDialogCancel>
+                  <AlertDialogAction
+                    disabled={cancelling}
+                    onClick={confirmCancel}
+                    className="bg-destructive text-white hover:bg-destructive/90"
+                  >
+                    {cancelling && <Loader2 className="size-4 animate-spin" />}
+                    Cancel order
+                  </AlertDialogAction>
+                </AlertDialogFooter>
+              </AlertDialogContent>
+            </AlertDialog>
+          )}
+        </div>
       )}
     </div>
   );
