@@ -12,7 +12,10 @@ export async function GET(request: NextRequest) {
     const supabase = await createClient();
     const { error } = await supabase.auth.exchangeCodeForSession(code);
     if (!error) {
-      return NextResponse.redirect(`${origin}/`);
+      // ?signedIn=1 triggers the "Glad to have you back!" toast on Home —
+      // but only for returning users; a first-timer gets redirected to
+      // /welcome before ever rendering it, so the toast never fires for them.
+      return NextResponse.redirect(`${origin}/?signedIn=1`);
     }
   }
 
