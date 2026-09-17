@@ -141,8 +141,10 @@ dishes, priced per 500 g/1 kg pack), bringing the total to 5 restaurants),
 (adds `trending_dishes()` / `trending_restaurants()` — see below),
 [`supabase/migrations/20260917000000_my_weekly_rank.sql`](supabase/migrations/20260917000000_my_weekly_rank.sql)
 (adds `my_weekly_rank()` — see below),
-and [`supabase/migrations/20260917010000_drop_unused_trending_restaurants.sql`](supabase/migrations/20260917010000_drop_unused_trending_restaurants.sql)
-(drops `trending_restaurants()` again — never called by the app).
+[`supabase/migrations/20260917010000_drop_unused_trending_restaurants.sql`](supabase/migrations/20260917010000_drop_unused_trending_restaurants.sql)
+(drops `trending_restaurants()` again — never called by the app),
+and [`supabase/migrations/20260917020000_highly_reordered_dishes.sql`](supabase/migrations/20260917020000_highly_reordered_dishes.sql)
+(adds `highly_reordered_dishes()` — see below).
 Migrations are applied by hand in the Supabase SQL editor (no CLI setup).
 
 All orders are handed over at **VIT-AP Main Gate** — there is no room
@@ -311,6 +313,17 @@ once confirmed unused — it no longer exists in the database.
   UI-only choice (not a security one) so the badge stays flattering and
   the percentile stays statistically meaningful, not a database
   restriction.
+
+- **`highly_reordered_dishes(min_repeat_students int default 3,
+  result_limit int default 10)`** — security definer, callable by
+  `authenticated` only, same aggregate-only pattern as `trending_dishes()`.
+  A dish qualifies when at least `min_repeat_students` distinct students
+  have each ordered it 3+ times (`orders.status <> 'cancelled'`) — a
+  genuine repeat-purchase signal, deliberately different from
+  `trending_dishes()`'s raw order-volume popularity. Powers the menu's
+  "Highly re-ordered" tag (`src/components/menu/dish-row.tsx`, alongside
+  the existing "Your favorite" tag), fetched via
+  `getHighlyReorderedDishIds()` in `src/lib/data/reorders.ts`.
 
 No other open schema TODOs right now.
 

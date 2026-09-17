@@ -30,6 +30,7 @@ export function MenuView({
   profilePhone,
   orderingEnabled,
   favoriteDishId,
+  highlyReorderedDishIds,
 }: {
   restaurant: Restaurant;
   sections: MenuSection[];
@@ -38,6 +39,8 @@ export function MenuView({
   orderingEnabled: boolean;
   /** This student's most-ordered dish at this restaurant, or null — tags it "Your favorite". */
   favoriteDishId: string | null;
+  /** Dishes campus-wide with a strong repeat-purchase signal — tags them "Highly re-ordered". */
+  highlyReorderedDishIds: Set<string>;
 }) {
   const cart = useCart();
   const [filter, setFilter] = useState(ALL);
@@ -168,6 +171,7 @@ export function MenuView({
               orderable={restaurant.is_active && orderingEnabled}
               pausedOnly={restaurant.is_active && !orderingEnabled}
               isFavorite={dish.id === favoriteDishId}
+              isHighlyReordered={highlyReorderedDishIds.has(dish.id)}
               onAdd={() => handleAdd(dish)}
               onChangeQuantity={(q) => setQuantity(dish.id, q)}
             />

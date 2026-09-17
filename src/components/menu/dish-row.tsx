@@ -1,6 +1,6 @@
 "use client";
 
-import { Minus, Plus, Star } from "lucide-react";
+import { Minus, Plus, Repeat, Star } from "lucide-react";
 import { BlurImage } from "@/components/blur-image";
 import { VegMark } from "@/components/veg-mark";
 import { MAX_QUANTITY } from "@/lib/cart/store";
@@ -16,6 +16,7 @@ export function DishRow({
   orderable,
   pausedOnly = false,
   isFavorite = false,
+  isHighlyReordered = false,
   onAdd,
   onChangeQuantity,
 }: {
@@ -28,6 +29,8 @@ export function DishRow({
   pausedOnly?: boolean;
   /** This student's most-ordered dish at this restaurant. */
   isFavorite?: boolean;
+  /** Campus-wide: several students have each reordered this dish 3+ times. */
+  isHighlyReordered?: boolean;
   onAdd: () => void;
   onChangeQuantity: (quantity: number) => void;
 }) {
@@ -102,11 +105,16 @@ export function DishRow({
             {dish.name}
           </h3>
         </div>
-        {(isFavorite || dish.note) && (
+        {(isFavorite || isHighlyReordered || dish.note) && (
           <div className="mt-1 ml-7 flex flex-wrap gap-1.5">
             {isFavorite && (
               <span className="inline-flex items-center gap-1 rounded-md bg-primary/10 px-2 py-0.5 text-sm font-medium text-primary">
                 <Star className="size-3.5 fill-primary" aria-hidden="true" /> Your favorite
+              </span>
+            )}
+            {isHighlyReordered && (
+              <span className="inline-flex items-center gap-1 rounded-md bg-success-soft px-2 py-0.5 text-sm font-medium text-success">
+                <Repeat className="size-3.5" aria-hidden="true" /> Highly re-ordered
               </span>
             )}
             {dish.note && (

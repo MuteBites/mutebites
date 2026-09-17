@@ -8,6 +8,7 @@ import { MenuProgress } from "@/components/menu/menu-progress";
 import { MenuView } from "@/components/menu/menu-view";
 import { getRestaurantCoverPhoto } from "@/lib/data/dish-photos";
 import { getDishesTried, getFavoriteDishId } from "@/lib/data/orders";
+import { getHighlyReorderedDishIds } from "@/lib/data/reorders";
 import { getRestaurantMenu } from "@/lib/data/restaurants";
 import { getOrderingEnabled } from "@/lib/data/settings";
 import { NAV_TRANSITION, REVEAL_ENTER } from "@/lib/nav-transition";
@@ -29,15 +30,17 @@ export default async function RestaurantPage({ params }: PageProps<"/restaurants
   // running alongside them.
   const profilePromise = requireProfile();
   const orderingEnabledPromise = getOrderingEnabled();
+  const highlyReorderedPromise = getHighlyReorderedDishIds();
   const { id } = await params;
   const menuPromise = getRestaurantMenu(id);
 
   const profile = await profilePromise;
-  const [menu, orderingEnabled, dishesTried, favoriteDishId] = await Promise.all([
+  const [menu, orderingEnabled, dishesTried, favoriteDishId, highlyReorderedDishIds] = await Promise.all([
     menuPromise,
     orderingEnabledPromise,
     getDishesTried(profile.id, id),
     getFavoriteDishId(profile.id, id),
+    highlyReorderedPromise,
   ]);
   if (!menu) notFound();
 
@@ -132,6 +135,7 @@ export default async function RestaurantPage({ params }: PageProps<"/restaurants
               profilePhone={profile.phone}
               orderingEnabled={orderingEnabled}
               favoriteDishId={favoriteDishId}
+              highlyReorderedDishIds={highlyReorderedDishIds}
             />
           </div>
         </ViewTransition>
