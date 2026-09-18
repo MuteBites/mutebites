@@ -54,7 +54,7 @@ export function CartBar({
                   return (
                     <span
                       key={line.dishId}
-                      className="relative flex size-11 items-center justify-center overflow-hidden rounded-full bg-ink-foreground/15 font-heading text-lg font-bold ring-2 ring-ink"
+                      className="animate-pop-in relative flex size-11 items-center justify-center overflow-hidden rounded-full bg-ink-foreground/15 font-heading text-lg font-bold ring-2 ring-ink"
                     >
                       {photo ? (
                         <Image src={photo} alt="" fill sizes="44px" className="object-cover" />

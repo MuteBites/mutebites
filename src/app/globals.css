@@ -62,6 +62,29 @@
  *             sans, no letter-spacing. Replaces the old mono-uppercase
  *             eyebrows, which made screens read like developer tooling.
  */
+/*
+ * Motion tokens. Three curves and four durations cover every animation in
+ * the app; reach for these instead of hand-typing cubic-beziers.
+ *   ease-out-expo  things arriving (sheets, toasts, content sliding in)
+ *   ease-spring    small confirmations that should feel springy (add to
+ *                  cart, count bumps) — overshoots slightly, keep it short
+ *   ease-in-quad   things leaving
+ * Durations: press 120ms · quick 180ms · base 240ms · slow 400ms. The
+ * ease-* ones also generate Tailwind utilities (ease-out-expo, …).
+ */
+@theme {
+  --ease-out-expo: cubic-bezier(0.16, 1, 0.3, 1);
+  --ease-spring: cubic-bezier(0.34, 1.56, 0.64, 1);
+  --ease-in-quad: cubic-bezier(0.55, 0.085, 0.68, 0.53);
+}
+
+:root {
+  --dur-press: 120ms;
+  --dur-quick: 180ms;
+  --dur-base: 240ms;
+  --dur-slow: 400ms;
+}
+
 @theme {
   /* Fluid: 34px on a 320px phone (so "Campus mood." stays one line), up
      to 42px from ~410px wide. */
@@ -427,22 +450,22 @@
  */
 @media (prefers-reduced-motion: no-preference) {
   .animate-pop-in {
-    animation: pop-in 180ms cubic-bezier(0.34, 1.56, 0.64, 1) both;
+    animation: pop-in var(--dur-quick) var(--ease-spring) both;
   }
   .animate-bounce-count {
-    animation: bounce-count 260ms ease-out;
+    animation: bounce-count var(--dur-base) var(--ease-spring);
   }
   .animate-slide-up-in {
-    animation: slide-up-in 260ms cubic-bezier(0.16, 1, 0.3, 1) both;
+    animation: slide-up-in var(--dur-base) var(--ease-out-expo) both;
   }
   .animate-toast-in {
-    animation: toast-in 220ms cubic-bezier(0.16, 1, 0.3, 1) both;
+    animation: toast-in var(--dur-base) var(--ease-out-expo) both;
   }
   .animate-overlay-in {
-    animation: overlay-in 220ms ease-out both;
+    animation: overlay-in var(--dur-base) var(--ease-out-expo) both;
   }
   .animate-overlay-out {
-    animation: overlay-out 220ms ease-in both;
+    animation: overlay-out var(--dur-base) var(--ease-in-quad) both;
   }
   .animate-confetti-fall {
     animation-name: confetti-fall;
@@ -451,6 +474,23 @@
   }
   .animate-ping-slow {
     animation: ping-slow 1.8s cubic-bezier(0, 0, 0.2, 1) infinite;
+  }
+  /* Deep-linked dish (?dish=): a rose outline that drops in from a little
+     further out, pulses once, then fades — "here it is", not a blinking
+     alarm. The outline lives on its own property so it never fights the
+     in-cart amber ring (box-shadow). */
+  .animate-highlight {
+    outline: 3px solid transparent;
+    animation: highlight-arrive 3s var(--ease-out-expo) both;
+  }
+  /* Milestone progress rings fill from empty the first time they paint. */
+  .ring-fill {
+    transition: stroke-dashoffset 900ms var(--ease-out-expo) 150ms;
+  }
+  @starting-style {
+    .ring-fill {
+      stroke-dashoffset: var(--ring-empty);
+    }
   }
   .animate-shimmer {
     position: relative;
@@ -483,13 +523,43 @@
    * active:not-aria-[haspopup]:translate-y-px — the reveal is the
    * feedback there, not a press.
    */
+  /* Lists the colour/shadow properties too: this rule is unlayered, so a
+     bare transition: transform here used to override every
+     transition-colors / transition-shadow utility on the same element and
+     make hovers snap instead of fade. */
   button:not(:disabled):not([aria-haspopup]),
   .pressable {
-    transition: transform 120ms ease-out;
+    transition-property: transform, color, background-color, border-color, box-shadow, opacity, filter;
+    transition-duration: var(--dur-press);
+    transition-timing-function: ease-out;
   }
   button:not(:disabled):not([aria-haspopup]):active,
   .pressable:active {
     transform: scale(0.97);
+  }
+}
+
+@keyframes highlight-arrive {
+  0% {
+    outline-offset: 10px;
+    outline-color: transparent;
+  }
+  18% {
+    outline-offset: 3px;
+    outline-color: var(--rose);
+  }
+  34% {
+    outline-offset: 6px;
+  }
+  50% {
+    outline-offset: 3px;
+  }
+  78% {
+    outline-color: var(--rose);
+  }
+  100% {
+    outline-offset: 3px;
+    outline-color: transparent;
   }
 }
 
@@ -613,6 +683,23 @@
   ::view-transition-group(*) {
     animation-duration: 0s !important;
     animation-delay: 0s !important;
+  }
+}
+
+/*
+ * Safety net: everything above is opt-in under no-preference, but library
+ * animations (tw-animate's dialog/sheet enter/exit, Tailwind's pulse and
+ * ping) aren't. With reduce set, collapse all of them to an instant end
+ * state. Spinners are exempt — they're a progress signal, not decoration.
+ */
+@media (prefers-reduced-motion: reduce) {
+  *:not(.animate-spin),
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
   }
 }
 

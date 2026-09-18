@@ -65,7 +65,7 @@ export function MenuView({
         if (!el) return;
         el.scrollIntoView({ block: "center", behavior: reduceMotion ? "auto" : "smooth" });
         setHighlighted(focusDishId);
-        clear = setTimeout(() => setHighlighted(null), 2400);
+        clear = setTimeout(() => setHighlighted(null), 3200);
       },
       reduceMotion ? 0 : 350,
     );

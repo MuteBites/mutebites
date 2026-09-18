@@ -96,21 +96,24 @@ export function DishCard({
     <article id={`dish-${dish.id}`} className="min-w-0 scroll-mt-24">
       <div
         className={cn(
-          "relative aspect-square overflow-hidden rounded-3xl bg-secondary transition-shadow",
+          "relative aspect-square rounded-3xl bg-secondary transition-shadow",
           inCart && "ring-3 ring-primary ring-offset-2 ring-offset-background",
-          highlighted && !inCart && "ring-3 ring-rose ring-offset-2 ring-offset-background motion-safe:animate-pulse",
+          highlighted &&
+            "animate-highlight motion-reduce:outline-3 motion-reduce:outline-offset-3 motion-reduce:outline-rose",
         )}
       >
         {photo ? (
-          <BlurImage
-            src={photo}
-            alt=""
-            sizes="(min-width: 448px) 200px, 45vw"
-            className={cn("object-cover", soldOut && "opacity-60 grayscale")}
-          />
+          <div className="absolute inset-0 overflow-hidden rounded-3xl">
+            <BlurImage
+              src={photo}
+              alt=""
+              sizes="(min-width: 448px) 200px, 45vw"
+              className={cn("object-cover", soldOut && "opacity-60 grayscale")}
+            />
+          </div>
         ) : (
           <div
-            className="absolute inset-0 flex items-center justify-center bg-brand-soft font-heading text-6xl font-bold text-brand-soft-foreground/60"
+            className="absolute inset-0 flex items-center justify-center rounded-3xl bg-brand-soft font-heading text-6xl font-bold text-brand-soft-foreground/60"
             aria-hidden="true"
           >
             {dish.name.trim().charAt(0)}

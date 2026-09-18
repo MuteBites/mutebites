@@ -1,3 +1,4 @@
+import type { CSSProperties } from "react";
 import {
   Award,
   ChefHat,
@@ -193,7 +194,8 @@ function BadgeTile({
               strokeLinecap="round"
               strokeDasharray={RING_CIRCUMFERENCE}
               strokeDashoffset={dashOffset}
-              className="stroke-rose transition-[stroke-dashoffset]"
+              className="ring-fill stroke-rose"
+              style={{ "--ring-empty": RING_CIRCUMFERENCE } as CSSProperties}
             />
           </svg>
         )}

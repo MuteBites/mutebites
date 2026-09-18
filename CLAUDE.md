@@ -69,6 +69,17 @@ Food delivery site for VIT-AP University students.
   scrolled to that dish with a brief rose ring (`focusDishId` in
   `MenuView`). Used by the Trending popup and the Thursday banner
   (`getThursdaySpecial()` now returns `dishId`).
+- **Motion**: CSS only (no Framer Motion). Easing tokens `--ease-out-expo`
+  / `--ease-spring` / `--ease-in-quad` (also Tailwind `ease-*` utilities) and
+  durations `--dur-press|quick|base|slow` in `globals.css` — use them rather
+  than hand-typed curves. New animations go inside the existing
+  `prefers-reduced-motion: no-preference` block; a reduce-motion safety net
+  at the bottom collapses anything else (library animations included) to
+  its end state, spinners exempt. The global press rule transitions colour
+  and shadow as well as transform on purpose — it's unlayered, so a bare
+  `transition: transform` there would override every `transition-colors`.
+  Shared-element view transitions (card → menu hero) were considered and
+  skipped: the menu has a `loading.tsx`, so the pair rarely forms.
 - **Backend**: Supabase (Postgres + Auth + Row Level Security)
 - **Auth**: "Continue with Google" via Supabase Auth (Google OAuth
   provider). No email/password, no OTP. On first login (no matching
