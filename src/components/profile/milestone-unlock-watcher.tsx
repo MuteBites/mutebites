@@ -2,15 +2,11 @@
 
 import { useEffect } from "react";
 import { toast } from "@/lib/toast/store";
-import type { MilestoneKey } from "./milestone-badges";
+import { MILESTONES, type MilestoneKey } from "./milestone-badges";
 
 const SEEN_KEY = "mutebites.milestones-seen";
 
-const LABELS: Record<MilestoneKey, string> = {
-  first_bite: "First Bite",
-  regular: "Regular",
-  campus_explorer: "Campus Explorer",
-};
+const LABELS = Object.fromEntries(MILESTONES.map((m) => [m.key, m.label])) as Record<MilestoneKey, string>;
 
 /**
  * Fires a toast the first time a milestone badge is newly unlocked,

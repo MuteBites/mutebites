@@ -15,7 +15,8 @@ const TIERS: { maxPercentile: number; label: string; Icon: LucideIcon }[] = [
 /**
  * Tiered version of the weekly rank — only shown when it's flattering
  * (top half or better) and the participating pool is big enough that the
- * underlying percentile actually means something.
+ * underlying percentile actually means something. Rendered as a pill on
+ * the profile's plum member card, so it uses the ink-surface tokens.
  */
 export function WeeklyRankBadge({ rank }: { rank: WeeklyRank | null }) {
   if (!rank || rank.totalStudents < MIN_PARTICIPANTS) return null;
@@ -24,11 +25,9 @@ export function WeeklyRankBadge({ rank }: { rank: WeeklyRank | null }) {
   if (!tier) return null;
 
   return (
-    <div className="mt-3 flex items-center gap-3 rounded-2xl border border-primary/20 bg-brand-soft px-5 py-4">
-      <span className="flex size-10 shrink-0 items-center justify-center rounded-full bg-primary text-primary-foreground">
-        <tier.Icon className="size-5" aria-hidden="true" />
-      </span>
-      <p className="font-heading text-lg font-bold text-foreground">{tier.label}</p>
-    </div>
+    <p className="inline-flex items-center gap-1.5 rounded-full bg-ink-foreground/10 px-3 py-1 text-sm font-semibold">
+      <tier.Icon className="size-4 text-ink-accent" aria-hidden="true" />
+      {tier.label}
+    </p>
   );
 }

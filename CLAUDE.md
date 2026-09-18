@@ -46,6 +46,13 @@ Food delivery site for VIT-AP University students.
   returns `{ lead, time }` with no-break spaces inside `time`, so "8:20 PM"
   can never wrap apart; slot logic is unchanged and still mirrors
   `slotEndTime()`.
+- **Profile**: one plum `MemberCard` (`src/components/profile/member-card.tsx`)
+  holds identity, the weekly-rank pill and the three stats (cravings
+  solved, day streak, no-shows). Milestones are data-driven in
+  `MILESTONES` (`milestone-badges.tsx`) — six tiers, all computed from
+  counts that only go up (delivered orders, distinct restaurants), so a
+  badge never re-locks; locked tiles show a progress ring and "N to go".
+  The unlock toast reads its labels from the same list.
 - **Backend**: Supabase (Postgres + Auth + Row Level Security)
 - **Auth**: "Continue with Google" via Supabase Auth (Google OAuth
   provider). No email/password, no OTP. On first login (no matching

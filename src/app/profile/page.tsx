@@ -1,10 +1,10 @@
 import type { Metadata } from "next";
 import { ViewTransition } from "react";
+import { Lock, MapPin } from "lucide-react";
 import { TabBar } from "@/components/nav/tab-bar";
-import { CravingsSolved } from "@/components/profile/cravings-solved";
+import { MemberCard } from "@/components/profile/member-card";
 import { getUnlockedMilestones, MilestoneBadges } from "@/components/profile/milestone-badges";
 import { MilestoneUnlockWatcher } from "@/components/profile/milestone-unlock-watcher";
-import { PickupStats } from "@/components/profile/pickup-stats";
 import { SoundToggle } from "@/components/profile/sound-toggle";
 import { SupportCard } from "@/components/profile/support-card";
 import { WeeklyRankBadge } from "@/components/profile/weekly-rank-badge";
@@ -62,15 +62,15 @@ export default async function ProfilePage() {
     <main className="mx-auto w-full max-w-md px-6 pt-6 pb-28">
       <ViewTransition {...NAV_TRANSITION}>
         <ViewTransition {...REVEAL_ENTER}>
-          <div className="flex items-center gap-4">
-            <div className="flex size-16 shrink-0 items-center justify-center rounded-2xl bg-primary font-heading text-xl font-bold text-primary-foreground">
-              {initials(profile.full_name)}
-            </div>
-            <div className="min-w-0">
-              <h1 className="truncate font-heading text-2xl font-bold">{profile.full_name}</h1>
-              <CravingsSolved count={orderStats.deliveredCount} streakDays={orderStats.streakDays} />
-            </div>
-          </div>
+          <MemberCard
+            initials={initials(profile.full_name)}
+            name={profile.full_name}
+            memberSince={formatMonthYear(profile.created_at)}
+            rankBadge={<WeeklyRankBadge rank={weeklyRank} />}
+            cravingsSolved={orderStats.deliveredCount}
+            streakDays={orderStats.streakDays}
+            noShows={orderStats.cancelledCount}
+          />
 
           <MilestoneBadges
             deliveredCount={orderStats.deliveredCount}
@@ -78,16 +78,10 @@ export default async function ProfilePage() {
             totalRestaurants={totalRestaurants}
           />
           <MilestoneUnlockWatcher unlockedCsv={unlockedMilestones.join(",")} />
-          <WeeklyRankBadge rank={weeklyRank} />
-          {(orderStats.deliveredCount > 0 || orderStats.cancelledCount > 0) && (
-            <PickupStats pickups={orderStats.deliveredCount} noShows={orderStats.cancelledCount} />
-          )}
 
-          <p className="mt-6 text-label text-muted-foreground">
-            Tap any field to edit
-          </p>
-
-          <div className="mt-2 divide-y rounded-2xl border bg-card shadow-card">
+          <h2 className="mt-8 font-heading text-title font-bold">Your details</h2>
+          <p className="text-sm text-muted-foreground">Tap a field to edit it.</p>
+          <div className="mt-3 divide-y rounded-2xl border bg-card shadow-card">
             <EditableName initialValue={profile.full_name} />
             <EditablePhone
               initialValue={profile.phone}
@@ -96,46 +90,35 @@ export default async function ProfilePage() {
             />
             <div className="flex items-center justify-between gap-3 px-5 py-4">
               <div className="min-w-0">
-                <p className="text-label text-muted-foreground">
-                  Email · signed in with Google
-                </p>
+                <p className="text-label text-muted-foreground">Email · signed in with Google</p>
                 <p className="mt-0.5 truncate font-semibold">{profile.email}</p>
               </div>
-              <span className="shrink-0 text-label text-muted-foreground">
-                Locked
-              </span>
+              <Lock className="size-4 shrink-0 text-muted-foreground" aria-label="Can't be changed" />
             </div>
-            <div className="flex items-center justify-between px-5 py-4">
-              <p className="text-label text-muted-foreground">
-                Member since
-              </p>
-              <p className="font-semibold">{formatMonthYear(profile.created_at)}</p>
+            <div className="flex items-center gap-3 px-5 py-4">
+              <MapPin className="size-5 shrink-0 text-rose" aria-hidden="true" />
+              <div>
+                <p className="text-label text-muted-foreground">Handover point</p>
+                <p className="font-semibold">VIT-AP Main Gate</p>
+              </div>
             </div>
           </div>
 
-          <div className="mt-6 flex items-center justify-between">
-            <p className="font-semibold text-muted-foreground">Appearance</p>
-            <ThemeIconToggle />
+          <h2 className="mt-8 font-heading text-title font-bold">Settings</h2>
+          <div className="mt-3 divide-y rounded-2xl border bg-card shadow-card">
+            <div className="flex items-center justify-between gap-3 px-5 py-3.5">
+              <p className="font-semibold">Appearance</p>
+              <ThemeIconToggle />
+            </div>
+            <div className="flex items-center justify-between gap-3 px-5 py-3.5">
+              <p className="font-semibold">Order placed sound</p>
+              <SoundToggle />
+            </div>
           </div>
-
-          <div className="mt-4 flex items-center justify-between">
-            <p className="font-semibold text-muted-foreground">Order placed sound</p>
-            <SoundToggle />
-          </div>
-
-          <p className="mt-6 flex items-center gap-3 rounded-2xl border border-primary/20 bg-brand-soft px-5 py-4">
-            <span aria-hidden="true">📍</span>
-            <span>
-              <span className="block text-label text-brand-soft-foreground">
-                Fixed handover point
-              </span>
-              <span className="font-semibold text-foreground">VIT-AP Main Gate</span>
-            </span>
-          </p>
 
           <SupportCard />
 
-          <div className="mt-6 flex justify-center border-t pt-4">
+          <div className="mt-6">
             <SignOutButton />
           </div>
         </ViewTransition>

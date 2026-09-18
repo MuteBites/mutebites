@@ -1,10 +1,94 @@
-import type { ReactNode } from "react";
-import { Compass, Repeat, UtensilsCrossed } from "lucide-react";
+import {
+  Award,
+  ChefHat,
+  Compass,
+  Crown,
+  Lock,
+  Repeat,
+  UtensilsCrossed,
+  type LucideIcon,
+} from "lucide-react";
 import { cn } from "@/lib/utils";
 
-const REGULAR_THRESHOLD = 10;
+export type MilestoneKey =
+  | "first_bite"
+  | "regular"
+  | "campus_explorer"
+  | "campus_foodie"
+  | "gate_legend"
+  | "centurion";
 
-export type MilestoneKey = "first_bite" | "regular" | "campus_explorer";
+type MilestoneStats = {
+  /** Orders that actually reached the student (status = delivered). */
+  deliveredCount: number;
+  /** Distinct restaurants among those delivered orders. */
+  restaurantsVisited: number;
+  /** Restaurants on the platform right now — Campus Explorer needs all of them. */
+  totalRestaurants: number;
+};
+
+/*
+ * Every milestone is derived from counts that only ever go up (delivered
+ * orders, distinct restaurants), so a badge never re-locks. The later
+ * tiers exist so there's always something visibly locked to aim for —
+ * with only three, most regulars had all of them within a couple of weeks.
+ */
+export const MILESTONES: {
+  key: MilestoneKey;
+  label: string;
+  Icon: LucideIcon;
+  /** [current, target] toward unlocking. */
+  progress: (s: MilestoneStats) => [number, number];
+  /** "19 more orders" etc., shown while locked. */
+  remaining: (left: number) => string;
+}[] = [
+  {
+    key: "first_bite",
+    label: "First Bite",
+    Icon: UtensilsCrossed,
+    progress: (s) => [s.deliveredCount, 1],
+    remaining: () => "Place your first order",
+  },
+  {
+    key: "regular",
+    label: "Regular",
+    Icon: Repeat,
+    progress: (s) => [s.deliveredCount, 10],
+    remaining: (n) => `${n} more ${n === 1 ? "order" : "orders"}`,
+  },
+  {
+    key: "campus_explorer",
+    label: "Campus Explorer",
+    Icon: Compass,
+    progress: (s) => [s.restaurantsVisited, s.totalRestaurants],
+    remaining: (n) => `${n} more ${n === 1 ? "restaurant" : "restaurants"}`,
+  },
+  {
+    key: "campus_foodie",
+    label: "Campus Foodie",
+    Icon: ChefHat,
+    progress: (s) => [s.deliveredCount, 25],
+    remaining: (n) => `${n} more ${n === 1 ? "order" : "orders"}`,
+  },
+  {
+    key: "gate_legend",
+    label: "Gate Legend",
+    Icon: Crown,
+    progress: (s) => [s.deliveredCount, 50],
+    remaining: (n) => `${n} more ${n === 1 ? "order" : "orders"}`,
+  },
+  {
+    key: "centurion",
+    label: "Centurion",
+    Icon: Award,
+    progress: (s) => [s.deliveredCount, 100],
+    remaining: (n) => `${n} more ${n === 1 ? "order" : "orders"}`,
+  },
+];
+
+function isUnlocked([current, target]: [number, number]) {
+  return target > 0 && current >= target;
+}
 
 /** Shared unlock logic — used both to render the badges and (in profile/page.tsx) to detect a newly-unlocked one for the toast. */
 export function getUnlockedMilestones(
@@ -12,129 +96,138 @@ export function getUnlockedMilestones(
   restaurantsVisited: number,
   totalRestaurants: number,
 ): MilestoneKey[] {
-  const unlocked: MilestoneKey[] = [];
-  if (deliveredCount >= 1) unlocked.push("first_bite");
-  if (deliveredCount >= REGULAR_THRESHOLD) unlocked.push("regular");
-  if (totalRestaurants > 0 && restaurantsVisited >= totalRestaurants) unlocked.push("campus_explorer");
-  return unlocked;
+  const stats = { deliveredCount, restaurantsVisited, totalRestaurants };
+  return MILESTONES.filter((m) => isUnlocked(m.progress(stats))).map((m) => m.key);
 }
 
-const TOTAL_MILESTONES = 3;
-
-export function MilestoneBadges({
-  deliveredCount,
-  restaurantsVisited,
-  totalRestaurants,
-}: {
-  /** Orders that actually reached the student (status = delivered). */
-  deliveredCount: number;
-  /** Distinct restaurants among those delivered orders. */
-  restaurantsVisited: number;
-  /** Restaurants on the platform right now — Campus Explorer needs all of them. */
-  totalRestaurants: number;
-}) {
-  const unlocked = new Set(getUnlockedMilestones(deliveredCount, restaurantsVisited, totalRestaurants));
+export function MilestoneBadges(stats: MilestoneStats) {
+  const tiles = MILESTONES.map((m) => {
+    const [current, target] = m.progress(stats);
+    return { ...m, current, target, unlocked: isUnlocked([current, target]) };
+  });
+  const unlockedCount = tiles.filter((t) => t.unlocked).length;
+  // The locked milestone you're proportionally closest to.
+  const next = tiles
+    .filter((t) => !t.unlocked && t.target > 0)
+    .sort((a, b) => b.current / b.target - a.current / a.target)[0];
 
   return (
-    <section className="mt-6">
-      <p className="flex items-baseline gap-1.5 text-label text-muted-foreground">
-        Milestones <span className="normal-case">({unlocked.size}/{TOTAL_MILESTONES} achieved)</span>
-      </p>
-      <div className="mt-2 grid grid-cols-3 gap-3">
-        <BadgeTile
-          icon={<UtensilsCrossed className="size-5" aria-hidden="true" />}
-          label="First Bite"
-          hint="Place your first order"
-          unlocked={unlocked.has("first_bite")}
-          progress={Math.min(1, deliveredCount / 1)}
-        />
-        <BadgeTile
-          icon={<Repeat className="size-5" aria-hidden="true" />}
-          label="Regular"
-          hint={`${REGULAR_THRESHOLD} orders delivered`}
-          unlocked={unlocked.has("regular")}
-          progress={Math.min(1, deliveredCount / REGULAR_THRESHOLD)}
-        />
-        <BadgeTile
-          icon={<Compass className="size-5" aria-hidden="true" />}
-          label="Campus Explorer"
-          hint="Order from every restaurant"
-          unlocked={unlocked.has("campus_explorer")}
-          progress={totalRestaurants > 0 ? Math.min(1, restaurantsVisited / totalRestaurants) : 0}
-        />
+    <section className="mt-7" aria-labelledby="milestones">
+      <div className="flex items-baseline justify-between">
+        <h2 id="milestones" className="font-heading text-title font-bold">
+          Milestones
+        </h2>
+        <span className="text-sm font-semibold text-muted-foreground tabular-nums">
+          {unlockedCount} of {tiles.length}
+        </span>
       </div>
+      {next && (
+        <p className="mt-0.5 text-sm text-muted-foreground">
+          Next up: <span className="font-semibold text-foreground">{next.label}</span> —{" "}
+          {next.remaining(next.target - next.current).toLowerCase()}
+        </p>
+      )}
+      <ul className="mt-3 grid grid-cols-3 gap-2.5">
+        {tiles.map((t) => (
+          <li key={t.key}>
+            <BadgeTile
+              Icon={t.Icon}
+              label={t.label}
+              unlocked={t.unlocked}
+              progress={t.target > 0 ? t.current / t.target : 0}
+              caption={t.unlocked ? "Unlocked" : t.remaining(t.target - t.current)}
+            />
+          </li>
+        ))}
+      </ul>
     </section>
   );
 }
 
-// Ring geometry for the size-11 (44px) icon circle.
-const RING_SIZE = 44;
+// Ring geometry for the size-12 (48px) icon circle.
+const RING_SIZE = 48;
 const RING_STROKE = 3;
 const RING_RADIUS = (RING_SIZE - RING_STROKE) / 2;
 const RING_CIRCUMFERENCE = 2 * Math.PI * RING_RADIUS;
 
 function BadgeTile({
-  icon,
+  Icon,
   label,
-  hint,
   unlocked,
   progress,
+  caption,
 }: {
-  icon: ReactNode;
+  Icon: LucideIcon;
   label: string;
-  hint: string;
   unlocked: boolean;
-  /** 0–1 fraction toward this milestone, drawn as a ring around the icon. */
+  /** 0–1 fraction toward this milestone, drawn as a ring around a locked icon. */
   progress: number;
+  caption: string;
 }) {
   const dashOffset = RING_CIRCUMFERENCE * (1 - Math.max(0, Math.min(1, progress)));
 
   return (
     <div
       className={cn(
-        "flex flex-col items-center gap-2 rounded-2xl border px-2 py-3 text-center",
-        unlocked ? "border-primary/20 bg-brand-soft" : "border-dashed bg-secondary/40",
+        "flex h-full flex-col items-center rounded-2xl px-1.5 pt-3.5 pb-3 text-center",
+        unlocked ? "border bg-card shadow-card" : "border border-dashed bg-transparent",
       )}
-      title={unlocked ? label : `${label} · ${hint}`}
     >
-      <span className="relative flex size-11 shrink-0 items-center justify-center">
-        <svg viewBox={`0 0 ${RING_SIZE} ${RING_SIZE}`} className="absolute inset-0 -rotate-90">
-          <circle
-            cx={RING_SIZE / 2}
-            cy={RING_SIZE / 2}
-            r={RING_RADIUS}
-            fill="none"
-            strokeWidth={RING_STROKE}
-            className="stroke-secondary"
-          />
-          <circle
-            cx={RING_SIZE / 2}
-            cy={RING_SIZE / 2}
-            r={RING_RADIUS}
-            fill="none"
-            strokeWidth={RING_STROKE}
-            strokeLinecap="round"
-            strokeDasharray={RING_CIRCUMFERENCE}
-            strokeDashoffset={dashOffset}
-            className="stroke-primary transition-[stroke-dashoffset]"
-          />
-        </svg>
+      <span className="relative flex size-12 shrink-0 items-center justify-center">
+        {!unlocked && (
+          <svg viewBox={`0 0 ${RING_SIZE} ${RING_SIZE}`} className="absolute inset-0 -rotate-90" aria-hidden="true">
+            <circle
+              cx={RING_SIZE / 2}
+              cy={RING_SIZE / 2}
+              r={RING_RADIUS}
+              fill="none"
+              strokeWidth={RING_STROKE}
+              className="stroke-secondary"
+            />
+            <circle
+              cx={RING_SIZE / 2}
+              cy={RING_SIZE / 2}
+              r={RING_RADIUS}
+              fill="none"
+              strokeWidth={RING_STROKE}
+              strokeLinecap="round"
+              strokeDasharray={RING_CIRCUMFERENCE}
+              strokeDashoffset={dashOffset}
+              className="stroke-rose transition-[stroke-dashoffset]"
+            />
+          </svg>
+        )}
         <span
           className={cn(
-            "relative flex size-8 items-center justify-center rounded-full",
-            unlocked ? "bg-primary text-primary-foreground" : "bg-secondary text-muted-foreground",
+            "relative flex items-center justify-center rounded-full",
+            unlocked ? "size-12 bg-primary text-primary-foreground" : "size-9 bg-secondary text-muted-foreground",
           )}
         >
-          {icon}
+          <Icon className={unlocked ? "size-5.5" : "size-4.5"} aria-hidden="true" />
         </span>
+        {!unlocked && (
+          <span className="absolute -right-0.5 -bottom-0.5 flex size-5 items-center justify-center rounded-full border bg-card text-muted-foreground">
+            <Lock className="size-2.5" aria-hidden="true" />
+          </span>
+        )}
       </span>
       <span
         className={cn(
-          "text-xs leading-tight font-semibold",
+          "mt-2 text-xs leading-tight font-semibold",
           unlocked ? "text-foreground" : "text-muted-foreground",
         )}
       >
         {label}
+      </span>
+      <span className={cn("mt-0.5 text-[0.6875rem] leading-tight", unlocked ? "text-success" : "text-muted-foreground")}>
+        {unlocked ? (
+          caption
+        ) : (
+          <>
+            <span className="sr-only">Locked · </span>
+            {caption}
+          </>
+        )}
       </span>
     </div>
   );
