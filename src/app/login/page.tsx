@@ -13,23 +13,28 @@ export const metadata: Metadata = {
  * than an empty cream screen: a tilted mosaic of actual menu photos (one
  * or more from every partner kitchen) that fades into the page. Three
  * columns, the middle one dropped half a tile, so it reads as a spread
- * rather than a grid. Purely decorative — aria-hidden, empty alts.
+ * rather than a grid. The mosaic takes whatever height the text block
+ * doesn't need (flex-1), so a tall phone gets more food, not a gap above
+ * the button. Purely decorative — aria-hidden, empty alts.
  */
 const MOSAIC: string[][] = [
   [
     "/MuteBites/A1 biryani/A1 mixed biryani .jpg",
     "/MuteBites/Bismillah fruit juice/Pomegranate juice.jpg",
     "/MuteBites/MuteBites Chinese/Chicken noodles.jpg",
+    "/MuteBites/Mutebites fresh fruits/Grapes 1kg.jpg",
   ],
   [
     "/MuteBites/Bheemasena/Paneer 65.jpg",
     "/MuteBites/Mutebites fresh fruits/Dragon fruit 500g.jpg",
     "/MuteBites/MuteBites Chinese/Chicken lollipop 4P.jpg",
+    "/MuteBites/MuteBites Chinese/Veg paneer friedrice.jpg",
   ],
   [
     "/MuteBites/MuteBites Chinese/Chicken chilli.jpg",
     "/MuteBites/Bismillah fruit juice/Pineapple juice.jpg",
     "/MuteBites/Bheemasena/Kunda biryani.jpg",
+    "/MuteBites/Bheemasena/Chicken tandoori.jpeg",
   ],
 ];
 
@@ -38,7 +43,7 @@ export default async function LoginPage({ searchParams }: PageProps<"/login">) {
 
   return (
     <main className="relative mx-auto flex w-full max-w-md flex-1 flex-col overflow-hidden">
-      <div aria-hidden="true" className="relative h-[44svh] min-h-64 shrink-0 overflow-hidden">
+      <div aria-hidden="true" className="relative min-h-60 flex-1 overflow-hidden">
         <div className="absolute -inset-x-12 -top-16 grid -rotate-6 grid-cols-3 gap-3">
           {MOSAIC.map((column, c) => (
             <div key={c} className={c === 1 ? "flex flex-col gap-3 pt-16" : "flex flex-col gap-3"}>
@@ -56,7 +61,7 @@ export default async function LoginPage({ searchParams }: PageProps<"/login">) {
         <div className="absolute inset-0 bg-linear-to-b from-transparent via-background/30 to-background" />
       </div>
 
-      <div className="relative -mt-24 flex flex-1 flex-col px-6 pb-[max(2rem,env(safe-area-inset-bottom))]">
+      <div className="relative -mt-24 flex flex-col px-6 pb-[max(2rem,env(safe-area-inset-bottom))]">
         <BrandLogo
           preload
           className="animate-pop-in size-20 rounded-3xl bg-card shadow-raised ring-4 ring-background"
@@ -79,7 +84,7 @@ export default async function LoginPage({ searchParams }: PageProps<"/login">) {
         </p>
 
         <div
-          className="animate-slide-up-in mt-auto w-full pt-8"
+          className="animate-slide-up-in mt-8 w-full"
           style={{ animationDelay: "170ms" }}
         >
           {error && (
