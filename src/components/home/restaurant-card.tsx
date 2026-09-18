@@ -1,17 +1,29 @@
 import Link from "next/link";
-import { Bike } from "lucide-react";
+import { ArrowRight } from "lucide-react";
 import { BlurImage } from "@/components/blur-image";
-import { getCuisineIcon } from "@/lib/cuisine-icons";
-import { getRestaurantCoverPhoto } from "@/lib/data/dish-photos";
+import { getRestaurantCoverPhoto, getRestaurantPreviewPhotos } from "@/lib/data/dish-photos";
+import type { RestaurantMenuStats } from "@/lib/data/restaurants";
 import type { Restaurant } from "@/lib/data/types";
+import { formatRupees } from "@/lib/format";
 import { cn } from "@/lib/utils";
 
+/*
+ * Photo-collage card: the cover takes the left two-thirds and two of the
+ * restaurant's signature dishes stack on the right, inset inside the card
+ * rather than a full-bleed banner with the name over a dark scrim. Name,
+ * description and a single meta line ("Biryani · 24 dishes · from ₹60")
+ * sit underneath on the card surface, with the amber arrow as the one
+ * action cue. Free delivery is campus-wide, so it's said once in the
+ * handover strip above the list, not on every card.
+ */
 export function RestaurantCard({
   restaurant,
   orderingEnabled,
+  stats,
 }: {
   restaurant: Restaurant;
   orderingEnabled: boolean;
+  stats?: RestaurantMenuStats;
 }) {
   const active = restaurant.is_active;
   // Fully orderable only when both this restaurant and the campus-wide
@@ -20,81 +32,81 @@ export function RestaurantCard({
   // didn't do anything, campus ordering is just off right now.
   const open = active && orderingEnabled;
   const paused = active && !orderingEnabled;
-  const cover = getRestaurantCoverPhoto(restaurant.name);
+
+  const previews = getRestaurantPreviewPhotos(restaurant.name);
+  const cover = getRestaurantCoverPhoto(restaurant.name) ?? previews.shift()?.src;
+  const sides = previews.length === 2 ? previews : [];
+
+  const meta = [
+    restaurant.cuisine_tags.join(", "),
+    stats && `${stats.dishCount} ${stats.dishCount === 1 ? "dish" : "dishes"}`,
+    stats && `from ${formatRupees(stats.minPrice)}`,
+  ].filter(Boolean);
 
   return (
     <Link
       href={`/restaurants/${restaurant.id}`}
       transitionTypes={["nav-forward"]}
-      className="pressable group block overflow-hidden rounded-3xl border bg-card shadow-card outline-none transition-shadow hover:shadow-raised focus-visible:ring-3 focus-visible:ring-ring/40"
+      className="pressable group block rounded-[1.75rem] border bg-card p-2 shadow-card outline-none transition-shadow hover:shadow-raised focus-visible:ring-3 focus-visible:ring-ring/40"
     >
-      <div className={cn("relative aspect-[5/2] bg-stripes", !active && "opacity-60 grayscale")}>
-        {cover && (
-          <BlurImage
-            src={cover}
-            alt=""
-            sizes="(min-width: 448px) 448px, 100vw"
-            className="object-cover"
-          />
+      <div
+        className={cn(
+          "grid h-44 grid-cols-3 grid-rows-2 gap-1.5 overflow-hidden rounded-[1.25rem]",
+          !active && "opacity-60 grayscale",
         )}
-        {cover && (
-          <div
-            className="absolute inset-x-0 bottom-0 h-2/3"
-            style={{ background: "linear-gradient(to top, rgb(0 0 0 / 70%), transparent)" }}
-            aria-hidden="true"
-          />
-        )}
-        {cover && (
-          <h2 className="absolute bottom-4 left-5 font-heading text-title font-bold text-white">
-            {restaurant.name}
-          </h2>
-        )}
-        <span
-          className={cn(
-            "absolute top-4 right-4 inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-sm font-semibold",
-            open ? "bg-success-soft text-success" : "bg-secondary text-muted-foreground",
+      >
+        <div className={cn("relative row-span-2 bg-stripes", sides.length ? "col-span-2" : "col-span-3")}>
+          {cover && (
+            <BlurImage
+              src={cover}
+              alt=""
+              sizes="(min-width: 448px) 290px, 66vw"
+              className="object-cover"
+            />
           )}
-        >
           <span
-            className={cn("size-1.5 rounded-full", open ? "bg-success" : "bg-muted-foreground")}
-            aria-hidden="true"
-          />
-          {!active ? "Closed" : paused ? "Paused" : "Open"}
-        </span>
+            className={cn(
+              "absolute top-2.5 left-2.5 inline-flex items-center gap-1.5 rounded-full bg-card/90 px-2.5 py-1 text-xs font-semibold backdrop-blur-sm",
+              open ? "text-success" : "text-muted-foreground",
+            )}
+          >
+            <span
+              className={cn("size-1.5 rounded-full", open ? "bg-success" : "bg-muted-foreground")}
+              aria-hidden="true"
+            />
+            {!active ? "Closed" : paused ? "Paused" : "Open"}
+          </span>
+        </div>
+        {sides.map(({ dish, src }) => (
+          <div key={src} className="relative bg-secondary">
+            <BlurImage src={src} alt={dish} sizes="(min-width: 448px) 145px, 33vw" className="object-cover" />
+          </div>
+        ))}
       </div>
 
-      <div className={cn("px-5 pt-4 pb-5", !open && "text-muted-foreground")}>
-        {!cover && (
-          <h2 className="font-heading text-title font-bold">{restaurant.name}</h2>
-        )}
+      <div className="px-3 pt-3.5 pb-2.5">
+        <div className="flex items-start justify-between gap-3">
+          <h2 className="min-w-0 font-heading text-title font-bold">{restaurant.name}</h2>
+          <span
+            className={cn(
+              "mt-0.5 flex size-9 shrink-0 items-center justify-center rounded-full transition-transform group-hover:translate-x-0.5",
+              open ? "bg-primary text-primary-foreground" : "bg-secondary text-muted-foreground",
+            )}
+            aria-hidden="true"
+          >
+            <ArrowRight className="size-4.5" />
+          </span>
+        </div>
         {restaurant.description && (
-          <p className="mt-1 text-muted-foreground">{restaurant.description}</p>
+          <p className="mt-1 text-sm text-muted-foreground">{restaurant.description}</p>
         )}
-
-        {open ? (
-          <ul className="mt-3 flex flex-wrap gap-2" aria-label="Cuisines">
-            <li className="flex items-center gap-1.5 rounded-full bg-success-soft px-3 py-1 text-sm font-medium text-success">
-              <Bike className="size-3.5" aria-hidden="true" />
-              Free delivery
-            </li>
-            {restaurant.cuisine_tags.map((tag) => {
-              const Icon = getCuisineIcon(tag);
-              return (
-                <li
-                  key={tag}
-                  className="flex items-center gap-1.5 rounded-full bg-secondary px-3 py-1 text-sm text-secondary-foreground"
-                >
-                  <Icon className="size-3.5" aria-hidden="true" />
-                  {tag}
-                </li>
-              );
-            })}
-          </ul>
-        ) : (
-          <p className="mt-3 rounded-xl bg-secondary px-4 py-2.5 text-sm">
-            {!active ? "Closed right now · menu still browsable" : "Browse menu · ordering paused"}
-          </p>
-        )}
+        <p className="mt-2.5 text-sm font-semibold">
+          {open
+            ? meta.join(" · ")
+            : !active
+              ? "Closed right now · menu still browsable"
+              : "Ordering paused · browse the menu"}
+        </p>
       </div>
     </Link>
   );

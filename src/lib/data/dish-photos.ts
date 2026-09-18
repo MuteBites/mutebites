@@ -157,3 +157,38 @@ export function getRestaurantCoverPhoto(restaurantName: string): string | undefi
 export function getDishPhoto(restaurantName: string, dishName: string): string | undefined {
   return DISH_PHOTOS[restaurantName]?.[dishName];
 }
+
+/**
+ * Two dishes per restaurant shown beside the cover on Home's restaurant
+ * card collage. Hand-picked for photo quality (no watermarks, reads well
+ * small) and to say what the kitchen is about; every name must exist in
+ * DISH_PHOTOS above. A restaurant missing here falls back to its first
+ * two distinct dish photos.
+ */
+const SIGNATURE_DISHES: Record<string, [string, string]> = {
+  "Bheemasena Restaurant": ["Paneer 65", "Chilli Chicken"],
+  "A1 Biryani Point": ["A1 Biryani Dum Biryani", "A1 Biryani Fry Pieces Biryani"],
+  "Bismillah Fruit Juice": ["Pomegranate Juice", "Pineapple Juice"],
+  "MuteBites Chinese": ["Chicken Noodles", "4P Chicken Lollipop"],
+  "MuteBites Fresh Fruits": ["Dragon Fruit (500 g)", "Black Grapes (1 kg)"],
+};
+
+/** Up to two dish photos (distinct files) to preview a restaurant with. */
+export function getRestaurantPreviewPhotos(restaurantName: string): { dish: string; src: string }[] {
+  const photos = DISH_PHOTOS[restaurantName];
+  if (!photos) return [];
+  const picked = SIGNATURE_DISHES[restaurantName]
+    ?.filter((dish) => photos[dish])
+    .map((dish) => ({ dish, src: photos[dish] }));
+  if (picked?.length === 2) return picked;
+
+  const seen = new Set<string>();
+  const fallback: { dish: string; src: string }[] = [];
+  for (const [dish, src] of Object.entries(photos)) {
+    if (seen.has(src)) continue;
+    seen.add(src);
+    fallback.push({ dish, src });
+    if (fallback.length === 2) break;
+  }
+  return fallback;
+}

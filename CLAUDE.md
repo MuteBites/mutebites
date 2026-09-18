@@ -137,6 +137,11 @@ instead of straight from the dashboard, and its back-link points to
   The login screen's photo mosaic (`src/app/login/page.tsx`, `MOSAIC`)
   also references a dozen of these files by path directly — renaming or
   removing a photo means updating that list too, or its tile goes blank.
+  Home's restaurant cards are a photo collage (cover + two signature
+  dishes); the two dishes per restaurant are hand-picked in
+  `SIGNATURE_DISHES` (same file) by dish name, falling back to the first
+  two distinct photos. The card's "24 dishes · from ₹60" line comes from
+  `getRestaurantMenuStats()` (`src/lib/data/restaurants.ts`).
 - `public/mutebites-logo.png` — the one source image behind every app
   icon. `src/lib/app-icon.tsx` reads it once at module scope (it's
   actually JPEG-encoded despite the `.png` name) and renders it full-bleed

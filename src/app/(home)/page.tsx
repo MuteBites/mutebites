@@ -7,7 +7,7 @@ import { SignInWelcomeToast } from "@/components/home/sign-in-welcome-toast";
 import { ThursdayNudge } from "@/components/home/thursday-nudge";
 import { YourUsualChip } from "@/components/home/your-usual-chip";
 import { TabBar } from "@/components/nav/tab-bar";
-import { getRestaurants, getThursdaySpecial } from "@/lib/data/restaurants";
+import { getRestaurantMenuStats, getRestaurants, getThursdaySpecial } from "@/lib/data/restaurants";
 import { getOrderingEnabled } from "@/lib/data/settings";
 import { getTrendingDishes } from "@/lib/data/trending";
 import { getUsualCart } from "@/lib/data/usual";
@@ -22,13 +22,15 @@ export default async function Home({ searchParams }: PageProps<"/">) {
   // wait behind that lookup instead of running alongside it.
   const profilePromise = requireProfile();
   const restaurantsPromise = getRestaurants();
+  const menuStatsPromise = getRestaurantMenuStats();
   const orderingEnabledPromise = getOrderingEnabled();
   const trendingDishesPromise = getTrendingDishes();
   const thursdaySpecialPromise = isThursdayIST() ? getThursdaySpecial() : Promise.resolve(null);
 
   const profile = await profilePromise;
-  const [restaurants, orderingEnabled, usual, thursdaySpecial, trendingDishes] = await Promise.all([
+  const [restaurants, menuStats, orderingEnabled, usual, thursdaySpecial, trendingDishes] = await Promise.all([
     restaurantsPromise,
+    menuStatsPromise,
     orderingEnabledPromise,
     getUsualCart(profile.id),
     thursdaySpecialPromise,
@@ -45,7 +47,7 @@ export default async function Home({ searchParams }: PageProps<"/">) {
           {usual && orderingEnabled && <YourUsualChip usual={usual} />}
           {thursdaySpecial && <ThursdayNudge special={thursdaySpecial} />}
           {!orderingEnabled && <OrderingPausedBanner />}
-          <RestaurantList restaurants={restaurants} orderingEnabled={orderingEnabled} />
+          <RestaurantList restaurants={restaurants} orderingEnabled={orderingEnabled} menuStats={menuStats} />
         </ViewTransition>
       </ViewTransition>
       <CartBar profilePhone={profile.phone} orderingEnabled={orderingEnabled} hasTabBar />

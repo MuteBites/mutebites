@@ -1,16 +1,19 @@
 "use client";
 
 import { useState } from "react";
-import { Search, X } from "lucide-react";
+import { MapPin, Search, X } from "lucide-react";
+import type { RestaurantMenuStats } from "@/lib/data/restaurants";
 import type { Restaurant } from "@/lib/data/types";
 import { RestaurantCard } from "./restaurant-card";
 
 export function RestaurantList({
   restaurants,
   orderingEnabled,
+  menuStats,
 }: {
   restaurants: Restaurant[];
   orderingEnabled: boolean;
+  menuStats: Record<string, RestaurantMenuStats>;
 }) {
   const [query, setQuery] = useState("");
 
@@ -50,10 +53,11 @@ export function RestaurantList({
         )}
       </label>
 
-      <p className="mt-4 flex items-center gap-2 rounded-xl border border-primary/20 bg-brand-soft px-4 py-2 text-sm text-brand-soft-foreground">
-        <span aria-hidden="true">📍</span>
+      <p className="mt-4 flex items-center gap-2 rounded-xl border border-brand-soft-foreground/15 bg-brand-soft px-4 py-2 text-sm text-brand-soft-foreground">
+        <MapPin className="size-4 shrink-0" aria-hidden="true" />
         <span>
-          Handover at <strong className="font-semibold text-foreground">VIT-AP Main Gate</strong>
+          Free delivery · handover at{" "}
+          <strong className="font-semibold text-foreground">VIT-AP Main Gate</strong>
         </span>
       </p>
 
@@ -74,7 +78,7 @@ export function RestaurantList({
               className="animate-slide-up-in"
               style={{ animationDelay: `${Math.min(i, 6) * 70}ms` }}
             >
-              <RestaurantCard restaurant={r} orderingEnabled={orderingEnabled} />
+              <RestaurantCard restaurant={r} orderingEnabled={orderingEnabled} stats={menuStats[r.id]} />
             </li>
           ))}
         </ul>

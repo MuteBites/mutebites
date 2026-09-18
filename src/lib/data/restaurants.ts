@@ -17,6 +17,30 @@ export async function getRestaurants(): Promise<Restaurant[]> {
   return data;
 }
 
+export type RestaurantMenuStats = { dishCount: number; minPrice: number };
+
+/**
+ * Per-restaurant count of available dishes and the cheapest one's price —
+ * the "24 dishes · from ₹60" line on Home's restaurant cards. One small
+ * query over dishes (public-read) rather than a column anywhere.
+ */
+export async function getRestaurantMenuStats(): Promise<Record<string, RestaurantMenuStats>> {
+  const supabase = await createClient();
+  const { data, error } = await supabase
+    .from("dishes")
+    .select("restaurant_id, price")
+    .eq("is_available", true);
+
+  if (error) throw error;
+  const stats: Record<string, RestaurantMenuStats> = {};
+  for (const { restaurant_id, price } of data) {
+    const s = (stats[restaurant_id] ??= { dishCount: 0, minPrice: Number(price) });
+    s.dishCount += 1;
+    s.minPrice = Math.min(s.minPrice, Number(price));
+  }
+  return stats;
+}
+
 /**
  * Number of currently-active restaurants — the "all 3" in the profile's
  * Campus Explorer badge. Deliberately excludes deactivated restaurants:
