@@ -78,8 +78,12 @@ export function TrendingDialog({ dishes }: { dishes: TrendingDish[] }) {
                   </span>
                   <span className="min-w-0 flex-1 text-left">
                     <span className="block truncate font-semibold">{d.dishName}</span>
-                    <span className="block truncate text-xs text-muted-foreground">
-                      {d.restaurantName} · {ordersLabel(d.orderCount)}
+                    <span className="block truncate text-xs text-muted-foreground">{d.restaurantName}</span>
+                  </span>
+                  <span className="shrink-0 text-right">
+                    <span className="block font-heading font-bold tabular-nums">{d.orderCount}</span>
+                    <span className="block text-xs text-muted-foreground">
+                      {d.orderCount === 1 ? "order" : "orders"}
                     </span>
                   </span>
                   <ChevronRight className="size-4 shrink-0 text-muted-foreground" aria-hidden="true" />

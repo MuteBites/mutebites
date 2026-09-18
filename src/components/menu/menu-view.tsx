@@ -55,17 +55,22 @@ export function MenuView({
 
   useEffect(() => {
     if (!focusDishId) return;
-    const el = document.getElementById(`dish-${focusDishId}`);
-    if (!el) return;
     const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-    // Deferred a frame so the page's own enter transition has laid out first.
-    const raf = requestAnimationFrame(() => {
-      el.scrollIntoView({ block: "center", behavior: reduceMotion ? "auto" : "smooth" });
-      setHighlighted(focusDishId);
-    });
-    const clear = setTimeout(() => setHighlighted(null), 2400);
+    let clear: ReturnType<typeof setTimeout> | undefined;
+    // Waits out the page's slide-in view transition (~400ms, see
+    // globals.css) so the scroll doesn't fight it; instant with reduced motion.
+    const start = setTimeout(
+      () => {
+        const el = document.getElementById(`dish-${focusDishId}`);
+        if (!el) return;
+        el.scrollIntoView({ block: "center", behavior: reduceMotion ? "auto" : "smooth" });
+        setHighlighted(focusDishId);
+        clear = setTimeout(() => setHighlighted(null), 2400);
+      },
+      reduceMotion ? 0 : 350,
+    );
     return () => {
-      cancelAnimationFrame(raf);
+      clearTimeout(start);
       clearTimeout(clear);
     };
   }, [focusDishId]);
