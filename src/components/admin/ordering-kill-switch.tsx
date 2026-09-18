@@ -44,7 +44,7 @@ export function OrderingKillSwitch({ initialEnabled }: { initialEnabled: boolean
           <span
             className={cn(
               "mt-0.5 flex size-9 shrink-0 items-center justify-center rounded-full",
-              enabled ? "bg-success/20 text-success" : "bg-destructive/20 text-destructive",
+              enabled ? "bg-ink-success/20 text-ink-success" : "bg-ink-danger/20 text-ink-danger",
             )}
             aria-hidden="true"
           >
@@ -56,7 +56,7 @@ export function OrderingKillSwitch({ initialEnabled }: { initialEnabled: boolean
               <Badge
                 className={cn(
                   "uppercase",
-                  enabled ? "bg-success/20 text-success" : "bg-destructive/20 text-destructive",
+                  enabled ? "bg-ink-success/20 text-ink-success" : "bg-ink-danger/20 text-ink-danger",
                 )}
               >
                 {enabled ? "System active" : "System paused"}

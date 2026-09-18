@@ -157,13 +157,13 @@ export function OrderTracking({
         >
           <span
             aria-hidden="true"
-            className="animate-ping-slow pointer-events-none absolute size-56 rounded-full bg-primary/25 blur-3xl"
+            className="animate-ping-slow pointer-events-none absolute size-56 rounded-full bg-ink-accent/25 blur-3xl"
           />
           {showConfetti && <ConfettiBurst />}
           <BrandLogo className="animate-pop-in size-20 bg-ink-foreground/10" />
           <p className="animate-pop-in mt-5 font-heading text-2xl font-bold">Order placed!</p>
           <p className="mt-1 text-ink-foreground/70">Show this token at the gate</p>
-          <p className="animate-pop-in mt-4 font-heading text-7xl font-bold tracking-tight text-primary">
+          <p className="animate-pop-in mt-4 font-heading text-7xl font-bold tracking-tight text-ink-accent">
             {formatOrderNumber(initialOrder.dailyNumber)}
           </p>
           <p className="mt-6 text-sm text-ink-foreground/50">Tap to continue</p>
@@ -186,15 +186,15 @@ export function OrderTracking({
             <div className="flex items-center justify-between gap-2">
               <p className="text-sm opacity-70">Order placed · {formatTime(initialOrder.createdAt)}</p>
               {live && (
-                <span className="flex shrink-0 items-center gap-1.5 text-xs font-semibold text-success">
-                  <span className="size-4 animate-pulse rounded-full bg-success" aria-hidden="true" />
+                <span className="flex shrink-0 items-center gap-1.5 text-xs font-semibold text-ink-success">
+                  <span className="size-4 animate-pulse rounded-full bg-ink-success" aria-hidden="true" />
                   Live
                 </span>
               )}
             </div>
             {!cancelled && (
               <div className="mt-4 flex items-start justify-between gap-2">
-                <p className="font-mono text-xs font-semibold tracking-[0.1em] text-primary uppercase">
+                <p className="font-mono text-xs font-semibold tracking-[0.1em] text-ink-accent uppercase">
                   Show this token
                 </p>
                 <p className="max-w-[9rem] shrink-0 text-right text-sm font-bold text-ink-foreground/90">

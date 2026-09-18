@@ -59,6 +59,9 @@
   --font-heading: var(--font-outfit);
   --color-ink: var(--ink);
   --color-ink-foreground: var(--ink-foreground);
+  --color-ink-accent: var(--ink-accent);
+  --color-ink-success: var(--ink-success);
+  --color-ink-danger: var(--ink-danger);
   --color-brand-soft: var(--brand-soft);
   --color-brand-soft-foreground: var(--brand-soft-foreground);
   --color-rose: var(--rose);
@@ -153,6 +156,13 @@
   --ring: #a25e1d;
   --ink: #552c4a;
   --ink-foreground: #fff8f2;
+  /* Accents that sit ON the ink surface (token card, cart bar, banners).
+     The normal amber/forest/brick are ~2:1 on plum, so ink surfaces get
+     their own tints — checked >=4.8:1 against the lighter top of the
+     surface-ink gradient, not just flat --ink. */
+  --ink-accent: #f0c38f;
+  --ink-success: #a6d9bd;
+  --ink-danger: #f6ada1;
   --brand-soft: #f8dedc;
   --brand-soft-foreground: #7a3743;
   --rose: #914955;
@@ -217,6 +227,9 @@
   --ring: #d9974f;
   --ink: #ebd9e2;
   --ink-foreground: #3f2037;
+  --ink-accent: #7a4511;
+  --ink-success: #22503a;
+  --ink-danger: #8e2416;
   --brand-soft: #3b2029;
   --brand-soft-foreground: #f2c3c8;
   --rose: #d7a8b8;

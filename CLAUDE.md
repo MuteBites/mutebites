@@ -21,7 +21,9 @@ Food delivery site for VIT-AP University students.
   (`text-success-foreground`, `text-destructive-foreground`, …), never
   `text-white` — dark-mode fills are light, so white fails there. Don't
   put `text-primary` on `bg-secondary`/`bg-brand-soft` (below 4.5:1). Use
-  `text-brand-soft-foreground` on blush instead.
+  `text-brand-soft-foreground` on blush instead. On the plum `bg-ink` surface
+  (token card, cart bar, banners) use `text-ink-accent` / `-ink-success` /
+  `-ink-danger` — regular amber/green/red are ~2:1 on plum.
 - **Backend**: Supabase (Postgres + Auth + Row Level Security)
 - **Auth**: "Continue with Google" via Supabase Auth (Google OAuth
   provider). No email/password, no OTP. On first login (no matching
