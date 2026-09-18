@@ -10,6 +10,7 @@ import { getRestaurantCoverPhoto } from "@/lib/data/dish-photos";
 import { getDishesTried, getFavoriteDishId } from "@/lib/data/orders";
 import { getHighlyReorderedDishIds } from "@/lib/data/reorders";
 import { getRestaurantMenu } from "@/lib/data/restaurants";
+import { isUuid } from "@/lib/ids";
 import { getOrderingEnabled } from "@/lib/data/settings";
 import { NAV_TRANSITION, REVEAL_ENTER } from "@/lib/nav-transition";
 import { requireProfile } from "@/lib/profile";
@@ -28,10 +29,13 @@ export default async function RestaurantPage({ params }: PageProps<"/restaurants
   // getOrderingEnabled() needs neither the profile nor the restaurant id,
   // so there's no reason to make it wait behind either lookup instead of
   // running alongside them.
+  const { id } = await params;
+  // A malformed id is a plain 404 — checked before any lookup starts, since
+  // the per-student queries below would hand it straight to Postgres.
+  if (!isUuid(id)) notFound();
   const profilePromise = requireProfile();
   const orderingEnabledPromise = getOrderingEnabled();
   const highlyReorderedPromise = getHighlyReorderedDishIds();
-  const { id } = await params;
   const menuPromise = getRestaurantMenu(id);
 
   const profile = await profilePromise;
