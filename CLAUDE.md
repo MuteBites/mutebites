@@ -133,9 +133,9 @@ instead of straight from the dashboard, and its back-link points to
 `href`/`label` overrides for this).
 
 Visually, admin shares the student app's system: the dashboard's plum
-"Today" card (\`StatCards\`) carries today's counts with the campus ordering
-switch (\`OrderingKillSwitch\`) as its footer row; secondary actions use the
-shared \`adminPill\` style (\`src/components/admin/styles.ts\`); order cards
+"Today" card (`StatCards`) carries today's counts with the campus ordering
+switch (`OrderingKillSwitch`) as its footer row; secondary actions use the
+shared `adminPill` style (`src/components/admin/styles.ts`); order cards
 lead with the token and a dish photo; restaurant controls show cover
 photos; no uppercase anywhere.
 
