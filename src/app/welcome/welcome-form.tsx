@@ -93,6 +93,7 @@ export function WelcomeForm({ defaultName }: { defaultName: string }) {
           >
             {phoneError ?? "Required — the delivery person calls this at the gate."}
           </p>
+          <p className="text-sm text-muted-foreground">Make sure this is your WhatsApp number.</p>
         </div>
 
         <p className="mt-8 rounded-2xl bg-secondary px-5 py-4 leading-relaxed text-muted-foreground">
