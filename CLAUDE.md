@@ -39,6 +39,13 @@ Food delivery site for VIT-AP University students.
   driven by `getTimeOfDayIST()`. Each mood has three `--mood-<time>-a/b/c`
   stops per theme, checked at ≥6.7:1 for the plum heading on top — re-check
   contrast if you change them.
+- **Order tracking ticket**: the token card (`order-tracking.tsx`) is a
+  ticket stub — up to three distinct photos of the ordered dishes on top,
+  a dashed tear line with edge notches (`bg-background` circles), then the
+  token and the delivery window. `deliveryWindow()` (`src/lib/date.ts`)
+  returns `{ lead, time }` with no-break spaces inside `time`, so "8:20 PM"
+  can never wrap apart; slot logic is unchanged and still mirrors
+  `slotEndTime()`.
 - **Backend**: Supabase (Postgres + Auth + Row Level Security)
 - **Auth**: "Continue with Google" via Supabase Auth (Google OAuth
   provider). No email/password, no OTP. On first login (no matching

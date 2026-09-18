@@ -9,16 +9,19 @@ import {
   Check,
   ChefHat,
   CookingPot,
+  MapPin,
   Receipt,
   Share2,
   type LucideIcon,
 } from "lucide-react";
+import { BlurImage } from "@/components/blur-image";
 import { BrandLogo } from "@/components/brand-logo";
 import { ConfettiBurst } from "@/components/orders/confetti-burst";
 import { SupportButtons } from "@/components/support-buttons";
 import type { OrderDetail } from "@/lib/data/orders";
 import type { OrderStatus } from "@/lib/data/types";
-import { estimatedDelivery, formatTime } from "@/lib/date";
+import { deliveryWindow, formatTime } from "@/lib/date";
+import { getDishPhoto } from "@/lib/data/dish-photos";
 import { formatRupees } from "@/lib/format";
 import { NAV_TRANSITION } from "@/lib/nav-transition";
 import { formatOrderNumber, orderTimeline, type TimelineStepState } from "@/lib/orders/status";
@@ -143,6 +146,13 @@ export function OrderTracking({
 
   const cancelled = status === "cancelled";
   const steps = cancelled ? [] : orderTimeline(status);
+  const eta = deliveryWindow(initialOrder.createdAt);
+  // Up to three distinct photos of what was ordered, for the ticket's header.
+  const photos = initialOrder.items
+    .map((item) => ({ dishName: item.dishName, src: getDishPhoto(initialOrder.restaurantName, item.dishName) }))
+    .filter((p): p is { dishName: string; src: string } => !!p.src)
+    .filter((p, i, all) => all.findIndex((q) => q.src === p.src) === i)
+    .slice(0, 3);
 
   return (
     <>
@@ -182,42 +192,79 @@ export function OrderTracking({
             </Link>
           </div>
 
-          <div className="surface-ink shadow-elevated-glow rounded-3xl bg-ink p-6 text-ink-foreground">
-            <div className="flex items-center justify-between gap-2">
-              <p className="text-sm opacity-70">Order placed · {formatTime(initialOrder.createdAt)}</p>
-              {live && (
-                <span className="flex shrink-0 items-center gap-1.5 text-xs font-semibold text-ink-success">
-                  <span className="size-4 animate-pulse rounded-full bg-ink-success" aria-hidden="true" />
-                  Live
-                </span>
-              )}
-            </div>
-            {!cancelled && (
-              <div className="mt-4 flex items-start justify-between gap-2">
-                <p className="text-label text-ink-accent">
-                  Show this token
-                </p>
-                <p className="max-w-[9rem] shrink-0 text-right text-sm font-bold text-ink-foreground/90">
-                  {estimatedDelivery(initialOrder.createdAt)}
-                </p>
+          {/* The token as a ticket stub: what you ordered (photos) above
+              the tear line, what you show at the gate below it. */}
+          <div className="surface-ink shadow-elevated-glow relative overflow-hidden rounded-3xl bg-ink text-ink-foreground">
+            {photos.length > 0 && (
+              <div
+                className={cn("grid h-36 gap-1 p-2 pb-0", cancelled && "opacity-60 grayscale")}
+                style={{ gridTemplateColumns: `repeat(${photos.length}, minmax(0, 1fr))` }}
+              >
+                {photos.map(({ dishName, src }, i) => (
+                  <div
+                    key={src}
+                    className={cn(
+                      "relative overflow-hidden bg-ink-foreground/10",
+                      i === 0 && "rounded-tl-[1.25rem]",
+                      i === photos.length - 1 && "rounded-tr-[1.25rem]",
+                    )}
+                  >
+                    <BlurImage src={src} alt={dishName} sizes="(min-width: 448px) 400px, 90vw" className="object-cover" />
+                  </div>
+                ))}
               </div>
             )}
-            <div className={cn("flex items-center gap-2", cancelled ? "mt-4" : "mt-1")}>
-              <p className="font-heading text-4xl font-bold tracking-tight">
-                {formatOrderNumber(initialOrder.dailyNumber)}
-              </p>
-              <button
-                type="button"
-                onClick={() => shareOrderToken(formatOrderNumber(initialOrder.dailyNumber))}
-                aria-label="Share order token"
-                className="flex size-9 shrink-0 items-center justify-center rounded-full bg-white/10 outline-none hover:bg-white/20 focus-visible:ring-2 focus-visible:ring-white"
-              >
-                <Share2 className="size-4" />
-              </button>
+
+            <div className="px-6 pt-4 pb-5">
+              <div className="flex items-center justify-between gap-2">
+                <p className="min-w-0 truncate text-sm text-ink-foreground/75">
+                  {initialOrder.restaurantName} · {formatTime(initialOrder.createdAt)}
+                </p>
+                {live && (
+                  <span className="flex shrink-0 items-center gap-1.5 text-xs font-semibold text-ink-success">
+                    <span className="size-2.5 animate-pulse rounded-full bg-ink-success" aria-hidden="true" />
+                    Live
+                  </span>
+                )}
+              </div>
             </div>
-            <p className="mt-4 inline-flex items-center gap-2 rounded-xl bg-white/10 px-4 py-2.5 text-sm">
-              <span aria-hidden="true">📍</span> Collect at VIT-AP Main Gate
-            </p>
+
+            {/* Tear line: dashed rule with a notch cut out of each edge. */}
+            <div className="relative h-0 border-t-2 border-dashed border-ink-foreground/20" aria-hidden="true">
+              <span className="absolute top-1/2 -left-3 size-6 -translate-y-1/2 rounded-full bg-background" />
+              <span className="absolute top-1/2 -right-3 size-6 -translate-y-1/2 rounded-full bg-background" />
+            </div>
+
+            <div className="px-6 pt-5 pb-6">
+              <div className="flex items-end justify-between gap-4">
+                <div className="min-w-0">
+                  <p className="text-label text-ink-accent">{cancelled ? "Order token" : "Show this token"}</p>
+                  <div className="mt-1 flex items-center gap-2">
+                    <p className={cn("font-heading text-5xl leading-none font-bold", cancelled && "line-through opacity-60")}>
+                      {formatOrderNumber(initialOrder.dailyNumber)}
+                    </p>
+                    <button
+                      type="button"
+                      onClick={() => shareOrderToken(formatOrderNumber(initialOrder.dailyNumber))}
+                      aria-label="Share order token"
+                      className="flex size-9 shrink-0 items-center justify-center rounded-full bg-ink-foreground/10 outline-none hover:bg-ink-foreground/20 focus-visible:ring-2 focus-visible:ring-ink-foreground"
+                    >
+                      <Share2 className="size-4" />
+                    </button>
+                  </div>
+                </div>
+                {!cancelled && (
+                  <p className="shrink-0 text-right">
+                    <span className="block text-sm text-ink-foreground/75">{eta.lead}</span>
+                    <span className="block font-heading text-xl font-bold whitespace-nowrap">{eta.time}</span>
+                  </p>
+                )}
+              </div>
+              <p className="mt-5 flex items-center gap-2 rounded-xl bg-ink-foreground/10 px-4 py-2.5 text-sm">
+                <MapPin className="size-4 shrink-0 text-ink-accent" aria-hidden="true" />
+                Collect at VIT-AP Main Gate
+              </p>
+            </div>
           </div>
 
           {cancelled ? (
@@ -244,8 +291,10 @@ export function OrderTracking({
                   <div className={cn("pb-6", step.state === "upcoming" && "opacity-50")}>
                     <p className={cn("font-semibold", step.state === "current" && "text-primary")}>
                       {step.label}
-                      {step.state === "current" && " (pending)"}
                     </p>
+                    {step.state === "current" && !step.label.startsWith("Preparing") && (
+                      <p className="text-sm text-muted-foreground">Waiting for the restaurant to confirm…</p>
+                    )}
                     {i === 0 && <p className="text-sm text-muted-foreground">{formatTime(initialOrder.createdAt)}</p>}
                     {step.state === "current" && step.label.startsWith("Preparing") && (
                       <p className="text-sm text-muted-foreground">We&apos;ll call you when we reach the gate.</p>
@@ -260,18 +309,26 @@ export function OrderTracking({
           )}
 
           <div className="mt-2 rounded-2xl border bg-card shadow-card p-5">
-            <p className="text-label text-muted-foreground">
-              {initialOrder.restaurantName}
-            </p>
-            <ul className="mt-3 divide-y">
-              {initialOrder.items.map((item) => (
-                <li key={item.dishName} className="flex justify-between py-2 text-sm">
-                  <span>
-                    {item.quantity} × {item.dishName}
-                  </span>
-                  <span className="tabular-nums">{formatRupees(item.subtotal)}</span>
-                </li>
-              ))}
+            <p className="text-label text-muted-foreground">Your order</p>
+            <ul className="mt-2 divide-y">
+              {initialOrder.items.map((item) => {
+                const photo = getDishPhoto(initialOrder.restaurantName, item.dishName);
+                return (
+                  <li key={item.dishName} className="flex items-center gap-3 py-2.5">
+                    <span className="relative flex size-11 shrink-0 items-center justify-center overflow-hidden rounded-xl bg-brand-soft font-heading font-bold text-brand-soft-foreground/60">
+                      {photo ? (
+                        <BlurImage src={photo} alt="" sizes="44px" className="object-cover" />
+                      ) : (
+                        <span aria-hidden="true">{item.dishName.trim().charAt(0)}</span>
+                      )}
+                    </span>
+                    <span className="min-w-0 flex-1 text-sm">
+                      <span className="font-semibold tabular-nums">{item.quantity} ×</span> {item.dishName}
+                    </span>
+                    <span className="text-sm tabular-nums">{formatRupees(item.subtotal)}</span>
+                  </li>
+                );
+              })}
             </ul>
             {initialOrder.notes && (
               <p className="mt-3 rounded-xl bg-secondary px-4 py-2.5 text-sm text-muted-foreground">
@@ -279,7 +336,7 @@ export function OrderTracking({
               </p>
             )}
             <div className="mt-3 flex items-center justify-between border-t pt-3">
-              <p className="font-semibold">Pay in cash</p>
+              <p className="font-semibold">To pay at pickup</p>
               <p className="font-heading text-xl font-bold tabular-nums">{formatRupees(initialOrder.totalAmount)}</p>
             </div>
           </div>

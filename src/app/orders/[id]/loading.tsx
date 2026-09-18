@@ -11,14 +11,25 @@ export default function Loading() {
         <Skeleton className="size-11 rounded-full" />
       </div>
 
-      <div className="rounded-3xl bg-ink p-6">
-        <Skeleton className="h-4 w-40 bg-white/10" />
-        <div className="mt-4 flex items-start justify-between gap-2">
-          <Skeleton className="h-4 w-24 bg-white/10" />
-          <Skeleton className="h-4 w-28 bg-white/10" />
+      <div className="overflow-hidden rounded-3xl bg-ink">
+        <Skeleton className="m-2 mb-0 h-36 rounded-none rounded-t-[1.25rem] bg-ink-foreground/10" />
+        <div className="px-6 pt-4 pb-5">
+          <Skeleton className="h-4 w-44 bg-ink-foreground/10" />
         </div>
-        <Skeleton className="mt-1 h-10 w-32 bg-white/10" />
-        <Skeleton className="mt-4 h-9 w-56 rounded-xl bg-white/10" />
+        <div className="border-t-2 border-dashed border-ink-foreground/20" />
+        <div className="px-6 pt-5 pb-6">
+          <div className="flex items-end justify-between gap-4">
+            <div>
+              <Skeleton className="h-4 w-28 bg-ink-foreground/10" />
+              <Skeleton className="mt-2 h-12 w-24 bg-ink-foreground/10" />
+            </div>
+            <div className="flex flex-col items-end">
+              <Skeleton className="h-4 w-24 bg-ink-foreground/10" />
+              <Skeleton className="mt-1.5 h-6 w-20 bg-ink-foreground/10" />
+            </div>
+          </div>
+          <Skeleton className="mt-5 h-10 w-full rounded-xl bg-ink-foreground/10" />
+        </div>
       </div>
 
       <div className="mt-6 flex flex-col">

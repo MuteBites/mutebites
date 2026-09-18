@@ -66,7 +66,7 @@ export function DishCard({
         type="button"
         onClick={() => onChangeQuantity(quantity - 1)}
         aria-label={`Remove one ${dish.name}`}
-        className="flex size-9 items-center justify-center rounded-full bg-white/15 outline-none hover:bg-white/25 focus-visible:ring-2 focus-visible:ring-white"
+        className="flex size-9 items-center justify-center rounded-full bg-primary-foreground/15 outline-none hover:bg-primary-foreground/25 focus-visible:ring-2 focus-visible:ring-primary-foreground"
       >
         <Minus className="size-4" />
       </button>
@@ -82,7 +82,7 @@ export function DishCard({
         onClick={() => onChangeQuantity(quantity + 1)}
         disabled={quantity >= MAX_QUANTITY}
         aria-label={`Add one more ${dish.name}`}
-        className="flex size-9 items-center justify-center rounded-full bg-white/15 outline-none hover:bg-white/25 focus-visible:ring-2 focus-visible:ring-white disabled:opacity-40"
+        className="flex size-9 items-center justify-center rounded-full bg-primary-foreground/15 outline-none hover:bg-primary-foreground/25 focus-visible:ring-2 focus-visible:ring-primary-foreground disabled:opacity-40"
       >
         <Plus className="size-4" />
       </button>

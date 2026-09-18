@@ -47,15 +47,18 @@ const hourMinuteFmt = new Intl.DateTimeFormat("en-GB", {
 
 /**
  * A rough delivery-window estimate, purely a function of when the order
- * was placed (IST wall-clock time) — no ETA is stored anywhere.
+ * was placed (IST wall-clock time) — no ETA is stored anywhere. Split into
+ * a lead-in and the time itself so the UI can keep the time on one line
+ * ("before 8:20 PM" was wrapping as "8:20 / PM"); the spaces inside `time`
+ * are no-break for the same reason.
  */
-export function estimatedDelivery(iso: string): string {
+export function deliveryWindow(iso: string): { lead: string; time: string } {
   const [h, m] = hourMinuteFmt.format(new Date(iso)).split(":").map(Number);
   const minutesOfDay = h * 60 + m;
 
-  if (minutesOfDay < 12 * 60 + 40) return "Delivery by 1:30 PM";
-  if (minutesOfDay <= 18 * 60) return "Delivery between 7:00 PM – 7:30 PM";
-  return "Delivery before 8:20 PM";
+  if (minutesOfDay < 12 * 60 + 40) return { lead: "Delivery by", time: "1:30\u00a0PM" };
+  if (minutesOfDay <= 18 * 60) return { lead: "Delivery between", time: "7:00\u2013\u20097:30\u00a0PM" };
+  return { lead: "Delivery before", time: "8:20\u00a0PM" };
 }
 
 /**
