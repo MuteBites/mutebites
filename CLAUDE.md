@@ -53,6 +53,15 @@ Food delivery site for VIT-AP University students.
   counts that only go up (delivered orders, distinct restaurants), so a
   badge never re-locks; locked tiles show a progress ring and "N to go".
   The unlock toast reads its labels from the same list.
+- **404 / error pages**: `src/app/not-found.tsx` ("Token #404"),
+  `src/app/error.tsx` and a self-contained `src/app/global-error.tsx`, all
+  using `LostTicket` (`src/components/lost-ticket.tsx`) where they can. This
+  Next.js version passes `retry` (not `reset`) to error boundaries.
+  `getRestaurantMenu()` / `getOrder()` return null for a malformed id
+  (`isUuid()`, `src/lib/ids.ts`), so a mangled URL is a 404 rather than a
+  Postgres error. Empty states go through `EmptyState`
+  (`src/components/empty-state.tsx`): `art="plates"` for empty cart /
+  orders, an icon for in-place no-match states.
 - **Backend**: Supabase (Postgres + Auth + Row Level Security)
 - **Auth**: "Continue with Google" via Supabase Auth (Google OAuth
   provider). No email/password, no OTP. On first login (no matching

@@ -2,6 +2,7 @@ import "server-only";
 
 import { cache } from "react";
 import { createClient } from "@/lib/supabase/server";
+import { isUuid } from "@/lib/ids";
 import type { Dish, DishCategory, MenuSection, Restaurant } from "./types";
 
 /** All restaurants for the student home screen — open ones first. */
@@ -92,6 +93,7 @@ export async function getThursdaySpecial(): Promise<ThursdaySpecial | null> {
 export const getRestaurantMenu = cache(async function getRestaurantMenu(
   id: string,
 ): Promise<{ restaurant: Restaurant; sections: MenuSection[] } | null> {
+  if (!isUuid(id)) return null;
   const supabase = await createClient();
 
   const [restaurantResult, categoriesResult, dishesResult] = await Promise.all([

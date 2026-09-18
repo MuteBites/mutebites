@@ -24,6 +24,8 @@ export default function Error({
 
   return (
     <main className="mx-auto flex w-full max-w-md flex-1 flex-col items-center justify-center px-6 py-16 text-center">
+      {/* Error boundaries can't export metadata; React hoists this into <head>. */}
+      <title>Something went wrong · MuteBites</title>
       <LostTicket
         label="Kitchen hiccup"
         token="Oops"

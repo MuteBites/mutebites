@@ -3,6 +3,7 @@ import "server-only";
 import { cache } from "react";
 import { istDayKey } from "@/lib/date";
 import { createClient } from "@/lib/supabase/server";
+import { isUuid } from "@/lib/ids";
 import { ACTIVE_STATUSES } from "@/lib/orders/status";
 import type { OrderStatus } from "./types";
 
@@ -225,6 +226,7 @@ export const getOrder = cache(async function getOrder(
   id: string,
   userId: string,
 ): Promise<OrderDetail | null> {
+  if (!isUuid(id)) return null;
   const supabase = await createClient();
   const { data, error } = await supabase
     .from("orders")
