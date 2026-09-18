@@ -34,6 +34,11 @@ Food delivery site for VIT-AP University students.
   sans, no letter-spacing. No mono font is loaded any more; don't bring
   back the mono-uppercase eyebrow style (admin buttons still use
   `uppercase` until the admin pass).
+- **Home header mood field**: `HomeHeader` bleeds to the screen edges over
+  `.mood-field.mood-<morning|afternoon|evening|night>` (`globals.css`),
+  driven by `getTimeOfDayIST()`. Each mood has three `--mood-<time>-a/b/c`
+  stops per theme, checked at ≥6.7:1 for the plum heading on top — re-check
+  contrast if you change them.
 - **Backend**: Supabase (Postgres + Auth + Row Level Security)
 - **Auth**: "Continue with Google" via Supabase Auth (Google OAuth
   provider). No email/password, no OTP. On first login (no matching
