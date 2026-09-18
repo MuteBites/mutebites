@@ -3,7 +3,7 @@ import Link from "next/link";
 import { ViewTransition } from "react";
 import { ArrowRight, ChevronRight, RotateCcw } from "lucide-react";
 import { BlurImage } from "@/components/blur-image";
-import { BrandLogo } from "@/components/brand-logo";
+import { EmptyState } from "@/components/empty-state";
 import { TabBar } from "@/components/nav/tab-bar";
 import { getDishPhoto } from "@/lib/data/dish-photos";
 import { getOrderHistory, type OrderSummary } from "@/lib/data/orders";
@@ -90,17 +90,20 @@ export default async function OrdersPage() {
 
 function EmptyOrders() {
   return (
-    <div className="flex flex-col items-center pt-16 pb-6 text-center">
-      <BrandLogo className="size-24 animate-bounce-idle" />
-      <p className="mt-6 font-heading text-title font-bold">No orders yet</p>
-      <p className="mt-2 text-muted-foreground">Your first order shows up right here, start to finish.</p>
-      <Link
-        href="/"
-        className="pressable mt-6 flex h-14 items-center rounded-2xl bg-primary px-8 text-lg font-bold text-primary-foreground outline-none hover:bg-primary/90 focus-visible:ring-3 focus-visible:ring-ring/40"
-      >
-        Order something
-      </Link>
-    </div>
+    <EmptyState
+      art="plates"
+      title="No orders yet"
+      action={
+        <Link
+          href="/"
+          className="pressable flex h-14 items-center rounded-2xl bg-primary px-8 text-lg font-bold text-primary-foreground outline-none hover:bg-primary/90 focus-visible:ring-3 focus-visible:ring-ring/40"
+        >
+          Order something
+        </Link>
+      }
+    >
+      Your first order shows up right here, start to finish.
+    </EmptyState>
   );
 }
 

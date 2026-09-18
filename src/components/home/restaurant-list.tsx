@@ -1,7 +1,8 @@
 "use client";
 
 import { useState } from "react";
-import { MapPin, Search, X } from "lucide-react";
+import { MapPin, Search, SearchX, X } from "lucide-react";
+import { EmptyState } from "@/components/empty-state";
 import type { RestaurantMenuStats } from "@/lib/data/restaurants";
 import type { Restaurant } from "@/lib/data/types";
 import { RestaurantCard } from "./restaurant-card";
@@ -82,10 +83,9 @@ export function RestaurantList({
           ))}
         </ul>
       ) : (
-        <div className="mt-10 text-center">
-          <p className="font-heading text-xl font-bold">No match for “{query.trim()}”</p>
-          <p className="mt-1 text-muted-foreground">Try a dish type like biryani or juice.</p>
-        </div>
+        <EmptyState compact icon={SearchX} title={`No match for “${query.trim()}”`}>
+          Try a dish type like biryani or juice.
+        </EmptyState>
       )}
     </>
   );

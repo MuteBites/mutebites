@@ -4,7 +4,7 @@ import { useState, useTransition } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { Banknote, Loader2, MapPin, Phone, QrCode, X } from "lucide-react";
-import { BrandLogo } from "@/components/brand-logo";
+import { EmptyState } from "@/components/empty-state";
 import { CartLineRow } from "@/components/cart/cart-line-row";
 import { Sheet, SheetContent, SheetDescription, SheetTitle } from "@/components/ui/sheet";
 import { Textarea } from "@/components/ui/textarea";
@@ -77,19 +77,22 @@ export function CartSheet({
 
 function EmptyCart({ onBrowse }: { onBrowse: () => void }) {
   return (
-    <div className="flex flex-col items-center px-8 pt-16 pb-20 text-center">
-      <BrandLogo className="size-24 animate-bounce-idle" />
-      <p className="mt-6 font-heading text-title font-bold">Nothing here yet</p>
-      <p className="mt-2 text-muted-foreground">
-        Pick a restaurant and add a few dishes — most orders take under a minute.
-      </p>
-      <Link
-        href="/"
-        onClick={onBrowse}
-        className="pressable surface-ink mt-6 flex h-14 items-center rounded-2xl bg-ink px-8 text-lg font-bold text-ink-foreground outline-none hover:brightness-95 focus-visible:ring-3 focus-visible:ring-ring/40"
+    <div className="px-8 pb-14">
+      <EmptyState
+        art="plates"
+        title="Nothing here yet"
+        action={
+          <Link
+            href="/"
+            onClick={onBrowse}
+            className="pressable surface-ink flex h-14 items-center rounded-2xl bg-ink px-8 text-lg font-bold text-ink-foreground outline-none hover:brightness-95 focus-visible:ring-3 focus-visible:ring-ring/40"
+          >
+            Browse restaurants
+          </Link>
+        }
       >
-        Browse restaurants
-      </Link>
+        Pick a restaurant and add a few dishes — most orders take under a minute.
+      </EmptyState>
     </div>
   );
 }

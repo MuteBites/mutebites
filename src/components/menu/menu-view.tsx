@@ -1,7 +1,8 @@
 "use client";
 
 import { useState } from "react";
-import { Search, X } from "lucide-react";
+import { Leaf, Search, SearchX, UtensilsCrossed, X } from "lucide-react";
+import { EmptyState } from "@/components/empty-state";
 import { CartBar } from "@/components/cart/cart-bar";
 import {
   AlertDialog,
@@ -178,15 +179,15 @@ export function MenuView({
       )}
 
       {sections.length === 0 && (
-        <p className="py-16 text-center text-muted-foreground">Nothing on the menu yet — check back soon.</p>
+        <EmptyState compact icon={UtensilsCrossed} title="Nothing on the menu yet">
+          Check back soon.
+        </EmptyState>
       )}
 
       {sections.length > 0 && visible.length === 0 && (
-        <p className="py-16 text-center text-muted-foreground">
-          {q
-            ? `No dishes match “${query.trim()}” — try a different search.`
-            : "No veg dishes in this category — try another one."}
-        </p>
+        <EmptyState compact icon={q ? SearchX : Leaf} title={q ? `No dishes match “${query.trim()}”` : "No veg dishes here"}>
+          {q ? "Try a different search." : "Try another category, or switch Veg off."}
+        </EmptyState>
       )}
 
       {visible.map((section) => (

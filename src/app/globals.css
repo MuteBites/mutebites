@@ -449,9 +449,6 @@
     animation-timing-function: cubic-bezier(0.25, 0.46, 0.45, 0.94);
     animation-fill-mode: both;
   }
-  .animate-bounce-idle {
-    animation: bounce-idle 2.2s ease-in-out infinite;
-  }
   .animate-ping-slow {
     animation: ping-slow 1.8s cubic-bezier(0, 0, 0.2, 1) infinite;
   }
@@ -513,16 +510,6 @@
   100% {
     transform: scale(1.9);
     opacity: 0;
-  }
-}
-
-@keyframes bounce-idle {
-  0%,
-  100% {
-    transform: translateY(0);
-  }
-  50% {
-    transform: translateY(-8px);
   }
 }
 
