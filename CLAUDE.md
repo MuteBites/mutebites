@@ -129,6 +129,9 @@ instead of straight from the dashboard, and its back-link points to
   verified-fresh server responses and full dev-server restarts, so a
   changed cover photo should get a new filename, not overwrite the old one
   in place, to guarantee cache-safety.
+  The login screen's photo mosaic (`src/app/login/page.tsx`, `MOSAIC`)
+  also references a dozen of these files by path directly — renaming or
+  removing a photo means updating that list too, or its tile goes blank.
 - `public/mutebites-logo.png` — the one source image behind every app
   icon. `src/lib/app-icon.tsx` reads it once at module scope (it's
   actually JPEG-encoded despite the `.png` name) and renders it full-bleed
