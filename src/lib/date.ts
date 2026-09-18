@@ -112,6 +112,29 @@ export function formatAdminDay(iso: string): string {
   return adminDayFmt.format(new Date(iso));
 }
 
+// Built from en-US parts: en-IN and en-GB both abbreviate September as
+// "Sept" in current ICU, which reads like a typo next to "Aug"/"Oct".
+const dayHeadingFmt = new Intl.DateTimeFormat("en-US", {
+  timeZone: IST,
+  weekday: "short",
+  day: "numeric",
+  month: "short",
+});
+
+/**
+ * "Today", "Yesterday", or "Wed 17 Sep" (plus the year once it isn't this
+ * year) — IST calendar day, for the student orders list's date groups.
+ */
+export function formatDayHeading(iso: string, now: Date = new Date()): string {
+  const key = istDayKey(iso);
+  if (key === dayKeyFmt.format(now)) return "Today";
+  if (key === dayKeyFmt.format(new Date(now.getTime() - 24 * 60 * 60 * 1000))) return "Yesterday";
+  const part = (type: Intl.DateTimeFormatPartTypes) =>
+    dayHeadingFmt.formatToParts(new Date(iso)).find((p) => p.type === type)?.value;
+  const label = `${part("weekday")} ${part("day")} ${part("month")}`;
+  return key.slice(0, 4) === dayKeyFmt.format(now).slice(0, 4) ? label : `${label} ${key.slice(0, 4)}`;
+}
+
 /** The UTC instant of the start of "today" in IST wall-clock time — for scoping the admin dashboard to today's orders only. */
 export function startOfTodayIST(now: Date = new Date()): Date {
   const [year, month, day] = dayKeyFmt.format(now).split("-").map(Number);

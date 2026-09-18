@@ -16,6 +16,8 @@ export type OrderSummary = {
   itemCount: number;
   /** e.g. "2× Chicken Biryani, Veg Manchurian" — for the orders list, not the detail page. */
   itemsSummary: string;
+  /** Snapshotted dish names in order — the orders list looks up a photo from the first one it can. */
+  dishNames: string[];
   dailyNumber: number;
 };
 
@@ -78,6 +80,7 @@ export async function getOrderHistory(userId: string): Promise<OrderSummary[]> {
     restaurantName: o.restaurants?.name ?? "Restaurant",
     itemCount: o.order_items.reduce((sum, item) => sum + item.quantity, 0),
     itemsSummary: summarizeItems(o.order_items),
+    dishNames: o.order_items.map((i) => i.dish_name),
     dailyNumber: o.daily_number,
   }));
 }
