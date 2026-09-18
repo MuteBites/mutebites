@@ -91,9 +91,9 @@ export function WelcomeForm({ defaultName }: { defaultName: string }) {
             id="phone-hint"
             className={cn("text-[0.95rem]", phoneError ? "text-destructive" : "text-muted-foreground")}
           >
-            {phoneError ?? "Required — the delivery person calls this at the gate."}
+            {phoneError ??
+              "Required — the delivery person calls this at the gate. Make sure this is your WhatsApp number."}
           </p>
-          <p className="text-sm text-muted-foreground">Make sure this is your WhatsApp number.</p>
         </div>
 
         <p className="mt-8 rounded-2xl bg-secondary px-5 py-4 leading-relaxed text-muted-foreground">
