@@ -1,4 +1,6 @@
 import type { Metadata } from "next";
+import Image from "next/image";
+import Link from "next/link";
 import { BrandLogo } from "@/components/brand-logo";
 import { GoogleSignInButton } from "./google-sign-in-button";
 
@@ -6,52 +8,101 @@ export const metadata: Metadata = {
   title: "Sign in · MuteBites",
 };
 
+/*
+ * The first thing a student sees, so it leads with the real food rather
+ * than an empty cream screen: a tilted mosaic of actual menu photos (one
+ * or more from every partner kitchen) that fades into the page. Three
+ * columns, the middle one dropped half a tile, so it reads as a spread
+ * rather than a grid. Purely decorative — aria-hidden, empty alts.
+ */
+const MOSAIC: string[][] = [
+  [
+    "/MuteBites/A1 biryani/A1 mixed biryani .jpg",
+    "/MuteBites/Bismillah fruit juice/Pomegranate juice.jpg",
+    "/MuteBites/MuteBites Chinese/Chicken noodles.jpg",
+  ],
+  [
+    "/MuteBites/Bheemasena/Paneer 65.jpg",
+    "/MuteBites/Mutebites fresh fruits/Dragon fruit 500g.jpg",
+    "/MuteBites/MuteBites Chinese/Chicken lollipop 4P.jpg",
+  ],
+  [
+    "/MuteBites/MuteBites Chinese/Chicken chilli.jpg",
+    "/MuteBites/Bismillah fruit juice/Pineapple juice.jpg",
+    "/MuteBites/Bheemasena/Kunda biryani.jpg",
+  ],
+];
+
 export default async function LoginPage({ searchParams }: PageProps<"/login">) {
   const { error } = await searchParams;
 
   return (
-    <main className="relative mx-auto flex w-full max-w-md flex-1 flex-col items-center justify-center overflow-hidden px-6 py-12">
-      <div
-        aria-hidden="true"
-        className="animate-gradient-drift-a pointer-events-none absolute -top-24 -left-16 size-72 rounded-full blur-3xl"
-        style={{
-          background:
-            "radial-gradient(circle, color-mix(in srgb, var(--glow-afternoon) 22%, transparent), transparent 70%)",
-        }}
-      />
-      <div
-        aria-hidden="true"
-        className="animate-gradient-drift-b pointer-events-none absolute -right-20 -bottom-24 size-80 rounded-full blur-3xl"
-        style={{
-          background:
-            "radial-gradient(circle, color-mix(in srgb, var(--glow-night) 20%, transparent), transparent 70%)",
-        }}
-      />
+    <main className="relative mx-auto flex w-full max-w-md flex-1 flex-col overflow-hidden">
+      <div aria-hidden="true" className="relative h-[44svh] min-h-64 shrink-0 overflow-hidden">
+        <div className="absolute -inset-x-12 -top-16 grid -rotate-6 grid-cols-3 gap-3">
+          {MOSAIC.map((column, c) => (
+            <div key={c} className={c === 1 ? "flex flex-col gap-3 pt-16" : "flex flex-col gap-3"}>
+              {column.map((src) => (
+                <div
+                  key={src}
+                  className="relative aspect-[4/5] overflow-hidden rounded-3xl bg-secondary shadow-card"
+                >
+                  <Image src={src} alt="" fill sizes="(max-width: 448px) 36vw, 160px" className="object-cover" />
+                </div>
+              ))}
+            </div>
+          ))}
+        </div>
+        <div className="absolute inset-0 bg-linear-to-b from-transparent via-background/30 to-background" />
+      </div>
 
-      <BrandLogo priority className="animate-pop-in relative" />
+      <div className="relative -mt-24 flex flex-1 flex-col px-6 pb-[max(2rem,env(safe-area-inset-bottom))]">
+        <BrandLogo
+          preload
+          className="animate-pop-in size-20 rounded-3xl bg-card shadow-raised ring-4 ring-background"
+        />
 
-      <h1
-        className="animate-slide-up-in relative mt-10 text-center font-heading text-display font-bold"
-        style={{ animationDelay: "90ms" }}
-      >
-        Good food.
-        <br />
-        Campus mood.
-      </h1>
+        <h1
+          className="animate-slide-up-in mt-6 font-heading text-display font-bold"
+          style={{ animationDelay: "90ms" }}
+        >
+          Good food.
+          <br />
+          Campus mood.
+        </h1>
+        <p
+          className="animate-slide-up-in mt-3 max-w-[22rem] text-base text-muted-foreground"
+          style={{ animationDelay: "130ms" }}
+        >
+          Biryani, Chinese, fresh juice and fruit from campus kitchens — handed over at VIT-AP
+          Main Gate. Pay when you collect.
+        </p>
 
-      <div
-        className="animate-slide-up-in relative mt-10 w-full"
-        style={{ animationDelay: "170ms" }}
-      >
-        {error && (
-          <p
-            role="alert"
-            className="mb-4 rounded-xl bg-brand-soft px-4 py-3 text-center text-sm text-brand-soft-foreground"
-          >
-            Sign-in didn&apos;t go through — give it another shot.
+        <div
+          className="animate-slide-up-in mt-auto w-full pt-8"
+          style={{ animationDelay: "170ms" }}
+        >
+          {error && (
+            <p
+              role="alert"
+              className="mb-4 rounded-xl bg-brand-soft px-4 py-3 text-center text-sm text-brand-soft-foreground"
+            >
+              Sign-in didn&apos;t go through — give it another shot.
+            </p>
+          )}
+          <GoogleSignInButton />
+          <p className="mt-4 text-center text-xs text-muted-foreground">
+            By continuing you agree to our{" "}
+            <Link href="/terms" className="font-semibold text-foreground underline-offset-2 hover:underline">
+              Terms
+            </Link>{" "}
+            and{" "}
+            <Link href="/privacy" className="font-semibold text-foreground underline-offset-2 hover:underline">
+              Privacy Policy
+            </Link>
+            .
           </p>
-        )}
-        <GoogleSignInButton />
+        </div>
       </div>
     </main>
   );

@@ -388,12 +388,6 @@
   .animate-bounce-idle {
     animation: bounce-idle 2.2s ease-in-out infinite;
   }
-  .animate-gradient-drift-a {
-    animation: gradient-drift-a 16s ease-in-out infinite alternate;
-  }
-  .animate-gradient-drift-b {
-    animation: gradient-drift-b 20s ease-in-out infinite alternate;
-  }
   .animate-ping-slow {
     animation: ping-slow 1.8s cubic-bezier(0, 0, 0.2, 1) infinite;
   }
@@ -465,26 +459,6 @@
   }
   50% {
     transform: translateY(-8px);
-  }
-}
-
-/* Slow ambient drift for the login screen's background glow — the first
-   motion a student sees, so it stays subtle: big, soft, slow. */
-@keyframes gradient-drift-a {
-  0% {
-    transform: translate(0, 0) scale(1);
-  }
-  100% {
-    transform: translate(6%, 8%) scale(1.15);
-  }
-}
-
-@keyframes gradient-drift-b {
-  0% {
-    transform: translate(0, 0) scale(1.1);
-  }
-  100% {
-    transform: translate(-8%, -5%) scale(1);
   }
 }
 

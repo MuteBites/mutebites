@@ -3,10 +3,10 @@ import { cn } from "@/lib/utils";
 
 export function BrandLogo({
   className,
-  priority,
+  preload,
 }: {
   className?: string;
-  priority?: boolean;
+  preload?: boolean;
 }) {
   return (
     <div
@@ -21,7 +21,7 @@ export function BrandLogo({
         width={640}
         height={640}
         sizes="144px"
-        priority={priority}
+        preload={preload}
         className="size-[88%] rounded-full object-contain"
       />
     </div>
