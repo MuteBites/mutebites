@@ -11,9 +11,9 @@ import { cn } from "@/lib/utils";
  * Photo-collage card: the cover takes the left two-thirds and two of the
  * restaurant's signature dishes stack on the right, inset inside the card
  * rather than a full-bleed banner with the name over a dark scrim. Name,
- * description and a single meta line ("Biryani · 24 dishes · from ₹60")
- * sit underneath on the card surface, with the amber arrow as the one
- * action cue. Free delivery is campus-wide, so it's said once in the
+ * cuisines, description and a short "24 dishes · from ₹60" line sit
+ * underneath on the card surface, with the amber arrow as the one action
+ * cue. Free delivery is campus-wide, so it's said once in the
  * handover strip above the list, not on every card.
  */
 export function RestaurantCard({
@@ -36,12 +36,6 @@ export function RestaurantCard({
   const previews = getRestaurantPreviewPhotos(restaurant.name);
   const cover = getRestaurantCoverPhoto(restaurant.name) ?? previews.shift()?.src;
   const sides = previews.length === 2 ? previews : [];
-
-  const meta = [
-    restaurant.cuisine_tags.join(", "),
-    stats && `${stats.dishCount} ${stats.dishCount === 1 ? "dish" : "dishes"}`,
-    stats && `from ${formatRupees(stats.minPrice)}`,
-  ].filter(Boolean);
 
   return (
     <Link
@@ -86,7 +80,14 @@ export function RestaurantCard({
 
       <div className="px-3 pt-3.5 pb-2.5">
         <div className="flex items-start justify-between gap-3">
-          <h2 className="min-w-0 font-heading text-title font-bold">{restaurant.name}</h2>
+          <div className="min-w-0">
+            <h2 className="font-heading text-title font-bold">{restaurant.name}</h2>
+            {restaurant.cuisine_tags.length > 0 && (
+              <p className="mt-0.5 truncate text-sm font-medium text-rose">
+                {restaurant.cuisine_tags.join(" · ")}
+              </p>
+            )}
+          </div>
           <span
             className={cn(
               "mt-0.5 flex size-9 shrink-0 items-center justify-center rounded-full transition-transform group-hover:translate-x-0.5",
@@ -102,7 +103,7 @@ export function RestaurantCard({
         )}
         <p className="mt-2.5 text-sm font-semibold">
           {open
-            ? meta.join(" · ")
+            ? stats && `${stats.dishCount} ${stats.dishCount === 1 ? "dish" : "dishes"} · from ${formatRupees(stats.minPrice)}`
             : !active
               ? "Closed right now · menu still browsable"
               : "Ordering paused · browse the menu"}
