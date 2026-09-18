@@ -63,7 +63,9 @@
  *             eyebrows, which made screens read like developer tooling.
  */
 @theme {
-  --text-display: 2.625rem;
+  /* Fluid: 34px on a 320px phone (so "Campus mood." stays one line), up
+     to 42px from ~410px wide. */
+  --text-display: clamp(2.125rem, 11vw - 0.2rem, 2.625rem);
   --text-display--line-height: 1.04;
   --text-display--letter-spacing: -0.025em;
   --text-headline: 1.875rem;

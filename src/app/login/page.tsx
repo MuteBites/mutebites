@@ -43,7 +43,7 @@ export default async function LoginPage({ searchParams }: PageProps<"/login">) {
 
   return (
     <main className="relative mx-auto flex w-full max-w-md flex-1 flex-col overflow-hidden">
-      <div aria-hidden="true" className="relative min-h-60 flex-1 overflow-hidden">
+      <div aria-hidden="true" className="relative min-h-44 flex-1 overflow-hidden">
         <div className="absolute -inset-x-12 -top-16 grid -rotate-6 grid-cols-3 gap-3">
           {MOSAIC.map((column, c) => (
             <div key={c} className={c === 1 ? "flex flex-col gap-3 pt-16" : "flex flex-col gap-3"}>
