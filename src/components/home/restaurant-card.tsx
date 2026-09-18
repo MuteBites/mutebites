@@ -83,7 +83,7 @@ export function RestaurantCard({
           <div className="min-w-0">
             <h2 className="font-heading text-title font-bold">{restaurant.name}</h2>
             {restaurant.cuisine_tags.length > 0 && (
-              <p className="mt-0.5 truncate text-sm font-medium text-rose">
+              <p className="mt-0.5 text-sm font-medium text-rose">
                 {restaurant.cuisine_tags.join(" · ")}
               </p>
             )}
