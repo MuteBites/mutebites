@@ -2,7 +2,8 @@
 
 import { useState, useTransition } from "react";
 import { Loader2 } from "lucide-react";
-import { Badge } from "@/components/ui/badge";
+import { BlurImage } from "@/components/blur-image";
+import { getRestaurantCoverPhoto } from "@/lib/data/dish-photos";
 import type { AdminRestaurant } from "@/lib/data/admin";
 import { setRestaurantActive } from "@/lib/admin/actions";
 import { toast } from "@/lib/toast/store";
@@ -23,6 +24,7 @@ function RestaurantToggleCard({
   // being shown as plain "Open" (which would read as taking orders right
   // now) or "Closed" (which would misattribute the pause to this restaurant).
   const paused = active && !orderingEnabled;
+  const cover = getRestaurantCoverPhoto(restaurant.name);
 
   function toggle() {
     const next = !active;
@@ -38,10 +40,18 @@ function RestaurantToggleCard({
   }
 
   return (
-    <div className="flex items-center justify-between gap-3 rounded-2xl border bg-card shadow-card p-4">
-      <div className="min-w-0">
+    <div className="flex items-center gap-3 rounded-3xl border bg-card p-3 pr-4 shadow-card">
+      <span className={cn("relative size-14 shrink-0 overflow-hidden rounded-2xl bg-stripes", !active && "grayscale")}>
+        {cover && <BlurImage src={cover} alt="" sizes="56px" className="object-cover" />}
+      </span>
+      <div className="min-w-0 flex-1">
         <p className="truncate font-semibold">{restaurant.name}</p>
-        <div className="mt-1 flex items-center gap-1.5">
+        <p
+          className={cn(
+            "mt-0.5 flex items-center gap-1.5 text-sm font-semibold",
+            !active ? "text-destructive" : paused ? "text-primary" : "text-success",
+          )}
+        >
           <span
             className={cn(
               "size-1.5 rounded-full",
@@ -49,16 +59,8 @@ function RestaurantToggleCard({
             )}
             aria-hidden="true"
           />
-          <Badge
-            variant={!active ? "destructive" : paused ? "default" : "outline"}
-            className={cn(
-              "uppercase",
-              active && !paused && "border-transparent bg-success-soft text-success",
-            )}
-          >
-            Status: {!active ? "Closed" : paused ? "Paused" : "Open"}
-          </Badge>
-        </div>
+          {!active ? "Closed" : paused ? "Paused" : "Open"}
+        </p>
         {paused && (
           <p className="mt-1 text-xs text-muted-foreground">Campus ordering is paused — see above.</p>
         )}
@@ -69,9 +71,9 @@ function RestaurantToggleCard({
         disabled={pending}
         onClick={toggle}
         className={cn(
-          "flex shrink-0 items-center gap-1.5 rounded-xl px-3.5 py-2 text-sm font-bold uppercase outline-none focus-visible:ring-3 focus-visible:ring-ring/40 disabled:opacity-70",
+          "flex h-10 shrink-0 items-center gap-1.5 rounded-full px-4 text-sm font-bold outline-none focus-visible:ring-3 focus-visible:ring-ring/40 disabled:opacity-70",
           active
-            ? "bg-destructive text-destructive-foreground hover:bg-destructive/90"
+            ? "border border-destructive/30 bg-destructive/5 text-destructive hover:bg-destructive/10"
             : "bg-success text-success-foreground hover:bg-success/90",
         )}
       >

@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { ShieldBan } from "lucide-react";
 import { BackToDashboardLink } from "@/components/admin/back-to-dashboard-link";
+import { adminPill } from "@/components/admin/styles";
 import { UsersList } from "@/components/admin/users-list";
 import { getAllUsers } from "@/lib/data/admin";
 
@@ -17,13 +18,13 @@ export default async function AdminUsersPage() {
           <BackToDashboardLink />
           <Link
             href="/admin/banned"
-            className="flex h-9 items-center gap-1.5 rounded-xl border bg-card px-3 text-sm font-semibold outline-none hover:bg-secondary focus-visible:ring-3 focus-visible:ring-ring/40"
+            className={adminPill}
           >
-            <ShieldBan className="size-3.5" />
+            <ShieldBan className="size-4" aria-hidden="true" />
             Banned users
           </Link>
         </div>
-        <h1 className="mt-2 font-heading text-title font-bold">Users</h1>
+        <h1 className="mt-4 font-heading text-headline font-bold">Users</h1>
         <p className="mt-1 text-muted-foreground">
           Everyone registered on MuteBites — {users.length} total.
         </p>

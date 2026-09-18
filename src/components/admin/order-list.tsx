@@ -1,7 +1,8 @@
 "use client";
 
 import { useMemo, useState, type ReactNode } from "react";
-import { ChevronDown, Search, X } from "lucide-react";
+import { ChevronDown, Inbox, Search, X } from "lucide-react";
+import { EmptyState } from "@/components/empty-state";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -15,6 +16,7 @@ import { formatOrderNumber } from "@/lib/orders/status";
 import { cn } from "@/lib/utils";
 import { ExportOrdersButton } from "./export-orders-button";
 import { OrderCard } from "./order-card";
+import { adminPill } from "./styles";
 
 const ALL_RESTAURANTS = "all";
 
@@ -23,7 +25,7 @@ type StatusFilter = "all" | "confirmed" | "delivered" | "cancelled";
 // "delivered" is what's stored; "Completed" is what the admin sees, same
 // wording as the stat card at the top of the page.
 const STATUS_OPTIONS: { value: StatusFilter; label: string }[] = [
-  { value: "all", label: "All Statuses" },
+  { value: "all", label: "All statuses" },
   { value: "confirmed", label: "Confirmed" },
   { value: "delivered", label: "Completed" },
   { value: "cancelled", label: "Cancelled" },
@@ -72,15 +74,15 @@ export function OrderList({
 
   const restaurantLabel =
     restaurantFilter === ALL_RESTAURANTS
-      ? "All Restaurants"
-      : (restaurants.find((r) => r.id === restaurantFilter)?.name ?? "All Restaurants");
-  const statusLabel = STATUS_OPTIONS.find((s) => s.value === statusFilter)?.label ?? "All Statuses";
+      ? "all restaurants"
+      : (restaurants.find((r) => r.id === restaurantFilter)?.name ?? "all restaurants");
+  const statusLabel = STATUS_OPTIONS.find((s) => s.value === statusFilter)?.label ?? "All statuses";
 
   return (
     <div className="flex flex-col gap-4">
       <div className="flex gap-2 overflow-x-auto pb-1 [scrollbar-width:none]">
         <RestaurantTab active={restaurantFilter === ALL_RESTAURANTS} onClick={() => setRestaurantFilter(ALL_RESTAURANTS)}>
-          All Restaurants
+          All restaurants
         </RestaurantTab>
         {restaurants.map((r) => (
           <RestaurantTab key={r.id} active={restaurantFilter === r.id} onClick={() => setRestaurantFilter(r.id)}>
@@ -101,7 +103,7 @@ export function OrderList({
             value={query}
             onChange={(e) => setQuery(e.target.value)}
             placeholder="Search ID, name, phone…"
-            className="h-10 w-full rounded-xl bg-secondary pr-9 pl-9 text-sm outline-none placeholder:text-muted-foreground focus-visible:ring-2 focus-visible:ring-ring/30 [&::-webkit-search-cancel-button]:hidden"
+            className="h-10 w-full rounded-full bg-secondary pr-9 pl-9 text-sm outline-none placeholder:text-muted-foreground focus-visible:ring-2 focus-visible:ring-ring/30 [&::-webkit-search-cancel-button]:hidden"
           />
           {query && (
             <button
@@ -116,7 +118,7 @@ export function OrderList({
         </label>
 
         <DropdownMenu>
-          <DropdownMenuTrigger className="flex h-10 shrink-0 items-center gap-1.5 rounded-xl border bg-card px-3 text-sm font-semibold outline-none focus-visible:ring-3 focus-visible:ring-ring/40">
+          <DropdownMenuTrigger className={adminPill}>
             {statusLabel}
             <ChevronDown className="size-4 text-muted-foreground" aria-hidden="true" />
           </DropdownMenuTrigger>
@@ -145,9 +147,9 @@ export function OrderList({
       </p>
 
       {filtered.length === 0 ? (
-        <p className="rounded-2xl border bg-card shadow-card p-6 text-center text-muted-foreground">
-          No orders found matching the selected filter.
-        </p>
+        <EmptyState compact icon={Inbox} title="No orders here">
+          Nothing matches these filters yet.
+        </EmptyState>
       ) : groups ? (
         <div className="flex flex-col gap-6">
           {groups.map(([dayKey, dayOrders]) => (
@@ -158,7 +160,7 @@ export function OrderList({
                   {dayOrders.length} order{dayOrders.length === 1 ? "" : "s"}
                 </span>
               </div>
-              <div className="flex flex-col gap-3">
+              <div className="grid items-start gap-3 md:grid-cols-2 xl:grid-cols-3">
                 {dayOrders.map((order) => (
                   <OrderCard key={order.id} order={order} />
                 ))}
@@ -167,7 +169,7 @@ export function OrderList({
           ))}
         </div>
       ) : (
-        <div className="flex flex-col gap-3">
+        <div className="grid items-start gap-3 md:grid-cols-2 xl:grid-cols-3">
           {filtered.map((order) => (
             <OrderCard key={order.id} order={order} />
           ))}
@@ -192,7 +194,7 @@ function RestaurantTab({
       onClick={onClick}
       aria-pressed={active}
       className={cn(
-        "h-9 shrink-0 rounded-full px-4 text-sm font-medium whitespace-nowrap outline-none transition-colors focus-visible:ring-3 focus-visible:ring-ring/40",
+        "h-10 shrink-0 rounded-full px-4 text-sm font-semibold whitespace-nowrap outline-none transition-colors focus-visible:ring-3 focus-visible:ring-ring/40",
         active ? "bg-ink text-ink-foreground" : "bg-secondary text-secondary-foreground hover:bg-border",
       )}
     >

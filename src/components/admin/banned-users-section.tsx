@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState, useTransition } from "react";
-import { Loader2, Search } from "lucide-react";
+import { Loader2, Search, ShieldCheck } from "lucide-react";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -17,6 +17,8 @@ import type { BannedUser } from "@/lib/data/admin";
 import { formatOrderTimestamp } from "@/lib/date";
 import { formatStoredMobile } from "@/lib/phone";
 import { toast } from "@/lib/toast/store";
+import { EmptyState } from "@/components/empty-state";
+import { Initials } from "./initials";
 
 export function BannedUsersSection({ bannedUsers }: { bannedUsers: BannedUser[] }) {
   const [banned, setBanned] = useState(bannedUsers);
@@ -46,17 +48,18 @@ export function BannedUsersSection({ bannedUsers }: { bannedUsers: BannedUser[] 
       <BanStudentSearch onBanned={onBanned} />
 
       {banned.length === 0 ? (
-        <p className="rounded-2xl border bg-card shadow-card p-6 text-center text-muted-foreground">
-          No one is currently banned.
-        </p>
+        <EmptyState compact icon={ShieldCheck} title="No one is banned">
+          Everyone can order right now.
+        </EmptyState>
       ) : (
         <div className="flex flex-col gap-2">
           {banned.map((user) => (
             <div
               key={user.id}
-              className="flex items-center justify-between gap-3 rounded-2xl border bg-card shadow-card p-4"
+              className="flex items-center gap-3 rounded-3xl border bg-card p-4 shadow-card"
             >
-              <div className="min-w-0">
+              <Initials name={user.fullName} />
+              <div className="min-w-0 flex-1">
                 <p className="truncate font-semibold">{user.fullName}</p>
                 <p className="text-sm text-muted-foreground">
                   {formatStoredMobile(user.phone)}
@@ -67,7 +70,7 @@ export function BannedUsersSection({ bannedUsers }: { bannedUsers: BannedUser[] 
                 type="button"
                 disabled={pending}
                 onClick={() => unban(user.id, user.fullName)}
-                className="shrink-0 rounded-xl bg-success px-3.5 py-2 text-sm font-bold text-success-foreground uppercase outline-none hover:bg-success/90 focus-visible:ring-3 focus-visible:ring-ring/40 disabled:opacity-70"
+                className="flex h-10 shrink-0 items-center rounded-full bg-success px-4 text-sm font-bold text-success-foreground outline-none hover:bg-success/90 focus-visible:ring-3 focus-visible:ring-ring/40 disabled:opacity-70"
               >
                 Unban
               </button>
@@ -120,7 +123,7 @@ function BanStudentSearch({ onBanned }: { onBanned: (user: StudentSearchResult) 
   }
 
   return (
-    <div className="rounded-2xl border bg-card shadow-card p-4">
+    <div className="rounded-3xl border bg-card p-4 shadow-card">
       <label className="relative block">
         <span className="sr-only">Search students to ban</span>
         <Search
@@ -132,7 +135,7 @@ function BanStudentSearch({ onBanned }: { onBanned: (user: StudentSearchResult) 
           value={query}
           onChange={(e) => setQuery(e.target.value)}
           placeholder="Search by name, phone, or reg. number to ban a student…"
-          className="h-11 w-full rounded-xl bg-secondary pr-4 pl-10 outline-none placeholder:text-muted-foreground focus-visible:ring-2 focus-visible:ring-ring/30"
+          className="h-11 w-full rounded-full bg-secondary pr-4 pl-10 outline-none placeholder:text-muted-foreground focus-visible:ring-2 focus-visible:ring-ring/30"
         />
       </label>
 
@@ -152,14 +155,14 @@ function BanStudentSearch({ onBanned }: { onBanned: (user: StudentSearchResult) 
                 <p className="text-sm text-muted-foreground">{formatStoredMobile(user.phone)}</p>
               </div>
               {user.isBanned ? (
-                <span className="shrink-0 text-xs font-semibold text-destructive uppercase">
+                <span className="shrink-0 text-xs font-bold text-destructive">
                   Already banned
                 </span>
               ) : (
                 <button
                   type="button"
                   onClick={() => setTarget(user)}
-                  className="shrink-0 rounded-xl bg-destructive px-3.5 py-2 text-sm font-bold text-destructive-foreground uppercase outline-none hover:bg-destructive/90 focus-visible:ring-3 focus-visible:ring-ring/40"
+                  className="flex h-10 shrink-0 items-center rounded-full bg-destructive px-4 text-sm font-bold text-destructive-foreground outline-none hover:bg-destructive/90 focus-visible:ring-3 focus-visible:ring-ring/40"
                 >
                   Ban
                 </button>

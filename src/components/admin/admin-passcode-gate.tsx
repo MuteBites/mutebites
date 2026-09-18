@@ -33,10 +33,10 @@ export function AdminPasscodeGate() {
 
   return (
     <main className="mx-auto flex min-h-dvh w-full max-w-sm flex-col items-center justify-center px-6">
-      <div className="flex size-14 items-center justify-center rounded-2xl bg-ink text-ink-foreground">
+      <div className="surface-ink flex size-14 items-center justify-center rounded-2xl bg-ink text-ink-foreground shadow-raised">
         <Lock className="size-6" />
       </div>
-      <h1 className="mt-5 text-center font-heading text-2xl font-bold">Admin passcode</h1>
+      <h1 className="mt-5 text-center font-heading text-headline font-bold">Admin passcode</h1>
       <p className="mt-1.5 text-center text-muted-foreground">
         Enter the admin passcode to continue — a second check on top of your account.
       </p>

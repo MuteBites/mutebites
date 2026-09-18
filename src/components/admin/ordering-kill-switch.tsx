@@ -13,7 +13,6 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
-import { Badge } from "@/components/ui/badge";
 import { setOrderingEnabled } from "@/lib/admin/actions";
 import { toast } from "@/lib/toast/store";
 import { cn } from "@/lib/utils";
@@ -37,38 +36,31 @@ export function OrderingKillSwitch({ initialEnabled }: { initialEnabled: boolean
     });
   }
 
+  // Rendered as the footer row of the dashboard's plum "Today" card
+  // (StatCards), so it uses the ink-surface tokens throughout.
   return (
-    <div className="rounded-3xl bg-ink p-5 text-ink-foreground sm:p-6">
-      <div className="flex flex-wrap items-start justify-between gap-4">
-        <div className="flex items-start gap-3">
-          <span
-            className={cn(
-              "mt-0.5 flex size-9 shrink-0 items-center justify-center rounded-full",
-              enabled ? "bg-ink-success/20 text-ink-success" : "bg-ink-danger/20 text-ink-danger",
-            )}
-            aria-hidden="true"
-          >
-            <Power className="size-4.5" />
-          </span>
-          <div>
-            <div className="flex flex-wrap items-center gap-2">
-              <h2 className="font-heading text-lg font-bold">Overall Campus Ordering System</h2>
-              <Badge
-                className={cn(
-                  "uppercase",
-                  enabled ? "bg-ink-success/20 text-ink-success" : "bg-ink-danger/20 text-ink-danger",
-                )}
-              >
-                {enabled ? "System active" : "System paused"}
-              </Badge>
-            </div>
-            <p className="mt-1 max-w-md text-sm text-ink-foreground/70">
-              {enabled
-                ? "Students can browse dishes, build carts, and place new orders normally across all open restaurants."
-                : "New orders are blocked campus-wide. Students can still browse menus, but placing an order fails until you turn ordering back on."}
-            </p>
-          </div>
+    <div className="flex flex-wrap items-center justify-between gap-3">
+      <div className="flex min-w-0 items-start gap-3">
+        <span
+          className={cn(
+            "mt-0.5 flex size-9 shrink-0 items-center justify-center rounded-full",
+            enabled ? "bg-ink-success/20 text-ink-success" : "bg-ink-danger/20 text-ink-danger",
+          )}
+          aria-hidden="true"
+        >
+          <Power className="size-4.5" />
+        </span>
+        <div className="min-w-0">
+          <p className="font-semibold">
+            {enabled ? "Campus ordering is live" : "Campus ordering is paused"}
+          </p>
+          <p className="max-w-md text-sm text-ink-foreground/75">
+            {enabled
+              ? "Students can place orders at every open restaurant."
+              : "New orders are blocked everywhere. Menus stay browsable."}
+          </p>
         </div>
+      </div>
 
         <AlertDialog open={open} onOpenChange={(next) => (pending ? null : setOpen(next))}>
           <AlertDialogTrigger
@@ -76,15 +68,15 @@ export function OrderingKillSwitch({ initialEnabled }: { initialEnabled: boolean
               <button
                 type="button"
                 className={cn(
-                  "shrink-0 rounded-xl px-4 py-2.5 text-sm font-bold tracking-wide uppercase outline-none focus-visible:ring-3 focus-visible:ring-ring/40",
+                  "flex h-10 shrink-0 items-center rounded-full px-4 text-sm font-bold outline-none focus-visible:ring-3 focus-visible:ring-ink-foreground/40",
                   enabled
-                    ? "bg-destructive text-destructive-foreground hover:bg-destructive/90"
-                    : "bg-success text-success-foreground hover:bg-success/90",
+                    ? "bg-ink-foreground/10 text-ink-danger hover:bg-ink-foreground/15"
+                    : "bg-ink-success text-ink hover:brightness-95",
                 )}
               />
             }
           >
-            {enabled ? "Turn off ordering" : "Turn on ordering"}
+            {enabled ? "Pause ordering" : "Turn ordering on"}
           </AlertDialogTrigger>
           <AlertDialogContent>
             <AlertDialogHeader>
@@ -110,7 +102,6 @@ export function OrderingKillSwitch({ initialEnabled }: { initialEnabled: boolean
             </AlertDialogFooter>
           </AlertDialogContent>
         </AlertDialog>
-      </div>
     </div>
   );
 }

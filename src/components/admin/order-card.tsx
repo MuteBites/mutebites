@@ -13,9 +13,10 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
-import { Badge } from "@/components/ui/badge";
+import { BlurImage } from "@/components/blur-image";
 import { advanceOrderStatus, cancelOrder } from "@/lib/admin/actions";
 import type { AdminOrder } from "@/lib/data/admin";
+import { getDishPhoto } from "@/lib/data/dish-photos";
 import { formatOrderTimestamp } from "@/lib/date";
 import { formatRupees } from "@/lib/format";
 import { advanceLabel, formatOrderNumber, nextStatus, statusBadge } from "@/lib/orders/status";
@@ -71,32 +72,49 @@ export function OrderCard({ order }: { order: AdminOrder }) {
     });
   }
 
-  const itemsSummary = order.items.map((i) => `${i.dishName} x${i.quantity}`).join(", ");
+  const itemsSummary = order.items.map((i) => `${i.quantity}× ${i.dishName}`).join(", ");
+  // First ordered dish that has a photo — same lookup as the student side.
+  const photo = order.items
+    .map((i) => getDishPhoto(order.restaurantName, i.dishName))
+    .find((src): src is string => !!src);
   const whatsAppMessage = `Hi ${order.studentName.split(" ")[0]}, this is MuteBites — confirming your order ${formatOrderNumber(order.dailyNumber)} from ${order.restaurantName} (${formatRupees(order.totalAmount)}). Do you want to go ahead with this order? Reply yes to confirm.`;
 
   return (
-    <div className="rounded-2xl border bg-card shadow-card p-4">
-      <div className="flex items-start justify-between gap-2">
-        <div>
-          <span className="text-sm font-semibold text-muted-foreground tabular-nums">
-            {formatOrderNumber(order.dailyNumber)}
-          </span>
-          <span className="ml-2 text-sm text-muted-foreground">{formatOrderTimestamp(order.createdAt)}</span>
+    <div className="rounded-3xl border bg-card p-4 shadow-card">
+      <div className="flex items-start gap-3">
+        <span className="relative flex size-14 shrink-0 items-center justify-center overflow-hidden rounded-2xl bg-brand-soft font-heading text-xl font-bold text-brand-soft-foreground/60">
+          {photo ? (
+            <BlurImage src={photo} alt="" sizes="56px" className="object-cover" />
+          ) : (
+            <span aria-hidden="true">{order.restaurantName.trim().charAt(0)}</span>
+          )}
+        </span>
+        <div className="min-w-0 flex-1">
+          <div className="flex items-center justify-between gap-2">
+            <p className="font-heading text-2xl leading-none font-bold tabular-nums">
+              {formatOrderNumber(order.dailyNumber)}
+            </p>
+            <span className={cn("shrink-0 rounded-full px-2.5 py-0.5 text-xs font-bold", badge.className)}>
+              {badge.label}
+            </span>
+          </div>
+          <p className="mt-1 truncate text-sm text-muted-foreground">
+            {order.restaurantName} · {formatOrderTimestamp(order.createdAt)}
+          </p>
         </div>
-        <Badge className={cn("uppercase", badge.className)}>{badge.label}</Badge>
       </div>
 
-      <div className="mt-2 flex items-center gap-2">
-        <p className="truncate font-heading text-base font-bold">{order.studentName}</p>
+      <div className="mt-3 flex items-center gap-2">
+        <p className="truncate font-semibold">{order.studentName}</p>
         {order.studentBanned && (
-          <Badge className="bg-destructive/10 text-destructive uppercase">Banned</Badge>
+          <span className="shrink-0 rounded-full bg-destructive/10 px-2 py-0.5 text-xs font-bold text-destructive">
+            Banned
+          </span>
         )}
       </div>
-      <p className="text-sm text-muted-foreground">
-        {formatStoredMobile(order.contactPhone)} · {order.restaurantName}
-      </p>
+      <p className="text-sm text-muted-foreground tabular-nums">{formatStoredMobile(order.contactPhone)}</p>
 
-      {itemsSummary && <p className="mt-2 text-sm font-medium text-brand-soft-foreground">{itemsSummary}</p>}
+      {itemsSummary && <p className="mt-2 text-sm">{itemsSummary}</p>}
       {order.notes && <p className="mt-1 text-sm text-muted-foreground italic">“{order.notes}”</p>}
 
       <div className="mt-3 flex items-center justify-between gap-3">
@@ -106,9 +124,9 @@ export function OrderCard({ order }: { order: AdminOrder }) {
           href={whatsAppLink(order.contactPhone, whatsAppMessage)}
           target="_blank"
           rel="noopener noreferrer"
-          className="flex items-center gap-1.5 rounded-lg border px-2.5 py-1.5 text-sm font-semibold text-success outline-none hover:bg-success-soft focus-visible:ring-3 focus-visible:ring-ring/40"
+          className="flex h-10 items-center gap-1.5 rounded-full bg-success-soft px-4 text-sm font-semibold text-success outline-none hover:brightness-95 focus-visible:ring-3 focus-visible:ring-ring/40"
         >
-          <MessageCircle className="size-3.5" />
+          <MessageCircle className="size-4" aria-hidden="true" />
           WhatsApp
         </a>
       </div>
@@ -121,7 +139,7 @@ export function OrderCard({ order }: { order: AdminOrder }) {
               disabled={advancing}
               onClick={advance}
               className={cn(
-                "flex h-11 flex-1 items-center justify-center gap-1.5 rounded-xl text-sm font-bold uppercase outline-none focus-visible:ring-3 focus-visible:ring-ring/40 disabled:opacity-70",
+                "flex h-11 flex-1 items-center justify-center gap-1.5 rounded-2xl text-sm font-bold outline-none focus-visible:ring-3 focus-visible:ring-ring/40 disabled:opacity-70",
                 isFinalStep
                   ? "bg-success text-success-foreground hover:bg-success/90"
                   : "bg-primary text-primary-foreground hover:bg-primary/90",
@@ -138,7 +156,7 @@ export function OrderCard({ order }: { order: AdminOrder }) {
                 render={
                   <button
                     type="button"
-                    className="flex h-11 flex-1 items-center justify-center rounded-xl border border-destructive/30 bg-destructive/5 text-sm font-bold text-destructive uppercase outline-none hover:bg-destructive/10 focus-visible:ring-3 focus-visible:ring-ring/40"
+                    className="flex h-11 flex-1 items-center justify-center rounded-2xl border border-destructive/30 bg-destructive/5 text-sm font-bold text-destructive outline-none hover:bg-destructive/10 focus-visible:ring-3 focus-visible:ring-ring/40"
                   />
                 }
               >

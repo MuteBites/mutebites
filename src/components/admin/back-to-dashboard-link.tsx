@@ -1,5 +1,7 @@
 import Link from "next/link";
 import { ArrowLeft } from "lucide-react";
+import { cn } from "@/lib/utils";
+import { adminPill } from "./styles";
 
 /**
  * Shared "back" button for admin sub-pages. Defaults to the main
@@ -17,9 +19,9 @@ export function BackToDashboardLink({
   return (
     <Link
       href={href}
-      className="flex h-9 items-center gap-1.5 rounded-xl border bg-card px-3 text-sm font-semibold outline-none hover:bg-secondary focus-visible:ring-3 focus-visible:ring-ring/40"
+      className={cn(adminPill, "w-fit")}
     >
-      <ArrowLeft className="size-3.5" />
+      <ArrowLeft className="size-4" aria-hidden="true" />
       {label}
     </Link>
   );

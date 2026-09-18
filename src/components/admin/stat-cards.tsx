@@ -1,101 +1,64 @@
-import { BadgeCheck, CheckCheck, Power, ShoppingBag, Store } from "lucide-react";
+import type { ReactNode } from "react";
 import { cn } from "@/lib/utils";
 
-function StatCard({
-  icon,
-  iconClassName,
-  label,
-  value,
-}: {
-  icon: React.ReactNode;
-  iconClassName: string;
-  label: string;
-  value: React.ReactNode;
-}) {
-  return (
-    <div className="flex items-center gap-3 rounded-2xl border bg-card shadow-card p-4">
-      <span
-        className={cn(
-          "flex size-9 shrink-0 items-center justify-center rounded-xl [&>svg]:size-4.5",
-          iconClassName,
-        )}
-        aria-hidden="true"
-      >
-        {icon}
-      </span>
-      <div className="min-w-0">
-        <p className="truncate text-label text-muted-foreground">
-          {label}
-        </p>
-        <p className="font-heading text-xl font-bold tabular-nums">{value}</p>
-      </div>
-    </div>
-  );
-}
-
+/*
+ * The dashboard's one plum block — the same member-card treatment as the
+ * student profile: today's numbers across the top, and (via `children`)
+ * the campus-wide ordering switch as its footer row, instead of five
+ * separate stat tiles plus a second dark banner for the kill switch.
+ * Scoped to today's IST orders, same as before (getOrderCounts(startOfTodayIST())).
+ */
 export function StatCards({
+  todayLabel,
   totalOrders,
   confirmedOrders,
   completedOrders,
   activeRestaurants,
   totalRestaurants,
-  orderingEnabled,
+  children,
 }: {
+  /** "Sat 19 Sep" — shown under the heading. */
+  todayLabel: string;
   totalOrders: number;
   confirmedOrders: number;
   completedOrders: number;
   activeRestaurants: number;
   totalRestaurants: number;
-  orderingEnabled: boolean;
+  /** Footer row — the ordering kill switch. */
+  children?: ReactNode;
 }) {
   return (
-    <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-5">
-      <StatCard
-        icon={<ShoppingBag />}
-        iconClassName="bg-brand-soft text-brand-soft-foreground"
-        label="Today's orders"
-        value={totalOrders}
-      />
-      <StatCard
-        icon={<BadgeCheck />}
-        iconClassName="bg-brand-soft text-brand-soft-foreground"
-        label="Confirmed"
-        value={confirmedOrders}
-      />
-      <StatCard
-        icon={<CheckCheck />}
-        iconClassName="bg-success-soft text-success"
-        label="Completed"
-        value={completedOrders}
-      />
-      <StatCard
-        icon={<Store />}
-        iconClassName="bg-secondary text-secondary-foreground"
-        label="Active vendors"
-        value={
-          <>
-            {activeRestaurants}
-            <span className="text-muted-foreground">/{totalRestaurants}</span>
-          </>
-        }
-      />
-      <StatCard
-        icon={<Power />}
-        iconClassName={orderingEnabled ? "bg-success-soft text-success" : "bg-destructive/10 text-destructive"}
-        label="System state"
-        value={
-          <span className="inline-flex items-center gap-1.5">
-            <span
-              className={cn(
-                "size-2 rounded-full",
-                orderingEnabled ? "bg-success" : "bg-destructive",
-              )}
-              aria-hidden="true"
-            />
-            {orderingEnabled ? "Live" : "Paused"}
-          </span>
-        }
-      />
+    <section className="surface-ink shadow-elevated-glow rounded-3xl bg-ink text-ink-foreground">
+      <div className="px-5 pt-5 sm:px-6">
+        <h2 className="font-heading text-title font-bold">Today</h2>
+        <p className="text-sm text-ink-foreground/75">{todayLabel} · VIT-AP Main Gate</p>
+      </div>
+      <dl className="mt-4 grid grid-cols-2 gap-y-4 px-5 pb-5 sm:grid-cols-4 sm:px-6">
+        <Stat label="Orders" value={totalOrders} />
+        <Stat label="Confirmed" value={confirmedOrders} />
+        <Stat label="Completed" value={completedOrders} tone="success" />
+        <Stat
+          label="Restaurants open"
+          value={
+            <>
+              {activeRestaurants}
+              <span className="text-ink-foreground/50">/{totalRestaurants}</span>
+            </>
+          }
+        />
+      </dl>
+      {children && <div className="border-t border-ink-foreground/15 px-5 py-4 sm:px-6">{children}</div>}
+    </section>
+  );
+}
+
+function Stat({ label, value, tone }: { label: string; value: ReactNode; tone?: "success" }) {
+  return (
+    <div className="flex flex-col-reverse justify-end">
+      <dt className="text-sm text-ink-foreground/75">{label}</dt>
+      <dd className={cn("font-heading text-3xl font-bold tabular-nums", tone === "success" && "text-ink-success")}>
+        {value}
+      </dd>
     </div>
   );
 }

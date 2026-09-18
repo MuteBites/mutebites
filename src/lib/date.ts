@@ -129,10 +129,15 @@ export function formatDayHeading(iso: string, now: Date = new Date()): string {
   const key = istDayKey(iso);
   if (key === dayKeyFmt.format(now)) return "Today";
   if (key === dayKeyFmt.format(new Date(now.getTime() - 24 * 60 * 60 * 1000))) return "Yesterday";
+  const label = formatShortDay(iso);
+  return key.slice(0, 4) === dayKeyFmt.format(now).slice(0, 4) ? label : `${label} ${key.slice(0, 4)}`;
+}
+
+/** "Sat 19 Sep" — IST calendar day, no relative wording (admin's Today card). */
+export function formatShortDay(iso: string): string {
   const part = (type: Intl.DateTimeFormatPartTypes) =>
     dayHeadingFmt.formatToParts(new Date(iso)).find((p) => p.type === type)?.value;
-  const label = `${part("weekday")} ${part("day")} ${part("month")}`;
-  return key.slice(0, 4) === dayKeyFmt.format(now).slice(0, 4) ? label : `${label} ${key.slice(0, 4)}`;
+  return `${part("weekday")} ${part("day")} ${part("month")}`;
 }
 
 /** The UTC instant of the start of "today" in IST wall-clock time — for scoping the admin dashboard to today's orders only. */

@@ -5,6 +5,7 @@ import { Search } from "lucide-react";
 import type { AdminUser } from "@/lib/data/admin";
 import { formatOrderTimestamp } from "@/lib/date";
 import { formatStoredMobile } from "@/lib/phone";
+import { Initials } from "./initials";
 
 export function UsersList({ users }: { users: AdminUser[] }) {
   const [query, setQuery] = useState("");
@@ -34,7 +35,7 @@ export function UsersList({ users }: { users: AdminUser[] }) {
           value={query}
           onChange={(e) => setQuery(e.target.value)}
           placeholder="Search by name, phone, email, or reg. number…"
-          className="h-11 w-full rounded-xl bg-secondary pr-4 pl-10 outline-none placeholder:text-muted-foreground focus-visible:ring-2 focus-visible:ring-ring/30"
+          className="h-11 w-full rounded-full bg-secondary pr-4 pl-10 outline-none placeholder:text-muted-foreground focus-visible:ring-2 focus-visible:ring-ring/30"
         />
       </label>
 
@@ -47,9 +48,10 @@ export function UsersList({ users }: { users: AdminUser[] }) {
           {filtered.map((user) => (
             <div
               key={user.id}
-              className="flex items-center justify-between gap-3 rounded-2xl border bg-card shadow-card p-4"
+              className="flex items-center gap-3 rounded-3xl border bg-card p-4 shadow-card"
             >
-              <div className="min-w-0">
+              <Initials name={user.fullName} />
+              <div className="min-w-0 flex-1">
                 <p className="truncate font-semibold">{user.fullName}</p>
                 <p className="truncate text-sm text-muted-foreground">
                   {formatStoredMobile(user.phone)}
@@ -59,7 +61,7 @@ export function UsersList({ users }: { users: AdminUser[] }) {
               </div>
               <div className="flex shrink-0 flex-col items-end gap-1">
                 {user.isBanned && (
-                  <span className="rounded-full bg-destructive/10 px-2 py-0.5 text-xs font-semibold text-destructive uppercase">
+                  <span className="rounded-full bg-destructive/10 px-2 py-0.5 text-xs font-bold text-destructive">
                     Banned
                   </span>
                 )}

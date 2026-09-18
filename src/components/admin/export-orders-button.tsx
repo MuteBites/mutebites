@@ -6,6 +6,7 @@ import { formatOrderTimestamp } from "@/lib/date";
 import { formatRupees } from "@/lib/format";
 import { formatOrderNumber, statusBadge } from "@/lib/orders/status";
 import { formatStoredMobile } from "@/lib/phone";
+import { adminPill } from "./styles";
 
 const COLUMNS = ["Order", "Date", "Student", "Phone", "Restaurant", "Items", "Amount", "Status"];
 
@@ -52,9 +53,9 @@ export function ExportOrdersButton({ orders }: { orders: AdminOrder[] }) {
       type="button"
       disabled={orders.length === 0}
       onClick={exportCsv}
-      className="flex items-center gap-1.5 rounded-xl border bg-card px-3.5 py-2 text-xs font-bold uppercase outline-none hover:bg-muted focus-visible:ring-3 focus-visible:ring-ring/40 disabled:opacity-50"
+      className={adminPill}
     >
-      <Download className="size-3.5" />
+      <Download className="size-4" aria-hidden="true" />
       Export to Excel
     </button>
   );
