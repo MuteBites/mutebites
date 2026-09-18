@@ -160,7 +160,7 @@ export function OrderList({
                   {dayOrders.length} order{dayOrders.length === 1 ? "" : "s"}
                 </span>
               </div>
-              <div className="grid items-start gap-3 md:grid-cols-2 xl:grid-cols-3">
+              <div className="grid grid-cols-1 items-start gap-3 md:grid-cols-2 xl:grid-cols-3">
                 {dayOrders.map((order) => (
                   <OrderCard key={order.id} order={order} />
                 ))}
@@ -169,7 +169,7 @@ export function OrderList({
           ))}
         </div>
       ) : (
-        <div className="grid items-start gap-3 md:grid-cols-2 xl:grid-cols-3">
+        <div className="grid grid-cols-1 items-start gap-3 md:grid-cols-2 xl:grid-cols-3">
           {filtered.map((order) => (
             <OrderCard key={order.id} order={order} />
           ))}
