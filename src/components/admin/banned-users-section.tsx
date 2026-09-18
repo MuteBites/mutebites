@@ -46,7 +46,7 @@ export function BannedUsersSection({ bannedUsers }: { bannedUsers: BannedUser[] 
       <BanStudentSearch onBanned={onBanned} />
 
       {banned.length === 0 ? (
-        <p className="rounded-2xl border bg-card p-6 text-center text-muted-foreground">
+        <p className="rounded-2xl border bg-card shadow-card p-6 text-center text-muted-foreground">
           No one is currently banned.
         </p>
       ) : (
@@ -54,7 +54,7 @@ export function BannedUsersSection({ bannedUsers }: { bannedUsers: BannedUser[] 
           {banned.map((user) => (
             <div
               key={user.id}
-              className="flex items-center justify-between gap-3 rounded-2xl border bg-card p-4"
+              className="flex items-center justify-between gap-3 rounded-2xl border bg-card shadow-card p-4"
             >
               <div className="min-w-0">
                 <p className="truncate font-semibold">{user.fullName}</p>
@@ -67,7 +67,7 @@ export function BannedUsersSection({ bannedUsers }: { bannedUsers: BannedUser[] 
                 type="button"
                 disabled={pending}
                 onClick={() => unban(user.id, user.fullName)}
-                className="shrink-0 rounded-xl bg-success px-3.5 py-2 text-sm font-bold text-white uppercase outline-none hover:bg-success/90 focus-visible:ring-3 focus-visible:ring-ring/40 disabled:opacity-70"
+                className="shrink-0 rounded-xl bg-success px-3.5 py-2 text-sm font-bold text-success-foreground uppercase outline-none hover:bg-success/90 focus-visible:ring-3 focus-visible:ring-ring/40 disabled:opacity-70"
               >
                 Unban
               </button>
@@ -120,7 +120,7 @@ function BanStudentSearch({ onBanned }: { onBanned: (user: StudentSearchResult) 
   }
 
   return (
-    <div className="rounded-2xl border bg-card p-4">
+    <div className="rounded-2xl border bg-card shadow-card p-4">
       <label className="relative block">
         <span className="sr-only">Search students to ban</span>
         <Search
@@ -159,7 +159,7 @@ function BanStudentSearch({ onBanned }: { onBanned: (user: StudentSearchResult) 
                 <button
                   type="button"
                   onClick={() => setTarget(user)}
-                  className="shrink-0 rounded-xl bg-destructive px-3.5 py-2 text-sm font-bold text-white uppercase outline-none hover:bg-destructive/90 focus-visible:ring-3 focus-visible:ring-ring/40"
+                  className="shrink-0 rounded-xl bg-destructive px-3.5 py-2 text-sm font-bold text-destructive-foreground uppercase outline-none hover:bg-destructive/90 focus-visible:ring-3 focus-visible:ring-ring/40"
                 >
                   Ban
                 </button>
@@ -183,7 +183,7 @@ function BanStudentSearch({ onBanned }: { onBanned: (user: StudentSearchResult) 
             <AlertDialogAction
               disabled={banPending}
               onClick={confirmBan}
-              className="bg-destructive text-white hover:bg-destructive/90"
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
             >
               {banPending && <Loader2 className="size-4 animate-spin" />}
               Ban student

@@ -156,7 +156,7 @@ function CartContents({
           />
         </label>
 
-        <div className="mt-4 mb-5 divide-y rounded-2xl border bg-card">
+        <div className="mt-4 mb-5 divide-y rounded-2xl border bg-card shadow-card">
           <div className="flex items-center gap-4 px-5 py-4">
             <MapPin className="size-5 shrink-0 text-primary" aria-hidden="true" />
             <div>

@@ -64,7 +64,7 @@ export function MarkAllDeliveredButton({
             type="button"
             disabled={disabled}
             className={cn(
-              "rounded-xl bg-success px-3.5 py-2 text-xs font-bold text-white uppercase outline-none hover:bg-success/90 focus-visible:ring-3 focus-visible:ring-ring/40",
+              "rounded-xl bg-success px-3.5 py-2 text-xs font-bold text-success-foreground uppercase outline-none hover:bg-success/90 focus-visible:ring-3 focus-visible:ring-ring/40",
               disabled && "opacity-50 hover:bg-success",
             )}
           />
@@ -89,7 +89,7 @@ export function MarkAllDeliveredButton({
           <AlertDialogAction
             disabled={pending}
             onClick={confirm}
-            className="bg-success text-white hover:bg-success/90"
+            className="bg-success text-success-foreground hover:bg-success/90"
           >
             {pending && <Loader2 className="size-4 animate-spin" />}
             Mark all delivered

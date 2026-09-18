@@ -78,8 +78,8 @@ export function OrderingKillSwitch({ initialEnabled }: { initialEnabled: boolean
                 className={cn(
                   "shrink-0 rounded-xl px-4 py-2.5 font-heading text-sm font-bold tracking-wide uppercase outline-none focus-visible:ring-3 focus-visible:ring-ring/40",
                   enabled
-                    ? "bg-destructive text-white hover:bg-destructive/90"
-                    : "bg-success text-white hover:bg-success/90",
+                    ? "bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                    : "bg-success text-success-foreground hover:bg-success/90",
                 )}
               />
             }
@@ -102,7 +102,7 @@ export function OrderingKillSwitch({ initialEnabled }: { initialEnabled: boolean
               <AlertDialogAction
                 disabled={pending}
                 onClick={confirm}
-                className={cn(enabled ? "bg-destructive text-white hover:bg-destructive/90" : "")}
+                className={cn(enabled ? "bg-destructive text-destructive-foreground hover:bg-destructive/90" : "")}
               >
                 {pending && <Loader2 className="size-4 animate-spin" />}
                 {enabled ? "Turn off ordering" : "Turn on ordering"}

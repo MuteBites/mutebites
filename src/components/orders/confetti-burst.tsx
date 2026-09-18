@@ -11,7 +11,7 @@ type Piece = {
   color: string;
 };
 
-const COLORS = ["#f26419", "#1e8a4c", "#e0518c", "#3b82f6"];
+const COLORS = ["#c07a35", "#914955", "#d7a8b8", "#2f6b4f", "#552c4a"];
 const PIECE_COUNT = 20;
 
 function makePieces(): Piece[] {

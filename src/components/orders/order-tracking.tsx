@@ -259,7 +259,7 @@ export function OrderTracking({
             </ol>
           )}
 
-          <div className="mt-2 rounded-2xl border bg-card p-5">
+          <div className="mt-2 rounded-2xl border bg-card shadow-card p-5">
             <p className="font-mono text-xs font-semibold tracking-[0.18em] text-muted-foreground uppercase">
               {initialOrder.restaurantName}
             </p>
@@ -284,7 +284,7 @@ export function OrderTracking({
             </div>
           </div>
 
-          <div className="mt-4 flex items-center justify-between rounded-2xl border bg-card px-5 py-4">
+          <div className="mt-4 flex items-center justify-between rounded-2xl border bg-card shadow-card px-5 py-4">
             <div>
               <p className="text-sm text-muted-foreground">Something wrong?</p>
               <p className="font-semibold">Contact MuteBites</p>
@@ -302,7 +302,7 @@ export function OrderTracking({
 function StepDot({ state, Icon }: { state: TimelineStepState; Icon: LucideIcon }) {
   if (state === "done") {
     return (
-      <span className="animate-pop-in flex size-9 shrink-0 items-center justify-center rounded-full bg-success text-white">
+      <span className="animate-pop-in flex size-9 shrink-0 items-center justify-center rounded-full bg-success text-success-foreground">
         <Check className="size-4" />
       </span>
     );
@@ -311,7 +311,7 @@ function StepDot({ state, Icon }: { state: TimelineStepState; Icon: LucideIcon }
     return (
       <span className="relative flex size-9 shrink-0 items-center justify-center" aria-hidden="true">
         <span className="animate-ping-slow absolute inset-0 rounded-full bg-primary/50" />
-        <span className="relative flex size-9 items-center justify-center rounded-full bg-primary text-white">
+        <span className="relative flex size-9 items-center justify-center rounded-full bg-primary text-primary-foreground">
           <Icon className="size-4" />
         </span>
       </span>

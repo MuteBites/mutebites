@@ -18,7 +18,7 @@ export function SupportButtons({ whatsappMessage }: { whatsappMessage: string })
         target="_blank"
         rel="noopener noreferrer"
         aria-label="Message MuteBites on WhatsApp"
-        className="flex size-11 items-center justify-center rounded-xl bg-success text-white outline-none hover:bg-success/90 focus-visible:ring-3 focus-visible:ring-ring/40"
+        className="flex size-11 items-center justify-center rounded-xl bg-success text-success-foreground outline-none hover:bg-success/90 focus-visible:ring-3 focus-visible:ring-ring/40"
       >
         <MessageCircle className="size-4" />
       </a>

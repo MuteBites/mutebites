@@ -87,7 +87,7 @@ export default async function ProfilePage() {
             Tap any field to edit
           </p>
 
-          <div className="mt-2 divide-y rounded-2xl border bg-card">
+          <div className="mt-2 divide-y rounded-2xl border bg-card shadow-card">
             <EditableName initialValue={profile.full_name} />
             <EditablePhone
               initialValue={profile.phone}

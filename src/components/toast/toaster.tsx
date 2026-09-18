@@ -17,7 +17,7 @@ export function Toaster() {
           role={t.kind === "error" ? "alert" : "status"}
           className={cn(
             "animate-toast-in flex max-w-sm items-center gap-2 rounded-2xl px-4 py-3 text-sm font-semibold shadow-xl",
-            t.kind === "error" ? "bg-destructive text-white" : "bg-success text-white",
+            t.kind === "error" ? "bg-destructive text-destructive-foreground" : "bg-success text-success-foreground",
           )}
         >
           {t.kind === "error" ? (

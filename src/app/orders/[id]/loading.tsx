@@ -30,7 +30,7 @@ export default function Loading() {
         ))}
       </div>
 
-      <div className="mt-2 rounded-2xl border bg-card p-5">
+      <div className="mt-2 rounded-2xl border bg-card shadow-card p-5">
         <Skeleton className="h-3 w-24" />
         <div className="mt-3 flex flex-col gap-2">
           <Skeleton className="h-4 w-full" />
@@ -42,7 +42,7 @@ export default function Loading() {
         </div>
       </div>
 
-      <div className="mt-4 flex items-center justify-between rounded-2xl border bg-card px-5 py-4">
+      <div className="mt-4 flex items-center justify-between rounded-2xl border bg-card shadow-card px-5 py-4">
         <div>
           <Skeleton className="h-3 w-24" />
           <Skeleton className="mt-1.5 h-4 w-28" />

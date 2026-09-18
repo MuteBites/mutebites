@@ -13,7 +13,7 @@ function StatCard({
   value: React.ReactNode;
 }) {
   return (
-    <div className="flex items-center gap-3 rounded-2xl border bg-card p-4">
+    <div className="flex items-center gap-3 rounded-2xl border bg-card shadow-card p-4">
       <span
         className={cn(
           "flex size-9 shrink-0 items-center justify-center rounded-xl [&>svg]:size-4.5",

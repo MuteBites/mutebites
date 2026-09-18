@@ -75,7 +75,7 @@ export function OrderCard({ order }: { order: AdminOrder }) {
   const whatsAppMessage = `Hi ${order.studentName.split(" ")[0]}, this is MuteBites — confirming your order ${formatOrderNumber(order.dailyNumber)} from ${order.restaurantName} (${formatRupees(order.totalAmount)}). Do you want to go ahead with this order? Reply yes to confirm.`;
 
   return (
-    <div className="rounded-2xl border bg-card p-4">
+    <div className="rounded-2xl border bg-card shadow-card p-4">
       <div className="flex items-start justify-between gap-2">
         <div>
           <span className="font-mono text-sm font-semibold text-muted-foreground">
@@ -123,7 +123,7 @@ export function OrderCard({ order }: { order: AdminOrder }) {
               className={cn(
                 "flex h-11 flex-1 items-center justify-center gap-1.5 rounded-xl font-heading text-sm font-bold uppercase outline-none focus-visible:ring-3 focus-visible:ring-ring/40 disabled:opacity-70",
                 isFinalStep
-                  ? "bg-success text-white hover:bg-success/90"
+                  ? "bg-success text-success-foreground hover:bg-success/90"
                   : "bg-primary text-primary-foreground hover:bg-primary/90",
               )}
             >
@@ -157,7 +157,7 @@ export function OrderCard({ order }: { order: AdminOrder }) {
                   <AlertDialogAction
                     disabled={cancelling}
                     onClick={confirmCancel}
-                    className="bg-destructive text-white hover:bg-destructive/90"
+                    className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
                   >
                     {cancelling && <Loader2 className="size-4 animate-spin" />}
                     Cancel order

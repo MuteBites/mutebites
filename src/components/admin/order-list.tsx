@@ -145,7 +145,7 @@ export function OrderList({
       </p>
 
       {filtered.length === 0 ? (
-        <p className="rounded-2xl border bg-card p-6 text-center text-muted-foreground">
+        <p className="rounded-2xl border bg-card shadow-card p-6 text-center text-muted-foreground">
           No orders found matching the selected filter.
         </p>
       ) : groups ? (

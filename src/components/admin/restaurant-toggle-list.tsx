@@ -38,7 +38,7 @@ function RestaurantToggleCard({
   }
 
   return (
-    <div className="flex items-center justify-between gap-3 rounded-2xl border bg-card p-4">
+    <div className="flex items-center justify-between gap-3 rounded-2xl border bg-card shadow-card p-4">
       <div className="min-w-0">
         <p className="truncate font-semibold">{restaurant.name}</p>
         <div className="mt-1 flex items-center gap-1.5">
@@ -71,8 +71,8 @@ function RestaurantToggleCard({
         className={cn(
           "flex shrink-0 items-center gap-1.5 rounded-xl px-3.5 py-2 text-sm font-bold uppercase outline-none focus-visible:ring-3 focus-visible:ring-ring/40 disabled:opacity-70",
           active
-            ? "bg-destructive text-white hover:bg-destructive/90"
-            : "bg-success text-white hover:bg-success/90",
+            ? "bg-destructive text-destructive-foreground hover:bg-destructive/90"
+            : "bg-success text-success-foreground hover:bg-success/90",
         )}
       >
         {pending && <Loader2 className="size-3.5 animate-spin" />}

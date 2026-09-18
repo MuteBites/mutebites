@@ -55,7 +55,7 @@ export function AdminPasscodeGate() {
           aria-invalid={!!error || undefined}
           aria-describedby={error ? "passcode-error" : undefined}
           className={cn(
-            "h-14 w-full rounded-2xl border bg-card px-5 text-lg outline-none focus-visible:ring-2 focus-visible:ring-ring/30",
+            "h-14 w-full rounded-2xl border bg-card shadow-card px-5 text-lg outline-none focus-visible:ring-2 focus-visible:ring-ring/30",
             error && "border-destructive",
           )}
         />

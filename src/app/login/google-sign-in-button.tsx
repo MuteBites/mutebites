@@ -36,7 +36,7 @@ export function GoogleSignInButton() {
       >
         <span className="flex size-8 items-center justify-center rounded-full bg-white">
           {pending ? (
-            <Loader2 className="size-4 animate-spin text-[#18171c]" />
+            <Loader2 className="size-4 animate-spin text-plum-700" />
           ) : (
             <GoogleIcon />
           )}

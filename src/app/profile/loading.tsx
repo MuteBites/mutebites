@@ -31,7 +31,7 @@ export default function Loading() {
         </div>
 
         <Skeleton className="mt-6 h-4 w-32" />
-        <div className="mt-2 divide-y rounded-2xl border bg-card">
+        <div className="mt-2 divide-y rounded-2xl border bg-card shadow-card">
           {[0, 1, 2, 3].map((i) => (
             <div key={i} className="px-5 py-4">
               <Skeleton className="h-3 w-24" />

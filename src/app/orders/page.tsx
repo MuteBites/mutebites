@@ -69,7 +69,7 @@ function OrderCard({ order }: { order: OrderSummary }) {
   const active = isActiveStatus(order.status);
 
   return (
-    <div className={cn("rounded-3xl border bg-card p-5", active && "border-primary/40")}>
+    <div className={cn("rounded-3xl border bg-card shadow-card p-5", active && "border-primary/40")}>
       <div className="flex items-start justify-between gap-3">
         <h2 className="font-heading text-lg font-bold">{order.restaurantName}</h2>
         <span
@@ -99,7 +99,7 @@ function OrderCard({ order }: { order: OrderSummary }) {
           <Link
             href={`/restaurants/${order.restaurantId}`}
             transitionTypes={["nav-forward"]}
-            className="pressable flex h-10 shrink-0 items-center gap-1.5 rounded-full border border-primary/30 bg-brand-soft px-4 text-sm font-bold text-primary outline-none hover:bg-brand-soft/70 focus-visible:ring-2 focus-visible:ring-ring/40"
+            className="pressable flex h-10 shrink-0 items-center gap-1.5 rounded-full border border-brand-soft-foreground/20 bg-brand-soft px-4 text-sm font-bold text-brand-soft-foreground outline-none hover:bg-brand-soft/70 focus-visible:ring-2 focus-visible:ring-ring/40"
           >
             <RotateCcw className="size-4" aria-hidden="true" /> Reorder
           </Link>

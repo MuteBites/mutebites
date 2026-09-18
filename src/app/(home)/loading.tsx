@@ -29,7 +29,7 @@ export default function Loading() {
 
         <div className="mt-4 flex flex-col gap-5">
           {[0, 1, 2].map((i) => (
-            <div key={i} className="overflow-hidden rounded-3xl border bg-card">
+            <div key={i} className="overflow-hidden rounded-3xl border bg-card shadow-card">
               <Skeleton className="aspect-[5/2] w-full rounded-none" />
               <div className="px-5 pt-4 pb-5">
                 <Skeleton className="h-6 w-2/3" />

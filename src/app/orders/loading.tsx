@@ -15,7 +15,7 @@ export default function Loading() {
 
         <div className="mt-6 flex flex-col gap-4">
           {[0, 1, 2].map((i) => (
-            <div key={i} className="rounded-3xl border bg-card p-5">
+            <div key={i} className="rounded-3xl border bg-card shadow-card p-5">
               <div className="flex items-start justify-between gap-3">
                 <Skeleton className="h-6 w-32" />
                 <Skeleton className="h-6 w-20 rounded-full" />

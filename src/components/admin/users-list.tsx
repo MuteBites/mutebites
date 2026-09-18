@@ -39,7 +39,7 @@ export function UsersList({ users }: { users: AdminUser[] }) {
       </label>
 
       {filtered.length === 0 ? (
-        <p className="rounded-2xl border bg-card p-6 text-center text-muted-foreground">
+        <p className="rounded-2xl border bg-card shadow-card p-6 text-center text-muted-foreground">
           No users match “{query.trim()}”.
         </p>
       ) : (
@@ -47,7 +47,7 @@ export function UsersList({ users }: { users: AdminUser[] }) {
           {filtered.map((user) => (
             <div
               key={user.id}
-              className="flex items-center justify-between gap-3 rounded-2xl border bg-card p-4"
+              className="flex items-center justify-between gap-3 rounded-2xl border bg-card shadow-card p-4"
             >
               <div className="min-w-0">
                 <p className="truncate font-semibold">{user.fullName}</p>

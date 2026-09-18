@@ -39,7 +39,7 @@ export function SignOutButton() {
           <AlertDialogAction
             disabled={pending}
             onClick={() => startTransition(() => signOutAndClearCart())}
-            className="bg-destructive text-white hover:bg-destructive/90"
+            className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
           >
             {pending && <Loader2 className="size-4 animate-spin" />}
             Yes, sign out

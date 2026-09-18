@@ -32,7 +32,7 @@ export function TrendingDialog({ dishes }: { dishes: TrendingDish[] }) {
                   transitionTypes={["nav-forward"]}
                   className="pressable flex items-center gap-3 rounded-xl outline-none focus-visible:ring-2 focus-visible:ring-ring/40"
                 >
-                  <span className="flex size-7 shrink-0 items-center justify-center rounded-full bg-brand-soft text-sm font-bold text-primary">
+                  <span className="flex size-7 shrink-0 items-center justify-center rounded-full bg-brand-soft text-sm font-bold text-brand-soft-foreground">
                     {i + 1}
                   </span>
                   <span className="min-w-0 flex-1 text-left">

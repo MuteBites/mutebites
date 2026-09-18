@@ -31,7 +31,12 @@ export const metadata: Metadata = {
 };
 
 export const viewport: Viewport = {
-  themeColor: "#fdfbf7",
+  // Matches --background in globals.css. Follows the OS scheme only — an
+  // in-app theme override can't retarget this meta tag before paint.
+  themeColor: [
+    { media: "(prefers-color-scheme: light)", color: "#faf3ec" },
+    { media: "(prefers-color-scheme: dark)", color: "#170f14" },
+  ],
 };
 
 export default function RootLayout({ children }: LayoutProps<"/">) {
