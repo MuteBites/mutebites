@@ -98,7 +98,7 @@ export function CartLineRow({ line, restaurantName }: { line: CartLine; restaura
             <VegMark isVeg={line.isVeg} className="mr-1.5 inline-flex size-4 -translate-y-px align-middle" />
             {line.name}
           </p>
-          <div className="mt-2 flex items-center gap-3">
+          <div className="mt-2 flex flex-wrap items-center gap-x-3 gap-y-1">
             <div className="flex h-9 items-center gap-1 rounded-full bg-secondary p-1">
               <button
                 type="button"
