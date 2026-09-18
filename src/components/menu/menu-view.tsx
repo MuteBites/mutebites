@@ -158,7 +158,7 @@ export function MenuView({
         <section key={sectionKey(section)} aria-labelledby={`sec-${sectionKey(section)}`} className="pt-6">
           <h2
             id={`sec-${sectionKey(section)}`}
-            className="font-mono text-xs font-semibold tracking-[0.18em] text-muted-foreground uppercase"
+            className="text-label text-muted-foreground"
           >
             {sectionName(section)}
           </h2>

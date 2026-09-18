@@ -24,7 +24,7 @@ function StatCard({
         {icon}
       </span>
       <div className="min-w-0">
-        <p className="truncate font-mono text-[0.7rem] font-semibold tracking-[0.08em] text-muted-foreground uppercase">
+        <p className="truncate text-label text-muted-foreground">
           {label}
         </p>
         <p className="font-heading text-xl font-bold tabular-nums">{value}</p>

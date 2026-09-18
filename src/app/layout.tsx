@@ -1,5 +1,5 @@
 import type { Metadata, Viewport } from "next";
-import { JetBrains_Mono, Outfit, Plus_Jakarta_Sans } from "next/font/google";
+import { Fraunces, Plus_Jakarta_Sans } from "next/font/google";
 import Script from "next/script";
 import { Toaster } from "@/components/toast/toaster";
 import { THEME_INIT_SCRIPT } from "@/lib/theme/init-script";
@@ -10,14 +10,14 @@ const jakarta = Plus_Jakarta_Sans({
   subsets: ["latin"],
 });
 
-const outfit = Outfit({
-  variable: "--font-outfit",
+// Display face. Only the SOFT axis (rounded terminals, set in
+// globals.css) on top of weight: adding opsz as well took the preloaded
+// Fraunces file from 62KB to 121KB, for a display cut this app's bold
+// headings barely show.
+const fraunces = Fraunces({
+  variable: "--font-fraunces",
   subsets: ["latin"],
-});
-
-const jetbrainsMono = JetBrains_Mono({
-  variable: "--font-jetbrains-mono",
-  subsets: ["latin"],
+  axes: ["SOFT"],
 });
 
 export const metadata: Metadata = {
@@ -47,7 +47,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
       // "dark" class / colorScheme style before React hydrates — expected,
       // not a real mismatch.
       suppressHydrationWarning
-      className={`${jakarta.variable} ${outfit.variable} ${jetbrainsMono.variable} h-full antialiased`}
+      className={`${jakarta.variable} ${fraunces.variable} h-full antialiased`}
     >
       <body className="min-h-full flex flex-col">
         <Script id="theme-init" strategy="beforeInteractive">

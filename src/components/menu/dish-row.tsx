@@ -51,7 +51,7 @@ export function DishRow({
       onClick={onAdd}
       aria-label={`Add ${dish.name}`}
       className={cn(
-        "animate-pop-in h-11 w-full rounded-xl border-[1.5px] border-primary bg-card font-heading text-lg font-bold text-primary outline-none transition-colors hover:bg-brand-soft focus-visible:ring-3 focus-visible:ring-ring/40",
+        "animate-pop-in h-11 w-full rounded-xl border-[1.5px] border-primary bg-card text-lg font-bold text-primary outline-none transition-colors hover:bg-brand-soft focus-visible:ring-3 focus-visible:ring-ring/40",
         photo && "shadow-md",
       )}
     >

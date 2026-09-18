@@ -27,7 +27,7 @@ export function AboutMuteBitesDialog({ children }: { children: ReactNode }) {
           <br />
           Scan and pay through UPI too
         </p>
-        <p className="mt-4 font-mono text-xs font-semibold tracking-[0.15em] text-primary uppercase">
+        <p className="mt-4 text-label text-primary">
           Fast · Reliable · Affordable
         </p>
         <p className="mt-4 text-xs text-muted-foreground">~ mutebites</p>

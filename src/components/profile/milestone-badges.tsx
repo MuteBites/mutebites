@@ -37,7 +37,7 @@ export function MilestoneBadges({
 
   return (
     <section className="mt-6">
-      <p className="flex items-baseline gap-1.5 font-mono text-xs font-semibold tracking-[0.18em] text-muted-foreground uppercase">
+      <p className="flex items-baseline gap-1.5 text-label text-muted-foreground">
         Milestones <span className="normal-case">({unlocked.size}/{TOTAL_MILESTONES} achieved)</span>
       </p>
       <div className="mt-2 grid grid-cols-3 gap-3">

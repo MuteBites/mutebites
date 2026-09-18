@@ -61,7 +61,7 @@ export default async function RestaurantPage({ params }: PageProps<"/restaurants
         className={cn("size-1.5 rounded-full", orderable ? "bg-success" : "bg-muted-foreground")}
         aria-hidden="true"
       />
-      {!active ? "CLOSED" : paused ? "PAUSED" : "OPEN"}
+      {!active ? "Closed" : paused ? "Paused" : "Open"}
     </span>
   );
 
@@ -95,7 +95,7 @@ export default async function RestaurantPage({ params }: PageProps<"/restaurants
             </Link>
             {cover && <div className="absolute top-4 right-4">{statusBadge}</div>}
             {cover && (
-              <h1 className="absolute bottom-4 left-6 font-heading text-3xl leading-tight font-bold tracking-tight text-white">
+              <h1 className="absolute bottom-4 left-6 font-heading text-headline font-bold text-white">
                 {restaurant.name}
               </h1>
             )}
@@ -105,7 +105,7 @@ export default async function RestaurantPage({ params }: PageProps<"/restaurants
             <header className="pt-5 pb-3">
               {!cover && (
                 <div className="flex items-start justify-between gap-3">
-                  <h1 className="font-heading text-3xl leading-tight font-bold tracking-tight">
+                  <h1 className="font-heading text-headline font-bold">
                     {restaurant.name}
                   </h1>
                   <div className="mt-1">{statusBadge}</div>

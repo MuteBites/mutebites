@@ -58,7 +58,7 @@ export function RestaurantList({
       </p>
 
       <div className="mt-8 flex items-baseline justify-between">
-        <h2 className="font-mono text-xs font-semibold tracking-[0.18em] text-muted-foreground uppercase">
+        <h2 className="text-label text-muted-foreground">
           Partner restaurants
         </h2>
         <span className="text-muted-foreground">

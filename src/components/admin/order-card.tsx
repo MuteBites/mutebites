@@ -78,7 +78,7 @@ export function OrderCard({ order }: { order: AdminOrder }) {
     <div className="rounded-2xl border bg-card shadow-card p-4">
       <div className="flex items-start justify-between gap-2">
         <div>
-          <span className="font-mono text-sm font-semibold text-muted-foreground">
+          <span className="text-sm font-semibold text-muted-foreground tabular-nums">
             {formatOrderNumber(order.dailyNumber)}
           </span>
           <span className="ml-2 text-sm text-muted-foreground">{formatOrderTimestamp(order.createdAt)}</span>
@@ -121,7 +121,7 @@ export function OrderCard({ order }: { order: AdminOrder }) {
               disabled={advancing}
               onClick={advance}
               className={cn(
-                "flex h-11 flex-1 items-center justify-center gap-1.5 rounded-xl font-heading text-sm font-bold uppercase outline-none focus-visible:ring-3 focus-visible:ring-ring/40 disabled:opacity-70",
+                "flex h-11 flex-1 items-center justify-center gap-1.5 rounded-xl text-sm font-bold uppercase outline-none focus-visible:ring-3 focus-visible:ring-ring/40 disabled:opacity-70",
                 isFinalStep
                   ? "bg-success text-success-foreground hover:bg-success/90"
                   : "bg-primary text-primary-foreground hover:bg-primary/90",
@@ -138,7 +138,7 @@ export function OrderCard({ order }: { order: AdminOrder }) {
                 render={
                   <button
                     type="button"
-                    className="flex h-11 flex-1 items-center justify-center rounded-xl border border-destructive/30 bg-destructive/5 font-heading text-sm font-bold text-destructive uppercase outline-none hover:bg-destructive/10 focus-visible:ring-3 focus-visible:ring-ring/40"
+                    className="flex h-11 flex-1 items-center justify-center rounded-xl border border-destructive/30 bg-destructive/5 text-sm font-bold text-destructive uppercase outline-none hover:bg-destructive/10 focus-visible:ring-3 focus-visible:ring-ring/40"
                   />
                 }
               >

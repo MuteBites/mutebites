@@ -23,7 +23,7 @@ export default async function AdminUsersPage() {
             Banned users
           </Link>
         </div>
-        <h1 className="mt-2 font-heading text-2xl font-bold tracking-tight">Users</h1>
+        <h1 className="mt-2 font-heading text-title font-bold">Users</h1>
         <p className="mt-1 text-muted-foreground">
           Everyone registered on MuteBites — {users.length} total.
         </p>

@@ -45,7 +45,7 @@ export function RestaurantCard({
           />
         )}
         {cover && (
-          <h2 className="absolute bottom-4 left-5 font-heading text-2xl font-bold tracking-tight text-white">
+          <h2 className="absolute bottom-4 left-5 font-heading text-title font-bold text-white">
             {restaurant.name}
           </h2>
         )}
@@ -59,13 +59,13 @@ export function RestaurantCard({
             className={cn("size-1.5 rounded-full", open ? "bg-success" : "bg-muted-foreground")}
             aria-hidden="true"
           />
-          {!active ? "CLOSED" : paused ? "PAUSED" : "OPEN"}
+          {!active ? "Closed" : paused ? "Paused" : "Open"}
         </span>
       </div>
 
       <div className={cn("px-5 pt-4 pb-5", !open && "text-muted-foreground")}>
         {!cover && (
-          <h2 className="font-heading text-2xl font-bold tracking-tight">{restaurant.name}</h2>
+          <h2 className="font-heading text-title font-bold">{restaurant.name}</h2>
         )}
         {restaurant.description && (
           <p className="mt-1 text-muted-foreground">{restaurant.description}</p>

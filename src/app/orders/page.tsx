@@ -22,7 +22,7 @@ export default async function OrdersPage() {
     <main className="mx-auto w-full max-w-md px-6 pt-6 pb-28">
       <ViewTransition {...NAV_TRANSITION}>
         <ViewTransition {...REVEAL_ENTER}>
-          <h1 className="font-heading text-3xl font-bold tracking-tight">Your orders</h1>
+          <h1 className="font-heading text-headline font-bold">Your orders</h1>
           <p className="mt-1 text-muted-foreground">
             {orders.length === 0
               ? "No orders yet"
@@ -56,7 +56,7 @@ function EmptyOrders() {
       <p className="mt-2 text-muted-foreground">Your first order shows up right here, start to finish.</p>
       <Link
         href="/"
-        className="pressable mt-6 flex h-14 items-center rounded-2xl bg-primary px-8 font-heading text-lg font-bold text-primary-foreground outline-none hover:bg-primary/90 focus-visible:ring-3 focus-visible:ring-ring/40"
+        className="pressable mt-6 flex h-14 items-center rounded-2xl bg-primary px-8 text-lg font-bold text-primary-foreground outline-none hover:bg-primary/90 focus-visible:ring-3 focus-visible:ring-ring/40"
       >
         Order something
       </Link>
@@ -74,7 +74,7 @@ function OrderCard({ order }: { order: OrderSummary }) {
         <h2 className="font-heading text-lg font-bold">{order.restaurantName}</h2>
         <span
           className={cn(
-            "shrink-0 rounded-full px-3 py-1 text-xs font-bold tracking-wide whitespace-nowrap",
+            "shrink-0 rounded-full px-3 py-1 text-xs font-bold whitespace-nowrap",
             badge.className,
           )}
         >

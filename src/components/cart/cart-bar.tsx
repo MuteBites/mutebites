@@ -56,7 +56,7 @@ export function CartBar({
               <button
                 type="button"
                 onClick={() => setOpen(true)}
-                className="surface-primary flex h-14 items-center gap-2 rounded-2xl bg-primary px-6 font-heading text-lg font-bold text-primary-foreground outline-none hover:brightness-95 focus-visible:ring-3 focus-visible:ring-white/60"
+                className="surface-primary flex h-14 items-center gap-2 rounded-2xl bg-primary px-6 text-lg font-bold text-primary-foreground outline-none hover:brightness-95 focus-visible:ring-3 focus-visible:ring-white/60"
               >
                 View cart <ArrowRight className="size-5" />
               </button>

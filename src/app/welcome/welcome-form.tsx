@@ -11,7 +11,7 @@ import { cn } from "@/lib/utils";
 import { createProfile, type WelcomeFormState } from "./actions";
 
 const eyebrow =
-  "font-mono text-xs font-semibold tracking-[0.18em] text-muted-foreground uppercase";
+  "text-label text-muted-foreground";
 
 export function WelcomeForm({ defaultName }: { defaultName: string }) {
   const [state, formAction, pending] = useActionState<WelcomeFormState, FormData>(
@@ -32,7 +32,7 @@ export function WelcomeForm({ defaultName }: { defaultName: string }) {
   return (
     <form action={formAction} className="flex flex-1 flex-col" noValidate>
       <div className="flex-1 px-6 pt-10 pb-8">
-        <h1 className="font-heading text-[2.5rem] leading-tight font-bold tracking-tight">
+        <h1 className="font-heading text-display font-bold">
           Almost there
         </h1>
         <p className="mt-2 text-lg leading-relaxed text-muted-foreground">

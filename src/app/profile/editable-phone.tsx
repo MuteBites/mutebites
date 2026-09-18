@@ -7,7 +7,7 @@ import { toast } from "@/lib/toast/store";
 import { cn } from "@/lib/utils";
 import { updatePhone, type FieldActionState } from "./actions";
 
-const eyebrow = "font-mono text-xs font-semibold tracking-[0.1em] text-muted-foreground uppercase";
+const eyebrow = "text-label text-muted-foreground";
 
 export function EditablePhone({
   initialValue,

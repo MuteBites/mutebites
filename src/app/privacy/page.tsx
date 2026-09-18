@@ -12,7 +12,7 @@ export default function PrivacyPage() {
         <span className="font-heading text-lg font-bold">MuteBites</span>
       </Link>
 
-      <h1 className="mt-8 font-heading text-3xl font-bold tracking-tight">Privacy Policy</h1>
+      <h1 className="mt-8 font-heading text-headline font-bold">Privacy Policy</h1>
 
       <div className="mt-6 flex flex-col gap-4 leading-relaxed text-muted-foreground">
         <p>

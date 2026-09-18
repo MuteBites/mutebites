@@ -194,7 +194,7 @@ export function OrderTracking({
             </div>
             {!cancelled && (
               <div className="mt-4 flex items-start justify-between gap-2">
-                <p className="font-mono text-xs font-semibold tracking-[0.1em] text-ink-accent uppercase">
+                <p className="text-label text-ink-accent">
                   Show this token
                 </p>
                 <p className="max-w-[9rem] shrink-0 text-right text-sm font-bold text-ink-foreground/90">
@@ -260,7 +260,7 @@ export function OrderTracking({
           )}
 
           <div className="mt-2 rounded-2xl border bg-card shadow-card p-5">
-            <p className="font-mono text-xs font-semibold tracking-[0.18em] text-muted-foreground uppercase">
+            <p className="text-label text-muted-foreground">
               {initialOrder.restaurantName}
             </p>
             <ul className="mt-3 divide-y">

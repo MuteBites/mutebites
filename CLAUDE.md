@@ -24,6 +24,16 @@ Food delivery site for VIT-AP University students.
   `text-brand-soft-foreground` on blush instead. On the plum `bg-ink` surface
   (token card, cart bar, banners) use `text-ink-accent` / `-ink-success` /
   `-ink-danger` — regular amber/green/red are ~2:1 on plum.
+- **Typography**: Fraunces (`font-heading`, SOFT axis at 50 via a base
+  rule in `globals.css`) for display text and big numerals; Plus Jakarta
+  (`font-sans`) for body **and buttons** — buttons never use
+  `font-heading`. Sizes above body come from the named scale in
+  `globals.css` — `text-display` (hero), `text-headline` (page titles),
+  `text-title` (card/section titles) — not one-off `text-[2.5rem]`s.
+  Small captions above fields/sections use `text-label`: sentence case,
+  sans, no letter-spacing. No mono font is loaded any more; don't bring
+  back the mono-uppercase eyebrow style (admin buttons still use
+  `uppercase` until the admin pass).
 - **Backend**: Supabase (Postgres + Auth + Row Level Security)
 - **Auth**: "Continue with Google" via Supabase Auth (Google OAuth
   provider). No email/password, no OTP. On first login (no matching

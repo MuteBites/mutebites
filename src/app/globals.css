@@ -51,12 +51,37 @@
   --color-brick-900: #561409;
 }
 
+/*
+ * Type scale — the named steps for display text (Fraunces via font-heading).
+ * Body copy keeps Tailwind's text-sm/text-base; everything bigger than a
+ * card title should come from here rather than one-off text-[2.5rem]s.
+ *   display   login / welcome hero
+ *   headline  page titles (Your orders, restaurant name, cart)
+ *   title     card and section titles
+ *   label     small caption above a field or section — sentence case,
+ *             sans, no letter-spacing. Replaces the old mono-uppercase
+ *             eyebrows, which made screens read like developer tooling.
+ */
+@theme {
+  --text-display: 2.625rem;
+  --text-display--line-height: 1.04;
+  --text-display--letter-spacing: -0.025em;
+  --text-headline: 1.875rem;
+  --text-headline--line-height: 1.1;
+  --text-headline--letter-spacing: -0.02em;
+  --text-title: 1.4375rem;
+  --text-title--line-height: 1.2;
+  --text-title--letter-spacing: -0.01em;
+  --text-label: 0.8125rem;
+  --text-label--line-height: 1.125rem;
+  --text-label--font-weight: 600;
+}
+
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
   --font-sans: var(--font-jakarta);
-  --font-mono: var(--font-jetbrains-mono);
-  --font-heading: var(--font-outfit);
+  --font-heading: var(--font-fraunces), var(--font-jakarta);
   --color-ink: var(--ink);
   --color-ink-foreground: var(--ink-foreground);
   --color-ink-accent: var(--ink-accent);
@@ -320,6 +345,13 @@
   }
   html {
     @apply font-sans;
+  }
+  /* Fraunces at SOFT 50: rounded, friendly terminals instead of the sharp
+     bookish default. Numbers in the display face (prices, tokens, totals)
+     use lining figures, not the old-style ones Fraunces can fall into. */
+  .font-heading {
+    font-variation-settings: "SOFT" 50;
+    font-variant-numeric: lining-nums;
   }
 }
 

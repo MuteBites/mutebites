@@ -12,7 +12,7 @@ export default function TermsPage() {
         <span className="font-heading text-lg font-bold">MuteBites</span>
       </Link>
 
-      <h1 className="mt-8 font-heading text-3xl font-bold tracking-tight">Terms of Service</h1>
+      <h1 className="mt-8 font-heading text-headline font-bold">Terms of Service</h1>
 
       <div className="mt-6 flex flex-col gap-4 leading-relaxed text-muted-foreground">
         <p>

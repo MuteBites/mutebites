@@ -16,7 +16,7 @@ import { formatLocalMobile, formatStoredMobile, normalizeIndianMobile } from "@/
 import { toast } from "@/lib/toast/store";
 import { cn } from "@/lib/utils";
 
-const eyebrow = "font-mono text-[0.7rem] font-semibold tracking-[0.18em] text-muted-foreground uppercase";
+const eyebrow = "text-label text-muted-foreground";
 
 export function CartSheet({
   open,
@@ -43,7 +43,7 @@ export function CartSheet({
       >
         <header className="flex items-start gap-3 border-b px-6 pt-6 pb-4">
           <div className="min-w-0 flex-1">
-            <SheetTitle className="font-heading text-3xl font-bold tracking-tight">Your cart</SheetTitle>
+            <SheetTitle className="font-heading text-headline font-bold">Your cart</SheetTitle>
             <SheetDescription className={cn("mt-0.5 truncate text-base", empty && "sr-only")}>
               {empty
                 ? "Your cart is empty"
@@ -86,7 +86,7 @@ function EmptyCart({ onBrowse }: { onBrowse: () => void }) {
       <Link
         href="/"
         onClick={onBrowse}
-        className="pressable surface-ink mt-6 flex h-14 items-center rounded-2xl bg-ink px-8 font-heading text-lg font-bold text-ink-foreground outline-none hover:brightness-95 focus-visible:ring-3 focus-visible:ring-ring/40"
+        className="pressable surface-ink mt-6 flex h-14 items-center rounded-2xl bg-ink px-8 text-lg font-bold text-ink-foreground outline-none hover:brightness-95 focus-visible:ring-3 focus-visible:ring-ring/40"
       >
         Browse restaurants
       </Link>
@@ -216,7 +216,7 @@ function CartContents({
           onClick={submit}
           disabled={placing || !orderingEnabled}
           aria-describedby={error ? "place-order-error" : undefined}
-          className="surface-primary mt-3 flex h-14 w-full items-center justify-center gap-2 rounded-2xl bg-primary font-heading text-lg font-bold text-primary-foreground outline-none hover:brightness-95 focus-visible:ring-3 focus-visible:ring-ring/40 disabled:opacity-70"
+          className="surface-primary mt-3 flex h-14 w-full items-center justify-center gap-2 rounded-2xl bg-primary text-lg font-bold text-primary-foreground outline-none hover:brightness-95 focus-visible:ring-3 focus-visible:ring-ring/40 disabled:opacity-70"
         >
           {placing && <Loader2 className="size-5 animate-spin" />}
           {placing ? "Placing order…" : `Place order · ${formatRupees(amount)}`}

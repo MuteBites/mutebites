@@ -36,7 +36,7 @@ export default async function AdminPage() {
       <OrderingKillSwitch initialEnabled={orderingEnabled} />
 
       <section>
-        <h2 className="mb-3 font-mono text-xs font-semibold tracking-[0.1em] text-muted-foreground uppercase">
+        <h2 className="mb-3 text-label text-muted-foreground">
           Restaurant controls
         </h2>
         <RestaurantToggleList restaurants={restaurants} orderingEnabled={orderingEnabled} />
@@ -44,7 +44,7 @@ export default async function AdminPage() {
 
       <section>
         <div className="mb-3 flex flex-wrap items-center justify-between gap-2">
-          <h2 className="font-mono text-xs font-semibold tracking-[0.1em] text-muted-foreground uppercase">
+          <h2 className="text-label text-muted-foreground">
             Orders · Today
           </h2>
           <div className="flex items-center gap-2">

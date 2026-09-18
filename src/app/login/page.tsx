@@ -31,7 +31,7 @@ export default async function LoginPage({ searchParams }: PageProps<"/login">) {
       <BrandLogo priority className="animate-pop-in relative" />
 
       <h1
-        className="animate-slide-up-in relative mt-10 text-center font-heading text-[2.75rem] leading-[1.1] font-bold tracking-tight"
+        className="animate-slide-up-in relative mt-10 text-center font-heading text-display font-bold"
         style={{ animationDelay: "90ms" }}
       >
         Good food.

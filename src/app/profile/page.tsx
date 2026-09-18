@@ -83,7 +83,7 @@ export default async function ProfilePage() {
             <PickupStats pickups={orderStats.deliveredCount} noShows={orderStats.cancelledCount} />
           )}
 
-          <p className="mt-6 font-mono text-xs font-semibold tracking-[0.18em] text-muted-foreground uppercase">
+          <p className="mt-6 text-label text-muted-foreground">
             Tap any field to edit
           </p>
 
@@ -96,17 +96,17 @@ export default async function ProfilePage() {
             />
             <div className="flex items-center justify-between gap-3 px-5 py-4">
               <div className="min-w-0">
-                <p className="font-mono text-xs font-semibold tracking-[0.1em] text-muted-foreground uppercase">
+                <p className="text-label text-muted-foreground">
                   Email · signed in with Google
                 </p>
                 <p className="mt-0.5 truncate font-semibold">{profile.email}</p>
               </div>
-              <span className="shrink-0 font-mono text-xs font-semibold tracking-[0.1em] text-muted-foreground uppercase">
+              <span className="shrink-0 text-label text-muted-foreground">
                 Locked
               </span>
             </div>
             <div className="flex items-center justify-between px-5 py-4">
-              <p className="font-mono text-xs font-semibold tracking-[0.1em] text-muted-foreground uppercase">
+              <p className="text-label text-muted-foreground">
                 Member since
               </p>
               <p className="font-semibold">{formatMonthYear(profile.created_at)}</p>
@@ -126,7 +126,7 @@ export default async function ProfilePage() {
           <p className="mt-6 flex items-center gap-3 rounded-2xl border border-primary/20 bg-brand-soft px-5 py-4">
             <span aria-hidden="true">📍</span>
             <span>
-              <span className="block font-mono text-xs font-semibold tracking-[0.1em] text-brand-soft-foreground uppercase">
+              <span className="block text-label text-brand-soft-foreground">
                 Fixed handover point
               </span>
               <span className="font-semibold text-foreground">VIT-AP Main Gate</span>

@@ -76,7 +76,7 @@ export function OrderingKillSwitch({ initialEnabled }: { initialEnabled: boolean
               <button
                 type="button"
                 className={cn(
-                  "shrink-0 rounded-xl px-4 py-2.5 font-heading text-sm font-bold tracking-wide uppercase outline-none focus-visible:ring-3 focus-visible:ring-ring/40",
+                  "shrink-0 rounded-xl px-4 py-2.5 text-sm font-bold tracking-wide uppercase outline-none focus-visible:ring-3 focus-visible:ring-ring/40",
                   enabled
                     ? "bg-destructive text-destructive-foreground hover:bg-destructive/90"
                     : "bg-success text-success-foreground hover:bg-success/90",
