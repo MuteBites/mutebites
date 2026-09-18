@@ -1,6 +1,6 @@
 "use client";
 
-import { AlertCircle, CheckCircle2 } from "lucide-react";
+import { AlertCircle, CheckCircle2, Trophy } from "lucide-react";
 import { useToasts } from "@/lib/toast/store";
 import { cn } from "@/lib/utils";
 
@@ -22,6 +22,8 @@ export function Toaster() {
         >
           {t.kind === "error" ? (
             <AlertCircle className="size-4 shrink-0" aria-hidden="true" />
+          ) : t.icon === "trophy" ? (
+            <Trophy className="size-4 shrink-0" aria-hidden="true" />
           ) : (
             <CheckCircle2 className="size-4 shrink-0" aria-hidden="true" />
           )}

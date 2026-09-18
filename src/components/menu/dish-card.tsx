@@ -26,6 +26,7 @@ export function DishCard({
   pausedOnly = false,
   isFavorite = false,
   isHighlyReordered = false,
+  highlighted = false,
   onAdd,
   onChangeQuantity,
 }: {
@@ -40,6 +41,8 @@ export function DishCard({
   isFavorite?: boolean;
   /** Campus-wide: several students have each reordered this dish 3+ times. */
   isHighlyReordered?: boolean;
+  /** Just arrived here from a deep link (Trending, Thursday banner) — flash a ring. */
+  highlighted?: boolean;
   onAdd: () => void;
   onChangeQuantity: (quantity: number) => void;
 }) {
@@ -90,11 +93,12 @@ export function DishCard({
   );
 
   return (
-    <article className="min-w-0">
+    <article id={`dish-${dish.id}`} className="min-w-0 scroll-mt-24">
       <div
         className={cn(
           "relative aspect-square overflow-hidden rounded-3xl bg-secondary transition-shadow",
           inCart && "ring-3 ring-primary ring-offset-2 ring-offset-background",
+          highlighted && !inCart && "ring-3 ring-rose ring-offset-2 ring-offset-background motion-safe:animate-pulse",
         )}
       >
         {photo ? (

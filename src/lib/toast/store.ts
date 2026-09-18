@@ -7,7 +7,8 @@ import { useSyncExternalStore } from "react";
 // singleton pattern as the cart and theme stores.
 
 export type ToastKind = "success" | "error";
-export type ToastItem = { id: number; kind: ToastKind; message: string };
+/** `icon: "trophy"` swaps the default check for a trophy — milestone unlocks. */
+export type ToastItem = { id: number; kind: ToastKind; message: string; icon?: "trophy" };
 
 const DURATIONS: Record<ToastKind, number> = { success: 2200, error: 3800 };
 const EMPTY: ToastItem[] = [];
@@ -25,15 +26,15 @@ function dismiss(id: number) {
   emit();
 }
 
-function push(kind: ToastKind, message: string) {
+function push(kind: ToastKind, message: string, icon?: ToastItem["icon"]) {
   const id = nextId++;
-  toasts = [...toasts, { id, kind, message }];
+  toasts = [...toasts, { id, kind, message, icon }];
   emit();
   setTimeout(() => dismiss(id), DURATIONS[kind]);
 }
 
 export const toast = {
-  success: (message: string) => push("success", message),
+  success: (message: string, options?: { icon?: ToastItem["icon"] }) => push("success", message, options?.icon),
   error: (message: string) => push("error", message),
 };
 

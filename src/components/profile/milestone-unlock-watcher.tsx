@@ -36,7 +36,7 @@ export function MilestoneUnlockWatcher({ unlockedCsv }: { unlockedCsv: string })
     }
 
     for (const key of newlyUnlocked) {
-      toast.success(`🏆 Milestone unlocked: ${LABELS[key]}!`);
+      toast.success(`Milestone unlocked: ${LABELS[key]}!`, { icon: "trophy" });
     }
   }, [unlockedCsv]);
 

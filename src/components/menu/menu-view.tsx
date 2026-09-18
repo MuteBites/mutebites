@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Leaf, Search, SearchX, UtensilsCrossed, X } from "lucide-react";
 import { EmptyState } from "@/components/empty-state";
 import { CartBar } from "@/components/cart/cart-bar";
@@ -32,6 +32,7 @@ export function MenuView({
   orderingEnabled,
   favoriteDishId,
   highlyReorderedDishIds,
+  focusDishId = null,
 }: {
   restaurant: Restaurant;
   sections: MenuSection[];
@@ -42,12 +43,32 @@ export function MenuView({
   favoriteDishId: string | null;
   /** Dishes campus-wide with a strong repeat-purchase signal — tags them "Highly re-ordered". */
   highlyReorderedDishIds: Set<string>;
+  /** Dish to scroll to and briefly highlight on arrival (from ?dish=). */
+  focusDishId?: string | null;
 }) {
   const cart = useCart();
   const [filter, setFilter] = useState(ALL);
   const [vegOnly, setVegOnly] = useState(false);
   const [query, setQuery] = useState("");
   const [searchOpen, setSearchOpen] = useState(false);
+  const [highlighted, setHighlighted] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (!focusDishId) return;
+    const el = document.getElementById(`dish-${focusDishId}`);
+    if (!el) return;
+    const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    // Deferred a frame so the page's own enter transition has laid out first.
+    const raf = requestAnimationFrame(() => {
+      el.scrollIntoView({ block: "center", behavior: reduceMotion ? "auto" : "smooth" });
+      setHighlighted(focusDishId);
+    });
+    const clear = setTimeout(() => setHighlighted(null), 2400);
+    return () => {
+      cancelAnimationFrame(raf);
+      clearTimeout(clear);
+    };
+  }, [focusDishId]);
   // Dish waiting on "replace your cart?" confirmation.
   const [pendingDish, setPendingDish] = useState<Dish | null>(null);
 
@@ -209,6 +230,7 @@ export function MenuView({
                 pausedOnly={restaurant.is_active && !orderingEnabled}
                 isFavorite={dish.id === favoriteDishId}
                 isHighlyReordered={highlyReorderedDishIds.has(dish.id)}
+                highlighted={highlighted === dish.id}
                 onAdd={() => handleAdd(dish)}
                 onChangeQuantity={(q) => setQuantity(dish.id, q)}
               />

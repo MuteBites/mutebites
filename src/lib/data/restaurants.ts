@@ -60,7 +60,7 @@ export async function getRestaurantCount(): Promise<number> {
   return count ?? 0;
 }
 
-export type ThursdaySpecial = { restaurantId: string; restaurantName: string; dishName: string };
+export type ThursdaySpecial = { restaurantId: string; restaurantName: string; dishId: string; dishName: string };
 
 /**
  * The first available Thursday-only dish (note contains "Thursday") at an
@@ -72,17 +72,22 @@ export async function getThursdaySpecial(): Promise<ThursdaySpecial | null> {
   const supabase = await createClient();
   const { data, error } = await supabase
     .from("dishes")
-    .select("name, sort_order, restaurant_id, restaurants!inner(name, is_active)")
+    .select("id, name, sort_order, restaurant_id, restaurants!inner(name, is_active)")
     .ilike("note", "%thursday%")
     .eq("is_available", true)
     .eq("restaurants.is_active", true)
     .order("sort_order")
     .limit(1)
-    .maybeSingle<{ name: string; restaurant_id: string; restaurants: { name: string } }>();
+    .maybeSingle<{ id: string; name: string; restaurant_id: string; restaurants: { name: string } }>();
 
   if (error) throw error;
   if (!data) return null;
-  return { restaurantId: data.restaurant_id, restaurantName: data.restaurants.name, dishName: data.name };
+  return {
+    restaurantId: data.restaurant_id,
+    restaurantName: data.restaurants.name,
+    dishId: data.id,
+    dishName: data.name,
+  };
 }
 
 /**

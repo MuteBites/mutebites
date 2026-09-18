@@ -27,7 +27,7 @@ export function SignOutButton() {
       </AlertDialogTrigger>
       <AlertDialogContent>
         <AlertDialogHeader>
-          <AlertDialogTitle>We&apos;re missing you already 😭</AlertDialogTitle>
+          <AlertDialogTitle>We&apos;re missing you already</AlertDialogTitle>
           <AlertDialogDescription>Are you sure you want to log out?</AlertDialogDescription>
         </AlertDialogHeader>
         <AlertDialogFooter>

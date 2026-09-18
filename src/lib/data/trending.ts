@@ -29,6 +29,7 @@ export async function getTrendingDishes(limit = 5): Promise<TrendingDish[]> {
     dishName: d.dish_name,
     restaurantId: d.restaurant_id,
     restaurantName: d.restaurant_name,
-    orderCount: d.order_count,
+    // bigint in Postgres — coerce in case it ever arrives as a string.
+    orderCount: Number(d.order_count),
   }));
 }

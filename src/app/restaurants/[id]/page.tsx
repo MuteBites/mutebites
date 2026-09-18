@@ -24,7 +24,7 @@ export async function generateMetadata({
   return { title: menu ? `${menu.restaurant.name} · MuteBites` : "MuteBites" };
 }
 
-export default async function RestaurantPage({ params }: PageProps<"/restaurants/[id]">) {
+export default async function RestaurantPage({ params, searchParams }: PageProps<"/restaurants/[id]">) {
   // Kicked off up front rather than after requireProfile() resolves —
   // getOrderingEnabled() needs neither the profile nor the restaurant id,
   // so there's no reason to make it wait behind either lookup instead of
@@ -37,6 +37,10 @@ export default async function RestaurantPage({ params }: PageProps<"/restaurants
   const orderingEnabledPromise = getOrderingEnabled();
   const highlyReorderedPromise = getHighlyReorderedDishIds();
   const menuPromise = getRestaurantMenu(id);
+  // ?dish=<id> — set by Trending and the Thursday banner so the menu opens
+  // scrolled to that dish instead of the top of a 40-dish list.
+  const { dish } = await searchParams;
+  const focusDishId = typeof dish === "string" && isUuid(dish) ? dish : null;
 
   const profile = await profilePromise;
   const [menu, orderingEnabled, dishesTried, favoriteDishId, highlyReorderedDishIds] = await Promise.all([
@@ -127,6 +131,7 @@ export default async function RestaurantPage({ params }: PageProps<"/restaurants
               orderingEnabled={orderingEnabled}
               favoriteDishId={favoriteDishId}
               highlyReorderedDishIds={highlyReorderedDishIds}
+              focusDishId={focusDishId}
             />
           </div>
         </ViewTransition>

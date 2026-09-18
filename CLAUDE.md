@@ -62,6 +62,13 @@ Food delivery site for VIT-AP University students.
   Postgres error. Empty states go through `EmptyState`
   (`src/components/empty-state.tsx`): `art="plates"` for empty cart /
   orders, an icon for in-place no-match states.
+- **Icons**: lucide only — no emoji anywhere in the UI (they render
+  differently per OS and clashed with the icon set). Toasts take
+  `{ icon: "trophy" }` for celebratory ones instead of an emoji in the text.
+- **Dish deep links**: `/restaurants/<id>?dish=<dishId>` opens the menu
+  scrolled to that dish with a brief rose ring (`focusDishId` in
+  `MenuView`). Used by the Trending popup and the Thursday banner
+  (`getThursdaySpecial()` now returns `dishId`).
 - **Backend**: Supabase (Postgres + Auth + Row Level Security)
 - **Auth**: "Continue with Google" via Supabase Auth (Google OAuth
   provider). No email/password, no OTP. On first login (no matching
