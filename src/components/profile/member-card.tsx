@@ -51,7 +51,7 @@ export function MemberCard({
 
 function Stat({ value, label, danger = false }: { value: number; label: string; danger?: boolean }) {
   return (
-    <div className="flex flex-col-reverse px-1">
+    <div className="flex flex-col-reverse justify-end px-1">
       <dt className="text-xs text-ink-foreground/75">{label}</dt>
       <dd className={cn("font-heading text-2xl font-bold tabular-nums", danger && "text-ink-danger")}>{value}</dd>
     </div>
