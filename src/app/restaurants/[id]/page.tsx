@@ -53,8 +53,8 @@ export default async function RestaurantPage({ params }: PageProps<"/restaurants
   const statusBadge = (
     <span
       className={cn(
-        "inline-flex shrink-0 items-center gap-1.5 rounded-full px-3 py-1 text-sm font-semibold",
-        orderable ? "bg-success-soft text-success" : "bg-secondary text-muted-foreground",
+        "inline-flex shrink-0 items-center gap-1.5 rounded-full bg-card/90 px-3 py-1 text-sm font-semibold backdrop-blur-sm",
+        orderable ? "text-success" : "text-muted-foreground",
       )}
     >
       <span
@@ -65,11 +65,14 @@ export default async function RestaurantPage({ params }: PageProps<"/restaurants
     </span>
   );
 
+  // Same anatomy as Home's restaurant card: the photo is just a photo (no
+  // black scrim, no name printed over it) and the page itself rises over
+  // its bottom edge as a rounded sheet carrying the name.
   return (
     <main className="mx-auto w-full max-w-md">
       <ViewTransition {...NAV_TRANSITION}>
         <ViewTransition {...REVEAL_ENTER}>
-          <div className={cn("relative aspect-[2/1] bg-stripes", !active && "grayscale")}>
+          <div className={cn("relative aspect-[16/10] bg-stripes", !active && "grayscale")}>
             {cover && (
               <BlurImage
                 src={cover}
@@ -78,42 +81,26 @@ export default async function RestaurantPage({ params }: PageProps<"/restaurants
                 className="object-cover"
               />
             )}
-            {cover && (
-              <div
-                className="absolute inset-x-0 bottom-0 h-2/3"
-                style={{ background: "linear-gradient(to top, rgb(0 0 0 / 70%), transparent)" }}
-                aria-hidden="true"
-              />
-            )}
             <Link
               href="/"
               aria-label="Back to restaurants"
               transitionTypes={["nav-back"]}
-              className="absolute top-4 left-4 flex size-12 items-center justify-center rounded-full bg-card shadow-sm outline-none focus-visible:ring-3 focus-visible:ring-ring/40"
+              className="absolute top-4 left-4 flex size-11 items-center justify-center rounded-full bg-card/90 shadow-card backdrop-blur-sm outline-none focus-visible:ring-3 focus-visible:ring-ring/40"
             >
               <ArrowLeft className="size-5" />
             </Link>
-            {cover && <div className="absolute top-4 right-4">{statusBadge}</div>}
-            {cover && (
-              <h1 className="absolute bottom-4 left-6 font-heading text-headline font-bold text-white">
-                {restaurant.name}
-              </h1>
-            )}
+            <div className="absolute top-5 right-4">{statusBadge}</div>
           </div>
 
-          <div className="px-6">
-            <header className="pt-5 pb-3">
-              {!cover && (
-                <div className="flex items-start justify-between gap-3">
-                  <h1 className="font-heading text-headline font-bold">
-                    {restaurant.name}
-                  </h1>
-                  <div className="mt-1">{statusBadge}</div>
-                </div>
+          <div className="relative -mt-7 rounded-t-[1.75rem] bg-background px-6">
+            <header className="pt-6 pb-3">
+              <h1 className="font-heading text-headline font-bold">{restaurant.name}</h1>
+              {restaurant.cuisine_tags.length > 0 && (
+                <p className="mt-1 font-medium text-rose">{restaurant.cuisine_tags.join(" · ")}</p>
               )}
-              <p className="mt-1.5 text-muted-foreground">
-                {[restaurant.description, "Free delivery"].filter(Boolean).join(" · ")}
-              </p>
+              {restaurant.description && (
+                <p className="mt-1 text-muted-foreground">{restaurant.description}</p>
+              )}
               <MenuProgress restaurantName={restaurant.name} tried={dishesTried} total={totalDishes} />
               {!active && (
                 <p className="mt-4 rounded-2xl bg-secondary px-4 py-3 text-sm">

@@ -383,8 +383,9 @@ once confirmed unused — it no longer exists in the database.
   have each ordered it 3+ times (`orders.status <> 'cancelled'`) — a
   genuine repeat-purchase signal, deliberately different from
   `trending_dishes()`'s raw order-volume popularity. Powers the menu's
-  "Highly re-ordered" tag (`src/components/menu/dish-row.tsx`, alongside
-  the existing "Your favorite" tag), fetched via
+  "Highly re-ordered" tag (`src/components/menu/dish-card.tsx`, alongside
+  the existing "Your favorite" tag — the card shows one of the two, with
+  "Your favorite" winning if a dish is both), fetched via
   `getHighlyReorderedDishIds()` in `src/lib/data/reorders.ts`.
 
 No other open schema TODOs right now (see "Pending decisions" below for
