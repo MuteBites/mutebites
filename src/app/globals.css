@@ -221,11 +221,22 @@
   --elevation-raised: 0 2px 4px rgb(85 44 74 / 6%), 0 12px 28px -8px rgb(85 44 74 / 18%);
   --elevation-overlay: 0 4px 8px rgb(85 44 74 / 8%), 0 24px 48px -12px rgb(85 44 74 / 28%);
 
-  /* Time-of-day glow behind the Home greeting — see HomeHeader. */
-  --glow-morning: #f0b865;
-  --glow-afternoon: #c07a35;
-  --glow-evening: #d7a8b8;
-  --glow-night: #8a6fb8;
+  /* Home header ambient field, three stops per time of day — see
+     .mood-field below and HomeHeader. Alpha is baked into each stop so the
+     field reads clearly on ivory while the plum heading on top of its
+     densest point stays above 7:1. */
+  --mood-morning-a: #f0c38fcc;
+  --mood-morning-b: #f8dedc;
+  --mood-morning-c: #e0ae7866;
+  --mood-afternoon-a: #e0ae78aa;
+  --mood-afternoon-b: #f7e6d2;
+  --mood-afternoon-c: #f0c38f88;
+  --mood-evening-a: #d7a8b8cc;
+  --mood-evening-b: #f8dedc;
+  --mood-evening-c: #e0ae7855;
+  --mood-night-a: #a9789a99;
+  --mood-night-b: #d7a8b8cc;
+  --mood-night-c: #efe3ea;
 }
 
 /* Dark: plum-tinted grounds (not neutral grey) so the brand survives at
@@ -285,10 +296,61 @@
   --elevation-raised: 0 2px 4px rgb(0 0 0 / 30%), 0 12px 28px -8px rgb(0 0 0 / 50%);
   --elevation-overlay: 0 4px 8px rgb(0 0 0 / 35%), 0 24px 48px -12px rgb(0 0 0 / 60%);
 
-  --glow-morning: #d9a14f;
-  --glow-afternoon: #d9974f;
-  --glow-evening: #b5708a;
-  --glow-night: #7d66b0;
+  --mood-morning-a: #c07a3566;
+  --mood-morning-b: #91495555;
+  --mood-morning-c: #6b3d1288;
+  --mood-afternoon-a: #d9974f55;
+  --mood-afternoon-b: #6b3d1299;
+  --mood-afternoon-c: #91495544;
+  --mood-evening-a: #91495599;
+  --mood-evening-b: #552c4acc;
+  --mood-evening-c: #c07a3544;
+  --mood-night-a: #552c4a;
+  --mood-night-b: #3f2a6bcc;
+  --mood-night-c: #91495555;
+}
+
+/*
+ * Home header's time-of-day ambient field: three soft radial light sources
+ * (top-left, top-right, lower-middle) that fade out downward into the
+ * ground, so the header has an atmosphere instead of a hard band. On
+ * screens wider than the app column the sides fade too, so the field
+ * never ends in a visible vertical edge.
+ */
+.mood-field {
+  background:
+    radial-gradient(70% 90% at 8% 0%, var(--mood-a), transparent 70%),
+    radial-gradient(60% 80% at 96% 12%, var(--mood-b), transparent 70%),
+    radial-gradient(80% 55% at 45% 85%, var(--mood-c), transparent 75%);
+  mask-image: linear-gradient(to bottom, #000 45%, transparent);
+}
+@media (min-width: 28rem) {
+  .mood-field {
+    mask-image:
+      linear-gradient(to bottom, #000 45%, transparent),
+      linear-gradient(to right, transparent, #000 12%, #000 88%, transparent);
+    mask-composite: intersect;
+  }
+}
+.mood-morning {
+  --mood-a: var(--mood-morning-a);
+  --mood-b: var(--mood-morning-b);
+  --mood-c: var(--mood-morning-c);
+}
+.mood-afternoon {
+  --mood-a: var(--mood-afternoon-a);
+  --mood-b: var(--mood-afternoon-b);
+  --mood-c: var(--mood-afternoon-c);
+}
+.mood-evening {
+  --mood-a: var(--mood-evening-a);
+  --mood-b: var(--mood-evening-b);
+  --mood-c: var(--mood-evening-c);
+}
+.mood-night {
+  --mood-a: var(--mood-night-a);
+  --mood-b: var(--mood-night-b);
+  --mood-c: var(--mood-night-c);
 }
 
 /* Striped stand-in for photos we don't have yet (matches the design refs). */

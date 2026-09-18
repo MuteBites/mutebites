@@ -11,7 +11,7 @@ export function TrendingDialog({ dishes }: { dishes: TrendingDish[] }) {
     <Dialog>
       <DialogTrigger
         aria-label="Trending this week"
-        className="pressable flex size-14 shrink-0 items-center justify-center rounded-2xl bg-secondary outline-none focus-visible:ring-3 focus-visible:ring-ring/40"
+        className="pressable flex size-12 shrink-0 items-center justify-center rounded-2xl bg-card/80 shadow-card outline-none focus-visible:ring-3 focus-visible:ring-ring/40"
       >
         <Flame className="size-6 text-primary" aria-hidden="true" />
       </DialogTrigger>

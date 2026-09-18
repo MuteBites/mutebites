@@ -1,34 +1,18 @@
+import { Moon, Sun, Sunrise, Sunset, type LucideIcon } from "lucide-react";
 import { AboutMuteBitesDialog } from "@/components/home/about-mutebites-dialog";
 import { TrendingDialog } from "@/components/home/trending-dialog";
 import { BrandLogo } from "@/components/brand-logo";
 import type { TrendingDish } from "@/lib/data/trending";
 import type { TimeOfDay } from "@/lib/date";
 
-const MOOD: Record<TimeOfDay, { greeting: string; emoji: string; heading: string; glow: string }> = {
-  morning: {
-    greeting: "Good morning",
-    emoji: "☀️",
-    heading: "Fuel up for the day?",
-    glow: "var(--glow-morning)",
-  },
-  afternoon: {
-    greeting: "Hey",
-    emoji: "👋",
-    heading: "What are we craving now?",
-    glow: "var(--glow-afternoon)",
-  },
-  evening: {
-    greeting: "Good evening",
-    emoji: "🌆",
-    heading: "Dinner o'clock?",
-    glow: "var(--glow-evening)",
-  },
-  night: {
-    greeting: "Hey",
-    emoji: "🌙",
-    heading: "Late night craving?",
-    glow: "var(--glow-night)",
-  },
+// Each time of day gets its own ambient field (.mood-field.mood-<time> in
+// globals.css) — sunrise amber, bright afternoon, rose dusk, plum night —
+// plus a greeting and a hero question to match.
+const MOOD: Record<TimeOfDay, { greeting: string; Icon: LucideIcon; heading: string }> = {
+  morning: { greeting: "Good morning", Icon: Sunrise, heading: "Fuel up for the day?" },
+  afternoon: { greeting: "Hey", Icon: Sun, heading: "What are we craving now?" },
+  evening: { greeting: "Good evening", Icon: Sunset, heading: "Dinner o'clock?" },
+  night: { greeting: "Hey", Icon: Moon, heading: "Late night craving?" },
 };
 
 export function HomeHeader({
@@ -40,27 +24,31 @@ export function HomeHeader({
   timeOfDay: TimeOfDay;
   trendingDishes: TrendingDish[];
 }) {
-  const mood = MOOD[timeOfDay];
+  const { greeting, Icon, heading } = MOOD[timeOfDay];
+  const firstName = fullName.trim().split(/\s+/)[0];
 
   return (
-    <header className="relative flex items-center gap-3">
+    // Bleeds out of main's px-6/pt-6 so the field reaches the screen edges
+    // and the very top; the field itself runs past the header's bottom and
+    // fades out behind whatever comes next.
+    <header className="relative -mx-6 -mt-6 px-6 pt-6">
       <div
         aria-hidden="true"
-        className="pointer-events-none absolute -top-8 -left-8 size-40 rounded-full blur-2xl"
-        style={{
-          background: `radial-gradient(circle, color-mix(in srgb, ${mood.glow} 24%, transparent), transparent 70%)`,
-        }}
+        className={`mood-field mood-${timeOfDay} pointer-events-none absolute inset-x-0 top-0 h-[calc(100%+6rem)]`}
       />
-      <AboutMuteBitesDialog>
-        <BrandLogo className="relative size-14 rounded-2xl" />
-      </AboutMuteBitesDialog>
-      <div className="relative min-w-0 flex-1">
-        <p className="truncate text-muted-foreground">
-          {mood.greeting} {fullName} <span aria-hidden="true">{mood.emoji}</span>
-        </p>
-        <h1 className="font-heading text-xl font-bold tracking-tight">{mood.heading}</h1>
+      <div className="relative flex items-center justify-between">
+        <AboutMuteBitesDialog>
+          <BrandLogo className="size-12 rounded-2xl bg-card/80 shadow-card" />
+        </AboutMuteBitesDialog>
+        <TrendingDialog dishes={trendingDishes} />
       </div>
-      <TrendingDialog dishes={trendingDishes} />
+      <p className="relative mt-8 flex items-center gap-1.5 font-semibold">
+        <Icon className="size-[1.125rem] shrink-0" aria-hidden="true" />
+        <span className="truncate">
+          {greeting}, {firstName}
+        </span>
+      </p>
+      <h1 className="relative mt-1 font-heading text-display font-bold">{heading}</h1>
     </header>
   );
 }

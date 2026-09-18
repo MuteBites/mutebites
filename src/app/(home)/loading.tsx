@@ -10,14 +10,13 @@ export default function Loading() {
       <span className="sr-only">Loading restaurants…</span>
 
       <ViewTransition {...REVEAL_EXIT}>
-        <div className="flex items-center gap-3">
-          <Skeleton className="size-14 rounded-2xl" />
-          <div className="min-w-0 flex-1">
-            <Skeleton className="h-4 w-28" />
-            <Skeleton className="mt-2 h-6 w-44" />
-          </div>
-          <Skeleton className="size-14 shrink-0 rounded-2xl" />
+        <div className="flex items-center justify-between">
+          <Skeleton className="size-12 rounded-2xl" />
+          <Skeleton className="size-12 shrink-0 rounded-2xl" />
         </div>
+        <Skeleton className="mt-8 h-5 w-32" />
+        <Skeleton className="mt-2 h-9 w-4/5" />
+        <Skeleton className="mt-2 h-9 w-1/2" />
 
         <Skeleton className="mt-6 h-14 w-full rounded-2xl" />
         <Skeleton className="mt-4 h-14 w-full rounded-2xl" />
