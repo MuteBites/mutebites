@@ -8,6 +8,20 @@ Food delivery site for VIT-AP University students.
 
 - **Framework**: Next.js (App Router), TypeScript
 - **Styling**: Tailwind CSS v4 + shadcn/ui (`src/components/ui`)
+- **Design tokens** (`src/app/globals.css`): plum `#552C4A` is ink,
+  amber carries every action (`--primary` `#A25E1D` — a hair darker than
+  the approved `#A9631F`, which fails AA as text on the ivory ground),
+  rose `#914955` is the secondary accent, blush/lavender are tint surfaces
+  only, raw amber `#C07A35` is decorative only (3.5:1, never text). Fixed
+  5-step ramps (`plum-`/`rose-`/`amber-`/`ivory-`/`forest-`/`brick-`
+  100–900) sit alongside semantic tokens that flip per theme — prefer the
+  semantic ones. Surfaces step ground (`--background`) → card → raised
+  (`--popover`), with `shadow-card` / `shadow-raised` / `shadow-overlay`
+  elevation. Text on a coloured fill uses its `*-foreground` token
+  (`text-success-foreground`, `text-destructive-foreground`, …), never
+  `text-white` — dark-mode fills are light, so white fails there. Don't
+  put `text-primary` on `bg-secondary`/`bg-brand-soft` (below 4.5:1). Use
+  `text-brand-soft-foreground` on blush instead.
 - **Backend**: Supabase (Postgres + Auth + Row Level Security)
 - **Auth**: "Continue with Google" via Supabase Auth (Google OAuth
   provider). No email/password, no OTP. On first login (no matching
