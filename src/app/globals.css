@@ -311,17 +311,17 @@
 }
 
 /*
- * Home header's time-of-day ambient field: three soft radial light sources
- * (top-left, top-right, lower-middle) that fade out downward into the
- * ground, so the header has an atmosphere instead of a hard band. On
+ * Home header's time-of-day ambient field: a top-down wash of the mood's
+ * middle colour, a broad light source from the top-left and a second one
+ * low and to the right, all fading out downward into the ground, so the header has an atmosphere instead of a hard band. On
  * screens wider than the app column the sides fade too, so the field
  * never ends in a visible vertical edge.
  */
 .mood-field {
   background:
-    radial-gradient(70% 90% at 8% 0%, var(--mood-a), transparent 70%),
-    radial-gradient(60% 80% at 96% 12%, var(--mood-b), transparent 70%),
-    radial-gradient(80% 55% at 45% 85%, var(--mood-c), transparent 75%);
+    radial-gradient(95% 110% at 0% 0%, var(--mood-a), transparent 70%),
+    radial-gradient(110% 70% at 70% 80%, var(--mood-c), transparent 70%),
+    linear-gradient(var(--mood-b), transparent);
   mask-image: linear-gradient(to bottom, #000 45%, transparent);
 }
 @media (min-width: 28rem) {
