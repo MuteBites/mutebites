@@ -4,7 +4,9 @@ import { useRef, useState, type PointerEvent as ReactPointerEvent } from "react"
 import { Minus, Plus, Trash2 } from "lucide-react";
 import { MAX_QUANTITY } from "@/lib/cart/limits";
 import { setQuantity, type CartLine } from "@/lib/cart/store";
+import { getDishPhoto } from "@/lib/data/dish-photos";
 import { formatRupees } from "@/lib/format";
+import { BlurImage } from "@/components/blur-image";
 import { VegMark } from "@/components/veg-mark";
 
 const SWIPE_THRESHOLD = 88;
@@ -21,7 +23,8 @@ function prefersReducedMotion() {
  * buttons stay as the accessible way to remove an item for anyone who
  * can't (or doesn't know to) swipe.
  */
-export function CartLineRow({ line }: { line: CartLine }) {
+export function CartLineRow({ line, restaurantName }: { line: CartLine; restaurantName: string | null }) {
+  const photo = restaurantName ? getDishPhoto(restaurantName, line.name) : undefined;
   const [dragX, setDragX] = useState(0);
   const [dragging, setDragging] = useState(false);
   const [removing, setRemoving] = useState(false);
@@ -76,34 +79,50 @@ export function CartLineRow({ line }: { line: CartLine }) {
           transform: `translateX(${dragX}px)`,
           transition: dragging || prefersReducedMotion() ? "none" : "transform 200ms ease-out",
         }}
-        className="relative flex touch-pan-y items-center gap-3 bg-background py-4"
+        className="relative flex touch-pan-y items-center gap-3 bg-background py-3.5"
       >
-        <VegMark isVeg={line.isVeg} />
+        <div className="relative size-16 shrink-0 overflow-hidden rounded-2xl bg-brand-soft">
+          {photo ? (
+            <BlurImage src={photo} alt="" sizes="64px" className="object-cover" />
+          ) : (
+            <span
+              className="flex size-full items-center justify-center font-heading text-2xl font-bold text-brand-soft-foreground/60"
+              aria-hidden="true"
+            >
+              {line.name.trim().charAt(0)}
+            </span>
+          )}
+        </div>
         <div className="min-w-0 flex-1">
-          <p className="leading-snug font-semibold">{line.name}</p>
-          <p className="text-sm text-muted-foreground">{formatRupees(line.price)} each</p>
+          <p className="leading-snug font-semibold">
+            <VegMark isVeg={line.isVeg} className="mr-1.5 inline-flex size-4 -translate-y-px align-middle" />
+            {line.name}
+          </p>
+          <div className="mt-2 flex items-center gap-3">
+            <div className="flex h-9 items-center gap-1 rounded-full bg-secondary p-1">
+              <button
+                type="button"
+                onClick={() => setQuantity(line.dishId, line.quantity - 1)}
+                aria-label={`Remove one ${line.name}`}
+                className="flex size-7 items-center justify-center rounded-full bg-card outline-none hover:bg-border focus-visible:ring-2 focus-visible:ring-ring/40"
+              >
+                <Minus className="size-3.5" />
+              </button>
+              <span className="min-w-5 text-center text-sm font-bold tabular-nums">{line.quantity}</span>
+              <button
+                type="button"
+                onClick={() => setQuantity(line.dishId, line.quantity + 1)}
+                disabled={line.quantity >= MAX_QUANTITY}
+                aria-label={`Add one more ${line.name}`}
+                className="flex size-7 items-center justify-center rounded-full bg-primary text-primary-foreground outline-none hover:brightness-95 focus-visible:ring-2 focus-visible:ring-ring/40 disabled:opacity-40"
+              >
+                <Plus className="size-3.5" />
+              </button>
+            </div>
+            <span className="text-sm text-muted-foreground tabular-nums">{formatRupees(line.price)} each</span>
+          </div>
         </div>
-        <div className="flex h-11 items-center gap-1 rounded-xl border bg-card p-1">
-          <button
-            type="button"
-            onClick={() => setQuantity(line.dishId, line.quantity - 1)}
-            aria-label={`Remove one ${line.name}`}
-            className="flex size-8 items-center justify-center rounded-lg bg-secondary outline-none hover:bg-border focus-visible:ring-2 focus-visible:ring-ring/40"
-          >
-            <Minus className="size-4" />
-          </button>
-          <span className="w-6 text-center font-semibold tabular-nums">{line.quantity}</span>
-          <button
-            type="button"
-            onClick={() => setQuantity(line.dishId, line.quantity + 1)}
-            disabled={line.quantity >= MAX_QUANTITY}
-            aria-label={`Add one more ${line.name}`}
-            className="flex size-8 items-center justify-center rounded-lg bg-brand-soft text-primary outline-none hover:bg-primary/15 focus-visible:ring-2 focus-visible:ring-ring/40 disabled:opacity-40"
-          >
-            <Plus className="size-4" />
-          </button>
-        </div>
-        <p className="w-16 text-right font-heading font-bold tabular-nums">
+        <p className="self-start pt-0.5 text-right font-heading text-lg font-bold tabular-nums">
           {formatRupees(line.price * line.quantity)}
         </p>
       </div>

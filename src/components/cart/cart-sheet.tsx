@@ -3,7 +3,7 @@
 import { useState, useTransition } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { Loader2, MapPin, Phone, X } from "lucide-react";
+import { Banknote, Loader2, MapPin, Phone, QrCode, X } from "lucide-react";
 import { BrandLogo } from "@/components/brand-logo";
 import { CartLineRow } from "@/components/cart/cart-line-row";
 import { Sheet, SheetContent, SheetDescription, SheetTitle } from "@/components/ui/sheet";
@@ -79,7 +79,7 @@ function EmptyCart({ onBrowse }: { onBrowse: () => void }) {
   return (
     <div className="flex flex-col items-center px-8 pt-16 pb-20 text-center">
       <BrandLogo className="size-24 animate-bounce-idle" />
-      <p className="mt-6 font-heading text-2xl font-bold">Nothing here yet</p>
+      <p className="mt-6 font-heading text-title font-bold">Nothing here yet</p>
       <p className="mt-2 text-muted-foreground">
         Pick a restaurant and add a few dishes — most orders take under a minute.
       </p>
@@ -135,12 +135,17 @@ function CartContents({
     });
   }
 
+  // Only the Place-order button is pinned. The bill, payment notes and the
+  // handover/contact card all scroll with the items: the old pinned footer
+  // (bill + payment box + button, ~300px) left so little room on a phone
+  // that the contact card got cut off mid-sentence. The bottom edge of the
+  // scroll area fades out so it reads as "more below", not as clipped.
   return (
     <>
-      <div className="min-h-0 flex-1 overflow-y-auto px-6">
+      <div className="min-h-0 flex-1 overflow-y-auto px-6 pb-6 [mask-image:linear-gradient(to_bottom,#000_calc(100%-1.5rem),transparent)]">
         <ul>
           {cart.lines.map((line) => (
-            <CartLineRow key={line.dishId} line={line} />
+            <CartLineRow key={line.dishId} line={line} restaurantName={cart.restaurantName} />
           ))}
         </ul>
 
@@ -156,9 +161,9 @@ function CartContents({
           />
         </label>
 
-        <div className="mt-4 mb-5 divide-y rounded-2xl border bg-card shadow-card">
+        <div className="mt-4 divide-y rounded-2xl border bg-card shadow-card">
           <div className="flex items-center gap-4 px-5 py-4">
-            <MapPin className="size-5 shrink-0 text-primary" aria-hidden="true" />
+            <MapPin className="size-5 shrink-0 text-rose" aria-hidden="true" />
             <div>
               <p className={eyebrow}>Handover point</p>
               <p className="font-semibold">VIT-AP Main Gate</p>
@@ -166,47 +171,44 @@ function CartContents({
           </div>
           <ContactPhone value={contactPhone} onChange={setContactPhone} />
         </div>
+
+        <div className="mt-4 rounded-2xl border bg-card px-5 py-4 shadow-card">
+          <dl className="space-y-1.5">
+            <div className="flex justify-between text-muted-foreground">
+              <dt>Item total</dt>
+              <dd className="tabular-nums">{formatRupees(amount)}</dd>
+            </div>
+            <div className="flex justify-between text-muted-foreground">
+              <dt>Delivery</dt>
+              <dd className="font-semibold text-success">Free</dd>
+            </div>
+            <div className="flex items-baseline justify-between border-t border-dashed pt-2.5">
+              <dt className="font-semibold">To pay at pickup</dt>
+              <dd className="font-heading text-2xl font-bold tabular-nums">{formatRupees(amount)}</dd>
+            </div>
+          </dl>
+          <ul className="mt-3 space-y-1.5 border-t pt-3 text-sm text-muted-foreground">
+            <li className="flex items-center gap-2.5">
+              <Banknote className="size-4 shrink-0 text-rose" aria-hidden="true" />
+              Cash at the gate — exact change helps.
+            </li>
+            <li className="flex items-center gap-2.5">
+              <QrCode className="size-4 shrink-0 text-rose" aria-hidden="true" />
+              UPI works too — scan and pay when you collect.
+            </li>
+          </ul>
+        </div>
       </div>
 
-      <footer className="border-t px-6 pt-4 pb-[max(1rem,env(safe-area-inset-bottom))]">
-        <dl className="space-y-1.5">
-          <div className="flex justify-between text-muted-foreground">
-            <dt>Item total</dt>
-            <dd className="tabular-nums">{formatRupees(amount)}</dd>
-          </div>
-          <div className="flex justify-between text-muted-foreground">
-            <dt>Delivery fee</dt>
-            <dd className="font-semibold text-success">FREE</dd>
-          </div>
-          <div className="flex items-baseline justify-between border-t border-dashed pt-2.5">
-            <dt className="text-lg font-semibold">To pay in cash</dt>
-            <dd className="font-heading text-3xl font-bold tabular-nums">{formatRupees(amount)}</dd>
-          </div>
-        </dl>
-
-        <div className="mt-3 rounded-2xl border border-primary/20 bg-brand-soft px-4 py-3 text-sm text-brand-soft-foreground">
-          <p className="flex items-start gap-3">
-            <span aria-hidden="true" className="w-4 shrink-0 text-center font-bold text-primary">
-              ₹
-            </span>
-            <span>Cash on delivery at the gate. Please carry exact change.</span>
-          </p>
-          <p className="mt-1.5 flex items-center gap-3">
-            <span aria-hidden="true" className="w-4 shrink-0 text-center">
-              📱
-            </span>
-            <span>Scan and pay through UPI too</span>
-          </p>
-        </div>
-
+      <footer className="border-t bg-background px-6 pt-3 pb-[max(1rem,env(safe-area-inset-bottom))]">
         {!orderingEnabled && (
-          <p className="mt-3 rounded-2xl bg-secondary px-4 py-3 text-center text-sm">
+          <p className="mb-3 rounded-2xl bg-secondary px-4 py-3 text-center text-sm">
             Ordering is paused campus-wide right now. Try again in a bit.
           </p>
         )}
 
         {error && (
-          <p id="place-order-error" role="alert" className="mt-3 text-center text-sm text-destructive">
+          <p id="place-order-error" role="alert" className="mb-3 text-center text-sm text-destructive">
             {error}
           </p>
         )}
@@ -216,10 +218,13 @@ function CartContents({
           onClick={submit}
           disabled={placing || !orderingEnabled}
           aria-describedby={error ? "place-order-error" : undefined}
-          className="surface-primary mt-3 flex h-14 w-full items-center justify-center gap-2 rounded-2xl bg-primary text-lg font-bold text-primary-foreground outline-none hover:brightness-95 focus-visible:ring-3 focus-visible:ring-ring/40 disabled:opacity-70"
+          className="surface-primary flex h-14 w-full items-center justify-between gap-2 rounded-2xl bg-primary px-6 text-lg font-bold text-primary-foreground outline-none hover:brightness-95 focus-visible:ring-3 focus-visible:ring-ring/40 disabled:opacity-70"
         >
-          {placing && <Loader2 className="size-5 animate-spin" />}
-          {placing ? "Placing order…" : `Place order · ${formatRupees(amount)}`}
+          <span className="flex items-center gap-2">
+            {placing && <Loader2 className="size-5 animate-spin" />}
+            {placing ? "Placing order…" : "Place order"}
+          </span>
+          <span className="font-heading text-xl tabular-nums">{formatRupees(amount)}</span>
         </button>
       </footer>
     </>
@@ -242,7 +247,7 @@ function ContactPhone({ value, onChange }: { value: string; onChange: (v: string
   if (!editing) {
     return (
       <div className="flex items-center gap-4 px-5 py-4">
-        <Phone className="size-5 shrink-0 text-primary" aria-hidden="true" />
+        <Phone className="size-5 shrink-0 text-rose" aria-hidden="true" />
         <div className="min-w-0 flex-1">
           <p className={eyebrow}>Your number</p>
           <p className="font-semibold tabular-nums">{formatStoredMobile(value)}</p>

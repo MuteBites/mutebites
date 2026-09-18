@@ -1,8 +1,10 @@
 "use client";
 
 import { useState } from "react";
+import Image from "next/image";
 import { ArrowRight } from "lucide-react";
 import { cartTotals, useCart } from "@/lib/cart/store";
+import { getDishPhoto } from "@/lib/data/dish-photos";
 import { formatRupees } from "@/lib/format";
 import { cn } from "@/lib/utils";
 import { CartSheet } from "./cart-sheet";
@@ -42,7 +44,27 @@ export function CartBar({
               hasTabBar ? "bottom-20 pb-0" : "bottom-0 pb-[max(1rem,env(safe-area-inset-bottom))]",
             )}
           >
-            <div className="surface-ink shadow-elevated-glow flex items-center gap-3 rounded-3xl bg-ink p-3 pl-5 text-ink-foreground">
+            <div className="surface-ink shadow-elevated-glow flex items-center gap-3 rounded-3xl bg-ink p-3 pl-3.5 text-ink-foreground">
+              {/* The actual food in the cart, not just a count: up to two
+                  dish photos overlapping, falling back to the dish's initial.
+                  Dropped below 360px so the total never gets squeezed. */}
+              <div className="flex shrink-0 -space-x-3 max-[359px]:hidden" aria-hidden="true">
+                {cart.lines.slice(0, 2).map((line) => {
+                  const photo = cart.restaurantName ? getDishPhoto(cart.restaurantName, line.name) : undefined;
+                  return (
+                    <span
+                      key={line.dishId}
+                      className="relative flex size-11 items-center justify-center overflow-hidden rounded-full bg-ink-foreground/15 font-heading text-lg font-bold ring-2 ring-ink"
+                    >
+                      {photo ? (
+                        <Image src={photo} alt="" fill sizes="44px" className="object-cover" />
+                      ) : (
+                        line.name.trim().charAt(0)
+                      )}
+                    </span>
+                  );
+                })}
+              </div>
               <div className="min-w-0 flex-1">
                 <p className="truncate text-sm opacity-75">
                   <span key={totals.items} className="animate-bounce-count inline-block">
@@ -56,7 +78,7 @@ export function CartBar({
               <button
                 type="button"
                 onClick={() => setOpen(true)}
-                className="surface-primary flex h-14 items-center gap-2 rounded-2xl bg-primary px-6 text-lg font-bold text-primary-foreground outline-none hover:brightness-95 focus-visible:ring-3 focus-visible:ring-white/60"
+                className="surface-primary flex h-14 shrink-0 items-center gap-2 rounded-2xl bg-primary px-5 text-lg font-bold text-primary-foreground outline-none hover:brightness-95 focus-visible:ring-3 focus-visible:ring-white/60"
               >
                 View cart <ArrowRight className="size-5" />
               </button>
