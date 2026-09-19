@@ -134,7 +134,7 @@ export function RestaurantList({
                 closedLine={closedLine}
                 stats={menuStats[r.id]}
                 slides={slidesByRestaurant[r.id] ?? []}
-                slideDelay={i * 900}
+                slideDelay={i * 700}
               />
             </li>
           ))}

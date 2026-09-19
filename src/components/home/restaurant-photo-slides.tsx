@@ -1,13 +1,18 @@
 "use client";
 
-import { useEffect, useRef, useState, type ReactNode } from "react";
+import { useEffect, useRef, useState, type MouseEvent, type ReactNode } from "react";
+import { useRouter } from "next/navigation";
 import { BlurImage } from "@/components/blur-image";
 import { VegMark } from "@/components/veg-mark";
 import type { CardSlide } from "@/lib/data/dish-photos";
 import { formatRupees } from "@/lib/format";
 import { cn } from "@/lib/utils";
 
-const INTERVAL_MS = 3200;
+/** How long the first slide (the cover) holds, on screen, before sliding starts. */
+const FIRST_SLIDE_MS = 2500;
+/** How long each later slide holds. */
+const SLIDE_MS = 3200;
+const TICK_MS = 250;
 /** How long autoplay backs off after the student touches the slides. */
 const PAUSE_AFTER_TOUCH_MS = 8000;
 
@@ -15,27 +20,34 @@ const PAUSE_AFTER_TOUCH_MS = 8000;
  * The photo strip on Home's restaurant card: cover first, then dishes
  * with a "name · price" chip, advancing on its own every few seconds and
  * swipeable by hand (native scroll-snap, so a swipe never counts as a tap
- * on the card's link).
+ * on the card's link). Tapping a dish slide opens the menu at that dish
+ * (`?dish=`, same deep link as search results); tapping the cover opens
+ * the menu as usual.
  *
- * Autoplay only runs while the card is mostly on screen and the tab is
- * visible, backs off after a touch, and never runs under reduced motion
+ * Each slide's hold time only counts while the card is mostly on screen,
+ * the tab is visible and no touch is backing it off — so the cover always
+ * gets its full FIRST_SLIDE_MS once seen. Never autoplays under reduced motion
  * (swiping still works). Photos mount one slide ahead of the current one,
  * and only once the card has been seen — a card below the fold still
  * downloads just its cover.
  */
 export function RestaurantPhotoSlides({
   slides,
+  restaurantHref,
   autoplay,
   startDelay = 0,
   children,
 }: {
   slides: CardSlide[];
+  /** The card's own link — a dish slide appends ?dish= to it. */
+  restaurantHref: string;
   autoplay: boolean;
-  /** Offsets each card's first advance so a list of them doesn't flip in lockstep. */
+  /** Extra hold on the cover, so a list of cards doesn't flip in lockstep. */
   startDelay?: number;
   /** Overlays that stay put while the photos move (the Open/Closed chip). */
   children?: ReactNode;
 }) {
+  const router = useRouter();
   const scrollerRef = useRef<HTMLDivElement>(null);
   const [index, setIndex] = useState(0);
   // Highest slide whose photo is mounted.
@@ -63,21 +75,37 @@ export function RestaurantPhotoSlides({
     if (!autoplay || count < 2) return;
     if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
 
-    let interval: ReturnType<typeof setInterval> | undefined;
-    const tick = () => {
+    // When the current slide started counting toward its hold time.
+    let shownAt = Date.now();
+    let shownIndex = indexRef.current;
+    const interval = setInterval(() => {
       const el = scrollerRef.current;
-      if (!el || !visibleRef.current || document.hidden || Date.now() < pausedUntilRef.current) return;
-      const next = (indexRef.current + 1) % count;
+      const now = Date.now();
+      if (!el || !visibleRef.current || document.hidden || now < pausedUntilRef.current) {
+        shownAt = now;
+        return;
+      }
+      if (indexRef.current !== shownIndex) {
+        shownIndex = indexRef.current;
+        shownAt = now;
+        return;
+      }
+      const hold = shownIndex === 0 ? FIRST_SLIDE_MS + startDelay : SLIDE_MS;
+      if (now - shownAt < hold) return;
+      const next = (shownIndex + 1) % count;
       el.scrollTo({ left: next * el.clientWidth, behavior: "smooth" });
-    };
-    const start = setTimeout(() => {
-      interval = setInterval(tick, INTERVAL_MS);
-    }, startDelay);
-    return () => {
-      clearTimeout(start);
-      clearInterval(interval);
-    };
+      shownAt = now;
+    }, TICK_MS);
+    return () => clearInterval(interval);
   }, [autoplay, count, startDelay]);
+
+  function onClick(e: MouseEvent) {
+    const dish = slides[indexRef.current]?.dish;
+    // Modified clicks (new tab etc.) keep the card's plain link.
+    if (!dish || e.button !== 0 || e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return;
+    e.preventDefault();
+    router.push(`${restaurantHref}?dish=${dish.id}`, { transitionTypes: ["nav-forward"] });
+  }
 
   function onScroll() {
     const el = scrollerRef.current;
@@ -97,6 +125,7 @@ export function RestaurantPhotoSlides({
         aria-hidden="true"
         tabIndex={-1}
         onScroll={onScroll}
+        onClick={onClick}
         onPointerDown={() => {
           pausedUntilRef.current = Date.now() + PAUSE_AFTER_TOUCH_MS;
         }}

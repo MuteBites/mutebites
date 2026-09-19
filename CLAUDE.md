@@ -238,9 +238,12 @@ silently re-enables the button.
   `src/components/home/restaurant-photo-slides.tsx`): the cover first,
   then up to five available dishes with a "veg mark · name · price" chip
   (`getRestaurantCardSlides()`, same file as above) — `SIGNATURE_DISHES`
-  lead, the rest follow menu order, one slide per distinct photo. Auto-
-  advances every 3.2 s (staggered per card) only while the card is on
-  screen and the tab visible; pauses 8 s after a touch; no autoplay under
+  lead, the rest follow menu order, one slide per distinct photo. The
+  cover holds 2.5 s (+0.7 s per card down the list), each dish 3.2 s —
+  hold time only counts while the card is on screen and the tab visible;
+  pauses 8 s after a touch. Tapping a dish slide opens
+  `/restaurants/<id>?dish=<dishId>` (the dish deep link), the cover opens
+  the plain menu; no autoplay under
   reduced motion or for a closed restaurant; swiping is native
   scroll-snap. Dish photos mount one slide ahead, only once the card has
   been seen. The card's "24 dishes · from ₹60" line comes from

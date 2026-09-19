@@ -176,7 +176,7 @@ const SIGNATURE_DISHES: Record<string, string[]> = {
 /** Most dish slides per card — each is another photo download on Home. */
 const MAX_DISH_SLIDES = 5;
 
-export type CardSlide = { src: string; dish?: { name: string; price: number; isVeg: boolean } };
+export type CardSlide = { src: string; dish?: { id: string; name: string; price: number; isVeg: boolean } };
 
 /**
  * The photos Home's restaurant card slides through: the cover first
@@ -186,7 +186,7 @@ export type CardSlide = { src: string; dish?: { name: string; price: number; isV
  */
 export function getRestaurantCardSlides(
   restaurantName: string,
-  dishes: { name: string; price: number; isVeg: boolean; isAvailable: boolean }[],
+  dishes: { id: string; name: string; price: number; isVeg: boolean; isAvailable: boolean }[],
 ): CardSlide[] {
   const photos = DISH_PHOTOS[restaurantName] ?? {};
   const signature = SIGNATURE_DISHES[restaurantName] ?? [];
@@ -203,7 +203,7 @@ export function getRestaurantCardSlides(
     const src = photos[d.name];
     if (!src || seen.has(src)) continue;
     seen.add(src);
-    dishSlides.push({ src, dish: { name: d.name, price: d.price, isVeg: d.isVeg } });
+    dishSlides.push({ src, dish: { id: d.id, name: d.name, price: d.price, isVeg: d.isVeg } });
     if (dishSlides.length === MAX_DISH_SLIDES) break;
   }
   return cover ? [{ src: cover }, ...dishSlides] : dishSlides;

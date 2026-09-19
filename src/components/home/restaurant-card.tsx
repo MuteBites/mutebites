@@ -49,7 +49,12 @@ export function RestaurantCard({
       className="pressable group block rounded-[1.75rem] border bg-card p-2 shadow-card outline-none transition-shadow hover:shadow-raised focus-visible:ring-3 focus-visible:ring-ring/80"
     >
       <div className={cn("h-44 overflow-hidden rounded-[1.25rem]", !active && "opacity-60 grayscale")}>
-        <RestaurantPhotoSlides slides={slides} autoplay={active} startDelay={slideDelay}>
+        <RestaurantPhotoSlides
+          slides={slides}
+          restaurantHref={`/restaurants/${restaurant.id}`}
+          autoplay={active}
+          startDelay={slideDelay}
+        >
           <span
             className={cn(
               "pointer-events-none absolute top-2.5 left-2.5 inline-flex items-center gap-1.5 rounded-full bg-card/90 px-2.5 py-1 text-xs font-semibold backdrop-blur-sm",
