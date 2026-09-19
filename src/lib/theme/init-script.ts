@@ -1,4 +1,4 @@
-// Runs before hydration (see <Script strategy="beforeInteractive"> in
+// Runs before first paint (a raw inline <script> at the top of <body> in
 // layout.tsx) so a stored "dark" or "system"+OS-dark preference applies
 // before first paint, with no flash of the light theme. Must stay in sync
 // with the defaults/logic in ./store.ts (this can't import that module —

@@ -285,7 +285,9 @@ silently re-enables the button.
   background. `AppSplash` is plain server markup, first in `<body>`; a
   raw inline `<script>` (`init-script.ts`) — **not** `next/script`
   `beforeInteractive`, which is queued until Next's JS loads and would let
-  the app paint first — decides play/skip before first paint, preloads the
+  the app paint first (the theme-init script, `src/lib/theme/init-script.ts`,
+  is a raw inline script for the same reason — no light flash for dark
+  users) — decides play/skip before first paint, preloads the
   layers and drives `data-splash` on `<html>` (`play` → `run` → `out` →
   `done`), so it never waits for hydration. All motion is CSS (the
   "Startup splash" rules in `globals.css`; storyboard keyframe rules

@@ -1,6 +1,5 @@
 import type { Metadata, Viewport } from "next";
 import { Fraunces, Plus_Jakarta_Sans } from "next/font/google";
-import Script from "next/script";
 import { AppSplash } from "@/components/splash/app-splash";
 import { SPLASH_DISABLED } from "@/components/splash/config";
 import { SPLASH_INIT_SCRIPT } from "@/components/splash/init-script";
@@ -53,9 +52,11 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
       className={`${jakarta.variable} ${fraunces.variable} h-full antialiased`}
     >
       <body className="min-h-full flex flex-col">
-        <Script id="theme-init" strategy="beforeInteractive">
-          {THEME_INIT_SCRIPT}
-        </Script>
+        {/* Raw inline <script>, not next/script: beforeInteractive inline
+            scripts are queued (self.__next_s) until Next's own JS loads, so
+            a dark-mode user would see a flash of the light theme first.
+            This runs as the parser reaches it, before anything is painted. */}
+        <script id="theme-init" dangerouslySetInnerHTML={{ __html: THEME_INIT_SCRIPT }} />
         {!SPLASH_DISABLED && (
           <>
             {/* A plain inline <script>, not next/script: beforeInteractive
