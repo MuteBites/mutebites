@@ -148,6 +148,13 @@ photos; no uppercase anywhere.
 ## Project structure
 
 - `src/app` — routes (App Router)
+- `src/app/robots.ts` — generates `/robots.txt` (everything but `/admin`
+  crawlable). Excluded from the `src/proxy.ts` matcher like `favicon.ico`,
+  otherwise the sign-in guard 307s crawlers to `/login` and Lighthouse
+  marks robots.txt invalid.
+- Every page has exactly one `<h1>` (order tracking's is `sr-only`; the
+  admin header's "Admin" is an h1 only on the dashboard itself, since
+  sub-pages carry their own). Keep it that way when adding pages.
 - `src/app/privacy`, `src/app/terms` — static, unauthenticated pages
   required for the Google OAuth consent-screen review. Listed in
   `PUBLIC_PATHS` (`src/lib/supabase/middleware.ts`) alongside `/login` and
