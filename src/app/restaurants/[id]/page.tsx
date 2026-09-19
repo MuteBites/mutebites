@@ -93,7 +93,7 @@ export default async function RestaurantPage({ params, searchParams }: PageProps
               href="/"
               aria-label="Back to restaurants"
               transitionTypes={["nav-back"]}
-              className="absolute top-4 left-4 flex size-11 items-center justify-center rounded-full bg-card/90 shadow-card backdrop-blur-sm outline-none focus-visible:ring-3 focus-visible:ring-ring/40"
+              className="absolute top-4 left-4 flex size-11 items-center justify-center rounded-full bg-card/90 shadow-card backdrop-blur-sm outline-none focus-visible:ring-3 focus-visible:ring-ring/80"
             >
               <ArrowLeft className="size-5" />
             </Link>

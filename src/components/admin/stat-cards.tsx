@@ -42,7 +42,7 @@ export function StatCards({
           value={
             <>
               {activeRestaurants}
-              <span className="text-ink-foreground/50">/{totalRestaurants}</span>
+              <span className="text-ink-foreground/75">/{totalRestaurants}</span>
             </>
           }
         />

@@ -59,7 +59,7 @@ export function DishCard({
       type="button"
       onClick={onAdd}
       aria-label={`Add ${dish.name}`}
-      className="animate-pop-in flex size-11 items-center justify-center rounded-full bg-primary text-primary-foreground shadow-raised outline-none hover:brightness-95 focus-visible:ring-3 focus-visible:ring-ring/50"
+      className="animate-pop-in flex size-11 items-center justify-center rounded-full bg-primary text-primary-foreground shadow-raised outline-none hover:brightness-95 focus-visible:ring-3 focus-visible:ring-ring/80"
     >
       <Plus className="size-5" strokeWidth={2.5} />
     </button>

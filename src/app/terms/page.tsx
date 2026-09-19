@@ -29,7 +29,7 @@ export default function TermsPage() {
 
       <Link
         href="/"
-        className="mt-10 inline-block font-semibold text-primary outline-none hover:underline focus-visible:ring-2 focus-visible:ring-ring/40"
+        className="mt-10 inline-block font-semibold text-primary outline-none hover:underline focus-visible:ring-2 focus-visible:ring-ring/80"
       >
         ← Back to MuteBites
       </Link>

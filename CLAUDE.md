@@ -24,6 +24,13 @@ Food delivery site for VIT-AP University students.
   `text-brand-soft-foreground` on blush instead. On the plum `bg-ink` surface
   (token card, cart bar, banners) use `text-ink-accent` / `-ink-success` /
   `-ink-danger` — regular amber/green/red are ~2:1 on plum.
+  Focus rings are `ring-ring/80` (3.5:1+ on card) and input borders use
+  `--input` (3.4:1+) — both chosen to meet WCAG's 3:1 for non-text UI;
+  don't drop them back to /40 or the old pale border. `npm run
+  audit:contrast` (`scripts/contrast-audit.mjs`) re-checks every token pair
+  the app uses in both themes and fails if any pair is below its minimum —
+  run it after touching colours, and add a pair when you introduce a new
+  text/surface combination.
 - **Typography**: Fraunces (`font-heading`, SOFT axis at 50 via a base
   rule in `globals.css`) for display text and big numerals; Plus Jakarta
   (`font-sans`) for body **and buttons** — buttons never use
@@ -32,8 +39,7 @@ Food delivery site for VIT-AP University students.
   `text-title` (card/section titles) — not one-off `text-[2.5rem]`s.
   Small captions above fields/sections use `text-label`: sentence case,
   sans, no letter-spacing. No mono font is loaded any more; don't bring
-  back the mono-uppercase eyebrow style (admin buttons still use
-  `uppercase` until the admin pass).
+  back the mono-uppercase eyebrow style, and no `uppercase` anywhere.
 - **Home header mood field**: `HomeHeader` bleeds to the screen edges over
   `.mood-field.mood-<morning|afternoon|evening|night>` (`globals.css`),
   driven by `getTimeOfDayIST()`. Each mood has three `--mood-<time>-a/b/c`

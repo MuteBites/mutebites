@@ -10,7 +10,7 @@ export function AboutMuteBitesDialog({ children }: { children: ReactNode }) {
     <Dialog>
       <DialogTrigger
         aria-label="About MuteBites"
-        className="pressable rounded-2xl outline-none focus-visible:ring-3 focus-visible:ring-ring/40"
+        className="pressable rounded-2xl outline-none focus-visible:ring-3 focus-visible:ring-ring/80"
       >
         {children}
       </DialogTrigger>

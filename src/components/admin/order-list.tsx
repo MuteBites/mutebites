@@ -103,14 +103,14 @@ export function OrderList({
             value={query}
             onChange={(e) => setQuery(e.target.value)}
             placeholder="Search ID, name, phone…"
-            className="h-10 w-full rounded-full bg-secondary pr-9 pl-9 text-sm outline-none placeholder:text-muted-foreground focus-visible:ring-2 focus-visible:ring-ring/30 [&::-webkit-search-cancel-button]:hidden"
+            className="h-10 w-full rounded-full bg-secondary pr-9 pl-9 text-sm outline-none placeholder:text-muted-foreground focus-visible:ring-2 focus-visible:ring-ring/80 [&::-webkit-search-cancel-button]:hidden"
           />
           {query && (
             <button
               type="button"
               onClick={() => setQuery("")}
               aria-label="Clear search"
-              className="absolute top-1/2 right-2 flex size-6 -translate-y-1/2 items-center justify-center rounded-full bg-border text-foreground outline-none hover:bg-ink hover:text-ink-foreground focus-visible:ring-2 focus-visible:ring-ring/40"
+              className="absolute top-1/2 right-2 flex size-6 -translate-y-1/2 items-center justify-center rounded-full bg-border text-foreground outline-none hover:bg-ink hover:text-ink-foreground focus-visible:ring-2 focus-visible:ring-ring/80"
             >
               <X className="size-3.5" />
             </button>
@@ -194,7 +194,7 @@ function RestaurantTab({
       onClick={onClick}
       aria-pressed={active}
       className={cn(
-        "h-10 shrink-0 rounded-full px-4 text-sm font-semibold whitespace-nowrap outline-none transition-colors focus-visible:ring-3 focus-visible:ring-ring/40",
+        "h-10 shrink-0 rounded-full px-4 text-sm font-semibold whitespace-nowrap outline-none transition-colors focus-visible:ring-3 focus-visible:ring-ring/80",
         active ? "bg-ink text-ink-foreground" : "bg-secondary text-secondary-foreground hover:bg-border",
       )}
     >

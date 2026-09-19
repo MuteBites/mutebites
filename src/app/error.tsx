@@ -40,14 +40,14 @@ export default function Error({
         <button
           type="button"
           onClick={() => retry()}
-          className="surface-primary flex h-14 items-center justify-center gap-2 rounded-2xl bg-primary text-lg font-bold text-primary-foreground outline-none hover:brightness-95 focus-visible:ring-3 focus-visible:ring-ring/40"
+          className="surface-primary flex h-14 items-center justify-center gap-2 rounded-2xl bg-primary text-lg font-bold text-primary-foreground outline-none hover:brightness-95 focus-visible:ring-3 focus-visible:ring-ring/80"
         >
           <RotateCw className="size-5" aria-hidden="true" />
           Try again
         </button>
         <Link
           href="/"
-          className="pressable flex h-12 items-center justify-center rounded-2xl border bg-card font-semibold outline-none hover:bg-secondary focus-visible:ring-3 focus-visible:ring-ring/40"
+          className="pressable flex h-12 items-center justify-center rounded-2xl border bg-card font-semibold outline-none hover:bg-secondary focus-visible:ring-3 focus-visible:ring-ring/80"
         >
           Back to restaurants
         </Link>

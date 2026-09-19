@@ -71,7 +71,7 @@ function RestaurantToggleCard({
         disabled={pending}
         onClick={toggle}
         className={cn(
-          "flex h-10 shrink-0 items-center gap-1.5 rounded-full px-4 text-sm font-bold outline-none focus-visible:ring-3 focus-visible:ring-ring/40 disabled:opacity-70",
+          "flex h-10 shrink-0 items-center gap-1.5 rounded-full px-4 text-sm font-bold outline-none focus-visible:ring-3 focus-visible:ring-ring/80 disabled:opacity-70",
           active
             ? "border border-destructive/30 bg-destructive/5 text-destructive hover:bg-destructive/10"
             : "bg-success text-success-foreground hover:bg-success/90",

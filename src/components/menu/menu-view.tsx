@@ -131,7 +131,7 @@ export function MenuView({
                   onChange={(e) => setQuery(e.target.value)}
                   onKeyDown={(e) => e.key === "Escape" && closeSearch()}
                   placeholder="Search this menu…"
-                  className="h-10 w-full rounded-full bg-secondary pr-3 pl-10 outline-none placeholder:text-muted-foreground focus-visible:ring-2 focus-visible:ring-ring/30 [&::-webkit-search-cancel-button]:hidden"
+                  className="h-10 w-full rounded-full bg-secondary pr-3 pl-10 outline-none placeholder:text-muted-foreground focus-visible:ring-2 focus-visible:ring-ring/80 [&::-webkit-search-cancel-button]:hidden"
                 />
               </label>
             ) : (
@@ -139,7 +139,7 @@ export function MenuView({
                 type="button"
                 onClick={() => setSearchOpen(true)}
                 aria-label="Search this menu"
-                className="flex size-10 shrink-0 items-center justify-center rounded-full bg-secondary outline-none hover:bg-border focus-visible:ring-3 focus-visible:ring-ring/40"
+                className="flex size-10 shrink-0 items-center justify-center rounded-full bg-secondary outline-none hover:bg-border focus-visible:ring-3 focus-visible:ring-ring/80"
               >
                 <Search className="size-4.5" />
               </button>
@@ -150,7 +150,7 @@ export function MenuView({
                 type="button"
                 onClick={closeSearch}
                 aria-label="Close search"
-                className="flex size-10 shrink-0 items-center justify-center rounded-full bg-secondary outline-none hover:bg-border focus-visible:ring-3 focus-visible:ring-ring/40"
+                className="flex size-10 shrink-0 items-center justify-center rounded-full bg-secondary outline-none hover:bg-border focus-visible:ring-3 focus-visible:ring-ring/80"
               >
                 <X className="size-4.5" />
               </button>
@@ -162,7 +162,7 @@ export function MenuView({
                 aria-label="Veg only"
                 title="Veg only"
                 className={cn(
-                  "flex h-10 shrink-0 items-center gap-1.5 rounded-full border px-3 text-sm font-semibold outline-none transition-colors focus-visible:ring-3 focus-visible:ring-ring/40",
+                  "flex h-10 shrink-0 items-center gap-1.5 rounded-full border px-3 text-sm font-semibold outline-none transition-colors focus-visible:ring-3 focus-visible:ring-ring/80",
                   vegOnly
                     ? "border-success bg-success-soft text-success"
                     : "bg-card text-muted-foreground hover:bg-secondary",
@@ -185,7 +185,7 @@ export function MenuView({
                           onClick={() => setFilter(chip.key)}
                           aria-pressed={filter === chip.key}
                           className={cn(
-                            "flex h-10 items-center gap-1.5 rounded-full px-4 text-sm font-semibold whitespace-nowrap outline-none transition-colors focus-visible:ring-3 focus-visible:ring-ring/40",
+                            "flex h-10 items-center gap-1.5 rounded-full px-4 text-sm font-semibold whitespace-nowrap outline-none transition-colors focus-visible:ring-3 focus-visible:ring-ring/80",
                             filter === chip.key
                               ? "bg-ink text-ink-foreground"
                               : "bg-secondary text-secondary-foreground hover:bg-border",

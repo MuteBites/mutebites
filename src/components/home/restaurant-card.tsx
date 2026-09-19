@@ -41,7 +41,7 @@ export function RestaurantCard({
     <Link
       href={`/restaurants/${restaurant.id}`}
       transitionTypes={["nav-forward"]}
-      className="pressable group block rounded-[1.75rem] border bg-card p-2 shadow-card outline-none transition-shadow hover:shadow-raised focus-visible:ring-3 focus-visible:ring-ring/40"
+      className="pressable group block rounded-[1.75rem] border bg-card p-2 shadow-card outline-none transition-shadow hover:shadow-raised focus-visible:ring-3 focus-visible:ring-ring/80"
     >
       <div
         className={cn(

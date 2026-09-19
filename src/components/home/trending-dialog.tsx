@@ -26,7 +26,7 @@ export function TrendingDialog({ dishes }: { dishes: TrendingDish[] }) {
     <Dialog>
       <DialogTrigger
         aria-label="Trending this week"
-        className="pressable flex size-12 shrink-0 items-center justify-center rounded-2xl bg-card/80 shadow-card outline-none focus-visible:ring-3 focus-visible:ring-ring/40"
+        className="pressable flex size-12 shrink-0 items-center justify-center rounded-2xl bg-card/80 shadow-card outline-none focus-visible:ring-3 focus-visible:ring-ring/80"
       >
         <Flame className="size-6 text-primary" aria-hidden="true" />
       </DialogTrigger>
@@ -45,7 +45,7 @@ export function TrendingDialog({ dishes }: { dishes: TrendingDish[] }) {
           <Link
             href={dishHref(top)}
             transitionTypes={["nav-forward"]}
-            className="pressable group mt-4 block rounded-2xl outline-none focus-visible:ring-3 focus-visible:ring-ring/40"
+            className="pressable group mt-4 block rounded-2xl outline-none focus-visible:ring-3 focus-visible:ring-ring/80"
           >
             <div className="relative aspect-[16/9] overflow-hidden rounded-2xl bg-brand-soft">
               <DishPhoto dish={top} sizes="(min-width: 384px) 336px, 85vw" className="text-5xl" />
@@ -68,7 +68,7 @@ export function TrendingDialog({ dishes }: { dishes: TrendingDish[] }) {
                 <Link
                   href={dishHref(d)}
                   transitionTypes={["nav-forward"]}
-                  className="pressable flex items-center gap-3 rounded-xl py-2.5 outline-none focus-visible:ring-2 focus-visible:ring-ring/40"
+                  className="pressable flex items-center gap-3 rounded-xl py-2.5 outline-none focus-visible:ring-2 focus-visible:ring-ring/80"
                 >
                   <span className="w-5 shrink-0 text-center font-heading font-bold text-muted-foreground tabular-nums">
                     {i + 2}

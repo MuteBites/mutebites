@@ -96,7 +96,7 @@ function EmptyOrders() {
       action={
         <Link
           href="/"
-          className="pressable flex h-14 items-center rounded-2xl bg-primary px-8 text-lg font-bold text-primary-foreground outline-none hover:bg-primary/90 focus-visible:ring-3 focus-visible:ring-ring/40"
+          className="pressable flex h-14 items-center rounded-2xl bg-primary px-8 text-lg font-bold text-primary-foreground outline-none hover:bg-primary/90 focus-visible:ring-3 focus-visible:ring-ring/80"
         >
           Order something
         </Link>
@@ -138,7 +138,7 @@ function ActiveOrderCard({ order }: { order: OrderSummary }) {
     <Link
       href={`/orders/${order.id}`}
       transitionTypes={["nav-forward"]}
-      className="pressable block rounded-3xl border border-primary/40 bg-card p-4 shadow-card outline-none focus-visible:ring-3 focus-visible:ring-ring/40"
+      className="pressable block rounded-3xl border border-primary/40 bg-card p-4 shadow-card outline-none focus-visible:ring-3 focus-visible:ring-ring/80"
     >
       <div className="flex gap-3.5">
         <OrderThumb order={order} className="size-16 rounded-2xl text-2xl" />
@@ -171,7 +171,7 @@ function PastOrderRow({ order }: { order: OrderSummary }) {
       <Link
         href={`/orders/${order.id}`}
         transitionTypes={["nav-forward"]}
-        className="flex min-w-0 flex-1 items-center gap-3 rounded-3xl py-3.5 pl-4 outline-none focus-visible:ring-3 focus-visible:ring-ring/40 focus-visible:ring-inset"
+        className="flex min-w-0 flex-1 items-center gap-3 rounded-3xl py-3.5 pl-4 outline-none focus-visible:ring-3 focus-visible:ring-ring/80 focus-visible:ring-inset"
       >
         <OrderThumb order={order} className={cn("size-14 rounded-xl text-xl", !delivered && "grayscale")} />
         <div className="min-w-0 flex-1">
@@ -195,7 +195,7 @@ function PastOrderRow({ order }: { order: OrderSummary }) {
           transitionTypes={["nav-forward"]}
           aria-label={`Reorder from ${order.restaurantName}`}
           title="Reorder"
-          className="pressable flex size-10 shrink-0 items-center justify-center rounded-full bg-brand-soft text-brand-soft-foreground outline-none hover:brightness-95 focus-visible:ring-2 focus-visible:ring-ring/40"
+          className="pressable flex size-10 shrink-0 items-center justify-center rounded-full bg-brand-soft text-brand-soft-foreground outline-none hover:brightness-95 focus-visible:ring-2 focus-visible:ring-ring/80"
         >
           <RotateCcw className="size-4" aria-hidden="true" />
         </Link>

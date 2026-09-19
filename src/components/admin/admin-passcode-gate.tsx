@@ -55,7 +55,7 @@ export function AdminPasscodeGate() {
           aria-invalid={!!error || undefined}
           aria-describedby={error ? "passcode-error" : undefined}
           className={cn(
-            "h-14 w-full rounded-2xl border bg-card shadow-card px-5 text-lg outline-none focus-visible:ring-2 focus-visible:ring-ring/30",
+            "h-14 w-full rounded-2xl border bg-card shadow-card px-5 text-lg outline-none focus-visible:ring-2 focus-visible:ring-ring/80",
             error && "border-destructive",
           )}
         />
@@ -67,7 +67,7 @@ export function AdminPasscodeGate() {
         <button
           type="submit"
           disabled={pending || passcode.length === 0}
-          className="mt-4 flex h-14 w-full items-center justify-center gap-2 rounded-2xl bg-primary text-lg font-bold text-primary-foreground outline-none hover:bg-primary/90 focus-visible:ring-3 focus-visible:ring-ring/40 disabled:opacity-70"
+          className="mt-4 flex h-14 w-full items-center justify-center gap-2 rounded-2xl bg-primary text-lg font-bold text-primary-foreground outline-none hover:bg-primary/90 focus-visible:ring-3 focus-visible:ring-ring/80 disabled:opacity-70"
         >
           {pending && <Loader2 className="size-5 animate-spin" />}
           Continue

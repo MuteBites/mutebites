@@ -202,7 +202,8 @@
   --destructive: #b42b1c;
   --destructive-foreground: #ffffff;
   --border: #e5d3c8;
-  --input: #d9c3b6;
+  /* 3.5:1 against card — WCAG 1.4.11 wants 3:1 for a control's boundary. */
+  --input: #9d8478;
   --ring: #a25e1d;
   --ink: #552c4a;
   --ink-foreground: #fff8f2;
@@ -284,7 +285,7 @@
   --destructive: #f08271;
   --destructive-foreground: #2a0e09;
   --border: rgb(245 234 225 / 11%);
-  --input: rgb(245 234 225 / 17%);
+  --input: rgb(245 234 225 / 40%);
   --ring: #d9974f;
   --ink: #ebd9e2;
   --ink-foreground: #3f2037;
@@ -425,7 +426,7 @@
 
 @layer base {
   * {
-    @apply border-border outline-ring/50;
+    @apply border-border outline-ring/80;
   }
   body {
     @apply bg-background text-foreground;

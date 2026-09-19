@@ -186,7 +186,7 @@ export function OrderTracking({
               href="/orders"
               aria-label="Back to your orders"
               transitionTypes={["nav-back"]}
-              className="flex size-11 items-center justify-center rounded-full bg-secondary outline-none hover:bg-border focus-visible:ring-3 focus-visible:ring-ring/40"
+              className="flex size-11 items-center justify-center rounded-full bg-secondary outline-none hover:bg-border focus-visible:ring-3 focus-visible:ring-ring/80"
             >
               <ArrowLeft className="size-5" />
             </Link>

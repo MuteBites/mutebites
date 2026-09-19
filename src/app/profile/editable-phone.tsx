@@ -58,7 +58,7 @@ export function EditablePhone({
               setDraft(formatLocalMobile(value.replace(/^\+91/, "")));
               setEditing(true);
             }}
-            className="shrink-0 rounded-md font-semibold text-primary outline-none hover:underline focus-visible:ring-2 focus-visible:ring-ring/40"
+            className="shrink-0 rounded-md font-semibold text-primary outline-none hover:underline focus-visible:ring-2 focus-visible:ring-ring/80"
           >
             Edit
           </button>
@@ -95,7 +95,7 @@ export function EditablePhone({
         <button
           type="submit"
           disabled={pending}
-          className="flex h-11 items-center gap-1.5 rounded-xl bg-primary px-4 font-semibold text-primary-foreground outline-none hover:bg-primary/90 focus-visible:ring-3 focus-visible:ring-ring/40 disabled:opacity-70"
+          className="flex h-11 items-center gap-1.5 rounded-xl bg-primary px-4 font-semibold text-primary-foreground outline-none hover:bg-primary/90 focus-visible:ring-3 focus-visible:ring-ring/80 disabled:opacity-70"
         >
           {pending && <Loader2 className="size-4 animate-spin" />}
           Save

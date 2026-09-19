@@ -16,7 +16,7 @@ export function SoundToggle() {
       aria-label="Order placed sound"
       onClick={() => setSoundEnabled(!enabled)}
       className={cn(
-        "relative inline-flex h-8 w-14 shrink-0 items-center rounded-full outline-none transition-colors focus-visible:ring-2 focus-visible:ring-ring/40",
+        "relative inline-flex h-8 w-14 shrink-0 items-center rounded-full outline-none transition-colors focus-visible:ring-2 focus-visible:ring-ring/80",
         enabled ? "bg-primary" : "bg-secondary",
       )}
     >

@@ -104,7 +104,7 @@ export function CartLineRow({ line, restaurantName }: { line: CartLine; restaura
                 type="button"
                 onClick={() => setQuantity(line.dishId, line.quantity - 1)}
                 aria-label={`Remove one ${line.name}`}
-                className="flex size-7 items-center justify-center rounded-full bg-card outline-none hover:bg-border focus-visible:ring-2 focus-visible:ring-ring/40"
+                className="flex size-7 items-center justify-center rounded-full bg-card outline-none hover:bg-border focus-visible:ring-2 focus-visible:ring-ring/80"
               >
                 <Minus className="size-3.5" />
               </button>
@@ -114,7 +114,7 @@ export function CartLineRow({ line, restaurantName }: { line: CartLine; restaura
                 onClick={() => setQuantity(line.dishId, line.quantity + 1)}
                 disabled={line.quantity >= MAX_QUANTITY}
                 aria-label={`Add one more ${line.name}`}
-                className="flex size-7 items-center justify-center rounded-full bg-primary text-primary-foreground outline-none hover:brightness-95 focus-visible:ring-2 focus-visible:ring-ring/40 disabled:opacity-40"
+                className="flex size-7 items-center justify-center rounded-full bg-primary text-primary-foreground outline-none hover:brightness-95 focus-visible:ring-2 focus-visible:ring-ring/80 disabled:opacity-40"
               >
                 <Plus className="size-3.5" />
               </button>

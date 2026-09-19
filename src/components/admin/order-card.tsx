@@ -124,7 +124,7 @@ export function OrderCard({ order }: { order: AdminOrder }) {
           href={whatsAppLink(order.contactPhone, whatsAppMessage)}
           target="_blank"
           rel="noopener noreferrer"
-          className="flex h-10 items-center gap-1.5 rounded-full bg-success-soft px-4 text-sm font-semibold text-success outline-none hover:brightness-95 focus-visible:ring-3 focus-visible:ring-ring/40"
+          className="flex h-10 items-center gap-1.5 rounded-full bg-success-soft px-4 text-sm font-semibold text-success outline-none hover:brightness-95 focus-visible:ring-3 focus-visible:ring-ring/80"
         >
           <MessageCircle className="size-4" aria-hidden="true" />
           WhatsApp
@@ -139,7 +139,7 @@ export function OrderCard({ order }: { order: AdminOrder }) {
               disabled={advancing}
               onClick={advance}
               className={cn(
-                "flex h-11 flex-1 items-center justify-center gap-1.5 rounded-2xl text-sm font-bold outline-none focus-visible:ring-3 focus-visible:ring-ring/40 disabled:opacity-70",
+                "flex h-11 flex-1 items-center justify-center gap-1.5 rounded-2xl text-sm font-bold outline-none focus-visible:ring-3 focus-visible:ring-ring/80 disabled:opacity-70",
                 isFinalStep
                   ? "bg-success text-success-foreground hover:bg-success/90"
                   : "bg-primary text-primary-foreground hover:bg-primary/90",
@@ -156,7 +156,7 @@ export function OrderCard({ order }: { order: AdminOrder }) {
                 render={
                   <button
                     type="button"
-                    className="flex h-11 flex-1 items-center justify-center rounded-2xl border border-destructive/30 bg-destructive/5 text-sm font-bold text-destructive outline-none hover:bg-destructive/10 focus-visible:ring-3 focus-visible:ring-ring/40"
+                    className="flex h-11 flex-1 items-center justify-center rounded-2xl border border-destructive/30 bg-destructive/5 text-sm font-bold text-destructive outline-none hover:bg-destructive/10 focus-visible:ring-3 focus-visible:ring-ring/80"
                   />
                 }
               >

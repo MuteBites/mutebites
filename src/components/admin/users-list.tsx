@@ -35,7 +35,7 @@ export function UsersList({ users }: { users: AdminUser[] }) {
           value={query}
           onChange={(e) => setQuery(e.target.value)}
           placeholder="Search by name, phone, email, or reg. number…"
-          className="h-11 w-full rounded-full bg-secondary pr-4 pl-10 outline-none placeholder:text-muted-foreground focus-visible:ring-2 focus-visible:ring-ring/30"
+          className="h-11 w-full rounded-full bg-secondary pr-4 pl-10 outline-none placeholder:text-muted-foreground focus-visible:ring-2 focus-visible:ring-ring/80"
         />
       </label>
 

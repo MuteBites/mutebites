@@ -54,7 +54,7 @@ export function CartSheet({
             type="button"
             onClick={() => onOpenChange(false)}
             aria-label="Close cart"
-            className="flex size-12 shrink-0 items-center justify-center rounded-full bg-secondary outline-none hover:bg-border focus-visible:ring-3 focus-visible:ring-ring/40"
+            className="flex size-12 shrink-0 items-center justify-center rounded-full bg-secondary outline-none hover:bg-border focus-visible:ring-3 focus-visible:ring-ring/80"
           >
             <X className="size-5" />
           </button>
@@ -85,7 +85,7 @@ function EmptyCart({ onBrowse }: { onBrowse: () => void }) {
           <Link
             href="/"
             onClick={onBrowse}
-            className="pressable surface-ink flex h-14 items-center rounded-2xl bg-ink px-8 text-lg font-bold text-ink-foreground outline-none hover:brightness-95 focus-visible:ring-3 focus-visible:ring-ring/40"
+            className="pressable surface-ink flex h-14 items-center rounded-2xl bg-ink px-8 text-lg font-bold text-ink-foreground outline-none hover:brightness-95 focus-visible:ring-3 focus-visible:ring-ring/80"
           >
             Browse restaurants
           </Link>
@@ -221,7 +221,7 @@ function CartContents({
           onClick={submit}
           disabled={placing || !orderingEnabled}
           aria-describedby={error ? "place-order-error" : undefined}
-          className="surface-primary flex h-14 w-full items-center justify-between gap-2 rounded-2xl bg-primary px-6 text-lg font-bold text-primary-foreground outline-none hover:brightness-95 focus-visible:ring-3 focus-visible:ring-ring/40 disabled:opacity-70"
+          className="surface-primary flex h-14 w-full items-center justify-between gap-2 rounded-2xl bg-primary px-6 text-lg font-bold text-primary-foreground outline-none hover:brightness-95 focus-visible:ring-3 focus-visible:ring-ring/80 disabled:opacity-70"
         >
           <span className="flex items-center gap-2">
             {placing && <Loader2 className="size-5 animate-spin" />}
@@ -265,7 +265,7 @@ function ContactPhone({ value, onChange }: { value: string; onChange: (v: string
             setInvalid(false);
             setEditing(true);
           }}
-          className="rounded-md font-semibold text-primary outline-none hover:underline focus-visible:ring-2 focus-visible:ring-ring/40"
+          className="rounded-md font-semibold text-primary outline-none hover:underline focus-visible:ring-2 focus-visible:ring-ring/80"
         >
           Change
         </button>
@@ -307,7 +307,7 @@ function ContactPhone({ value, onChange }: { value: string; onChange: (v: string
         <button
           type="button"
           onClick={save}
-          className="h-12 rounded-xl bg-primary px-4 font-semibold text-primary-foreground outline-none hover:bg-primary/90 focus-visible:ring-3 focus-visible:ring-ring/40"
+          className="h-12 rounded-xl bg-primary px-4 font-semibold text-primary-foreground outline-none hover:bg-primary/90 focus-visible:ring-3 focus-visible:ring-ring/80"
         >
           Save
         </button>

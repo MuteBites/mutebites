@@ -27,7 +27,7 @@ export function ThemeIconToggle() {
             aria-label={label}
             onClick={() => setTheme(value)}
             className={cn(
-              "flex size-8 items-center justify-center rounded-full outline-none transition-colors focus-visible:ring-2 focus-visible:ring-ring/40",
+              "flex size-8 items-center justify-center rounded-full outline-none transition-colors focus-visible:ring-2 focus-visible:ring-ring/80",
               selected
                 ? "bg-ink text-ink-foreground"
                 : "text-muted-foreground hover:text-foreground",

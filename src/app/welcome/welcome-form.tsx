@@ -66,7 +66,7 @@ export function WelcomeForm({ defaultName }: { defaultName: string }) {
           </Label>
           <div
             className={cn(
-              "flex h-14 items-center rounded-2xl border border-input bg-card transition-colors focus-within:border-ring focus-within:ring-2 focus-within:ring-ring/15",
+              "flex h-14 items-center rounded-2xl border border-input bg-card transition-colors focus-within:border-ring focus-within:ring-2 focus-within:ring-ring/80",
               phoneError &&
                 "border-destructive ring-3 ring-destructive/20 focus-within:border-destructive focus-within:ring-destructive/20",
             )}
@@ -84,7 +84,7 @@ export function WelcomeForm({ defaultName }: { defaultName: string }) {
               onChange={(e) => setPhone(formatLocalMobile(e.target.value))}
               aria-invalid={!!phoneError || undefined}
               aria-describedby="phone-hint"
-              className="h-full min-w-0 flex-1 rounded-r-2xl bg-transparent pr-4 text-lg tracking-wide outline-none placeholder:text-muted-foreground/60"
+              className="h-full min-w-0 flex-1 rounded-r-2xl bg-transparent pr-4 text-lg tracking-wide outline-none placeholder:text-muted-foreground"
             />
           </div>
           <p

@@ -70,7 +70,7 @@ export function BannedUsersSection({ bannedUsers }: { bannedUsers: BannedUser[] 
                 type="button"
                 disabled={pending}
                 onClick={() => unban(user.id, user.fullName)}
-                className="flex h-10 shrink-0 items-center rounded-full bg-success px-4 text-sm font-bold text-success-foreground outline-none hover:bg-success/90 focus-visible:ring-3 focus-visible:ring-ring/40 disabled:opacity-70"
+                className="flex h-10 shrink-0 items-center rounded-full bg-success px-4 text-sm font-bold text-success-foreground outline-none hover:bg-success/90 focus-visible:ring-3 focus-visible:ring-ring/80 disabled:opacity-70"
               >
                 Unban
               </button>
@@ -135,7 +135,7 @@ function BanStudentSearch({ onBanned }: { onBanned: (user: StudentSearchResult) 
           value={query}
           onChange={(e) => setQuery(e.target.value)}
           placeholder="Search by name, phone, or reg. number to ban a student…"
-          className="h-11 w-full rounded-full bg-secondary pr-4 pl-10 outline-none placeholder:text-muted-foreground focus-visible:ring-2 focus-visible:ring-ring/30"
+          className="h-11 w-full rounded-full bg-secondary pr-4 pl-10 outline-none placeholder:text-muted-foreground focus-visible:ring-2 focus-visible:ring-ring/80"
         />
       </label>
 
@@ -162,7 +162,7 @@ function BanStudentSearch({ onBanned }: { onBanned: (user: StudentSearchResult) 
                 <button
                   type="button"
                   onClick={() => setTarget(user)}
-                  className="flex h-10 shrink-0 items-center rounded-full bg-destructive px-4 text-sm font-bold text-destructive-foreground outline-none hover:bg-destructive/90 focus-visible:ring-3 focus-visible:ring-ring/40"
+                  className="flex h-10 shrink-0 items-center rounded-full bg-destructive px-4 text-sm font-bold text-destructive-foreground outline-none hover:bg-destructive/90 focus-visible:ring-3 focus-visible:ring-ring/80"
                 >
                   Ban
                 </button>

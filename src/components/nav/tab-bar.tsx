@@ -32,7 +32,7 @@ export function TabBar() {
             href={href}
             aria-current={active ? "page" : undefined}
             className={cn(
-              "flex flex-col items-center gap-1 rounded-lg py-1 text-xs font-medium outline-none focus-visible:ring-2 focus-visible:ring-ring/40",
+              "flex flex-col items-center gap-1 rounded-lg py-1 text-xs font-medium outline-none focus-visible:ring-2 focus-visible:ring-ring/80",
               active ? "text-primary" : "text-muted-foreground",
             )}
           >

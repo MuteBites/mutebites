@@ -64,7 +64,7 @@ export function MarkAllDeliveredButton({
             type="button"
             disabled={disabled}
             className={cn(
-              "flex h-10 items-center rounded-full bg-success px-4 text-sm font-bold text-success-foreground outline-none hover:bg-success/90 focus-visible:ring-3 focus-visible:ring-ring/40",
+              "flex h-10 items-center rounded-full bg-success px-4 text-sm font-bold text-success-foreground outline-none hover:bg-success/90 focus-visible:ring-3 focus-visible:ring-ring/80",
               disabled && "opacity-50 hover:bg-success",
             )}
           />
