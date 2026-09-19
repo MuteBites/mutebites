@@ -17,6 +17,7 @@ import {
 import { BlurImage } from "@/components/blur-image";
 import { BrandLogo } from "@/components/brand-logo";
 import { ConfettiBurst } from "@/components/orders/confetti-burst";
+import { RateOrder } from "@/components/orders/rate-order";
 import { SupportButtons } from "@/components/support-buttons";
 import type { OrderDetail } from "@/lib/data/orders";
 import type { OrderStatus } from "@/lib/data/types";
@@ -91,6 +92,7 @@ export function OrderTracking({
   const [showSuccess] = useState(justPlaced);
   const [status, setStatus] = useState(initialOrder.status);
   const [updatedAt, setUpdatedAt] = useState(initialOrder.updatedAt);
+  const [deliveredAt, setDeliveredAt] = useState(initialOrder.deliveredAt);
   const [live, setLive] = useState(false);
   const [successPhase, setSuccessPhase] = useState<"in" | "out" | "hidden">(
     showSuccess ? "in" : "hidden",
@@ -128,12 +130,13 @@ export function OrderTracking({
     const supabase = createClient();
     const channel = supabase
       .channel(`order-${initialOrder.id}`)
-      .on<{ status: OrderStatus; updated_at: string }>(
+      .on<{ status: OrderStatus; updated_at: string; delivered_at: string | null }>(
         "postgres_changes",
         { event: "UPDATE", schema: "public", table: "orders", filter: `id=eq.${initialOrder.id}` },
         (payload) => {
           setStatus(payload.new.status);
           setUpdatedAt(payload.new.updated_at);
+          setDeliveredAt(payload.new.delivered_at);
         },
       )
       .subscribe((subscribeStatus) => setLive(subscribeStatus === "SUBSCRIBED"));
@@ -311,7 +314,19 @@ export function OrderTracking({
             </ol>
           )}
 
-          <div className="mt-2 rounded-2xl border bg-card shadow-card p-5">
+          {/* Appears live the moment admin marks it delivered (status comes
+              from the Realtime subscription above). */}
+          {status === "delivered" && (
+            <RateOrder
+              orderId={initialOrder.id}
+              restaurantName={initialOrder.restaurantName}
+              items={initialOrder.items}
+              deliveredAt={deliveredAt}
+              initialReview={initialOrder.review}
+            />
+          )}
+
+          <div className="mt-4 rounded-2xl border bg-card shadow-card p-5">
             <p className="text-label text-muted-foreground">Your order</p>
             <ul className="mt-2 divide-y">
               {initialOrder.items.map((item) => {

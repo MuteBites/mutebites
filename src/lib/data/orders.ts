@@ -22,7 +22,15 @@ export type OrderSummary = {
   dailyNumber: number;
 };
 
-export type OrderItem = { dishName: string; unitPrice: number; quantity: number; subtotal: number };
+export type OrderItem = { id: string; dishName: string; unitPrice: number; quantity: number; subtotal: number };
+
+/** The student's own review of an order (order_reviews + order_item_ratings), if they've left one. */
+export type OrderReview = {
+  note: string | null;
+  createdAt: string;
+  /** order_item_id -> 1..5 */
+  ratings: Record<string, number>;
+};
 
 export type OrderDetail = {
   id: string;
@@ -30,6 +38,9 @@ export type OrderDetail = {
   totalAmount: number;
   createdAt: string;
   updatedAt: string;
+  /** Set by the set_delivered_at trigger; the 7-day review window counts from it. */
+  deliveredAt: string | null;
+  review: OrderReview | null;
   contactPhone: string;
   notes: string | null;
   restaurantId: string;
@@ -96,8 +107,17 @@ type OrderDetailRow = {
   notes: string | null;
   restaurant_id: string;
   restaurants: { name: string; phone: string } | null;
-  order_items: { dish_name: string; unit_price: number; quantity: number; subtotal: number }[];
+  order_items: { id: string; dish_name: string; unit_price: number; quantity: number; subtotal: number }[];
   daily_number: number;
+  delivered_at: string | null;
+  // One-to-one via order_reviews.order_id; PostgREST may return an object or a one-element array.
+  order_reviews: ReviewRow | ReviewRow[] | null;
+};
+
+type ReviewRow = {
+  note: string | null;
+  created_at: string;
+  order_item_ratings: { order_item_id: string; rating: number }[];
 };
 
 /**
@@ -222,6 +242,16 @@ export async function hasActiveOrder(userId: string): Promise<boolean> {
 }
 
 /** One order with its restaurant + items, or null if it's not this student's. */
+function toReview(row: OrderDetailRow["order_reviews"]): OrderReview | null {
+  const r = Array.isArray(row) ? row[0] : row;
+  if (!r) return null;
+  return {
+    note: r.note,
+    createdAt: r.created_at,
+    ratings: Object.fromEntries(r.order_item_ratings.map((x) => [x.order_item_id, x.rating])),
+  };
+}
+
 export const getOrder = cache(async function getOrder(
   id: string,
   userId: string,
@@ -231,7 +261,7 @@ export const getOrder = cache(async function getOrder(
   const { data, error } = await supabase
     .from("orders")
     .select(
-      "id, status, total_amount, created_at, updated_at, contact_phone, notes, restaurant_id, restaurants(name, phone), order_items(dish_name, unit_price, quantity, subtotal), daily_number",
+      "id, status, total_amount, created_at, updated_at, delivered_at, contact_phone, notes, restaurant_id, restaurants(name, phone), order_items(id, dish_name, unit_price, quantity, subtotal), daily_number, order_reviews(note, created_at, order_item_ratings(order_item_id, rating))",
     )
     .eq("id", id)
     .eq("user_id", userId)
@@ -246,12 +276,15 @@ export const getOrder = cache(async function getOrder(
     totalAmount: data.total_amount,
     createdAt: data.created_at,
     updatedAt: data.updated_at,
+    deliveredAt: data.delivered_at,
+    review: toReview(data.order_reviews),
     contactPhone: data.contact_phone,
     notes: data.notes,
     restaurantId: data.restaurant_id,
     restaurantName: data.restaurants?.name ?? "Restaurant",
     restaurantPhone: data.restaurants?.phone ?? "",
     items: data.order_items.map((i) => ({
+      id: i.id,
       dishName: i.dish_name,
       unitPrice: i.unit_price,
       quantity: i.quantity,

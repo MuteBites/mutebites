@@ -360,6 +360,13 @@ on `orders`).
   `not_delivered`, `review_window_closed`, `already_reviewed`,
   `note_too_long`, `invalid_ratings`. Reviews are **never shown to other
   students** — admin-only feedback.
+  UI: `RateOrder` (`src/components/orders/rate-order.tsx`) on the order
+  tracking page — shows the moment status turns `delivered` (Realtime also
+  carries `delivered_at`), opens a bottom sheet with 1–5 stars per dish
+  (all required) and the optional note, submits via `submitReview()`
+  (`src/lib/reviews/actions.ts`, maps the error keys), then shows "You
+  rated this". `getOrder()` returns `items[].id`, `deliveredAt` and the
+  student's own `review`.
 - **`daily_order_counters`** — `order_day` (date, primary key), `last_number`.
   One row per day, upserted by the trigger above (`on conflict (order_day)
   do update set last_number = last_number + 1 returning ... into
