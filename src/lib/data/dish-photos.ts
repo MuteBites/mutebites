@@ -145,24 +145,14 @@ export const DISH_PHOTOS: Record<string, Record<string, string>> = {
   },
 };
 
-/**
- * Old restaurant names still in the database until a rename migration has
- * been applied — photo lookups treat them as the new name. Remove an entry
- * once its rename SQL has run.
- */
-const RENAMED: Record<string, string> = {
-  "MuteBites Chinese": "Food Corner",
-};
-const current = (restaurantName: string) => RENAMED[restaurantName] ?? restaurantName;
-
 /** Cover photo for a restaurant's hero banner, or undefined for the placeholder. */
 export function getRestaurantCoverPhoto(restaurantName: string): string | undefined {
-  return RESTAURANT_COVER_PHOTOS[current(restaurantName)];
+  return RESTAURANT_COVER_PHOTOS[restaurantName];
 }
 
 /** Thumbnail photo for a dish, or undefined for the placeholder. */
 export function getDishPhoto(restaurantName: string, dishName: string): string | undefined {
-  return DISH_PHOTOS[current(restaurantName)]?.[dishName];
+  return DISH_PHOTOS[restaurantName]?.[dishName];
 }
 
 /**
@@ -198,8 +188,8 @@ export function getRestaurantCardSlides(
   dishes: { id: string; name: string; price: number; isVeg: boolean; isAvailable: boolean }[],
   orderCounts: Record<string, number> = {},
 ): CardSlide[] {
-  const photos = DISH_PHOTOS[current(restaurantName)] ?? {};
-  const signature = SIGNATURE_DISHES[current(restaurantName)] ?? [];
+  const photos = DISH_PHOTOS[restaurantName] ?? {};
+  const signature = SIGNATURE_DISHES[restaurantName] ?? [];
   const rank = (name: string) => {
     const i = signature.indexOf(name);
     return i === -1 ? signature.length : i;

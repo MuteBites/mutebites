@@ -358,8 +358,8 @@ to its own order's row for live status updates on top of the normal
 server-fetched page; existing RLS still governs who can actually receive
 them, and a plain page refresh still shows the true status either way),
 [`supabase/migrations/20260915140000_seed_new_restaurants.sql`](supabase/migrations/20260915140000_seed_new_restaurants.sql)
-(data only — two more partner restaurants, **MuteBites Chinese** (5
-categories, 24 dishes) and **MuteBites Fresh Fruits** (1 category, 13
+(data only — two more partner restaurants, **MuteBites Chinese** (since
+renamed Food Corner; 5 categories, 24 dishes) and **MuteBites Fresh Fruits** (1 category, 13
 dishes, priced per 500 g/1 kg pack), bringing the total to 5 restaurants),
 [`supabase/migrations/20260915150000_daily_order_numbers.sql`](supabase/migrations/20260915150000_daily_order_numbers.sql)
 (adds `orders.daily_number` — see below),
@@ -383,9 +383,13 @@ dishes, priced per 500 g/1 kg pack), bringing the total to 5 restaurants),
 (data only — deletes Bismillah's "Any Fruit Juice Bottle" and "Bismillah
 Fruit Juice (Any Flavour)"; its menu is now the 10 named fruit juices plus
 the two Sugarcane items),
-and [`supabase/migrations/20260919040000_fix_banana_pack_and_bismillah_tags.sql`](supabase/migrations/20260919040000_fix_banana_pack_and_bismillah_tags.sql)
+[`supabase/migrations/20260919040000_fix_banana_pack_and_bismillah_tags.sql`](supabase/migrations/20260919040000_fix_banana_pack_and_bismillah_tags.sql)
 (data only — renames "Bananas (30 g)" to "Bananas (500 g)" and drops
-Bismillah's stale "Special" cuisine tag).
+Bismillah's stale "Special" cuisine tag),
+and [`supabase/migrations/20260920000000_rename_chinese_to_food_corner.sql`](supabase/migrations/20260920000000_rename_chinese_to_food_corner.sql)
+(data only — "MuteBites Chinese" is now **Food Corner**, with "Chinese"
+added to its cuisine tags so search still finds it; its photo folder
+`public/MuteBites/MuteBites Chinese/` keeps the old name on purpose).
 Migrations are applied by hand in the Supabase SQL editor (no CLI setup).
 
 All orders are handed over at **VIT-AP Main Gate** — there is no room
