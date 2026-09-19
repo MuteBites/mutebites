@@ -91,6 +91,11 @@ Food delivery site for VIT-AP University students.
   order. "veg" / "non veg" filter on the dish's veg flag instead of text
   (so "veg" never matches inside "Non-Veg Biryani"). A "Dishes" section
   shows above restaurants; restaurants also appear if they serve a match.
+- **Menu filters** (`MenuView`, `src/components/menu/menu-view.tsx`): one
+  sticky row — search icon, then a scrolling rail of **Veg** / **Non-veg**
+  (mutually exclusive, tap again to clear; red on light red for non-veg)
+  and the category chips. The diet toggles only appear on a menu that has
+  both kinds of dish.
 - **Motion**: CSS only (no Framer Motion). Easing tokens `--ease-out-expo`
   / `--ease-spring` / `--ease-in-quad` (also Tailwind `ease-*` utilities) and
   durations `--dur-press|quick|base|slow` in `globals.css` — use them rather

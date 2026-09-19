@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { Leaf, Search, SearchX, UtensilsCrossed, X } from "lucide-react";
+import { Drumstick, Leaf, Search, SearchX, UtensilsCrossed, X } from "lucide-react";
 import { EmptyState } from "@/components/empty-state";
 import { CartBar } from "@/components/cart/cart-bar";
 import {
@@ -54,7 +54,7 @@ export function MenuView({
 }) {
   const cart = useCart();
   const [filter, setFilter] = useState(ALL);
-  const [vegOnly, setVegOnly] = useState(false);
+  const [diet, setDiet] = useState<Diet>("all");
   const [query, setQuery] = useState("");
   const [searchOpen, setSearchOpen] = useState(false);
   const [highlighted, setHighlighted] = useState<string | null>(null);
@@ -104,23 +104,32 @@ export function MenuView({
   // chip — a student searching usually doesn't know (or care) which
   // category something's in.
   const byCategory = q || filter === ALL ? sections : sections.filter((s) => sectionKey(s) === filter);
-  const byVeg = vegOnly
-    ? byCategory.map((s) => ({ ...s, dishes: s.dishes.filter((d) => d.is_veg) })).filter((s) => s.dishes.length > 0)
-    : byCategory;
+  // Veg / Non-veg only matter on a menu that has both; an all-veg juice bar
+  // or an all-chicken biryani shop gets no toggles.
+  const hasVeg = sections.some((s) => s.dishes.some((d) => d.is_veg));
+  const hasNonVeg = sections.some((s) => s.dishes.some((d) => !d.is_veg));
+  const showDiet = hasVeg && hasNonVeg;
+  const byDiet =
+    diet === "all"
+      ? byCategory
+      : byCategory
+          .map((s) => ({ ...s, dishes: s.dishes.filter((d) => d.is_veg === (diet === "veg")) }))
+          .filter((s) => s.dishes.length > 0);
   const visible = q
-    ? byVeg
+    ? byDiet
         .map((s) => ({ ...s, dishes: s.dishes.filter((d) => d.name.toLowerCase().includes(q)) }))
         .filter((s) => s.dishes.length > 0)
-    : byVeg;
+    : byDiet;
 
   const chips = [{ key: ALL, name: "All" }, ...sections.map((s) => ({ key: sectionKey(s), name: sectionName(s) }))];
 
   return (
     <>
       {sections.length > 0 && (
-        // One sticky row for every way of narrowing the menu — search, veg
-        // and category — so none of them scroll away on a 40-dish menu.
-        // Search collapses to an icon and expands in place over the rail.
+        // One sticky row for every way of narrowing the menu — search, then
+        // a scrolling rail of Veg / Non-veg and the categories — so none of
+        // them scroll away on a 40-dish menu. Search collapses to an icon
+        // and expands in place over the rail.
         <div className="sticky top-0 z-10 -mx-6 border-b bg-background/95 px-6 py-2.5 backdrop-blur">
           <div className="flex items-center gap-2">
             {searchOpen ? (
@@ -151,7 +160,7 @@ export function MenuView({
               </button>
             )}
 
-            {searchOpen ? (
+            {searchOpen && (
               <button
                 type="button"
                 onClick={closeSearch}
@@ -160,29 +169,27 @@ export function MenuView({
               >
                 <X className="size-4.5" />
               </button>
-            ) : (
-              <button
-                type="button"
-                onClick={() => setVegOnly((v) => !v)}
-                aria-pressed={vegOnly}
-                aria-label="Veg only"
-                title="Veg only"
-                className={cn(
-                  "flex h-10 shrink-0 items-center gap-1.5 rounded-full border px-3 text-sm font-semibold outline-none transition-colors focus-visible:ring-3 focus-visible:ring-ring/80",
-                  vegOnly
-                    ? "border-success bg-success-soft text-success"
-                    : "bg-card text-muted-foreground hover:bg-secondary",
-                )}
-              >
-                <VegMark isVeg className="size-4" />
-                Veg
-              </button>
             )}
 
-            {!searchOpen && sections.length > 1 && (
-              <nav aria-label="Menu categories" className="-mr-6 min-w-0 flex-1">
+            {!searchOpen && (sections.length > 1 || showDiet) && (
+              <nav aria-label="Menu filters" className="-mr-6 min-w-0 flex-1">
                 <ul className="flex gap-2 overflow-x-auto pr-6 [scrollbar-width:none]">
-                  {chips.map((chip) => {
+                  {showDiet && (
+                    <>
+                      <li className="shrink-0">
+                        <DietToggle kind="veg" active={diet === "veg"} onToggle={() => setDiet((d) => (d === "veg" ? "all" : "veg"))} />
+                      </li>
+                      <li className="shrink-0">
+                        <DietToggle
+                          kind="nonveg"
+                          active={diet === "nonveg"}
+                          onToggle={() => setDiet((d) => (d === "nonveg" ? "all" : "nonveg"))}
+                        />
+                      </li>
+                      {sections.length > 1 && <li aria-hidden="true" className="my-2 w-px shrink-0 bg-border" />}
+                    </>
+                  )}
+                  {sections.length > 1 && chips.map((chip) => {
                     const Icon = chip.key === ALL ? AllCategoriesIcon : getCuisineIcon(chip.name);
                     return (
                       <li key={chip.key} className="shrink-0">
@@ -217,8 +224,12 @@ export function MenuView({
       )}
 
       {sections.length > 0 && visible.length === 0 && (
-        <EmptyState compact icon={q ? SearchX : Leaf} title={q ? `No dishes match “${query.trim()}”` : "No veg dishes here"}>
-          {q ? "Try a different search." : "Try another category, or switch Veg off."}
+        <EmptyState
+          compact
+          icon={q ? SearchX : diet === "veg" ? Leaf : Drumstick}
+          title={q ? `No dishes match “${query.trim()}”` : `No ${diet === "veg" ? "veg" : "non-veg"} dishes here`}
+        >
+          {q ? "Try a different search." : `Try another category, or switch ${diet === "veg" ? "Veg" : "Non-veg"} off.`}
         </EmptyState>
       )}
 
@@ -283,5 +294,29 @@ export function MenuView({
         </AlertDialogContent>
       </AlertDialog>
     </>
+  );
+}
+
+type Diet = "all" | "veg" | "nonveg";
+
+/** One half of the Veg / Non-veg filter — tap again to show everything. */
+function DietToggle({ kind, active, onToggle }: { kind: "veg" | "nonveg"; active: boolean; onToggle: () => void }) {
+  const veg = kind === "veg";
+  return (
+    <button
+      type="button"
+      onClick={onToggle}
+      aria-pressed={active}
+      aria-label={veg ? "Veg only" : "Non-veg only"}
+      className={cn(
+        "flex h-10 items-center gap-1.5 rounded-full border px-3 text-sm font-semibold whitespace-nowrap outline-none transition-colors focus-visible:ring-3 focus-visible:ring-ring/80",
+        !active && "bg-card text-muted-foreground hover:bg-secondary",
+        active && veg && "border-success bg-success-soft text-success",
+        active && !veg && "border-destructive bg-destructive/10 text-destructive",
+      )}
+    >
+      <VegMark isVeg={veg} className="size-4" />
+      {veg ? "Veg" : "Non-veg"}
+    </button>
   );
 }
