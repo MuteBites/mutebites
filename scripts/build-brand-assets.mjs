@@ -5,7 +5,8 @@
 //
 // Outputs:
 //   public/brand/splash/*.webp            layers for the startup splash
-//   src/components/splash/layers.ts       their positions (generated)
+//                                         (body, legs, tray, shoes, lid, ...)
+//   src/components/splash/layers.ts       their boxes (generated)
 //   public/brand/mark.webp                mascot mark for in-app logo tiles
 //   public/brand/mark.png                 same, PNG, for the generated app icons
 //   src/app/favicon.ico                   16/32/48/64 RGBA PNG frames
@@ -43,6 +44,8 @@ const bagEdge = (y) => 490 - ((y - 300) * 80) / 300;
 const shinEdge = (y) => 750 + (y - 765) * 0.66;
 // Bottom of the cloche dome — follows the plate rim's curve.
 const lidBottom = (x) => 545 + ((x - 950) / 135) ** 2 * 14;
+// Underside of the delivery bag; the legs hang below it.
+const bagBottom = (x) => 624 + ((x - 410) * 28) / 370;
 
 const REGIONS = {
   steam: (x, y) =>
@@ -52,32 +55,72 @@ const REGIONS = {
   swoosh: (x, y) => x >= 370 && x < Math.min(shinEdge(y), 760) && y >= (x < 490 ? 790 : 765) && y < 866,
   wordmark: (x, y) => y >= 866 && y < 1116,
   tagline: (x, y) => y >= 1116 && y < 1180,
+  // The arm and the plate it carries (the lid and steam ride on it). The
+  // arm ends at y 657; below that the front thigh's edge starts.
+  tray: (x, y) => x >= 786 && y >= 540 && y < 670,
+  // Both legs and shoes, everything under the bag.
+  legs: (x, y) => y > bagBottom(x) + 2 && y < 866 && (x < 786 || y >= 670),
 };
-const ORDER = ["steam", "lid", "trails", "swoosh", "wordmark", "tagline"];
+const ORDER = ["steam", "lid", "trails", "swoosh", "wordmark", "tagline", "tray", "legs"];
 const regionOf = (x, y) => {
   for (const name of ORDER) if (REGIONS[name](x, y)) return name;
-  return y >= 140 && y < 866 ? "mascot" : null;
+  return y >= 140 && y < 866 ? "body" : null;
 };
 
+// The two shoes, cut back out of the legs as their own images: the splash
+// re-draws the legs as vector tubes with real hip/knee/ankle joints and
+// hangs these on the ankles, so they're ellipses fitted to the art.
+const inEllipse = (cx, cy, a, b, deg) => (x, y) => {
+  const t = (deg * Math.PI) / 180;
+  const dx = x - cx;
+  const dy = y - cy;
+  const u = dx * Math.cos(t) + dy * Math.sin(t);
+  const v = -dx * Math.sin(t) + dy * Math.cos(t);
+  return (u / a) ** 2 + (v / b) ** 2 <= 1;
+};
+const SHOES = {
+  backShoe: inEllipse(424, 716, 84, 45, -46.6),
+  frontShoe: inEllipse(851, 776, 86, 45, -48.8),
+};
+
+// Seam fillers. Where a cut runs through solid paint, the layer drawn
+// *underneath* also keeps a few pixels past the cut (hidden by the layer on
+// top). Without this, each layer's own edge anti-aliasing leaves a
+// hairline of background along the join when the logo is at rest.
+// [layer that gets the extra pixels, layer they're copied from, test]
+const UNDERLAPS = [
+  ["legs", "body", (x, y) => y > bagBottom(x) - 8 && (x < 786 || y >= 670)],
+  ["tray", "body", (x, y) => x >= 772 && y >= 540 && y < 670],
+  ["trails", "body", (x, y) => y >= 370 && y <= 600 && x >= 200 && x < bagEdge(y) + 6],
+  ["tray", "lid", (x, y) => y > lidBottom(x) - 6],
+];
+
 // ---- Split -----------------------------------------------------------------
+const newLayer = () => ({ buf: Buffer.alloc(W * H * 4), minX: W, minY: H, maxX: -1, maxY: -1 });
+const put = (l, i, x, y) => {
+  data.copy(l.buf, i, i, i + 4);
+  if (x < l.minX) l.minX = x;
+  if (y < l.minY) l.minY = y;
+  if (x > l.maxX) l.maxX = x;
+  if (y > l.maxY) l.maxY = y;
+};
 const layers = {};
-for (const name of [...ORDER, "mascot"]) {
-  layers[name] = { buf: Buffer.alloc(W * H * 4), minX: W, minY: H, maxX: -1, maxY: -1 };
-}
+for (const name of [...ORDER, "body"]) layers[name] = newLayer();
+const shoes = { backShoe: newLayer(), frontShoe: newLayer() };
 for (let y = 0; y < H; y++) {
   for (let x = 0; x < W; x++) {
     const i = (y * W + x) * 4;
     if (data[i + 3] === 0) continue;
     const name = regionOf(x, y);
     if (!name) continue;
-    const l = layers[name];
-    data.copy(l.buf, i, i, i + 4);
-    if (x < l.minX) l.minX = x;
-    if (y < l.minY) l.minY = y;
-    if (x > l.maxX) l.maxX = x;
-    if (y > l.maxY) l.maxY = y;
+    put(layers[name], i, x, y);
+    if (name === "legs") {
+      for (const [shoe, test] of Object.entries(SHOES)) if (test(x, y)) put(shoes[shoe], i, x, y);
+    }
+    for (const [under, from, test] of UNDERLAPS) if (name === from && test(x, y)) put(layers[under], i, x, y);
   }
 }
+const all = { ...layers, ...shoes };
 
 // Stage = union of every layer's box; positions are stored relative to it.
 const stage = Object.values(layers).reduce(
@@ -93,9 +136,11 @@ const stageW = stage.maxX - stage.minX + 1;
 const stageH = stage.maxY - stage.minY + 1;
 
 await mkdir(`${OUT}/splash`, { recursive: true });
-const pct = (n) => Math.round(n * 10000) / 100;
-const positions = {};
-for (const [name, l] of Object.entries(layers)) {
+// Boxes in source pixels, relative to the stage's top-left. The splash's
+// SVG leg rig uses the same coordinates (viewBox = stage), so its joints
+// can be measured straight off the source image.
+const boxes = {};
+for (const [name, l] of Object.entries(all)) {
   const width = l.maxX - l.minX + 1;
   const height = l.maxY - l.minY + 1;
   await sharp(l.buf, { raw: { width: W, height: H, channels: 4 } })
@@ -103,33 +148,14 @@ for (const [name, l] of Object.entries(layers)) {
     .resize(Math.round(width * LAYER_SCALE))
     .webp({ quality: 88, alphaQuality: 100, effort: 6 })
     .toFile(`${OUT}/splash/${name}.webp`);
-  positions[name] = {
-    src: `/brand/splash/${name}.webp`,
-    left: pct((l.minX - stage.minX) / stageW),
-    top: pct((l.minY - stage.minY) / stageH),
-    width: pct(width / stageW),
-    height: pct(height / stageH),
-  };
+  boxes[name] = { src: `/brand/splash/${name}.webp`, x: l.minX, y: l.minY, w: width, h: height };
 }
 
-await writeFile(
-  "src/components/splash/layers.ts",
-  `// Generated by scripts/build-brand-assets.mjs — don't edit by hand.
-// Each splash layer's box as a percentage of the stage (the logo's
-// visible bounds), so the layers re-assemble the logo exactly at rest.
-
-export const STAGE_ASPECT = ${stageW} / ${stageH};
-
-export const LAYERS = ${JSON.stringify(positions, null, 2)} as const;
-
-export type LayerName = keyof typeof LAYERS;
-`,
-);
-
 // ---- Mark: the mascot group (no wordmark/tagline/swoosh) --------------------
+const MARK_LAYERS = ["body", "legs", "tray", "trails", "lid", "steam"];
 const mark = Buffer.alloc(W * H * 4);
 const markBox = { minX: W, minY: H, maxX: 0, maxY: 0 };
-for (const name of ["mascot", "trails", "lid", "steam"]) {
+for (const name of MARK_LAYERS) {
   const l = layers[name];
   for (let i = 0; i < l.buf.length; i += 4) {
     if (l.buf[i + 3] === 0) continue;
@@ -149,6 +175,24 @@ const markImg = () =>
     width: markW,
     height: markH,
   });
+
+await writeFile(
+  "src/components/splash/layers.ts",
+  `// Generated by scripts/build-brand-assets.mjs — don't edit by hand.
+// Every splash layer's box in source-logo pixels (1254×1254 art); the
+// stage is the logo's visible bounds, the mark is the mascot group that
+// BrandLogo shows (public/brand/mark.webp) — the splash lands on it.
+
+export const STAGE = ${JSON.stringify({ x: stage.minX, y: stage.minY, w: stageW, h: stageH })};
+
+export const MARK = ${JSON.stringify({ x: markBox.minX, y: markBox.minY, w: markW, h: markH })};
+
+export const LAYERS = ${JSON.stringify(boxes, null, 2)} as const;
+
+export type LayerName = keyof typeof LAYERS;
+`,
+);
+
 await markImg().resize(512).webp({ quality: 90, alphaQuality: 100, effort: 6 }).toFile(`${OUT}/mark.webp`);
 await markImg().resize(640).png({ compressionLevel: 9 }).toFile(`${OUT}/mark.png`);
 
@@ -188,4 +232,4 @@ sizes.forEach((size, i) => {
 await writeFile("src/app/favicon.ico", Buffer.concat([header, ...frames]));
 
 console.log("stage", stageW, "x", stageH, "mark", markW, "x", markH);
-console.log(positions);
+console.log(boxes);

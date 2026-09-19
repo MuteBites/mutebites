@@ -272,34 +272,52 @@ silently re-enables the button.
     48/64 RGBA PNG frames (Next can't generate `favicon` from code, and
     its ico decoder rejects non-RGBA frames), written by the same script.
   - `public/brand/splash/*.webp` + `src/components/splash/layers.ts` —
-    the startup splash layers (mascot, speed trails, cloche lid, steam,
-    ground swoosh, wordmark, tagline) and their positions; at rest they
-    re-assemble the logo exactly.
-- **Startup splash** (`src/components/splash/`): ~2.35 s — ivory, the
-  mascot runs in from the left (bob, forward lean, stretched trails),
-  lands with a small bounce, lifts its cloche (warm glow + steam), then
-  the wordmark and tagline rise in, a short hold, and it fades into the
-  app. Once per browser session (sessionStorage `mutebites.splash-shown`,
-  so every fresh app/PWA open, never on route changes or reloads), never
-  on `/admin`, `/auth`, `/privacy`, `/terms`, or a tab opened in the
-  background. `AppSplash` is plain server markup, first in `<body>`; a
-  raw inline `<script>` (`init-script.ts`) — **not** `next/script`
-  `beforeInteractive`, which is queued until Next's JS loads and would let
-  the app paint first (the theme-init script, `src/lib/theme/init-script.ts`,
-  is a raw inline script for the same reason — no light flash for dark
-  users) — decides play/skip before first paint, preloads the
-  layers and drives `data-splash` on `<html>` (`play` → `run` → `out` →
-  `done`), so it never waits for hydration. All motion is CSS (the
-  "Startup splash" rules in `globals.css`; storyboard keyframe rules
-  inside the no-preference block). Reduced motion gets a plain fade
-  (`.splash-fade` is exempt from the reduce safety net). Safety valves:
-  tap skips; a failed/slow image load (> 2.5 s) just fades out; CSS hides
-  it after 9 s whatever happens. Knobs (speed, run-in distance, bounce,
-  steam, exit time) are in `splash/config.ts`. Disable: `?nosplash` (one
-  load), `?splash` forces it, localStorage `mutebites.splash = "off"` (one
-  device), `NEXT_PUBLIC_DISABLE_SPLASH=1` (removes it from the build).
-  One-off moments that could fire under it wait with `afterSplash()`
-  (`splash/after-splash.ts`) — the milestone celebration does.
+    the startup splash layers (body, legs, arm+tray, cloche lid, steam,
+    speed trails, ground swoosh, wordmark, tagline, plus the two shoes on
+    their own) and their boxes in source-art pixels. At rest they
+    re-assemble the logo exactly; where a cut runs through solid paint the
+    lower layer keeps a few extra pixels (`UNDERLAPS`) so no hairline seam
+    shows.
+- **Startup splash** (`src/components/splash/`), ~2.5 s, once per browser
+  session (sessionStorage `mutebites.splash-shown` — every fresh app/PWA
+  open, never on route changes or reloads), never on `/admin`, `/auth`,
+  `/privacy`, `/terms` or a tab opened in the background:
+  - Storyboard (timings in `config.ts`): ivory → the mascot **runs** in
+    from the left — the legs are a jointed rig (`rig.ts`: hip/knee/ankle
+    measured on the source art, vector tubes + the real shoes) cycling
+    through `STRIDE`, 3 strides that slow as it arrives, with body bob,
+    forward lean, stretched trails, the arm/tray and lid bouncing a beat
+    behind and steam streaming back → feet plant, squash, rebound (the rig
+    ends in exactly the drawn pose and hands over to the drawn legs) →
+    swoosh draws, lid lifts with a warm glow, steam rises → wordmark, then
+    tagline → hold → the ivory screen **closes down into the page's own
+    logo tile** while the mascot shrinks onto its mark (clip-path +
+    transform, measured live), so the splash becomes the app's logo instead
+    of fading. The landing spot is whichever `BrandLogo` has
+    `splashTarget` (login page, Home header); while a `loading.tsx`
+    skeleton (`aria-busy`) is up it waits up to 1.2 s for it, and pages
+    without one get a short fade.
+  - `app-splash.tsx` is plain server markup (first in `<body>`, styles in
+    `splash.css`), positioned in source-art pixels via `--u` (a container
+    query unit), so it lines up at any screen size. `engine.ts` is all the
+    motion — Web Animations on transform/opacity of HTML elements (legs
+    included), so it stays smooth while the app hydrates underneath. It's
+    one self-contained function that `init-script.ts` serialises
+    (`runSplash.toString()`) into a raw inline `<script>` in the root
+    layout — **not** `next/script` `beforeInteractive`, which is queued
+    until Next's JS loads and would let the app paint first (the
+    theme-init script, `src/lib/theme/init-script.ts`, is inline for the
+    same reason — no light flash for dark users). Keep `engine.ts` free of
+    imports and module-scope helpers.
+  - Reduced motion: no run — the finished logo fades in, holds ~0.65 s,
+    fades out. Safety valves: tap skips (to the finished logo, then the
+    close), slow/failed images (> 2.5 s) just fade out, and CSS hides the
+    overlay after 9 s whatever happens.
+  - Replay / disable: `?intro` (or `?splash`) forces it, `?nosplash`
+    skips one load, localStorage `mutebites.splash = "off"` disables it on
+    one device, `NEXT_PUBLIC_DISABLE_SPLASH=1` removes it from the build.
+  - One-off moments that could fire underneath wait with `afterSplash()`
+    (`splash/after-splash.ts`) — the milestone celebration does.
 
 `loading.tsx` exists for the restaurant list (`(home)`), the menu page
 (`restaurants/[id]`), both order pages (`orders`, `orders/[id]`), and
