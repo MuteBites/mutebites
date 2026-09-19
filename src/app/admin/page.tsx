@@ -8,13 +8,13 @@ import { StatCards } from "@/components/admin/stat-cards";
 import { adminPill } from "@/components/admin/styles";
 import { getAdminOrders, getAdminRestaurants, getConfirmedOrderTimes, getOrderCounts } from "@/lib/data/admin";
 import { formatShortDay, formatTime, isPastDeliverySlot, slotEndTime, startOfTodayIST } from "@/lib/date";
-import { getOrderingEnabled } from "@/lib/data/settings";
+import { getOrderingState } from "@/lib/data/settings";
 
 export default async function AdminPage() {
-  const [restaurants, orderCounts, orderingEnabled, orders, confirmedAll] = await Promise.all([
+  const [restaurants, orderCounts, ordering, orders, confirmedAll] = await Promise.all([
     getAdminRestaurants(),
     getOrderCounts(startOfTodayIST()),
-    getOrderingEnabled(),
+    getOrderingState(),
     getAdminOrders(),
     getConfirmedOrderTimes(),
   ]);
@@ -39,7 +39,7 @@ export default async function AdminPage() {
         activeRestaurants={activeRestaurants}
         totalRestaurants={restaurants.length}
       >
-        <OrderingKillSwitch initialEnabled={orderingEnabled} />
+        <OrderingKillSwitch ordering={ordering} />
       </StatCards>
 
       <div className="flex flex-wrap gap-2">
@@ -55,7 +55,7 @@ export default async function AdminPage() {
 
       <section>
         <h2 className="mb-3 font-heading text-title font-bold">Restaurants</h2>
-        <RestaurantToggleList restaurants={restaurants} orderingEnabled={orderingEnabled} />
+        <RestaurantToggleList restaurants={restaurants} orderingEnabled={ordering.open} closedChip={ordering.short} />
       </section>
 
       <section>

@@ -10,10 +10,16 @@ import { RestaurantCard } from "./restaurant-card";
 export function RestaurantList({
   restaurants,
   orderingEnabled,
+  closedChip,
+  closedLine,
   menuStats,
 }: {
   restaurants: Restaurant[];
   orderingEnabled: boolean;
+  /** "Opens 1:30 PM" / "Paused" — the card's status chip while ordering is shut. */
+  closedChip: string;
+  /** "Ordering opens again at 1:30 PM" — the card's footer line while ordering is shut. */
+  closedLine: string;
   menuStats: Record<string, RestaurantMenuStats>;
 }) {
   const [query, setQuery] = useState("");
@@ -78,7 +84,13 @@ export function RestaurantList({
               className="animate-slide-up-in"
               style={{ animationDelay: `${Math.min(i, 6) * 70}ms` }}
             >
-              <RestaurantCard restaurant={r} orderingEnabled={orderingEnabled} stats={menuStats[r.id]} />
+              <RestaurantCard
+                restaurant={r}
+                orderingEnabled={orderingEnabled}
+                closedChip={closedChip}
+                closedLine={closedLine}
+                stats={menuStats[r.id]}
+              />
             </li>
           ))}
         </ul>

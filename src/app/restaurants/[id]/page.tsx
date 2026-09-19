@@ -11,7 +11,7 @@ import { getDishesTried, getFavoriteDishId } from "@/lib/data/orders";
 import { getHighlyReorderedDishIds } from "@/lib/data/reorders";
 import { getRestaurantMenu } from "@/lib/data/restaurants";
 import { isUuid } from "@/lib/ids";
-import { getOrderingEnabled } from "@/lib/data/settings";
+import { getOrderingState } from "@/lib/data/settings";
 import { NAV_TRANSITION, REVEAL_ENTER } from "@/lib/nav-transition";
 import { requireProfile } from "@/lib/profile";
 import { cn } from "@/lib/utils";
@@ -34,7 +34,7 @@ export default async function RestaurantPage({ params, searchParams }: PageProps
   // the per-student queries below would hand it straight to Postgres.
   if (!isUuid(id)) notFound();
   const profilePromise = requireProfile();
-  const orderingEnabledPromise = getOrderingEnabled();
+  const orderingPromise = getOrderingState();
   const highlyReorderedPromise = getHighlyReorderedDishIds();
   const menuPromise = getRestaurantMenu(id);
   // ?dish=<id> — set by Trending and the Thursday banner so the menu opens
@@ -43,9 +43,9 @@ export default async function RestaurantPage({ params, searchParams }: PageProps
   const focusDishId = typeof dish === "string" && isUuid(dish) ? dish : null;
 
   const profile = await profilePromise;
-  const [menu, orderingEnabled, dishesTried, favoriteDishId, highlyReorderedDishIds] = await Promise.all([
+  const [menu, ordering, dishesTried, favoriteDishId, highlyReorderedDishIds] = await Promise.all([
     menuPromise,
-    orderingEnabledPromise,
+    orderingPromise,
     getDishesTried(profile.id, id),
     getFavoriteDishId(profile.id, id),
     highlyReorderedPromise,
@@ -54,6 +54,7 @@ export default async function RestaurantPage({ params, searchParams }: PageProps
 
   const { restaurant, sections } = menu;
   const active = restaurant.is_active;
+  const orderingEnabled = ordering.open;
   const orderable = active && orderingEnabled;
   const paused = active && !orderingEnabled;
   const totalDishes = sections.reduce((sum, s) => sum + s.dishes.length, 0);
@@ -69,7 +70,7 @@ export default async function RestaurantPage({ params, searchParams }: PageProps
         className={cn("size-1.5 rounded-full", orderable ? "bg-success" : "bg-muted-foreground")}
         aria-hidden="true"
       />
-      {!active ? "Closed" : paused ? "Paused" : "Open"}
+      {!active ? "Closed" : paused ? ordering.short : "Open"}
     </span>
   );
 
@@ -118,8 +119,7 @@ export default async function RestaurantPage({ params, searchParams }: PageProps
               )}
               {paused && (
                 <p className="mt-4 rounded-2xl bg-secondary px-4 py-3 text-sm">
-                  <strong className="font-semibold">Ordering is paused right now.</strong> You can
-                  browse the menu — try again in a bit.
+                  <strong className="font-semibold">{ordering.headline}.</strong> {ordering.detail}
                 </p>
               )}
             </header>
@@ -129,6 +129,8 @@ export default async function RestaurantPage({ params, searchParams }: PageProps
               sections={sections}
               profilePhone={profile.phone}
               orderingEnabled={orderingEnabled}
+              closedChip={ordering.short}
+              closedNote={ordering.headline}
               favoriteDishId={favoriteDishId}
               highlyReorderedDishIds={highlyReorderedDishIds}
               focusDishId={focusDishId}

@@ -3,6 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { isPastDeliverySlot } from "@/lib/date";
 import type { OrderStatus } from "@/lib/data/types";
+import type { OrderingMode } from "@/lib/ordering";
 import { nextStatus } from "@/lib/orders/status";
 import { getSessionProfile } from "@/lib/profile";
 import { createClient } from "@/lib/supabase/server";
@@ -20,17 +21,25 @@ async function assertAdmin(): Promise<{ ok: false; error: string } | null> {
   return null;
 }
 
-/** Campus-wide kill switch: pauses/resumes new orders everywhere at once. */
-export async function setOrderingEnabled(enabled: boolean): Promise<AdminActionResult> {
+/**
+ * Campus-wide ordering override: 'auto' follows the daily schedule
+ * (public.ordering_schedule_open()), 'open' / 'closed' force it either way.
+ * Also keeps the legacy ordering_enabled column in step until a later
+ * migration drops it.
+ */
+export async function setOrderingMode(mode: OrderingMode): Promise<AdminActionResult> {
   const denied = await assertAdmin();
   if (denied) return denied;
+  if (mode !== "auto" && mode !== "open" && mode !== "closed") {
+    return { ok: false, error: "Unknown ordering mode." };
+  }
 
   const supabase = await createClient();
   const { error } = await supabase
     .from("app_settings")
-    .update({ ordering_enabled: enabled, updated_at: new Date().toISOString() })
+    .update({ ordering_mode: mode, ordering_enabled: mode !== "closed", updated_at: new Date().toISOString() })
     .eq("id", true);
-  if (error) return { ok: false, error: "Couldn't update the kill switch. Please try again." };
+  if (error) return { ok: false, error: "Couldn't update ordering. Please try again." };
 
   revalidatePath("/admin");
   return { ok: true };

@@ -30,6 +30,8 @@ export function MenuView({
   sections,
   profilePhone,
   orderingEnabled,
+  closedChip = "Paused",
+  closedNote,
   favoriteDishId,
   highlyReorderedDishIds,
   focusDishId = null,
@@ -39,6 +41,10 @@ export function MenuView({
   profilePhone: string;
   /** Campus-wide kill switch — dishes become un-addable when off, same as a closed restaurant. */
   orderingEnabled: boolean;
+  /** "Opens 1:30 PM" / "Paused" — shown on dish cards while ordering is shut. */
+  closedChip?: string;
+  /** "Ordering opens again at 1:30 PM" — shown in the cart while ordering is shut. */
+  closedNote?: string;
   /** This student's most-ordered dish at this restaurant, or null — tags it "Your favorite". */
   favoriteDishId: string | null;
   /** Dishes campus-wide with a strong repeat-purchase signal — tags them "Highly re-ordered". */
@@ -233,6 +239,7 @@ export function MenuView({
                 quantity={quantityOf(dish.id)}
                 orderable={restaurant.is_active && orderingEnabled}
                 pausedOnly={restaurant.is_active && !orderingEnabled}
+                pausedLabel={closedChip}
                 isFavorite={dish.id === favoriteDishId}
                 isHighlyReordered={highlyReorderedDishIds.has(dish.id)}
                 highlighted={highlighted === dish.id}
@@ -250,6 +257,7 @@ export function MenuView({
         profilePhone={profilePhone}
         currentRestaurantId={restaurant.id}
         orderingEnabled={orderingEnabled}
+        closedNote={closedNote}
       />
 
       <AlertDialog open={pendingDish !== null} onOpenChange={(open) => !open && setPendingDish(null)}>

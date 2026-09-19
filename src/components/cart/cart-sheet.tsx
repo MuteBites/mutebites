@@ -23,6 +23,7 @@ export function CartSheet({
   onOpenChange,
   profilePhone,
   orderingEnabled,
+  closedNote,
 }: {
   open: boolean;
   onOpenChange: (open: boolean) => void;
@@ -30,6 +31,7 @@ export function CartSheet({
   profilePhone: string;
   /** Campus-wide kill switch — disables the "Place order" button when off. */
   orderingEnabled: boolean;
+  closedNote?: string;
 }) {
   const cart = useCart();
   const empty = cart.lines.length === 0;
@@ -67,6 +69,7 @@ export function CartSheet({
             cart={cart}
             profilePhone={profilePhone}
             orderingEnabled={orderingEnabled}
+            closedNote={closedNote}
             onPlaced={() => onOpenChange(false)}
           />
         )}
@@ -101,11 +104,13 @@ function CartContents({
   cart,
   profilePhone,
   orderingEnabled,
+  closedNote,
   onPlaced,
 }: {
   cart: Cart;
   profilePhone: string;
   orderingEnabled: boolean;
+  closedNote?: string;
   onPlaced: () => void;
 }) {
   const router = useRouter();
@@ -206,7 +211,8 @@ function CartContents({
       <footer className="border-t bg-background px-6 pt-3 pb-[max(1rem,env(safe-area-inset-bottom))]">
         {!orderingEnabled && (
           <p className="mb-3 rounded-2xl bg-secondary px-4 py-3 text-center text-sm">
-            Ordering is paused campus-wide right now. Try again in a bit.
+            {closedNote ? `${closedNote}.` : "Ordering is paused campus-wide right now."} Your cart will
+            wait.
           </p>
         )}
 

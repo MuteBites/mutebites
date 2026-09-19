@@ -24,6 +24,7 @@ export function DishCard({
   quantity,
   orderable,
   pausedOnly = false,
+  pausedLabel = "Paused",
   isFavorite = false,
   isHighlyReordered = false,
   highlighted = false,
@@ -37,6 +38,8 @@ export function DishCard({
   orderable: boolean;
   /** True when `orderable` is false only because of the campus-wide pause, not this restaurant's own status. */
   pausedOnly?: boolean;
+  /** Chip text when pausedOnly, e.g. "Opens 1:30 PM". */
+  pausedLabel?: string;
   /** This student's most-ordered dish at this restaurant. */
   isFavorite?: boolean;
   /** Campus-wide: several students have each reordered this dish 3+ times. */
@@ -52,7 +55,7 @@ export function DishCard({
 
   const control = soldOut ? null : !orderable ? (
     <span className="rounded-full bg-card/90 px-2.5 py-1 text-xs font-semibold text-muted-foreground backdrop-blur-sm">
-      {pausedOnly ? "Paused" : "Closed"}
+      {pausedOnly ? pausedLabel : "Closed"}
     </span>
   ) : !inCart ? (
     <button

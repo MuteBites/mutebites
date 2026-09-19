@@ -1,20 +1,22 @@
 import "server-only";
 
+import { describeOrdering, type OrderingMode, type OrderingState } from "@/lib/ordering";
 import { createClient } from "@/lib/supabase/server";
 
 /**
- * The campus-wide ordering kill switch (public.app_settings, single row).
- * Public-read — both the student app (to show the paused banner and grey
- * out ordering) and the admin dashboard (to show/flip the switch) need it.
+ * Whether students can order right now, and what to tell them if not.
+ * `open` comes straight from public.ordering_is_open() — the same function
+ * place_order() enforces — so the UI can't drift from the database; the
+ * admin override (app_settings.ordering_mode) picks the wording.
  */
-export async function getOrderingEnabled(): Promise<boolean> {
+export async function getOrderingState(): Promise<OrderingState> {
   const supabase = await createClient();
-  const { data, error } = await supabase
-    .from("app_settings")
-    .select("ordering_enabled")
-    .eq("id", true)
-    .single();
+  const [settings, open] = await Promise.all([
+    supabase.from("app_settings").select("ordering_mode").eq("id", true).single(),
+    supabase.rpc("ordering_is_open"),
+  ]);
 
-  if (error) throw error;
-  return data.ordering_enabled;
+  if (settings.error) throw settings.error;
+  if (open.error) throw open.error;
+  return describeOrdering(settings.data.ordering_mode as OrderingMode, open.data === true);
 }

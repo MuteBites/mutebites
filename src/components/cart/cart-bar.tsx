@@ -17,6 +17,7 @@ export function CartBar({
   profilePhone,
   currentRestaurantId,
   orderingEnabled,
+  closedNote,
   hasTabBar = false,
 }: {
   profilePhone: string;
@@ -24,6 +25,8 @@ export function CartBar({
   currentRestaurantId?: string;
   /** Campus-wide kill switch — disables checkout in the cart sheet when off. */
   orderingEnabled: boolean;
+  /** Why ordering is shut ("Ordering opens again at 1:30 PM"), shown in the cart sheet. */
+  closedNote?: string;
   /** True on pages that also render <TabBar/> below — stacks the bar above it. */
   hasTabBar?: boolean;
 }) {
@@ -91,6 +94,7 @@ export function CartBar({
         onOpenChange={setOpen}
         profilePhone={profilePhone}
         orderingEnabled={orderingEnabled}
+        closedNote={closedNote}
       />
     </>
   );

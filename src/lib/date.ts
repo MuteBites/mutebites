@@ -46,35 +46,38 @@ const hourMinuteFmt = new Intl.DateTimeFormat("en-GB", {
 });
 
 /**
- * A rough delivery-window estimate, purely a function of when the order
- * was placed (IST wall-clock time) — no ETA is stored anywhere. Split into
- * a lead-in and the time itself so the UI can keep the time on one line
- * ("before 8:20 PM" was wrapping as "8:20 / PM"); the spaces inside `time`
- * are no-break for the same reason.
+ * The delivery slot an order falls in, purely from when it was placed (IST)
+ * — the same cut-offs as the ordering schedule in src/lib/ordering.ts /
+ * public.ordering_schedule_open(). Split into a lead-in and the time so the
+ * UI can keep the time on one line; spaces inside `time` are no-break.
+ * An order placed after the last cut-off can only exist if an admin forced
+ * ordering open, so it has no slot: "to be confirmed".
  */
 export function deliveryWindow(iso: string): { lead: string; time: string } {
   const [h, m] = hourMinuteFmt.format(new Date(iso)).split(":").map(Number);
   const minutesOfDay = h * 60 + m;
 
-  if (minutesOfDay < 12 * 60 + 40) return { lead: "Delivery by", time: "1:30\u00a0PM" };
-  if (minutesOfDay <= 18 * 60) return { lead: "Delivery between", time: "7:00\u2013\u20097:30\u00a0PM" };
-  return { lead: "Delivery before", time: "8:20\u00a0PM" };
+  if (minutesOfDay < 12 * 60 + 45) return { lead: "Delivery by", time: "1:30\u00a0PM" };
+  if (minutesOfDay < 18 * 60) return { lead: "Delivery by", time: "7:30\u00a0PM" };
+  if (minutesOfDay < 19 * 60) return { lead: "Delivery by", time: "8:15\u00a0PM" };
+  return { lead: "Delivery time", time: "to be confirmed" };
 }
 
 /**
  * The literal end-of-slot instant for an order, based on when it was
- * placed (IST wall-clock) — the same three windows as estimatedDelivery()
- * above, just as a real Date instead of display text, so admin bulk
- * actions can gate on "has this slot actually ended" rather than go by
- * status alone.
+ * placed (IST wall-clock) — the same slots as deliveryWindow() above, as a
+ * real Date, so admin bulk actions can gate on "has this slot actually
+ * ended". A slot-less order (forced open after 7 PM) counts as ended as
+ * soon as it's placed, so an admin can mark it delivered whenever.
  */
 export function slotEndTime(iso: string): Date {
   const placed = new Date(iso);
   const [h, m] = hourMinuteFmt.format(placed).split(":").map(Number);
   const minutesOfDay = h * 60 + m;
 
+  if (minutesOfDay >= 19 * 60) return placed;
   const [endHour, endMinute] =
-    minutesOfDay < 12 * 60 + 40 ? [13, 30] : minutesOfDay <= 18 * 60 ? [19, 30] : [20, 20];
+    minutesOfDay < 12 * 60 + 45 ? [13, 30] : minutesOfDay < 18 * 60 ? [19, 30] : [20, 15];
 
   const [year, month, day] = dayKeyFmt.format(placed).split("-").map(Number);
   // IST is a fixed UTC+5:30 offset (no DST) — subtract it from the

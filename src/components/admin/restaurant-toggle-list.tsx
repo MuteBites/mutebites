@@ -12,10 +12,12 @@ import { cn } from "@/lib/utils";
 function RestaurantToggleCard({
   restaurant,
   orderingEnabled,
+  closedChip,
 }: {
   restaurant: AdminRestaurant;
   /** Campus-wide kill switch — a restaurant can be individually "open" and still not actually take orders while this is off. */
   orderingEnabled: boolean;
+  closedChip: string;
 }) {
   const [active, setActive] = useState(restaurant.is_active);
   const [pending, startTransition] = useTransition();
@@ -59,10 +61,10 @@ function RestaurantToggleCard({
             )}
             aria-hidden="true"
           />
-          {!active ? "Closed" : paused ? "Paused" : "Open"}
+          {!active ? "Closed" : paused ? closedChip : "Open"}
         </p>
         {paused && (
-          <p className="mt-1 text-xs text-muted-foreground">Campus ordering is paused — see above.</p>
+          <p className="mt-1 text-xs text-muted-foreground">Campus ordering is closed — see Today above.</p>
         )}
       </div>
 
@@ -87,9 +89,11 @@ function RestaurantToggleCard({
 export function RestaurantToggleList({
   restaurants,
   orderingEnabled,
+  closedChip,
 }: {
   restaurants: AdminRestaurant[];
   orderingEnabled: boolean;
+  closedChip: string;
 }) {
   return (
     <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
@@ -98,6 +102,7 @@ export function RestaurantToggleList({
           key={restaurant.id}
           restaurant={restaurant}
           orderingEnabled={orderingEnabled}
+          closedChip={closedChip}
         />
       ))}
     </div>

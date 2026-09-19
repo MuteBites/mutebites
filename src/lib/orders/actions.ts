@@ -120,6 +120,7 @@ const PLACE_ORDER_ERRORS: Record<string, string> = {
   profile_missing: "Looks like you got signed out — sign in again to place your order.",
   banned: "Ordering's blocked for this phone number. If that doesn't sound right, please reach out to support.",
   ordering_paused: "Ordering's paused campus-wide right now — check back in a bit.",
+  ordering_closed: "Ordering just closed for this slot — Home shows when it opens next.",
   invalid_contact_phone: "Enter a valid 10-digit mobile number.",
   notes_too_long: `That note's a bit long — keep it under ${MAX_NOTES} characters.`,
   restaurant_closed: "This restaurant isn't taking orders right now.",

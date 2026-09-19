@@ -19,10 +19,14 @@ import { cn } from "@/lib/utils";
 export function RestaurantCard({
   restaurant,
   orderingEnabled,
+  closedChip = "Paused",
+  closedLine = "Ordering paused",
   stats,
 }: {
   restaurant: Restaurant;
   orderingEnabled: boolean;
+  closedChip?: string;
+  closedLine?: string;
   stats?: RestaurantMenuStats;
 }) {
   const active = restaurant.is_active;
@@ -68,7 +72,7 @@ export function RestaurantCard({
               className={cn("size-1.5 rounded-full", open ? "bg-success" : "bg-muted-foreground")}
               aria-hidden="true"
             />
-            {!active ? "Closed" : paused ? "Paused" : "Open"}
+            {!active ? "Closed" : paused ? closedChip : "Open"}
           </span>
         </div>
         {sides.map(({ dish, src }) => (
@@ -106,7 +110,7 @@ export function RestaurantCard({
             ? stats && `${stats.dishCount} ${stats.dishCount === 1 ? "dish" : "dishes"} · from ${formatRupees(stats.minPrice)}`
             : !active
               ? "Closed right now · menu still browsable"
-              : "Ordering paused · browse the menu"}
+              : `${closedLine} · browse the menu`}
         </p>
       </div>
     </Link>

@@ -8,7 +8,7 @@ import { ThursdayNudge } from "@/components/home/thursday-nudge";
 import { YourUsualChip } from "@/components/home/your-usual-chip";
 import { TabBar } from "@/components/nav/tab-bar";
 import { getRestaurantMenuStats, getRestaurants, getThursdaySpecial } from "@/lib/data/restaurants";
-import { getOrderingEnabled } from "@/lib/data/settings";
+import { getOrderingState } from "@/lib/data/settings";
 import { getTrendingDishes } from "@/lib/data/trending";
 import { getUsualCart } from "@/lib/data/usual";
 import { getTimeOfDayIST, isThursdayIST } from "@/lib/date";
@@ -23,20 +23,21 @@ export default async function Home({ searchParams }: PageProps<"/">) {
   const profilePromise = requireProfile();
   const restaurantsPromise = getRestaurants();
   const menuStatsPromise = getRestaurantMenuStats();
-  const orderingEnabledPromise = getOrderingEnabled();
+  const orderingPromise = getOrderingState();
   const trendingDishesPromise = getTrendingDishes();
   const thursdaySpecialPromise = isThursdayIST() ? getThursdaySpecial() : Promise.resolve(null);
 
   const profile = await profilePromise;
-  const [restaurants, menuStats, orderingEnabled, usual, thursdaySpecial, trendingDishes] = await Promise.all([
+  const [restaurants, menuStats, ordering, usual, thursdaySpecial, trendingDishes] = await Promise.all([
     restaurantsPromise,
     menuStatsPromise,
-    orderingEnabledPromise,
+    orderingPromise,
     getUsualCart(profile.id),
     thursdaySpecialPromise,
     trendingDishesPromise,
   ]);
   const timeOfDay = getTimeOfDayIST();
+  const orderingEnabled = ordering.open;
 
   return (
     <main className="mx-auto w-full max-w-md px-6 pt-6 pb-28">
@@ -46,11 +47,17 @@ export default async function Home({ searchParams }: PageProps<"/">) {
           <HomeHeader fullName={profile.full_name} timeOfDay={timeOfDay} trendingDishes={trendingDishes} />
           {usual && orderingEnabled && <YourUsualChip usual={usual} />}
           {thursdaySpecial && <ThursdayNudge special={thursdaySpecial} />}
-          {!orderingEnabled && <OrderingPausedBanner />}
-          <RestaurantList restaurants={restaurants} orderingEnabled={orderingEnabled} menuStats={menuStats} />
+          {!orderingEnabled && <OrderingPausedBanner ordering={ordering} />}
+          <RestaurantList
+            restaurants={restaurants}
+            orderingEnabled={orderingEnabled}
+            closedChip={ordering.short}
+            closedLine={ordering.headline}
+            menuStats={menuStats}
+          />
         </ViewTransition>
       </ViewTransition>
-      <CartBar profilePhone={profile.phone} orderingEnabled={orderingEnabled} hasTabBar />
+      <CartBar profilePhone={profile.phone} orderingEnabled={orderingEnabled} closedNote={ordering.headline} hasTabBar />
       <TabBar />
     </main>
   );

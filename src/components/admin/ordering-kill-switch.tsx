@@ -1,7 +1,8 @@
 "use client";
 
 import { useState, useTransition } from "react";
-import { Loader2, Power } from "lucide-react";
+import { useRouter } from "next/navigation";
+import { CalendarClock, Loader2, Power } from "lucide-react";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -11,97 +12,139 @@ import {
   AlertDialogFooter,
   AlertDialogHeader,
   AlertDialogTitle,
-  AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
-import { setOrderingEnabled } from "@/lib/admin/actions";
+import { setOrderingMode } from "@/lib/admin/actions";
+import type { OrderingMode, OrderingState } from "@/lib/ordering";
 import { toast } from "@/lib/toast/store";
 import { cn } from "@/lib/utils";
 
-export function OrderingKillSwitch({ initialEnabled }: { initialEnabled: boolean }) {
-  const [enabled, setEnabled] = useState(initialEnabled);
-  const [open, setOpen] = useState(false);
+const MODES: { mode: OrderingMode; label: string }[] = [
+  { mode: "auto", label: "Auto" },
+  { mode: "open", label: "Open" },
+  { mode: "closed", label: "Closed" },
+];
+
+const CONFIRM: Record<OrderingMode, { title: string; body: string; action: string }> = {
+  auto: {
+    title: "Follow the schedule?",
+    body: "Ordering opens 10:30 AM – 12:45 PM and 1:30 PM – 7:00 PM, and closes on its own in between.",
+    action: "Use schedule",
+  },
+  open: {
+    title: "Force ordering open?",
+    body: "Students can order right now even outside the schedule. Orders placed after 7:00 PM have no slot — their ticket says delivery time to be confirmed. Switch back to Auto when you're done.",
+    action: "Force open",
+  },
+  closed: {
+    title: "Pause ordering campus-wide?",
+    body: "No student can place a new order until you switch back, whatever the schedule says. Orders already placed aren't affected.",
+    action: "Pause ordering",
+  },
+};
+
+/**
+ * Footer row of the dashboard's plum "Today" card: the three-way ordering
+ * override (app_settings.ordering_mode) and a line saying what's actually
+ * happening right now. Auto follows public.ordering_schedule_open(); Open
+ * and Closed force it either way. The status comes from the server
+ * (getOrderingState) and is re-fetched after every change.
+ */
+export function OrderingKillSwitch({ ordering }: { ordering: OrderingState }) {
+  const router = useRouter();
+  const [target, setTarget] = useState<OrderingMode | null>(null);
   const [pending, startTransition] = useTransition();
 
+  const status =
+    ordering.mode === "open"
+      ? "Forced open — ignoring the schedule"
+      : ordering.mode === "closed"
+        ? "Paused by admin"
+        : ordering.open
+          ? `Following the schedule — open until ${ordering.closesAt}`
+          : `Following the schedule — ${ordering.headline.toLowerCase()}`;
+
   function confirm() {
-    const next = !enabled;
+    if (!target) return;
     startTransition(async () => {
-      const result = await setOrderingEnabled(next);
+      const result = await setOrderingMode(target);
       if (result.ok) {
-        setEnabled(next);
-        setOpen(false);
-        toast.success(next ? "Ordering turned back on campus-wide." : "Ordering paused campus-wide.");
+        toast.success(
+          target === "auto" ? "Ordering follows the schedule." : target === "open" ? "Ordering forced open." : "Ordering paused.",
+        );
+        setTarget(null);
+        router.refresh();
       } else {
         toast.error(result.error);
       }
     });
   }
 
-  // Rendered as the footer row of the dashboard's plum "Today" card
-  // (StatCards), so it uses the ink-surface tokens throughout.
   return (
     <div className="flex flex-wrap items-center justify-between gap-3">
       <div className="flex min-w-0 items-start gap-3">
         <span
           className={cn(
             "mt-0.5 flex size-9 shrink-0 items-center justify-center rounded-full",
-            enabled ? "bg-ink-success/20 text-ink-success" : "bg-ink-danger/20 text-ink-danger",
+            ordering.open ? "bg-ink-success/20 text-ink-success" : "bg-ink-danger/20 text-ink-danger",
           )}
           aria-hidden="true"
         >
-          <Power className="size-4.5" />
+          {ordering.mode === "auto" ? <CalendarClock className="size-4.5" /> : <Power className="size-4.5" />}
         </span>
         <div className="min-w-0">
-          <p className="font-semibold">
-            {enabled ? "Campus ordering is live" : "Campus ordering is paused"}
-          </p>
-          <p className="max-w-md text-sm text-ink-foreground/75">
-            {enabled
-              ? "Students can place orders at every open restaurant."
-              : "New orders are blocked everywhere. Menus stay browsable."}
-          </p>
+          <p className="font-semibold">{ordering.open ? "Students can order now" : "Ordering is closed"}</p>
+          <p className="max-w-md text-sm text-ink-foreground/75">{status}</p>
         </div>
       </div>
 
-        <AlertDialog open={open} onOpenChange={(next) => (pending ? null : setOpen(next))}>
-          <AlertDialogTrigger
-            render={
-              <button
-                type="button"
-                className={cn(
-                  "flex h-10 shrink-0 items-center rounded-full px-4 text-sm font-bold outline-none focus-visible:ring-3 focus-visible:ring-ink-foreground/40",
-                  enabled
-                    ? "bg-ink-foreground/10 text-ink-danger hover:bg-ink-foreground/15"
-                    : "bg-ink-success text-ink hover:brightness-95",
-                )}
-              />
-            }
-          >
-            {enabled ? "Pause ordering" : "Turn ordering on"}
-          </AlertDialogTrigger>
-          <AlertDialogContent>
-            <AlertDialogHeader>
-              <AlertDialogTitle>
-                {enabled ? "Turn off ordering campus-wide?" : "Turn ordering back on?"}
-              </AlertDialogTitle>
-              <AlertDialogDescription>
-                {enabled
-                  ? "No student will be able to place a new order at any restaurant until you turn it back on. Existing orders already placed aren't affected."
-                  : "Students will immediately be able to place new orders again at every open restaurant."}
-              </AlertDialogDescription>
-            </AlertDialogHeader>
-            <AlertDialogFooter>
-              <AlertDialogCancel disabled={pending}>Cancel</AlertDialogCancel>
-              <AlertDialogAction
-                disabled={pending}
-                onClick={confirm}
-                className={cn(enabled ? "bg-destructive text-destructive-foreground hover:bg-destructive/90" : "")}
-              >
-                {pending && <Loader2 className="size-4 animate-spin" />}
-                {enabled ? "Turn off ordering" : "Turn on ordering"}
-              </AlertDialogAction>
-            </AlertDialogFooter>
-          </AlertDialogContent>
-        </AlertDialog>
+      <div
+        role="radiogroup"
+        aria-label="Ordering mode"
+        className="flex shrink-0 rounded-full bg-ink-foreground/10 p-1"
+      >
+        {MODES.map(({ mode, label }) => {
+          const active = ordering.mode === mode;
+          return (
+            <button
+              key={mode}
+              type="button"
+              role="radio"
+              aria-checked={active}
+              onClick={() => !active && setTarget(mode)}
+              className={cn(
+                "h-9 rounded-full px-4 text-sm font-bold outline-none focus-visible:ring-3 focus-visible:ring-ink-foreground/60",
+                active ? "bg-ink-foreground text-ink" : "text-ink-foreground/75 hover:text-ink-foreground",
+              )}
+            >
+              {label}
+            </button>
+          );
+        })}
+      </div>
+
+      <AlertDialog open={target !== null} onOpenChange={(next) => !next && !pending && setTarget(null)}>
+        <AlertDialogContent>
+          {target && (
+            <>
+              <AlertDialogHeader>
+                <AlertDialogTitle>{CONFIRM[target].title}</AlertDialogTitle>
+                <AlertDialogDescription>{CONFIRM[target].body}</AlertDialogDescription>
+              </AlertDialogHeader>
+              <AlertDialogFooter>
+                <AlertDialogCancel disabled={pending}>Cancel</AlertDialogCancel>
+                <AlertDialogAction
+                  disabled={pending}
+                  onClick={confirm}
+                  className={cn(target === "closed" && "bg-destructive text-destructive-foreground hover:bg-destructive/90")}
+                >
+                  {pending && <Loader2 className="size-4 animate-spin" />}
+                  {CONFIRM[target].action}
+                </AlertDialogAction>
+              </AlertDialogFooter>
+            </>
+          )}
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }

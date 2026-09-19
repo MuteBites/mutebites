@@ -270,8 +270,11 @@ dishes, priced per 500 g/1 kg pack), bringing the total to 5 restaurants),
 (adds `my_weekly_rank()` — see below),
 [`supabase/migrations/20260917010000_drop_unused_trending_restaurants.sql`](supabase/migrations/20260917010000_drop_unused_trending_restaurants.sql)
 (drops `trending_restaurants()` again — never called by the app),
-and [`supabase/migrations/20260917020000_highly_reordered_dishes.sql`](supabase/migrations/20260917020000_highly_reordered_dishes.sql)
-(adds `highly_reordered_dishes()` — see below).
+[`supabase/migrations/20260917020000_highly_reordered_dishes.sql`](supabase/migrations/20260917020000_highly_reordered_dishes.sql)
+(adds `highly_reordered_dishes()` — see below),
+and [`supabase/migrations/20260919000000_ordering_schedule.sql`](supabase/migrations/20260919000000_ordering_schedule.sql)
+(the daily ordering schedule + three-way admin override — see
+`app_settings` below).
 Migrations are applied by hand in the Supabase SQL editor (no CLI setup).
 
 All orders are handed over at **VIT-AP Main Gate** — there is no room
@@ -338,9 +341,29 @@ on `orders`).
   (quantity, generated `subtotal`), so later menu edits never rewrite past
   order history. `dish_id` is `on delete set null` for the same reason.
 - **`app_settings`** — single-row table (`id boolean primary key default
-  true check (id)` caps it at one row) holding `ordering_enabled`, the
-  campus-wide kill switch the admin dashboard flips. Public-read (the
-  student app needs to know ordering is paused), admin-only update.
+  true check (id)` caps it at one row) holding `ordering_mode`
+  (`'auto' | 'open' | 'closed'`, default `'auto'`), the campus-wide
+  ordering override the admin dashboard's Today card sets. Public-read (the
+  student app needs to know whether it can order), admin-only update.
+  `'auto'` follows the **daily schedule** (IST), enforced by
+  `public.ordering_schedule_open()`: open 10:30 AM – 12:45 PM (slot 1,
+  delivered by 1:30 PM), closed 12:45 – 1:30 PM, open 1:30 – 7:00 PM
+  (orders before 6:00 PM → delivered by 7:30 PM, 6:00 – 7:00 PM → by
+  8:15 PM), closed from 7:00 PM until 10:30 AM. `'open'` / `'closed'`
+  force it either way (e.g. testing at night). `public.ordering_is_open()`
+  (security definer, callable by anon + authenticated) combines the two
+  and is the single source of truth — `place_order()` checks it, and the
+  app reads it via `getOrderingState()` (`src/lib/data/settings.ts`), with
+  the wording ("Ordering opens again at 1:30 PM") from
+  `describeOrdering()` in `src/lib/ordering.ts`, which mirrors the schedule
+  constants — change the SQL function and that file together.
+  `deliveryWindow()` / `slotEndTime()` (`src/lib/date.ts`) use the same
+  cut-offs; an order placed after 7:00 PM can only exist when an admin
+  forced ordering open, so it gets "Delivery time to be confirmed" and
+  counts as past its slot immediately. The old `ordering_enabled` boolean
+  column still exists (kept in step by `setOrderingMode()`) only so the
+  previously deployed app kept working during the switch-over; a later
+  migration should drop it — nothing reads it any more.
 
 RLS is enabled on every table:
 - `restaurants` / `dish_categories` / `dishes` are public-read (browsing the
@@ -357,12 +380,13 @@ RLS is enabled on every table:
   contact phone format, restaurant `is_active`, and every dish belonging to
   the restaurant and `is_available`; snapshots dish name/price from
   `dishes` (never from the client); leaves `status` at `pending`; and
-  computes `total_amount` itself. It also checks `app_settings.ordering_enabled`
-  before anything else (raising `ordering_paused` if the admin kill switch
-  is off) — enforced in the function itself, not just hidden in the UI,
+  computes `total_amount` itself. It also checks `public.ordering_is_open()`
+  before anything else (raising `ordering_paused` if an admin forced
+  ordering closed, or `ordering_closed` if the daily schedule is between
+  slots) — enforced in the function itself, not just hidden in the UI,
   since a direct PostgREST call would otherwise bypass an app-level check.
   It raises short error keys
-  (`banned`, `restaurant_closed`, `dish_unavailable`, `ordering_paused`, …) that
+  (`banned`, `restaurant_closed`, `dish_unavailable`, `ordering_paused`, `ordering_closed`, …) that
   `src/lib/orders/actions.ts` maps to messages. Admins
   can additionally update any `orders` row (e.g. changing `status`) and read
   every `orders` row, every `users` row, and every `order_items` row (not
