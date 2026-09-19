@@ -99,8 +99,6 @@ export const DISH_PHOTOS: Record<string, Record<string, string>> = {
     "Sweet Lemon Juice (Mosambi)": `${BISMILLAH}/Sweet lemon mosambi juice.jpg`,
     "Sugarcane Juice (Glass)": `${BISMILLAH}/Sugarcane juice.jpg`,
     "Sugarcane Juice (1 Bottle)": `${BISMILLAH}/Sugarcane juice.jpg`,
-    // No photo: Any Fruit Juice Bottle, Bismillah Fruit Juice (Any Flavour)
-    // — flavour varies per order, no single photo represents them.
   },
 
   "MuteBites Chinese": {

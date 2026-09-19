@@ -317,9 +317,13 @@ dishes, priced per 500 g/1 kg pack), bringing the total to 5 restaurants),
 `app_settings` below),
 [`supabase/migrations/20260919010000_drop_ordering_enabled.sql`](supabase/migrations/20260919010000_drop_ordering_enabled.sql)
 (drops the old `ordering_enabled` switch it replaced),
-and [`supabase/migrations/20260919020000_order_reviews.sql`](supabase/migrations/20260919020000_order_reviews.sql)
+[`supabase/migrations/20260919020000_order_reviews.sql`](supabase/migrations/20260919020000_order_reviews.sql)
 (dish ratings — `orders.delivered_at`, `order_reviews`, `order_item_ratings`,
-`submit_review()`; see below).
+`submit_review()`; see below),
+and [`supabase/migrations/20260919030000_remove_bismillah_catch_all_juices.sql`](supabase/migrations/20260919030000_remove_bismillah_catch_all_juices.sql)
+(data only — deletes Bismillah's "Any Fruit Juice Bottle" and "Bismillah
+Fruit Juice (Any Flavour)"; its menu is now the 10 named fruit juices plus
+the two Sugarcane items).
 Migrations are applied by hand in the Supabase SQL editor (no CLI setup).
 
 All orders are handed over at **VIT-AP Main Gate** — there is no room
