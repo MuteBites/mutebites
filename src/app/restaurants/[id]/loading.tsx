@@ -21,7 +21,7 @@ export default function Loading() {
             <Skeleton className="mt-1.5 h-1.5 w-full rounded-full" />
           </div>
 
-          <div className="flex gap-2 border-b py-2.5">
+          <div className="flex gap-2 overflow-hidden border-b py-2.5">
             <Skeleton className="size-10 shrink-0 rounded-full" />
             <Skeleton className="h-10 w-16 shrink-0 rounded-full" />
             <Skeleton className="h-10 w-16 shrink-0 rounded-full" />

@@ -47,12 +47,22 @@ export default async function LoginPage({ searchParams }: PageProps<"/login">) {
         <div className="absolute -inset-x-12 -top-16 grid -rotate-6 grid-cols-3 gap-3">
           {MOSAIC.map((column, c) => (
             <div key={c} className={c === 1 ? "flex flex-col gap-3 pt-16" : "flex flex-col gap-3"}>
-              {column.map((src) => (
+              {column.map((src, row) => (
                 <div
                   key={src}
                   className="relative aspect-[4/5] overflow-hidden rounded-3xl bg-secondary shadow-card"
                 >
-                  <Image src={src} alt="" fill sizes="(max-width: 448px) 36vw, 160px" className="object-cover" />
+                  {/* The top two rows are what's on screen at load (and hold
+                      the LCP image), so they skip lazy-loading. */}
+                  <Image
+                    src={src}
+                    alt=""
+                    fill
+                    sizes="(max-width: 448px) 36vw, 160px"
+                    loading={row < 2 ? "eager" : "lazy"}
+                    fetchPriority={row < 2 ? "high" : undefined}
+                    className="object-cover"
+                  />
                 </div>
               ))}
             </div>

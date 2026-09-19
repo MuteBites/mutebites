@@ -192,6 +192,9 @@ export function OrderTracking({
             </Link>
           </div>
 
+          <h1 className="sr-only">
+            Order {formatOrderNumber(initialOrder.dailyNumber)} from {initialOrder.restaurantName}
+          </h1>
           {/* The token as a ticket stub: what you ordered (photos) above
               the tear line, what you show at the gate below it. */}
           <div className="surface-ink shadow-elevated-glow relative overflow-hidden rounded-3xl bg-ink text-ink-foreground">

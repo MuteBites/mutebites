@@ -12,7 +12,8 @@ export const config = {
     // the browser/OS fetches these to check install eligibility and to
     // render the home-screen icon, sometimes signed out (e.g. from the
     // login page), so like favicon.ico they must never hit the
-    // sign-in redirect below.
-    "/((?!_next/static|_next/image|favicon.ico|manifest.webmanifest|apple-icon|icons/|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)",
+    // sign-in redirect below. robots.txt (app/robots.ts) is excluded for the
+    // same reason — crawlers fetch it signed out.
+    "/((?!_next/static|_next/image|favicon.ico|robots.txt|manifest.webmanifest|apple-icon|icons/|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)",
   ],
 };

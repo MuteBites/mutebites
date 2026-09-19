@@ -1,7 +1,7 @@
 "use client";
 
 import { useTransition } from "react";
-import { useRouter } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { LogOut, RotateCw } from "lucide-react";
 import { BrandLogo } from "@/components/brand-logo";
 import { signOutAndClearCart } from "@/lib/sign-out";
@@ -12,12 +12,15 @@ export function AdminHeader() {
   const router = useRouter();
   const [signingOut, startSignOut] = useTransition();
   const [reloading, startReload] = useTransition();
+  // "Admin" is the page's h1 only on the dashboard; sub-pages (history,
+  // users, banned) have their own h1, and a page should have exactly one.
+  const Title = usePathname() === "/admin" ? "h1" : "p";
 
   return (
     <header className="flex items-center gap-3">
       <BrandLogo className="size-12 rounded-2xl bg-card shadow-card" />
       <div className="min-w-0 flex-1">
-        <h1 className="truncate font-heading text-headline font-bold">Admin</h1>
+        <Title className="truncate font-heading text-headline font-bold">Admin</Title>
         <p className="truncate text-sm text-muted-foreground">MuteBites operations</p>
       </div>
       <button
