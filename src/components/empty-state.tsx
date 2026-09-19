@@ -9,7 +9,7 @@ import { cn } from "@/lib/utils";
 // it reads as the whole campus menu rather than one restaurant.
 const PLATES = [
   "/MuteBites/MuteBites Chinese/Chicken noodles.jpg",
-  "/MuteBites/A1 biryani/A1 mixed biryani .jpg",
+  "/MuteBites/A1 biryani/A1 Mixed Biryani-v2.jpg",
   "/MuteBites/Bismillah fruit juice/Pomegranate juice.jpg",
 ];
 

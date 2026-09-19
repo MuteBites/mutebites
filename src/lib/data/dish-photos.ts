@@ -83,7 +83,7 @@ export const DISH_PHOTOS: Record<string, Record<string, string>> = {
   "A1 Biryani Point": {
     "A1 Biryani Dum Biryani": `${A1}/A1 Dum Biryani.jpg`,
     "A1 Biryani Fry Pieces Biryani": `${A1}/A1 Fry Piece Biryani.jpg`,
-    "A1 Biryani Mixed Biryani": `${A1}/A1 mixed biryani .jpg`,
+    "A1 Biryani Mixed Biryani": `${A1}/A1 Mixed Biryani-v2.jpg`,
   },
 
   "Bismillah Fruit Juice": {

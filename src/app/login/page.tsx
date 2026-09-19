@@ -19,7 +19,7 @@ export const metadata: Metadata = {
  */
 const MOSAIC: string[][] = [
   [
-    "/MuteBites/A1 biryani/A1 mixed biryani .jpg",
+    "/MuteBites/A1 biryani/A1 Mixed Biryani-v2.jpg",
     "/MuteBites/Bismillah fruit juice/Pomegranate juice.jpg",
     "/MuteBites/MuteBites Chinese/Chicken noodles.jpg",
     "/MuteBites/Mutebites fresh fruits/Grapes 1kg.jpg",
