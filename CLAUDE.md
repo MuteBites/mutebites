@@ -386,10 +386,12 @@ the two Sugarcane items),
 [`supabase/migrations/20260919040000_fix_banana_pack_and_bismillah_tags.sql`](supabase/migrations/20260919040000_fix_banana_pack_and_bismillah_tags.sql)
 (data only — renames "Bananas (30 g)" to "Bananas (500 g)" and drops
 Bismillah's stale "Special" cuisine tag),
-and [`supabase/migrations/20260920000000_rename_chinese_to_food_corner.sql`](supabase/migrations/20260920000000_rename_chinese_to_food_corner.sql)
+[`supabase/migrations/20260920000000_rename_chinese_to_food_corner.sql`](supabase/migrations/20260920000000_rename_chinese_to_food_corner.sql)
 (data only — "MuteBites Chinese" is now **Food Corner**, with "Chinese"
 added to its cuisine tags so search still finds it; its photo folder
-`public/MuteBites/MuteBites Chinese/` keeps the old name on purpose).
+`public/MuteBites/MuteBites Chinese/` keeps the old name on purpose),
+and [`supabase/migrations/20260920010000_bheemasena_single_mushroom_price.sql`](supabase/migrations/20260920010000_bheemasena_single_mushroom_price.sql)
+(data only — Single Mushroom Biryani ₹220 → ₹200).
 Migrations are applied by hand in the Supabase SQL editor (no CLI setup).
 
 All orders are handed over at **VIT-AP Main Gate** — there is no room

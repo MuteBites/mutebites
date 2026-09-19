@@ -68,7 +68,7 @@ export const DISH_PHOTOS: Record<string, Record<string, string>> = {
     "Single Mushroom Biryani": `${BHEEMASENA}/Special mushroom biryani.jpg`,
     "Single Mughlai Biryani": `${BHEEMASENA}/Mughlai biryani.jpg`,
     "Single Gongura Biryani": `${BHEEMASENA}/Gongura chicken fry biryani.jpg`,
-    "Mixed Biryani": `${BHEEMASENA}/Mixed Biryani.jpg`,
+    "Mixed Biryani": `${BHEEMASENA}/Mixed Biryani-v2.jpg`, // new photo, new name — see CLAUDE.md on caches
     "Butter Naan": `${BHEEMASENA}/Butter naan.jpg`,
     Roti: `${BHEEMASENA}/Roti.jpg`,
     "Paneer Butter Masala": `${BHEEMASENA}/Paneer butter masala .jpg`,
