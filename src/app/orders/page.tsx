@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { ViewTransition } from "react";
-import { ArrowRight, ChevronRight, RotateCcw } from "lucide-react";
+import { ArrowRight, ChevronRight, RotateCcw, Star } from "lucide-react";
 import { BlurImage } from "@/components/blur-image";
 import { EmptyState } from "@/components/empty-state";
 import { TabBar } from "@/components/nav/tab-bar";
@@ -165,11 +165,13 @@ function ActiveOrderCard({ order }: { order: OrderSummary }) {
 
 function PastOrderRow({ order }: { order: OrderSummary }) {
   const delivered = order.status === "delivered";
+  // Rateable orders open straight into the rating sheet (?rate=1).
+  const href = order.rateable ? `/orders/${order.id}?rate=1` : `/orders/${order.id}`;
 
   return (
     <li className="flex items-center gap-2 pr-3">
       <Link
-        href={`/orders/${order.id}`}
+        href={href}
         transitionTypes={["nav-forward"]}
         className="flex min-w-0 flex-1 items-center gap-3 rounded-3xl py-3.5 pl-4 outline-none focus-visible:ring-3 focus-visible:ring-ring/80 focus-visible:ring-inset"
       >
@@ -186,6 +188,12 @@ function PastOrderRow({ order }: { order: OrderSummary }) {
             </span>{" "}
             · {formatTime(order.createdAt)} · {formatOrderNumber(order.dailyNumber)}
           </p>
+          {order.rateable && (
+            <span className="mt-1.5 inline-flex items-center gap-1 rounded-full bg-primary px-2.5 py-0.5 text-xs font-bold text-primary-foreground">
+              <Star className="size-3 fill-current" aria-hidden="true" />
+              Rate your order
+            </span>
+          )}
         </div>
         {!delivered && <ChevronRight className="size-4 shrink-0 text-muted-foreground" aria-hidden="true" />}
       </Link>

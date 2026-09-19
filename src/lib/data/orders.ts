@@ -2,6 +2,7 @@ import "server-only";
 
 import { cache } from "react";
 import { istDayKey } from "@/lib/date";
+import { REVIEW_WINDOW_MS } from "@/lib/reviews/limits";
 import { createClient } from "@/lib/supabase/server";
 import { isUuid } from "@/lib/ids";
 import { ACTIVE_STATUSES } from "@/lib/orders/status";
@@ -20,7 +21,23 @@ export type OrderSummary = {
   /** Snapshotted dish names in order — the orders list looks up a photo from the first one it can. */
   dishNames: string[];
   dailyNumber: number;
+  /** Delivered within the last 7 days and not rated yet — the Orders list's "Rate" pill. */
+  rateable: boolean;
 };
+
+function isRateable(status: OrderStatus, deliveredAt: string | null, reviewed: boolean): boolean {
+  return (
+    status === "delivered" &&
+    !reviewed &&
+    deliveredAt !== null &&
+    Date.now() - new Date(deliveredAt).getTime() < REVIEW_WINDOW_MS
+  );
+}
+
+/** PostgREST returns a one-to-one embed as an object or a one-element array; normalise to "exists". */
+function hasReview(row: unknown): boolean {
+  return Array.isArray(row) ? row.length > 0 : row != null;
+}
 
 export type OrderItem = { id: string; dishName: string; unitPrice: number; quantity: number; subtotal: number };
 
@@ -59,6 +76,8 @@ type OrderSummaryRow = {
   restaurants: { name: string } | null;
   order_items: { dish_name: string; quantity: number }[];
   daily_number: number;
+  delivered_at: string | null;
+  order_reviews: { order_id: string } | { order_id: string }[] | null;
 };
 
 function summarizeItems(items: { dish_name: string; quantity: number }[]): string {
@@ -75,7 +94,7 @@ export async function getOrderHistory(userId: string): Promise<OrderSummary[]> {
   const { data, error } = await supabase
     .from("orders")
     .select(
-      "id, status, total_amount, created_at, restaurant_id, restaurants(name), order_items(dish_name, quantity), daily_number",
+      "id, status, total_amount, created_at, restaurant_id, restaurants(name), order_items(dish_name, quantity), daily_number, delivered_at, order_reviews(order_id)",
     )
     .eq("user_id", userId)
     .order("created_at", { ascending: false })
@@ -94,7 +113,54 @@ export async function getOrderHistory(userId: string): Promise<OrderSummary[]> {
     itemsSummary: summarizeItems(o.order_items),
     dishNames: o.order_items.map((i) => i.dish_name),
     dailyNumber: o.daily_number,
+    rateable: isRateable(o.status, o.delivered_at, hasReview(o.order_reviews)),
   }));
+}
+
+export type RatePromptOrder = {
+  id: string;
+  dailyNumber: number;
+  restaurantName: string;
+  /** First dish, for "How was your A1 Dum Biryani?" and its photo. */
+  firstDish: string;
+  otherDishCount: number;
+};
+
+/**
+ * The student's most recently delivered order that's still rateable (within
+ * 7 days, not rated) — what Home's one-time "How was it?" pop-up asks about.
+ */
+export async function getRatePromptOrder(userId: string): Promise<RatePromptOrder | null> {
+  const supabase = await createClient();
+  const { data, error } = await supabase
+    .from("orders")
+    .select("id, daily_number, delivered_at, restaurants(name), order_items(dish_name), order_reviews(order_id)")
+    .eq("user_id", userId)
+    .eq("status", "delivered")
+    .gte("delivered_at", new Date(Date.now() - REVIEW_WINDOW_MS).toISOString())
+    .order("delivered_at", { ascending: false })
+    .limit(5)
+    .returns<
+      {
+        id: string;
+        daily_number: number;
+        delivered_at: string;
+        restaurants: { name: string } | null;
+        order_items: { dish_name: string }[];
+        order_reviews: unknown;
+      }[]
+    >();
+
+  if (error) throw error;
+  const o = (data ?? []).find((row) => !hasReview(row.order_reviews) && row.order_items.length > 0);
+  if (!o) return null;
+  return {
+    id: o.id,
+    dailyNumber: o.daily_number,
+    restaurantName: o.restaurants?.name ?? "Restaurant",
+    firstDish: o.order_items[0].dish_name,
+    otherDishCount: o.order_items.length - 1,
+  };
 }
 
 type OrderDetailRow = {

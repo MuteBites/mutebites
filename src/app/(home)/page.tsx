@@ -11,6 +11,8 @@ import { getRestaurantMenuStats, getRestaurants, getSearchableDishes, getThursda
 import { getOrderingState } from "@/lib/data/settings";
 import { getTrendingDishes } from "@/lib/data/trending";
 import { getUsualCart } from "@/lib/data/usual";
+import { getRatePromptOrder } from "@/lib/data/orders";
+import { RatePrompt } from "@/components/home/rate-prompt";
 import { getTimeOfDayIST, isThursdayIST } from "@/lib/date";
 import { NAV_TRANSITION, REVEAL_ENTER } from "@/lib/nav-transition";
 import { requireProfile } from "@/lib/profile";
@@ -29,7 +31,7 @@ export default async function Home({ searchParams }: PageProps<"/">) {
   const thursdaySpecialPromise = isThursdayIST() ? getThursdaySpecial() : Promise.resolve(null);
 
   const profile = await profilePromise;
-  const [restaurants, menuStats, dishes, ordering, usual, thursdaySpecial, trendingDishes] = await Promise.all([
+  const [restaurants, menuStats, dishes, ordering, usual, thursdaySpecial, trendingDishes, ratePrompt] = await Promise.all([
     restaurantsPromise,
     menuStatsPromise,
     dishesPromise,
@@ -37,6 +39,7 @@ export default async function Home({ searchParams }: PageProps<"/">) {
     getUsualCart(profile.id),
     thursdaySpecialPromise,
     trendingDishesPromise,
+    getRatePromptOrder(profile.id),
   ]);
   const timeOfDay = getTimeOfDayIST();
   const orderingEnabled = ordering.open;
@@ -44,6 +47,7 @@ export default async function Home({ searchParams }: PageProps<"/">) {
   return (
     <main className="mx-auto w-full max-w-md px-6 pt-6 pb-28">
       <SignInWelcomeToast justSignedIn={signedIn === "1"} />
+      {ratePrompt && <RatePrompt order={ratePrompt} />}
       <ViewTransition {...NAV_TRANSITION}>
         <ViewTransition {...REVEAL_ENTER}>
           <HomeHeader fullName={profile.full_name} timeOfDay={timeOfDay} trendingDishes={trendingDishes} />

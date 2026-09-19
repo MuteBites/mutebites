@@ -9,11 +9,10 @@ import { Textarea } from "@/components/ui/textarea";
 import { getDishPhoto } from "@/lib/data/dish-photos";
 import type { OrderItem, OrderReview } from "@/lib/data/orders";
 import { submitReview } from "@/lib/reviews/actions";
-import { MAX_REVIEW_NOTE } from "@/lib/reviews/limits";
+import { MAX_REVIEW_NOTE, REVIEW_WINDOW_MS } from "@/lib/reviews/limits";
 import { toast } from "@/lib/toast/store";
 import { cn } from "@/lib/utils";
 
-const REVIEW_WINDOW_MS = 7 * 24 * 60 * 60 * 1000;
 const STAR_WORDS = ["", "Not good", "Meh", "Okay", "Good", "Loved it"];
 
 /**
@@ -29,15 +28,18 @@ export function RateOrder({
   items,
   deliveredAt,
   initialReview,
+  autoOpen = false,
 }: {
   orderId: string;
   restaurantName: string;
   items: OrderItem[];
   deliveredAt: string | null;
   initialReview: OrderReview | null;
+  /** From ?rate=1 (Orders-list pill, Home pop-up): open the sheet straight away. */
+  autoOpen?: boolean;
 }) {
   const [review, setReview] = useState(initialReview);
-  const [open, setOpen] = useState(false);
+  const [open, setOpen] = useState(autoOpen && !initialReview);
   // Captured once so the window check doesn't call Date.now() on every render.
   const [now] = useState(() => Date.now());
 

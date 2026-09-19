@@ -75,10 +75,13 @@ const STEP_ICONS: LucideIcon[] = [Receipt, ChefHat, CookingPot];
 export function OrderTracking({
   initialOrder,
   justPlaced = false,
+  openRating = false,
 }: {
   initialOrder: OrderDetail;
   /** True once, right after this order was placed — shows a brief success moment. */
   justPlaced?: boolean;
+  /** ?rate=1 — open the rating sheet on arrival (if the order is rateable). */
+  openRating?: boolean;
 }) {
   const router = useRouter();
   // Captured once, on mount — not the live `justPlaced` prop. The effect
@@ -323,6 +326,7 @@ export function OrderTracking({
               items={initialOrder.items}
               deliveredAt={deliveredAt}
               initialReview={initialOrder.review}
+              autoOpen={openRating}
             />
           )}
 

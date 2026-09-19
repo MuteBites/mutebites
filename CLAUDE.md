@@ -366,7 +366,13 @@ on `orders`).
   (all required) and the optional note, submits via `submitReview()`
   (`src/lib/reviews/actions.ts`, maps the error keys), then shows "You
   rated this". `getOrder()` returns `items[].id`, `deliveredAt` and the
-  student's own `review`.
+  student's own `review`. Nudges: the Orders list shows an amber "Rate your
+  order" pill on rateable orders (`OrderSummary.rateable` — delivered,
+  within 7 days, not rated), and Home shows a one-time pop-up
+  (`RatePrompt`, `getRatePromptOrder()`) for the latest one, remembered
+  per device in `localStorage` (`mutebites.rate-prompted`). Both link to
+  `/orders/<id>?rate=1`, which opens the rating sheet on arrival.
+  `REVIEW_WINDOW_MS` lives in `src/lib/reviews/limits.ts` (client-safe).
 - **`daily_order_counters`** — `order_day` (date, primary key), `last_number`.
   One row per day, upserted by the trigger above (`on conflict (order_day)
   do update set last_number = last_number + 1 returning ... into
