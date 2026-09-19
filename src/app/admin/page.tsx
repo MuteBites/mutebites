@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { History, Users } from "lucide-react";
+import { History, Star, Users } from "lucide-react";
 import { MarkAllDeliveredButton } from "@/components/admin/mark-all-delivered-button";
 import { OrderingKillSwitch } from "@/components/admin/ordering-kill-switch";
 import { OrderList } from "@/components/admin/order-list";
@@ -50,6 +50,10 @@ export default async function AdminPage() {
         <Link href="/admin/users" className={adminPill}>
           <Users className="size-4" aria-hidden="true" />
           Users
+        </Link>
+        <Link href="/admin/reviews" className={adminPill}>
+          <Star className="size-4" aria-hidden="true" />
+          Reviews
         </Link>
       </div>
 

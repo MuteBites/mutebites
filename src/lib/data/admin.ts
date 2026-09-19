@@ -227,3 +227,65 @@ export async function getBannedUsers(): Promise<BannedUser[]> {
     bannedAt: u.banned_at,
   }));
 }
+
+export type AdminReview = {
+  orderId: string;
+  dailyNumber: number;
+  restaurantId: string;
+  restaurantName: string;
+  studentName: string;
+  note: string | null;
+  createdAt: string;
+  /** One per dish in the order. */
+  ratings: { dishId: string | null; dishName: string; quantity: number; rating: number }[];
+};
+
+type AdminReviewRow = {
+  order_id: string;
+  note: string | null;
+  created_at: string;
+  users: { full_name: string } | null;
+  orders: { daily_number: number; restaurant_id: string; restaurants: { name: string } | null } | null;
+  order_item_ratings: {
+    rating: number;
+    dish_id: string | null;
+    order_items: { dish_name: string; quantity: number } | null;
+  }[];
+};
+
+// Capped like HISTORY_ORDERS_LIMIT — plenty for campus volume.
+const REVIEWS_LIMIT = 1000;
+
+/**
+ * Every review, newest first — for /admin/reviews. Admin-only by RLS
+ * (order_reviews / order_item_ratings are readable only by their author and
+ * admins); students never see each other's reviews.
+ */
+export async function getAdminReviews(): Promise<AdminReview[]> {
+  const supabase = await createClient();
+  const { data, error } = await supabase
+    .from("order_reviews")
+    .select(
+      "order_id, note, created_at, users(full_name), orders(daily_number, restaurant_id, restaurants(name)), order_item_ratings(rating, dish_id, order_items(dish_name, quantity))",
+    )
+    .order("created_at", { ascending: false })
+    .limit(REVIEWS_LIMIT)
+    .returns<AdminReviewRow[]>();
+
+  if (error) throw error;
+  return (data ?? []).map((r) => ({
+    orderId: r.order_id,
+    dailyNumber: r.orders?.daily_number ?? 0,
+    restaurantId: r.orders?.restaurant_id ?? "",
+    restaurantName: r.orders?.restaurants?.name ?? "Restaurant",
+    studentName: r.users?.full_name ?? "Student",
+    note: r.note,
+    createdAt: r.created_at,
+    ratings: r.order_item_ratings.map((x) => ({
+      dishId: x.dish_id,
+      dishName: x.order_items?.dish_name ?? "Dish",
+      quantity: x.order_items?.quantity ?? 1,
+      rating: x.rating,
+    })),
+  }));
+}

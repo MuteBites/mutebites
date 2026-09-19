@@ -373,6 +373,10 @@ on `orders`).
   per device in `localStorage` (`mutebites.rate-prompted`). Both link to
   `/orders/<id>?rate=1`, which opens the rating sheet on arrival.
   `REVIEW_WINDOW_MS` lives in `src/lib/reviews/limits.ts` (client-safe).
+  Admin reads them at `/admin/reviews` (a "Reviews" pill on the dashboard):
+  `getAdminReviews()` (`src/lib/data/admin.ts`) + `ReviewsView` — dish
+  averages (lowest first) and review cards, filtered by restaurant and by
+  "Needs attention" (any dish ≤ 2★) / "With notes".
 - **`daily_order_counters`** — `order_day` (date, primary key), `last_number`.
   One row per day, upserted by the trigger above (`on conflict (order_day)
   do update set last_number = last_number + 1 returning ... into
