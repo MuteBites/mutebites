@@ -282,8 +282,11 @@ dishes, priced per 500 g/1 kg pack), bringing the total to 5 restaurants),
 [`supabase/migrations/20260919000000_ordering_schedule.sql`](supabase/migrations/20260919000000_ordering_schedule.sql)
 (the daily ordering schedule + three-way admin override — see
 `app_settings` below),
-and [`supabase/migrations/20260919010000_drop_ordering_enabled.sql`](supabase/migrations/20260919010000_drop_ordering_enabled.sql)
-(drops the old `ordering_enabled` switch it replaced).
+[`supabase/migrations/20260919010000_drop_ordering_enabled.sql`](supabase/migrations/20260919010000_drop_ordering_enabled.sql)
+(drops the old `ordering_enabled` switch it replaced),
+and [`supabase/migrations/20260919020000_order_reviews.sql`](supabase/migrations/20260919020000_order_reviews.sql)
+(dish ratings — `orders.delivered_at`, `order_reviews`, `order_item_ratings`,
+`submit_review()`; see below).
 Migrations are applied by hand in the Supabase SQL editor (no CLI setup).
 
 All orders are handed over at **VIT-AP Main Gate** — there is no room
@@ -337,6 +340,26 @@ on `orders`).
   differently to student vs. admin. `orderReference()` (the old
   hash-of-uuid cosmetic token, e.g. "#4F2A") is gone; every display now
   reads `daily_number` directly.
+- **`orders.delivered_at`** (nullable timestamptz) — set to `now()` by the
+  `set_delivered_at` trigger whenever `status` becomes `delivered`
+  (single or bulk "Mark delivered"); backfilled from `updated_at` for
+  orders delivered before it existed. The 7-day review window counts from
+  it.
+- **`order_reviews`** — one row per order (`order_id` primary key),
+  `user_id`, optional `note` (≤ 300 chars), `created_at`. **`order_item_ratings`**
+  — one row per dish in that order (`order_item_id` primary key, `order_id`,
+  `dish_id` set null if the dish is ever deleted, `rating` 1–5). Stars per
+  dish, one note per order, **no photos** (decided against: storage and
+  cleanup cost). RLS: a student reads only their own review/ratings,
+  admins read all; no insert/update/delete policies — the only write path
+  is `public.submit_review(order_id, ratings jsonb, note)` (security
+  definer, authenticated only), which checks the caller owns the order,
+  it's `delivered`, `delivered_at` is within 7 days, it isn't already
+  reviewed (submit once, no edits), and there's exactly one 1–5 rating
+  for every item in the order. Error keys: `order_not_found`,
+  `not_delivered`, `review_window_closed`, `already_reviewed`,
+  `note_too_long`, `invalid_ratings`. Reviews are **never shown to other
+  students** — admin-only feedback.
 - **`daily_order_counters`** — `order_day` (date, primary key), `last_number`.
   One row per day, upserted by the trigger above (`on conflict (order_day)
   do update set last_number = last_number + 1 returning ... into
