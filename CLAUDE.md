@@ -237,8 +237,11 @@ silently re-enables the button.
   Home's restaurant cards slide through photos (`RestaurantPhotoSlides`,
   `src/components/home/restaurant-photo-slides.tsx`): the cover first,
   then up to five available dishes with a "veg mark · name · price" chip
-  (`getRestaurantCardSlides()`, same file as above) — `SIGNATURE_DISHES`
-  lead, the rest follow menu order, one slide per distinct photo. The
+  (`getRestaurantCardSlides()`, same file as above) — most ordered
+  first (campus-wide, last 30 days: `getDishOrderCounts()` in
+  `src/lib/data/trending.ts`, the same aggregate-only `trending_dishes()`
+  RPC with a high limit), ties broken by `SIGNATURE_DISHES` then menu
+  order; one slide per distinct photo, dishes without a photo skipped. The
   cover holds 2.5 s (+0.7 s per card down the list), each dish 3.2 s —
   hold time only counts while the card is on screen and the tab visible;
   pauses 8 s after a touch. Tapping a dish slide opens

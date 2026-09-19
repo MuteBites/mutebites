@@ -9,7 +9,7 @@ import { YourUsualChip } from "@/components/home/your-usual-chip";
 import { TabBar } from "@/components/nav/tab-bar";
 import { getRestaurantMenuStats, getRestaurants, getSearchableDishes, getThursdaySpecial } from "@/lib/data/restaurants";
 import { getOrderingState } from "@/lib/data/settings";
-import { getTrendingDishes } from "@/lib/data/trending";
+import { getDishOrderCounts, getTrendingDishes } from "@/lib/data/trending";
 import { getUsualCart } from "@/lib/data/usual";
 import { getRatePromptOrder } from "@/lib/data/orders";
 import { RatePrompt } from "@/components/home/rate-prompt";
@@ -28,10 +28,11 @@ export default async function Home({ searchParams }: PageProps<"/">) {
   const dishesPromise = getSearchableDishes();
   const orderingPromise = getOrderingState();
   const trendingDishesPromise = getTrendingDishes();
+  const dishOrderCountsPromise = getDishOrderCounts();
   const thursdaySpecialPromise = isThursdayIST() ? getThursdaySpecial() : Promise.resolve(null);
 
   const profile = await profilePromise;
-  const [restaurants, menuStats, dishes, ordering, usual, thursdaySpecial, trendingDishes, ratePrompt] = await Promise.all([
+  const [restaurants, menuStats, dishes, ordering, usual, thursdaySpecial, trendingDishes, ratePrompt, dishOrderCounts] = await Promise.all([
     restaurantsPromise,
     menuStatsPromise,
     dishesPromise,
@@ -40,6 +41,7 @@ export default async function Home({ searchParams }: PageProps<"/">) {
     thursdaySpecialPromise,
     trendingDishesPromise,
     getRatePromptOrder(profile.id),
+    dishOrderCountsPromise,
   ]);
   const timeOfDay = getTimeOfDayIST();
   const orderingEnabled = ordering.open;
@@ -61,6 +63,7 @@ export default async function Home({ searchParams }: PageProps<"/">) {
             closedLine={ordering.headline}
             menuStats={menuStats}
             dishes={dishes}
+            dishOrderCounts={dishOrderCounts}
           />
         </ViewTransition>
       </ViewTransition>

@@ -21,6 +21,7 @@ export function RestaurantList({
   closedLine,
   menuStats,
   dishes,
+  dishOrderCounts,
 }: {
   restaurants: Restaurant[];
   /** Every dish (getSearchableDishes) — searched on the client as the student types. */
@@ -31,6 +32,8 @@ export function RestaurantList({
   /** "Ordering opens again at 1:30 PM" — the card's footer line while ordering is shut. */
   closedLine: string;
   menuStats: Record<string, RestaurantMenuStats>;
+  /** getDishOrderCounts() — the card photos lead with each restaurant's most-ordered dishes. */
+  dishOrderCounts: Record<string, number>;
 }) {
   const [query, setQuery] = useState("");
 
@@ -42,9 +45,14 @@ export function RestaurantList({
   const slidesByRestaurant = useMemo(
     () =>
       Object.fromEntries(
-        restaurants.map((r) => [r.id, getRestaurantCardSlides(r.name, dishes.filter((d) => d.restaurantId === r.id))]),
+        restaurants.map((r) => [r.id, getRestaurantCardSlides(
+            r.name,
+            dishes.filter((d) => d.restaurantId === r.id),
+            dishOrderCounts,
+          ),
+        ]),
       ),
-    [restaurants, dishes],
+    [restaurants, dishes, dishOrderCounts],
   );
   // Dishes first — that's what people usually type ("dum biryani", "juice").
   const dishResults = useMemo(() => searchDishes(dishes, restaurantNames, q), [dishes, restaurantNames, q]);

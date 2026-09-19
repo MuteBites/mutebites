@@ -159,11 +159,11 @@ export function getDishPhoto(restaurantName: string, dishName: string): string |
 }
 
 /**
- * Dishes that lead each restaurant's photo slideshow on Home's cards,
- * right after the cover. Hand-picked for photo quality (no watermarks,
- * reads well small) and to say what the kitchen is about; every name must
- * exist in DISH_PHOTOS above. The rest of the slideshow fills from the
- * menu in its own order.
+ * Tie-breakers for each restaurant's photo slideshow on Home's cards:
+ * after order counts, these come first (e.g. before anyone has ordered
+ * much). Hand-picked for photo quality (no watermarks, reads well small)
+ * and to say what the kitchen is about; every name must exist in
+ * DISH_PHOTOS above.
  */
 const SIGNATURE_DISHES: Record<string, string[]> = {
   "Bheemasena Restaurant": ["Paneer 65", "Chilli Chicken"],
@@ -181,12 +181,15 @@ export type CardSlide = { src: string; dish?: { id: string; name: string; price:
 /**
  * The photos Home's restaurant card slides through: the cover first
  * (no caption), then up to MAX_DISH_SLIDES available dishes with their
- * own distinct photo — signature dishes first, then menu order. A
- * restaurant with no cover just starts on its first dish.
+ * own distinct photo — most ordered first (`orderCounts`, dishId →
+ * count), ties broken by SIGNATURE_DISHES, then menu order. A dish
+ * without a photo is skipped however popular it is. A restaurant with no
+ * cover just starts on its first dish.
  */
 export function getRestaurantCardSlides(
   restaurantName: string,
   dishes: { id: string; name: string; price: number; isVeg: boolean; isAvailable: boolean }[],
+  orderCounts: Record<string, number> = {},
 ): CardSlide[] {
   const photos = DISH_PHOTOS[restaurantName] ?? {};
   const signature = SIGNATURE_DISHES[restaurantName] ?? [];
@@ -198,8 +201,12 @@ export function getRestaurantCardSlides(
   const cover = getRestaurantCoverPhoto(restaurantName);
   const seen = new Set<string>(cover ? [cover] : []);
   const dishSlides: CardSlide[] = [];
-  // Stable sort keeps menu order among the non-signature dishes.
-  for (const d of dishes.filter((d) => d.isAvailable).sort((a, b) => rank(a.name) - rank(b.name))) {
+  const count = (id: string) => orderCounts[id] ?? 0;
+  // Stable sort keeps menu order among the rest.
+  const ordered = dishes
+    .filter((d) => d.isAvailable)
+    .sort((a, b) => count(b.id) - count(a.id) || rank(a.name) - rank(b.name));
+  for (const d of ordered) {
     const src = photos[d.name];
     if (!src || seen.has(src)) continue;
     seen.add(src);
