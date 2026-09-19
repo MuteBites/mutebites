@@ -272,9 +272,11 @@ dishes, priced per 500 g/1 kg pack), bringing the total to 5 restaurants),
 (drops `trending_restaurants()` again — never called by the app),
 [`supabase/migrations/20260917020000_highly_reordered_dishes.sql`](supabase/migrations/20260917020000_highly_reordered_dishes.sql)
 (adds `highly_reordered_dishes()` — see below),
-and [`supabase/migrations/20260919000000_ordering_schedule.sql`](supabase/migrations/20260919000000_ordering_schedule.sql)
+[`supabase/migrations/20260919000000_ordering_schedule.sql`](supabase/migrations/20260919000000_ordering_schedule.sql)
 (the daily ordering schedule + three-way admin override — see
-`app_settings` below).
+`app_settings` below),
+and [`supabase/migrations/20260919010000_drop_ordering_enabled.sql`](supabase/migrations/20260919010000_drop_ordering_enabled.sql)
+(drops the old `ordering_enabled` switch it replaced).
 Migrations are applied by hand in the Supabase SQL editor (no CLI setup).
 
 All orders are handed over at **VIT-AP Main Gate** — there is no room
@@ -361,9 +363,8 @@ on `orders`).
   cut-offs; an order placed after 7:00 PM can only exist when an admin
   forced ordering open, so it gets "Delivery time to be confirmed" and
   counts as past its slot immediately. The old `ordering_enabled` boolean
-  column still exists (kept in step by `setOrderingMode()`) only so the
-  previously deployed app kept working during the switch-over; a later
-  migration should drop it — nothing reads it any more.
+  it replaced was dropped in
+  [`20260919010000_drop_ordering_enabled.sql`](supabase/migrations/20260919010000_drop_ordering_enabled.sql).
 
 RLS is enabled on every table:
 - `restaurants` / `dish_categories` / `dishes` are public-read (browsing the

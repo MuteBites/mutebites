@@ -24,8 +24,6 @@ async function assertAdmin(): Promise<{ ok: false; error: string } | null> {
 /**
  * Campus-wide ordering override: 'auto' follows the daily schedule
  * (public.ordering_schedule_open()), 'open' / 'closed' force it either way.
- * Also keeps the legacy ordering_enabled column in step until a later
- * migration drops it.
  */
 export async function setOrderingMode(mode: OrderingMode): Promise<AdminActionResult> {
   const denied = await assertAdmin();
@@ -37,7 +35,7 @@ export async function setOrderingMode(mode: OrderingMode): Promise<AdminActionRe
   const supabase = await createClient();
   const { error } = await supabase
     .from("app_settings")
-    .update({ ordering_mode: mode, ordering_enabled: mode !== "closed", updated_at: new Date().toISOString() })
+    .update({ ordering_mode: mode, updated_at: new Date().toISOString() })
     .eq("id", true);
   if (error) return { ok: false, error: "Couldn't update ordering. Please try again." };
 
