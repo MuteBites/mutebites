@@ -49,9 +49,13 @@ Food delivery site for VIT-AP University students.
   ticket stub — up to three distinct photos of the ordered dishes on top,
   a dashed tear line with edge notches (`bg-background` circles), then the
   token and the delivery window. `deliveryWindow()` (`src/lib/date.ts`)
-  returns `{ lead, time }` with no-break spaces inside `time`, so "8:20 PM"
-  can never wrap apart; slot logic is unchanged and still mirrors
-  `slotEndTime()`.
+  returns `{ lead, time }` with no-break spaces inside `time`, so "8:15 PM"
+  can never wrap apart. Its cut-offs follow the daily ordering schedule
+  (placed before 12:45 PM → by 1:30 PM, before 6:00 PM → by 7:30 PM,
+  before 7:00 PM → by 8:15 PM, later only when an admin forced ordering
+  open → "to be confirmed") and mirror `slotEndTime()` — see `app_settings`
+  under Database schema. Once delivered, the ticket page also carries the
+  rating card (`RateOrder`, see `order_reviews`).
 - **Profile**: one plum `MemberCard` (`src/components/profile/member-card.tsx`)
   holds identity, the weekly-rank pill and the three stats (cravings
   solved, day streak, no-shows). Milestones are data-driven in
@@ -116,6 +120,14 @@ Food delivery site for VIT-AP University students.
   bigger than the redundant `auth.getUser()` call fixed alongside it in
   `src/lib/profile.ts`). If Supabase's region ever changes, update this
   to match.
+  Every push to `main` auto-deploys (usually ~30 s). The Hobby plan
+  allows 100 deployments a day and builds one at a time, so batch small
+  follow-up fixes into one push rather than pushing each tweak. The Vercel
+  CLI works via `npx -y vercel@latest` (`ls mutebites`, `inspect <url>
+  --logs`, `redeploy <url>`) with the saved login. A deploy stuck on
+  "Initializing" with no build logs has, so far, been a Vercel-side
+  incident — check https://www.vercel-status.com before redeploying (a
+  redeploy just queues behind it).
 
 ## Admin access
 
@@ -137,7 +149,8 @@ at `/admin/history` instead, grouped by day (newest first), reusing the
 same `OrderList` component in a `groupByDate` mode rather than a separate
 one-off component. Every registered student is browsable (read-only, with
 a client-side search box) at `/admin/users`, reached via a "Users" button
-next to "Order history" — this replaced a "Banned users" button that used
+next to "Order history" (a third button, "Reviews", opens `/admin/reviews` —
+see `order_reviews` under Database schema) — this replaced a "Banned users" button that used
 to sit directly on the main dashboard. Banned Users management itself
 still lives on its own page, `/admin/banned` (unchanged), but is now one
 level deeper — reached via a "Banned users" button on `/admin/users`
@@ -147,7 +160,9 @@ instead of straight from the dashboard, and its back-link points to
 
 Visually, admin shares the student app's system: the dashboard's plum
 "Today" card (`StatCards`) carries today's counts with the campus ordering
-switch (`OrderingKillSwitch`) as its footer row; secondary actions use the
+control (`OrderingKillSwitch` — a three-way Auto / Open / Closed switch
+for `app_settings.ordering_mode`, with a live status line such as
+"Following the schedule — open until 12:45 PM") as its footer row; secondary actions use the
 shared `adminPill` style (`src/components/admin/styles.ts`); order cards
 lead with the token and a dish photo; restaurant controls show cover
 photos; no uppercase anywhere.
@@ -184,10 +199,11 @@ silently re-enables the button.
   `src/app` without either dropping its `loading.tsx` or being fine with
   that.
 - `src/components/ui` — shadcn/ui components. Two modal-style primitives:
-  `alert-dialog.tsx` (confirmations — "Cancel this order?", "Turn off
-  ordering?") and `dialog.tsx` (plain popups with no confirm/cancel
-  semantics — currently just the "About MuteBites" card from the Home
-  logo). Both wrap `@base-ui/react`; reach for whichever already matches
+  `alert-dialog.tsx` (confirmations — "Cancel this order?", "Pause
+  ordering campus-wide?", "Mark 3 orders delivered?") and `dialog.tsx`
+  (plain popups with no confirm/cancel semantics — the "About MuteBites"
+  card from the Home logo, the Trending popup and the one-time "How was
+  it?" rating prompt). The cart and rating sheets use `sheet.tsx`. Both wrap `@base-ui/react`; reach for whichever already matches
   what you're building rather than hand-rolling a third.
 - `src/lib/supabase/client.ts` — browser Supabase client
 - `src/lib/supabase/server.ts` — server Supabase client (Server Components/Actions)
