@@ -538,6 +538,67 @@
   .pressable:active {
     transform: scale(0.97);
   }
+
+  /* ---- Startup splash storyboard (components/splash) -------------------
+     Times are for --sp-speed 1: 0-200 ivory, 200-900 run-in (bob, lean,
+     stretched trails), 850-1100 landing bounce, 880 swoosh draws,
+     1000-1350 cloche lifts with warmth + steam, 1100-1600 wordmark,
+     1450-1830 tagline, hold, 2050 exit (timed by init-script.ts). */
+  html[data-splash="run"] .sp-run {
+    animation: sp-run calc(700ms * var(--sp-speed)) cubic-bezier(0.22, 1, 0.36, 1)
+      calc(200ms * var(--sp-speed)) both;
+  }
+  html[data-splash="run"] .sp-lean {
+    animation: sp-lean calc(820ms * var(--sp-speed)) ease-out calc(200ms * var(--sp-speed)) both;
+  }
+  html[data-splash="run"] .sp-bob {
+    animation: sp-bob calc(115ms * var(--sp-speed)) ease-in-out calc(200ms * var(--sp-speed)) 6
+      alternate both;
+  }
+  html[data-splash="run"] .sp-land {
+    animation: sp-land calc(250ms * var(--sp-speed)) ease-out calc(850ms * var(--sp-speed)) both;
+  }
+  html[data-splash="run"] .sp-trails {
+    animation: sp-trails calc(950ms * var(--sp-speed)) cubic-bezier(0.3, 0.7, 0.4, 1)
+      calc(200ms * var(--sp-speed)) both;
+  }
+  html[data-splash="run"] .sp-swoosh {
+    animation: sp-swoosh calc(360ms * var(--sp-speed)) cubic-bezier(0.22, 1, 0.36, 1)
+      calc(880ms * var(--sp-speed)) both;
+  }
+  html[data-splash="run"] .sp-lid {
+    animation: sp-lid calc(380ms * var(--sp-speed)) ease-in-out calc(1000ms * var(--sp-speed)) both;
+  }
+  html[data-splash="run"] .sp-glow {
+    animation: sp-glow calc(420ms * var(--sp-speed)) ease-out calc(1000ms * var(--sp-speed)) both;
+  }
+  html[data-splash="run"] .sp-steam {
+    animation: sp-steam calc(420ms * var(--sp-speed)) ease-out calc(1060ms * var(--sp-speed)) both;
+  }
+  html[data-splash="run"] .sp-wisps path {
+    animation: sp-wisp calc(var(--sp-steam) * var(--sp-speed)) ease-out calc(1080ms * var(--sp-speed))
+      both;
+  }
+  html[data-splash="run"] .sp-wisps path + path {
+    animation-delay: calc(1180ms * var(--sp-speed));
+  }
+  html[data-splash="run"] .sp-wordmark {
+    animation: sp-rise calc(500ms * var(--sp-speed)) var(--ease-out-expo) calc(1100ms * var(--sp-speed))
+      both;
+  }
+  html[data-splash="run"] .sp-tagline {
+    animation: sp-tagline calc(380ms * var(--sp-speed)) ease-out calc(1450ms * var(--sp-speed)) both;
+  }
+  html[data-splash="out"] .app-splash {
+    animation: sp-out calc(300ms * var(--sp-speed)) var(--ease-in-quad) both;
+  }
+  html[data-splash="out"] .sp-stage {
+    animation: sp-stage-out calc(300ms * var(--sp-speed)) var(--ease-in-quad) both;
+  }
+  /* Opacity only: a transform here would re-anchor the fixed cart/tab bars inside <main>. */
+  html[data-splash="out"] main {
+    animation: sp-app-in 420ms var(--ease-out-expo) both;
+  }
 }
 
 @keyframes highlight-arrive {
@@ -688,13 +749,296 @@
 }
 
 /*
+ * Startup splash (components/splash/app-splash.tsx). Hidden unless the
+ * head script (splash/init-script.ts) set data-splash on <html> for this
+ * load; the storyboard's animations live in the no-preference block
+ * above. Fixed warm ivory in both themes — the logo is drawn for it.
+ */
+.app-splash {
+  display: none;
+}
+html[data-splash="play"] .app-splash,
+html[data-splash="run"] .app-splash,
+html[data-splash="out"] .app-splash {
+  position: fixed;
+  inset: 0;
+  z-index: 200;
+  display: grid;
+  place-items: center;
+  overflow: hidden;
+  background: #f5eae1;
+  cursor: pointer;
+  user-select: none;
+  -webkit-tap-highlight-color: transparent;
+}
+/* Last resort if the script dies mid-way: never cover the app for good.
+   (Not on "out", whose own fade animation must win.) */
+html[data-splash="play"] .app-splash,
+html[data-splash="run"] .app-splash {
+  animation: sp-failsafe 1ms linear 9s both;
+}
+html[data-splash="play"],
+html[data-splash="run"] {
+  overflow: hidden;
+}
+html[data-splash="out"] .app-splash {
+  pointer-events: none;
+}
+.sp-stage {
+  position: relative;
+  width: min(76vw, 26rem, calc(58dvh * var(--sp-aspect)));
+  aspect-ratio: var(--sp-aspect);
+  visibility: hidden;
+}
+html[data-splash-ran] .sp-stage {
+  visibility: visible;
+}
+.sp-fill {
+  position: absolute;
+  inset: 0;
+}
+.sp-layer {
+  position: absolute;
+}
+.sp-layer img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  -webkit-user-drag: none;
+}
+.sp-run,
+.sp-land,
+.sp-lean {
+  transform-origin: 55% 68%;
+}
+.sp-trails {
+  transform-origin: 100% 50%;
+}
+.sp-lid {
+  transform-origin: 12% 96%;
+}
+.sp-steam {
+  transform-origin: 50% 100%;
+}
+.sp-wordmark {
+  transform-origin: 50% 60%;
+}
+.sp-glow {
+  position: absolute;
+  left: 67%;
+  top: 34.5%;
+  width: 20%;
+  height: 7%;
+  border-radius: 50%;
+  background: radial-gradient(closest-side, rgb(192 122 53 / 0.55), rgb(192 122 53 / 0));
+  opacity: 0;
+}
+.sp-wisps {
+  position: absolute;
+  left: 66%;
+  top: 8%;
+  width: 26%;
+  height: 24%;
+  overflow: visible;
+}
+.sp-wisps path {
+  stroke-width: 3.2;
+  stroke-linecap: round;
+  opacity: 0;
+  transform-box: fill-box;
+  transform-origin: 50% 100%;
+}
+@media (prefers-reduced-motion: reduce) {
+  /* No run, bounce or steam: the finished logo fades in, holds, fades out. */
+  html[data-splash="run"] .sp-stage {
+    animation: sp-fade-in 250ms ease-out both;
+  }
+  html[data-splash="out"] .app-splash {
+    animation: sp-out 250ms ease-in both;
+  }
+}
+
+@keyframes sp-run {
+  from {
+    transform: translateX(var(--sp-run-from));
+  }
+  to {
+    transform: none;
+  }
+}
+@keyframes sp-lean {
+  from {
+    transform: rotate(7deg);
+  }
+  75% {
+    transform: rotate(3deg);
+  }
+  to {
+    transform: none;
+  }
+}
+@keyframes sp-bob {
+  from {
+    transform: translateY(0);
+  }
+  to {
+    transform: translateY(-2.4%);
+  }
+}
+@keyframes sp-land {
+  0% {
+    transform: none;
+  }
+  25% {
+    transform: translateY(1.2%) scale(calc(1 - var(--sp-bounce) * 0.67));
+  }
+  60% {
+    transform: translateY(-1%) scale(calc(1 + var(--sp-bounce)));
+  }
+  100% {
+    transform: none;
+  }
+}
+@keyframes sp-trails {
+  0% {
+    transform: scaleX(2);
+    opacity: 0;
+  }
+  12% {
+    opacity: 1;
+  }
+  68% {
+    transform: scaleX(1.7);
+  }
+  100% {
+    transform: none;
+    opacity: 1;
+  }
+}
+@keyframes sp-swoosh {
+  from {
+    clip-path: inset(0 100% 0 0);
+  }
+  to {
+    clip-path: inset(0 0 0 0);
+  }
+}
+@keyframes sp-lid {
+  0%,
+  100% {
+    transform: none;
+  }
+  38% {
+    transform: translateY(-9%) rotate(-9deg);
+  }
+  62% {
+    transform: translateY(-7%) rotate(-7deg);
+  }
+}
+@keyframes sp-glow {
+  0% {
+    opacity: 0;
+    transform: scale(0.6);
+  }
+  45% {
+    opacity: 0.85;
+    transform: scale(1);
+  }
+  100% {
+    opacity: 0;
+    transform: scale(1.1);
+  }
+}
+@keyframes sp-steam {
+  from {
+    opacity: 0;
+    transform: translateY(22%) scale(0.9, 0.75);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+@keyframes sp-wisp {
+  0% {
+    opacity: 0;
+    transform: translateY(10%);
+  }
+  30% {
+    opacity: 0.8;
+  }
+  100% {
+    opacity: 0;
+    transform: translateY(-35%);
+  }
+}
+@keyframes sp-rise {
+  from {
+    opacity: 0;
+    transform: translateY(9%) scale(0.96);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+@keyframes sp-tagline {
+  from {
+    opacity: 0;
+    transform: translateY(60%) scaleX(1.06);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+@keyframes sp-out {
+  from {
+    opacity: 1;
+  }
+  to {
+    opacity: 0;
+  }
+}
+@keyframes sp-stage-out {
+  to {
+    transform: scale(0.94);
+  }
+}
+@keyframes sp-fade-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+@keyframes sp-app-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+@keyframes sp-failsafe {
+  to {
+    visibility: hidden;
+    opacity: 0;
+    pointer-events: none;
+  }
+}
+
+/*
  * Safety net: everything above is opt-in under no-preference, but library
  * animations (tw-animate's dialog/sheet enter/exit, Tailwind's pulse and
  * ping) aren't. With reduce set, collapse all of them to an instant end
- * state. Spinners are exempt — they're a progress signal, not decoration.
+ * state. Spinners are exempt — they're a progress signal, not decoration —
+ * and so is the startup splash's plain fade (.splash-fade), which is its
+ * whole reduced-motion version.
  */
 @media (prefers-reduced-motion: reduce) {
-  *:not(.animate-spin),
+  *:not(.animate-spin):not(.splash-fade),
   *::before,
   *::after {
     animation-duration: 0.01ms !important;

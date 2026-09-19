@@ -7,7 +7,9 @@ export default function manifest(): MetadataRoute.Manifest {
     description: "Good food. Campus mood. Food delivery for VIT-AP students.",
     start_url: "/",
     display: "standalone",
-    background_color: "#faf3ec",
+    // Android's own launch screen (this colour + the icon) hands straight
+    // over to the in-app splash, which uses the same ivory.
+    background_color: "#f5eae1",
     theme_color: "#faf3ec",
     icons: [
       { src: "/icons/icon-192", sizes: "192x192", type: "image/png", purpose: "any" },

@@ -1,6 +1,9 @@
 import type { Metadata, Viewport } from "next";
 import { Fraunces, Plus_Jakarta_Sans } from "next/font/google";
 import Script from "next/script";
+import { AppSplash } from "@/components/splash/app-splash";
+import { SPLASH_DISABLED } from "@/components/splash/config";
+import { SPLASH_INIT_SCRIPT } from "@/components/splash/init-script";
 import { Toaster } from "@/components/toast/toaster";
 import { THEME_INIT_SCRIPT } from "@/lib/theme/init-script";
 import "./globals.css";
@@ -44,8 +47,8 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
     <html
       lang="en"
       // The theme-init script (and later, useThemePreference) can add the
-      // "dark" class / colorScheme style before React hydrates — expected,
-      // not a real mismatch.
+      // "dark" class / colorScheme style, and the splash-init script
+      // data-splash, before React hydrates — expected, not a real mismatch.
       suppressHydrationWarning
       className={`${jakarta.variable} ${fraunces.variable} h-full antialiased`}
     >
@@ -53,6 +56,18 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
         <Script id="theme-init" strategy="beforeInteractive">
           {THEME_INIT_SCRIPT}
         </Script>
+        {!SPLASH_DISABLED && (
+          <>
+            {/* A plain inline <script>, not next/script: beforeInteractive
+                inline scripts are queued (self.__next_s) until Next's own JS
+                loads, so the app would paint first and the splash would pop
+                in over it. This runs as the parser reaches it — before
+                anything below is painted. */}
+            <script id="splash-init" dangerouslySetInnerHTML={{ __html: SPLASH_INIT_SCRIPT }} />
+            {/* Right after, so it's in the first streamed chunk. */}
+            <AppSplash />
+          </>
+        )}
         {children}
         <Toaster />
       </body>

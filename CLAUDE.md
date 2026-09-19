@@ -251,19 +251,53 @@ silently re-enables the button.
   scroll-snap. Dish photos mount one slide ahead, only once the card has
   been seen. The card's "24 dishes · from ₹60" line comes from
   `getRestaurantMenuStats()` (`src/lib/data/restaurants.ts`).
-- `public/mutebites-logo.png` — the one source image behind every app
-  icon. `src/lib/app-icon.tsx` reads it once at module scope (it's
-  actually JPEG-encoded despite the `.png` name) and renders it full-bleed
-  for `apple-icon.tsx` and `icons/icon-192|512|512-maskable` — the logo's
-  own circular mark already sits inside the ~80%-diameter safe zone, so
-  the maskable icon needs no extra padding. `favicon.ico`
-  (`src/app/favicon.ico`) is the one exception: Next.js can't generate a
-  `favicon` from code, only `icon`/`apple-icon` support the route-handler
-  convention (see `node_modules/next/dist/docs/.../app-icons.md`), so it's
-  a static multi-resolution `.ico` (16/32/48/64px, RGBA PNG frames —
-  Next's ico decoder rejects non-RGBA) checked into the repo. If the logo
-  changes, regenerate it by hand (e.g. with `sharp`, already a
-  dependency) rather than editing the binary directly.
+- **Logo** — two sources in `public/`: `mutebites-logo-v2-2.png`
+  (transparent; everything is generated from it) and
+  `mutebites-logo-v2-1.png` (same art on its own background, reference
+  only). `node scripts/build-brand-assets.mjs` regenerates everything
+  below from v2-2 — rerun it (and re-measure its hand-set layer regions)
+  whenever the logo changes:
+  - `public/brand/mark.webp` / `mark.png` — the mascot group only (no
+    wordmark/tagline: unreadable at icon sizes). `BrandLogo`
+    (`src/components/brand-logo.tsx`) shows `mark.webp` on a fixed ivory
+    `#f5eae1` tile in every theme — the plum mascot vanishes on dark
+    cards and the ink surface, so callers size/round it but never set
+    its background.
+  - App icons: `src/lib/app-icon.tsx` centres `mark.png` on ivory for
+    `apple-icon.tsx` and `icons/icon-192|512|512-maskable` (maskable at
+    `markScale: 0.6` to stay inside the ~80% safe circle). The manifest's
+    `background_color` is the same ivory, so Android's launch screen
+    hands straight over to the splash.
+  - `src/app/favicon.ico` — the mark on an ivory rounded square, 16/32/
+    48/64 RGBA PNG frames (Next can't generate `favicon` from code, and
+    its ico decoder rejects non-RGBA frames), written by the same script.
+  - `public/brand/splash/*.webp` + `src/components/splash/layers.ts` —
+    the startup splash layers (mascot, speed trails, cloche lid, steam,
+    ground swoosh, wordmark, tagline) and their positions; at rest they
+    re-assemble the logo exactly.
+- **Startup splash** (`src/components/splash/`): ~2.35 s — ivory, the
+  mascot runs in from the left (bob, forward lean, stretched trails),
+  lands with a small bounce, lifts its cloche (warm glow + steam), then
+  the wordmark and tagline rise in, a short hold, and it fades into the
+  app. Once per browser session (sessionStorage `mutebites.splash-shown`,
+  so every fresh app/PWA open, never on route changes or reloads), never
+  on `/admin`, `/auth`, `/privacy`, `/terms`, or a tab opened in the
+  background. `AppSplash` is plain server markup, first in `<body>`; a
+  raw inline `<script>` (`init-script.ts`) — **not** `next/script`
+  `beforeInteractive`, which is queued until Next's JS loads and would let
+  the app paint first — decides play/skip before first paint, preloads the
+  layers and drives `data-splash` on `<html>` (`play` → `run` → `out` →
+  `done`), so it never waits for hydration. All motion is CSS (the
+  "Startup splash" rules in `globals.css`; storyboard keyframe rules
+  inside the no-preference block). Reduced motion gets a plain fade
+  (`.splash-fade` is exempt from the reduce safety net). Safety valves:
+  tap skips; a failed/slow image load (> 2.5 s) just fades out; CSS hides
+  it after 9 s whatever happens. Knobs (speed, run-in distance, bounce,
+  steam, exit time) are in `splash/config.ts`. Disable: `?nosplash` (one
+  load), `?splash` forces it, localStorage `mutebites.splash = "off"` (one
+  device), `NEXT_PUBLIC_DISABLE_SPLASH=1` (removes it from the build).
+  One-off moments that could fire under it wait with `afterSplash()`
+  (`splash/after-splash.ts`) — the milestone celebration does.
 
 `loading.tsx` exists for the restaurant list (`(home)`), the menu page
 (`restaurants/[id]`), both order pages (`orders`, `orders/[id]`), and
@@ -320,10 +354,13 @@ dishes, priced per 500 g/1 kg pack), bringing the total to 5 restaurants),
 [`supabase/migrations/20260919020000_order_reviews.sql`](supabase/migrations/20260919020000_order_reviews.sql)
 (dish ratings — `orders.delivered_at`, `order_reviews`, `order_item_ratings`,
 `submit_review()`; see below),
-and [`supabase/migrations/20260919030000_remove_bismillah_catch_all_juices.sql`](supabase/migrations/20260919030000_remove_bismillah_catch_all_juices.sql)
+[`supabase/migrations/20260919030000_remove_bismillah_catch_all_juices.sql`](supabase/migrations/20260919030000_remove_bismillah_catch_all_juices.sql)
 (data only — deletes Bismillah's "Any Fruit Juice Bottle" and "Bismillah
 Fruit Juice (Any Flavour)"; its menu is now the 10 named fruit juices plus
-the two Sugarcane items).
+the two Sugarcane items),
+and [`supabase/migrations/20260919040000_fix_banana_pack_and_bismillah_tags.sql`](supabase/migrations/20260919040000_fix_banana_pack_and_bismillah_tags.sql)
+(data only — renames "Bananas (30 g)" to "Bananas (500 g)" and drops
+Bismillah's stale "Special" cuisine tag).
 Migrations are applied by hand in the Supabase SQL editor (no CLI setup).
 
 All orders are handed over at **VIT-AP Main Gate** — there is no room

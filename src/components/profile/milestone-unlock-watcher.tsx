@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { CelebrationOverlay } from "@/components/celebration-overlay";
+import { afterSplash } from "@/components/splash/after-splash";
 import { cn } from "@/lib/utils";
 import { MILESTONES, type MilestoneKey } from "./milestone-badges";
 
@@ -25,11 +26,16 @@ export function MilestoneUnlockWatcher({ unlockedCsv }: { unlockedCsv: string })
   const [celebrating, setCelebrating] = useState<MilestoneKey[]>([]);
 
   useEffect(() => {
-    // Deferred a tick so the setState isn't synchronous in the effect body.
-    // Reading and writing storage both happen inside the timeout, so a
-    // Strict Mode double-run (which clears it) can't mark milestones seen
-    // without also celebrating them.
-    const timer = setTimeout(() => {
+    // Deferred (a tick, or until the startup splash has cleared) so the
+    // setState isn't synchronous in the effect body and the moment isn't
+    // spent hidden under the splash. Reading and writing storage both
+    // happen inside the callback, so a Strict Mode double-run (which
+    // cancels it) can't mark milestones seen without also celebrating them.
+    let timer: ReturnType<typeof setTimeout> | undefined;
+    const stopWaiting = afterSplash(() => {
+      timer = setTimeout(celebrateNew, 0);
+    });
+    function celebrateNew() {
       const unlocked = unlockedCsv ? (unlockedCsv.split(",") as MilestoneKey[]) : [];
 
       let seen: string[] = [];
@@ -48,8 +54,11 @@ export function MilestoneUnlockWatcher({ unlockedCsv }: { unlockedCsv: string })
       }
 
       if (newlyUnlocked.length > 0) setCelebrating(newlyUnlocked);
-    }, 0);
-    return () => clearTimeout(timer);
+    }
+    return () => {
+      stopWaiting();
+      clearTimeout(timer);
+    };
   }, [unlockedCsv]);
 
   if (celebrating.length === 0) return null;

@@ -133,7 +133,6 @@ export const DISH_PHOTOS: Record<string, Record<string, string>> = {
     "Apples (500 g)": `${FRUITS}/Apple 500g.jpg`,
     "Apples (1 kg)": `${FRUITS}/Apple 1kg.jpg`,
     "Bananas (500 g)": `${FRUITS}/Banana 30g.jpg`, // filename typo upstream (30g), same photo
-    "Bananas (30 g)": `${FRUITS}/Banana 30g.jpg`, // old name — drop once the rename SQL has run
     "Bananas (1 kg)": `${FRUITS}/Banana 1kg.jpg`,
     "Guava (500 g)": `${FRUITS}/Guava 30g.jpg`, // filename typo upstream (30g), same photo
     "Guava (1 kg)": `${FRUITS}/Guava 1kg.jpg`,

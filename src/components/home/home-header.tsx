@@ -38,7 +38,7 @@ export function HomeHeader({
       />
       <div className="relative flex items-center justify-between">
         <AboutMuteBitesDialog>
-          <BrandLogo className="size-12 rounded-2xl bg-card/80 shadow-card" />
+          <BrandLogo className="size-12 rounded-2xl shadow-card" />
         </AboutMuteBitesDialog>
         <TrendingDialog dishes={trendingDishes} />
       </div>
