@@ -60,6 +60,7 @@ export default async function ProfilePage() {
 
   return (
     <main className="mx-auto w-full max-w-md px-6 pt-6 pb-28">
+      <MilestoneUnlockWatcher unlockedCsv={unlockedMilestones.join(",")} />
       <ViewTransition {...NAV_TRANSITION}>
         <ViewTransition {...REVEAL_ENTER}>
           <MemberCard
@@ -77,7 +78,6 @@ export default async function ProfilePage() {
             restaurantsVisited={orderStats.restaurantsVisited}
             totalRestaurants={totalRestaurants}
           />
-          <MilestoneUnlockWatcher unlockedCsv={unlockedMilestones.join(",")} />
 
           <h2 className="mt-8 font-heading text-title font-bold">Your details</h2>
           <p className="text-sm text-muted-foreground">Tap a field to edit it.</p>

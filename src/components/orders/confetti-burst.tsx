@@ -27,10 +27,10 @@ function makePieces(): Piece[] {
 
 /**
  * A brief CSS-only confetti burst. The caller decides if/when to mount
- * this (see the "first order" one-time check in order-tracking.tsx) —
+ * this (see CelebrationOverlay's reduced-motion and once-per-device checks) —
  * pieces are randomized once via lazy useState, not regenerated on
  * re-render, and it never needs to unmount itself since it shares the
- * success overlay's lifecycle.
+ * celebration overlay's lifecycle.
  */
 export function ConfettiBurst() {
   const [pieces] = useState(makePieces);

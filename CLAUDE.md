@@ -62,7 +62,12 @@ Food delivery site for VIT-AP University students.
   `MILESTONES` (`milestone-badges.tsx`) — six tiers, all computed from
   counts that only go up (delivered orders, distinct restaurants), so a
   badge never re-locks; locked tiles show a progress ring and "N to go".
-  The unlock toast reads its labels from the same list.
+  A newly unlocked milestone (per device, `mutebites.milestones-seen`)
+  plays the same full-screen celebration as "Order placed!" — both use
+  `CelebrationOverlay` (`src/components/celebration-overlay.tsx`: plum
+  overlay, confetti unless reduced motion, the chime, tap or ~2 s to
+  dismiss); several at once share one overlay naming them all. Render it
+  outside any `<ViewTransition>`.
 - **404 / error pages**: `src/app/not-found.tsx` ("Token #404"),
   `src/app/error.tsx` and a self-contained `src/app/global-error.tsx`, all
   using `LostTicket` (`src/components/lost-ticket.tsx`) where they can. This
@@ -73,8 +78,8 @@ Food delivery site for VIT-AP University students.
   (`src/components/empty-state.tsx`): `art="plates"` for empty cart /
   orders, an icon for in-place no-match states.
 - **Icons**: lucide only — no emoji anywhere in the UI (they render
-  differently per OS and clashed with the icon set). Toasts take
-  `{ icon: "trophy" }` for celebratory ones instead of an emoji in the text.
+  differently per OS and clashed with the icon set). Big
+  moments get `CelebrationOverlay`, not an emoji-laden toast.
 - **Dish deep links**: `/restaurants/<id>?dish=<dishId>` opens the menu
   scrolled to that dish with a brief rose outline (`focusDishId` in
   `MenuView`). Used by Home search's dish results, the Trending popup and

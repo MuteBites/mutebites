@@ -16,7 +16,7 @@ import {
 } from "lucide-react";
 import { BlurImage } from "@/components/blur-image";
 import { BrandLogo } from "@/components/brand-logo";
-import { ConfettiBurst } from "@/components/orders/confetti-burst";
+import { CelebrationOverlay } from "@/components/celebration-overlay";
 import { RateOrder } from "@/components/orders/rate-order";
 import { SupportButtons } from "@/components/support-buttons";
 import type { OrderDetail } from "@/lib/data/orders";
@@ -26,7 +26,6 @@ import { getDishPhoto } from "@/lib/data/dish-photos";
 import { formatRupees } from "@/lib/format";
 import { NAV_TRANSITION } from "@/lib/nav-transition";
 import { formatOrderNumber, orderTimeline, type TimelineStepState } from "@/lib/orders/status";
-import { playOrderPlacedSound } from "@/lib/sound/play";
 import { createClient } from "@/lib/supabase/client";
 import { toast } from "@/lib/toast/store";
 import { cn } from "@/lib/utils";
@@ -88,45 +87,17 @@ export function OrderTracking({
   // below calls router.replace() to strip ?placed=1, which (this route
   // reads searchParams, so it's dynamically rendered) triggers a fresh
   // server render with justPlaced now false. If the effect depended on
-  // the live prop instead, that re-render would tear down its cleanup —
-  // cancelling the still-pending "out"/"hidden" timers below — and the
-  // re-run would immediately bail out without rescheduling them, leaving
-  // the success overlay stuck open until manually tapped.
+  // the live prop instead, that re-render would unmount the success
+  // overlay mid-moment.
   const [showSuccess] = useState(justPlaced);
   const [status, setStatus] = useState(initialOrder.status);
   const [updatedAt, setUpdatedAt] = useState(initialOrder.updatedAt);
   const [deliveredAt, setDeliveredAt] = useState(initialOrder.deliveredAt);
   const [live, setLive] = useState(false);
-  const [successPhase, setSuccessPhase] = useState<"in" | "out" | "hidden">(
-    showSuccess ? "in" : "hidden",
-  );
-  const [showConfetti, setShowConfetti] = useState(false);
 
   useEffect(() => {
-    if (!showSuccess) return;
     // Strip ?placed=1 right away so a refresh doesn't replay the moment.
-    router.replace(`/orders/${initialOrder.id}`);
-    playOrderPlacedSound();
-    // Deferred a tick (not called synchronously in the effect body) so this
-    // one-time browser-only check doesn't trigger a same-render setState.
-    const toConfetti = setTimeout(() => {
-      try {
-        const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-        if (!reducedMotion && !localStorage.getItem(CONFETTI_SHOWN_KEY)) {
-          localStorage.setItem(CONFETTI_SHOWN_KEY, "1");
-          setShowConfetti(true);
-        }
-      } catch {
-        // Storage unavailable (private mode) — skip the confetti, the rest of the success moment still shows.
-      }
-    }, 0);
-    const toOut = setTimeout(() => setSuccessPhase("out"), 1800);
-    const toHidden = setTimeout(() => setSuccessPhase("hidden"), 2020);
-    return () => {
-      clearTimeout(toConfetti);
-      clearTimeout(toOut);
-      clearTimeout(toHidden);
-    };
+    if (showSuccess) router.replace(`/orders/${initialOrder.id}`);
   }, [initialOrder.id, showSuccess, router]);
 
   useEffect(() => {
@@ -162,28 +133,15 @@ export function OrderTracking({
 
   return (
     <>
-      {successPhase !== "hidden" && (
-        <div
-          role="status"
-          onClick={() => setSuccessPhase("hidden")}
-          className={cn(
-            "fixed inset-0 z-[90] flex cursor-pointer flex-col items-center justify-center overflow-hidden bg-ink px-6 text-center text-ink-foreground",
-            successPhase === "out" ? "animate-overlay-out" : "animate-overlay-in",
-          )}
-        >
-          <span
-            aria-hidden="true"
-            className="animate-ping-slow pointer-events-none absolute size-56 rounded-full bg-ink-accent/25 blur-3xl"
-          />
-          {showConfetti && <ConfettiBurst />}
+      {showSuccess && (
+        <CelebrationOverlay confettiOnceKey={CONFETTI_SHOWN_KEY}>
           <BrandLogo className="animate-pop-in size-20 bg-ink-foreground/10" />
           <p className="animate-pop-in mt-5 font-heading text-2xl font-bold">Order placed!</p>
           <p className="mt-1 text-ink-foreground/70">Show this token at the gate</p>
           <p className="animate-pop-in mt-4 font-heading text-7xl font-bold tracking-tight text-ink-accent">
             {formatOrderNumber(initialOrder.dailyNumber)}
           </p>
-          <p className="mt-6 text-sm text-ink-foreground/50">Tap to continue</p>
-        </div>
+        </CelebrationOverlay>
       )}
       <main className="mx-auto w-full max-w-md px-6 pb-12">
         <ViewTransition {...NAV_TRANSITION}>

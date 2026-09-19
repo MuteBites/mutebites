@@ -91,7 +91,7 @@ function isUnlocked([current, target]: [number, number]) {
   return target > 0 && current >= target;
 }
 
-/** Shared unlock logic — used both to render the badges and (in profile/page.tsx) to detect a newly-unlocked one for the toast. */
+/** Shared unlock logic — used both to render the badges and (in profile/page.tsx) to detect a newly-unlocked one to celebrate. */
 export function getUnlockedMilestones(
   deliveredCount: number,
   restaurantsVisited: number,
