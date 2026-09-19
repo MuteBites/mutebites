@@ -76,8 +76,7 @@ export const DISH_PHOTOS: Record<string, Record<string, string>> = {
     "Chicken Curry": `${BHEEMASENA}/Chicken Curry.jpg`,
     "Chicken Tandoori Half": `${BHEEMASENA}/Chicken tandoori.jpeg`,
     "Chicken Tandoori Full": `${BHEEMASENA}/Chicken tandoori.jpeg`,
-    // No photo: Kaju Paneer Butter Masala (visually distinct from plain
-    // Paneer Butter Masala — left on the placeholder rather than misrepresented).
+    "Kaju Paneer Butter Masala": `${BHEEMASENA}/Kaju Paneer Butter Masala.jpg`,
   },
 
   "A1 Biryani Point": {
@@ -125,8 +124,7 @@ export const DISH_PHOTOS: Record<string, Record<string, string>> = {
     "Chicken Manchurian": `${CHINESE}/Chicken manchurian.jpg`,
     "Chicken Chilli": `${CHINESE}/Chicken chilli.jpg`,
     "4P Chicken Lollipop": `${CHINESE}/Chicken lollipop 4P.jpg`,
-    // No photo: Double Egg Chicken Noodles — no exact-match file (only the
-    // fried-rice version exists).
+    "Double Egg Chicken Noodles": `${CHINESE}/Double egg chicken noodles.jpg`,
   },
 
   "MuteBites Fresh Fruits": {
@@ -134,7 +132,8 @@ export const DISH_PHOTOS: Record<string, Record<string, string>> = {
     "Pomegranate (1 kg)": `${FRUITS}/Pomegranate 1kg.jpg`,
     "Apples (500 g)": `${FRUITS}/Apple 500g.jpg`,
     "Apples (1 kg)": `${FRUITS}/Apple 1kg.jpg`,
-    "Bananas (30 g)": `${FRUITS}/Banana 30g.jpg`,
+    "Bananas (500 g)": `${FRUITS}/Banana 30g.jpg`, // filename typo upstream (30g), same photo
+    "Bananas (30 g)": `${FRUITS}/Banana 30g.jpg`, // old name — drop once the rename SQL has run
     "Bananas (1 kg)": `${FRUITS}/Banana 1kg.jpg`,
     "Guava (500 g)": `${FRUITS}/Guava 30g.jpg`, // filename typo upstream (30g), same photo
     "Guava (1 kg)": `${FRUITS}/Guava 1kg.jpg`,
