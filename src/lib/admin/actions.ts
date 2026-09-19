@@ -143,7 +143,9 @@ export async function setStudentBanned(userId: string, banned: boolean): Promise
  * slot end here rather than trusting whatever the client sent, same as
  * every other admin write in this file trusting only what it reads itself.
  */
-export async function markAllConfirmedDelivered(): Promise<AdminActionResult> {
+export async function markAllConfirmedDelivered(): Promise<
+  { ok: true; count: number } | { ok: false; error: string }
+> {
   const denied = await assertAdmin();
   if (denied) return denied;
 
@@ -161,11 +163,18 @@ export async function markAllConfirmedDelivered(): Promise<AdminActionResult> {
     return { ok: false, error: "No confirmed orders have passed their delivery slot yet." };
   }
 
-  const { error } = await supabase.from("orders").update({ status: "delivered" }).in("id", eligibleIds);
+  // Compare-and-swap on status like the single-order actions: an order a
+  // second admin cancelled or already delivered in the meantime is skipped.
+  const { data: updated, error } = await supabase
+    .from("orders")
+    .update({ status: "delivered" })
+    .in("id", eligibleIds)
+    .eq("status", "confirmed")
+    .select("id");
   if (error) return { ok: false, error: "Couldn't update those orders. Please try again." };
 
   revalidatePath("/admin");
-  return { ok: true };
+  return { ok: true, count: updated?.length ?? 0 };
 }
 
 export type StudentSearchResult = {

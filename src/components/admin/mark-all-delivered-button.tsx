@@ -22,15 +22,24 @@ import { cn } from "@/lib/utils";
  * Bulk "confirmed → delivered", but only for orders whose delivery slot
  * has actually ended — a confirmed order still inside its window is left
  * alone. `confirmedCount` and `eligibleCount` come from the page, computed
- * against "now" at render time; the server re-checks eligibility itself
- * regardless (see markAllConfirmedDelivered).
+ * over every confirmed order (not just today's list) against "now" at
+ * render time; the server re-checks eligibility itself regardless (see
+ * markAllConfirmedDelivered) and reports how many it actually delivered.
+ *
+ * `disabled` goes on AlertDialogTrigger itself, not on the rendered
+ * <button>: Base UI's trigger merges its own button props last, and its
+ * default `disabled: false` silently overrode the element's `disabled`, so
+ * the button only *looked* disabled and opened a "Mark 0 orders" dialog.
  */
 export function MarkAllDeliveredButton({
   confirmedCount,
   eligibleCount,
+  nextSlotEnd,
 }: {
   confirmedCount: number;
   eligibleCount: number;
+  /** "1:30 PM" — when the earliest still-waiting confirmed order's slot ends, or null if none are waiting. */
+  nextSlotEnd: string | null;
 }) {
   const router = useRouter();
   const [open, setOpen] = useState(false);
@@ -49,32 +58,46 @@ export function MarkAllDeliveredButton({
       if (result.ok) {
         setOpen(false);
         router.refresh();
-        toast.success(`${eligibleCount} order${eligibleCount === 1 ? "" : "s"} marked delivered.`);
+        toast.success(`${result.count} order${result.count === 1 ? "" : "s"} marked delivered.`);
       } else {
         toast.error(result.error);
       }
     });
   }
 
+  // Why it's disabled, so a greyed-out button doesn't read as broken.
+  const hint = !disabled
+    ? null
+    : confirmedCount === 0
+      ? "No confirmed orders to deliver"
+      : nextSlotEnd
+        ? `Next slot ends ${nextSlotEnd}`
+        : null;
+
   return (
     <AlertDialog open={open} onOpenChange={(next) => (pending ? null : setOpen(next))}>
-      <AlertDialogTrigger
-        render={
-          <button
-            type="button"
-            disabled={disabled}
-            className={cn(
-              "flex h-10 items-center rounded-full bg-success px-4 text-sm font-bold text-success-foreground outline-none hover:bg-success/90 focus-visible:ring-3 focus-visible:ring-ring/80",
-              disabled && "opacity-50 hover:bg-success",
-            )}
-          />
-        }
-      >
-        {label}
-      </AlertDialogTrigger>
+      <div className="flex flex-col items-end gap-1">
+        <AlertDialogTrigger
+          disabled={disabled}
+          render={
+            <button
+              type="button"
+              className={cn(
+                "flex h-10 items-center rounded-full bg-success px-4 text-sm font-bold text-success-foreground outline-none hover:bg-success/90 focus-visible:ring-3 focus-visible:ring-ring/80",
+                disabled && "cursor-not-allowed opacity-50 hover:bg-success",
+              )}
+            />
+          }
+        >
+          {label}
+        </AlertDialogTrigger>
+        {hint && <p className="text-xs text-muted-foreground">{hint}</p>}
+      </div>
       <AlertDialogContent>
         <AlertDialogHeader>
-          <AlertDialogTitle>Mark {eligibleCount} orders delivered?</AlertDialogTitle>
+          <AlertDialogTitle>
+            Mark {eligibleCount} order{eligibleCount === 1 ? "" : "s"} delivered?
+          </AlertDialogTitle>
           <AlertDialogDescription>
             Every confirmed order whose delivery slot has already ended will jump straight to
             delivered.

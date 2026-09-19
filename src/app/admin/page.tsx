@@ -6,22 +6,28 @@ import { OrderList } from "@/components/admin/order-list";
 import { RestaurantToggleList } from "@/components/admin/restaurant-toggle-list";
 import { StatCards } from "@/components/admin/stat-cards";
 import { adminPill } from "@/components/admin/styles";
-import { getAdminOrders, getAdminRestaurants, getOrderCounts } from "@/lib/data/admin";
-import { formatShortDay, isPastDeliverySlot, startOfTodayIST } from "@/lib/date";
+import { getAdminOrders, getAdminRestaurants, getConfirmedOrderTimes, getOrderCounts } from "@/lib/data/admin";
+import { formatShortDay, formatTime, isPastDeliverySlot, slotEndTime, startOfTodayIST } from "@/lib/date";
 import { getOrderingEnabled } from "@/lib/data/settings";
 
 export default async function AdminPage() {
-  const [restaurants, orderCounts, orderingEnabled, orders] = await Promise.all([
+  const [restaurants, orderCounts, orderingEnabled, orders, confirmedAll] = await Promise.all([
     getAdminRestaurants(),
     getOrderCounts(startOfTodayIST()),
     getOrderingEnabled(),
     getAdminOrders(),
+    getConfirmedOrderTimes(),
   ]);
 
   const activeRestaurants = restaurants.filter((r) => r.is_active).length;
 
-  const confirmedOrders = orders.filter((o) => o.status === "confirmed");
-  const eligibleForDelivery = confirmedOrders.filter((o) => isPastDeliverySlot(o.createdAt)).length;
+  // Counted over every confirmed order (not just today's list below) —
+  // the same set markAllConfirmedDelivered() acts on.
+  const eligibleForDelivery = confirmedAll.filter((o) => isPastDeliverySlot(o.createdAt)).length;
+  const waiting = confirmedAll.filter((o) => !isPastDeliverySlot(o.createdAt));
+  const nextSlotEnd = waiting.length
+    ? formatTime(new Date(Math.min(...waiting.map((o) => slotEndTime(o.createdAt).getTime()))).toISOString())
+    : null;
 
   return (
     <>
@@ -56,8 +62,9 @@ export default async function AdminPage() {
         <div className="mb-3 flex flex-wrap items-center justify-between gap-2">
           <h2 className="font-heading text-title font-bold">Today&apos;s orders</h2>
           <MarkAllDeliveredButton
-            confirmedCount={confirmedOrders.length}
+            confirmedCount={confirmedAll.length}
             eligibleCount={eligibleForDelivery}
+            nextSlotEnd={nextSlotEnd}
           />
         </div>
         <OrderList orders={orders} restaurants={restaurants} />

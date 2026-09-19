@@ -145,6 +145,14 @@ shared `adminPill` style (`src/components/admin/styles.ts`); order cards
 lead with the token and a dish photo; restaurant controls show cover
 photos; no uppercase anywhere.
 
+"Mark all delivered" counts eligible orders over **every** confirmed order
+(`getConfirmedOrderTimes()`), not just today's list — the same set
+`markAllConfirmedDelivered()` acts on — and says why when it's disabled
+("Next slot ends 1:30 PM"). Base UI gotcha: put `disabled` on the
+`AlertDialogTrigger`/`DialogTrigger` itself, never on the element passed
+to its `render` prop — the trigger merges its own `disabled: false` last and
+silently re-enables the button.
+
 ## Project structure
 
 - `src/app` — routes (App Router)

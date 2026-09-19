@@ -119,6 +119,22 @@ function toAdminOrder(o: AdminOrderRow): AdminOrder {
  * whoever's standing at the gate, so this always matches their intuition
  * without needing a filter. See getAdminOrderHistory() for every past day.
  */
+/**
+ * Every `confirmed` order (any day), just id + placed-at — what the "Mark
+ * all delivered" button needs to count eligible orders the same way
+ * markAllConfirmedDelivered() does. The dashboard's order list is scoped to
+ * today, so counting from it missed confirmed orders from earlier days that
+ * the action would in fact deliver (and could leave the button disabled
+ * while there was work to do).
+ */
+export async function getConfirmedOrderTimes(): Promise<{ id: string; createdAt: string }[]> {
+  const supabase = await createClient();
+  const { data, error } = await supabase.from("orders").select("id, created_at").eq("status", "confirmed");
+
+  if (error) throw error;
+  return (data ?? []).map((o) => ({ id: o.id, createdAt: o.created_at }));
+}
+
 export async function getAdminOrders(): Promise<AdminOrder[]> {
   const supabase = await createClient();
   const { data, error } = await supabase
