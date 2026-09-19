@@ -29,11 +29,7 @@ export default function Loading() {
         <div className="mt-4 flex flex-col gap-5">
           {[0, 1, 2].map((i) => (
             <div key={i} className="rounded-[1.75rem] border bg-card p-2 shadow-card">
-              <div className="grid h-44 grid-cols-3 grid-rows-2 gap-1.5 overflow-hidden rounded-[1.25rem]">
-                <Skeleton className="col-span-2 row-span-2 rounded-none" />
-                <Skeleton className="rounded-none" />
-                <Skeleton className="rounded-none" />
-              </div>
+              <Skeleton className="h-44 rounded-[1.25rem]" />
               <div className="px-3 pt-3.5 pb-2.5">
                 <div className="flex items-start justify-between gap-3">
                   <Skeleton className="h-7 w-2/3" />

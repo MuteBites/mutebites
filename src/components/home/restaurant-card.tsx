@@ -1,16 +1,16 @@
 import Link from "next/link";
 import { ArrowRight } from "lucide-react";
-import { BlurImage } from "@/components/blur-image";
-import { getRestaurantCoverPhoto, getRestaurantPreviewPhotos } from "@/lib/data/dish-photos";
+import type { CardSlide } from "@/lib/data/dish-photos";
 import type { RestaurantMenuStats } from "@/lib/data/restaurants";
 import type { Restaurant } from "@/lib/data/types";
 import { formatRupees } from "@/lib/format";
 import { cn } from "@/lib/utils";
+import { RestaurantPhotoSlides } from "./restaurant-photo-slides";
 
 /*
- * Photo-collage card: the cover takes the left two-thirds and two of the
- * restaurant's signature dishes stack on the right, inset inside the card
- * rather than a full-bleed banner with the name over a dark scrim. Name,
+ * Photo card: the cover, then the restaurant's dishes sliding past on
+ * their own (RestaurantPhotoSlides), inset inside the card rather than a
+ * full-bleed banner with the name over a dark scrim. Name,
  * cuisines, description and a short "24 dishes · from ₹60" line sit
  * underneath on the card surface, with the amber arrow as the one action
  * cue. Free delivery is campus-wide, so it's said once in the
@@ -22,12 +22,17 @@ export function RestaurantCard({
   closedChip = "Paused",
   closedLine = "Ordering paused",
   stats,
+  slides,
+  slideDelay,
 }: {
   restaurant: Restaurant;
   orderingEnabled: boolean;
   closedChip?: string;
   closedLine?: string;
   stats?: RestaurantMenuStats;
+  /** getRestaurantCardSlides() — cover, then dish photos. */
+  slides: CardSlide[];
+  slideDelay?: number;
 }) {
   const active = restaurant.is_active;
   // Fully orderable only when both this restaurant and the campus-wide
@@ -37,34 +42,17 @@ export function RestaurantCard({
   const open = active && orderingEnabled;
   const paused = active && !orderingEnabled;
 
-  const previews = getRestaurantPreviewPhotos(restaurant.name);
-  const cover = getRestaurantCoverPhoto(restaurant.name) ?? previews.shift()?.src;
-  const sides = previews.length === 2 ? previews : [];
-
   return (
     <Link
       href={`/restaurants/${restaurant.id}`}
       transitionTypes={["nav-forward"]}
       className="pressable group block rounded-[1.75rem] border bg-card p-2 shadow-card outline-none transition-shadow hover:shadow-raised focus-visible:ring-3 focus-visible:ring-ring/80"
     >
-      <div
-        className={cn(
-          "grid h-44 grid-cols-3 grid-rows-2 gap-1.5 overflow-hidden rounded-[1.25rem]",
-          !active && "opacity-60 grayscale",
-        )}
-      >
-        <div className={cn("relative row-span-2 bg-stripes", sides.length ? "col-span-2" : "col-span-3")}>
-          {cover && (
-            <BlurImage
-              src={cover}
-              alt=""
-              sizes="(min-width: 448px) 290px, 66vw"
-              className="object-cover"
-            />
-          )}
+      <div className={cn("h-44 overflow-hidden rounded-[1.25rem]", !active && "opacity-60 grayscale")}>
+        <RestaurantPhotoSlides slides={slides} autoplay={active} startDelay={slideDelay}>
           <span
             className={cn(
-              "absolute top-2.5 left-2.5 inline-flex items-center gap-1.5 rounded-full bg-card/90 px-2.5 py-1 text-xs font-semibold backdrop-blur-sm",
+              "pointer-events-none absolute top-2.5 left-2.5 inline-flex items-center gap-1.5 rounded-full bg-card/90 px-2.5 py-1 text-xs font-semibold backdrop-blur-sm",
               open ? "text-success" : "text-muted-foreground",
             )}
           >
@@ -74,12 +62,7 @@ export function RestaurantCard({
             />
             {!active ? "Closed" : paused ? closedChip : "Open"}
           </span>
-        </div>
-        {sides.map(({ dish, src }) => (
-          <div key={src} className="relative bg-secondary">
-            <BlurImage src={src} alt={dish} sizes="(min-width: 448px) 145px, 33vw" className="object-cover" />
-          </div>
-        ))}
+        </RestaurantPhotoSlides>
       </div>
 
       <div className="px-3 pt-3.5 pb-2.5">

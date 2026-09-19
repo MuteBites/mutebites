@@ -159,13 +159,13 @@ export function getDishPhoto(restaurantName: string, dishName: string): string |
 }
 
 /**
- * Two dishes per restaurant shown beside the cover on Home's restaurant
- * card collage. Hand-picked for photo quality (no watermarks, reads well
- * small) and to say what the kitchen is about; every name must exist in
- * DISH_PHOTOS above. A restaurant missing here falls back to its first
- * two distinct dish photos.
+ * Dishes that lead each restaurant's photo slideshow on Home's cards,
+ * right after the cover. Hand-picked for photo quality (no watermarks,
+ * reads well small) and to say what the kitchen is about; every name must
+ * exist in DISH_PHOTOS above. The rest of the slideshow fills from the
+ * menu in its own order.
  */
-const SIGNATURE_DISHES: Record<string, [string, string]> = {
+const SIGNATURE_DISHES: Record<string, string[]> = {
   "Bheemasena Restaurant": ["Paneer 65", "Chilli Chicken"],
   "A1 Biryani Point": ["A1 Biryani Dum Biryani", "A1 Biryani Fry Pieces Biryani"],
   "Bismillah Fruit Juice": ["Pomegranate Juice", "Pineapple Juice"],
@@ -173,22 +173,38 @@ const SIGNATURE_DISHES: Record<string, [string, string]> = {
   "MuteBites Fresh Fruits": ["Dragon Fruit (500 g)", "Black Grapes (1 kg)"],
 };
 
-/** Up to two dish photos (distinct files) to preview a restaurant with. */
-export function getRestaurantPreviewPhotos(restaurantName: string): { dish: string; src: string }[] {
-  const photos = DISH_PHOTOS[restaurantName];
-  if (!photos) return [];
-  const picked = SIGNATURE_DISHES[restaurantName]
-    ?.filter((dish) => photos[dish])
-    .map((dish) => ({ dish, src: photos[dish] }));
-  if (picked?.length === 2) return picked;
+/** Most dish slides per card — each is another photo download on Home. */
+const MAX_DISH_SLIDES = 5;
 
-  const seen = new Set<string>();
-  const fallback: { dish: string; src: string }[] = [];
-  for (const [dish, src] of Object.entries(photos)) {
-    if (seen.has(src)) continue;
+export type CardSlide = { src: string; dish?: { name: string; price: number; isVeg: boolean } };
+
+/**
+ * The photos Home's restaurant card slides through: the cover first
+ * (no caption), then up to MAX_DISH_SLIDES available dishes with their
+ * own distinct photo — signature dishes first, then menu order. A
+ * restaurant with no cover just starts on its first dish.
+ */
+export function getRestaurantCardSlides(
+  restaurantName: string,
+  dishes: { name: string; price: number; isVeg: boolean; isAvailable: boolean }[],
+): CardSlide[] {
+  const photos = DISH_PHOTOS[restaurantName] ?? {};
+  const signature = SIGNATURE_DISHES[restaurantName] ?? [];
+  const rank = (name: string) => {
+    const i = signature.indexOf(name);
+    return i === -1 ? signature.length : i;
+  };
+
+  const cover = getRestaurantCoverPhoto(restaurantName);
+  const seen = new Set<string>(cover ? [cover] : []);
+  const dishSlides: CardSlide[] = [];
+  // Stable sort keeps menu order among the non-signature dishes.
+  for (const d of dishes.filter((d) => d.isAvailable).sort((a, b) => rank(a.name) - rank(b.name))) {
+    const src = photos[d.name];
+    if (!src || seen.has(src)) continue;
     seen.add(src);
-    fallback.push({ dish, src });
-    if (fallback.length === 2) break;
+    dishSlides.push({ src, dish: { name: d.name, price: d.price, isVeg: d.isVeg } });
+    if (dishSlides.length === MAX_DISH_SLIDES) break;
   }
-  return fallback;
+  return cover ? [{ src: cover }, ...dishSlides] : dishSlides;
 }

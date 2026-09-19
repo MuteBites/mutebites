@@ -6,7 +6,7 @@ import { ChevronRight, MapPin, Search, SearchX, X } from "lucide-react";
 import { BlurImage } from "@/components/blur-image";
 import { EmptyState } from "@/components/empty-state";
 import { VegMark } from "@/components/veg-mark";
-import { getDishPhoto } from "@/lib/data/dish-photos";
+import { getDishPhoto, getRestaurantCardSlides } from "@/lib/data/dish-photos";
 import type { RestaurantMenuStats, SearchableDish } from "@/lib/data/restaurants";
 import type { Restaurant } from "@/lib/data/types";
 import { formatRupees } from "@/lib/format";
@@ -38,6 +38,13 @@ export function RestaurantList({
   const restaurantNames = useMemo(
     () => Object.fromEntries(restaurants.map((r) => [r.id, r.name])),
     [restaurants],
+  );
+  const slidesByRestaurant = useMemo(
+    () =>
+      Object.fromEntries(
+        restaurants.map((r) => [r.id, getRestaurantCardSlides(r.name, dishes.filter((d) => d.restaurantId === r.id))]),
+      ),
+    [restaurants, dishes],
   );
   // Dishes first — that's what people usually type ("dum biryani", "juice").
   const dishResults = useMemo(() => searchDishes(dishes, restaurantNames, q), [dishes, restaurantNames, q]);
@@ -126,6 +133,8 @@ export function RestaurantList({
                 closedChip={closedChip}
                 closedLine={closedLine}
                 stats={menuStats[r.id]}
+                slides={slidesByRestaurant[r.id] ?? []}
+                slideDelay={i * 900}
               />
             </li>
           ))}

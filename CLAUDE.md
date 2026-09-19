@@ -234,10 +234,16 @@ silently re-enables the button.
   The login screen's photo mosaic (`src/app/login/page.tsx`, `MOSAIC`)
   also references a dozen of these files by path directly — renaming or
   removing a photo means updating that list too, or its tile goes blank.
-  Home's restaurant cards are a photo collage (cover + two signature
-  dishes); the two dishes per restaurant are hand-picked in
-  `SIGNATURE_DISHES` (same file) by dish name, falling back to the first
-  two distinct photos. The card's "24 dishes · from ₹60" line comes from
+  Home's restaurant cards slide through photos (`RestaurantPhotoSlides`,
+  `src/components/home/restaurant-photo-slides.tsx`): the cover first,
+  then up to five available dishes with a "veg mark · name · price" chip
+  (`getRestaurantCardSlides()`, same file as above) — `SIGNATURE_DISHES`
+  lead, the rest follow menu order, one slide per distinct photo. Auto-
+  advances every 3.2 s (staggered per card) only while the card is on
+  screen and the tab visible; pauses 8 s after a touch; no autoplay under
+  reduced motion or for a closed restaurant; swiping is native
+  scroll-snap. Dish photos mount one slide ahead, only once the card has
+  been seen. The card's "24 dishes · from ₹60" line comes from
   `getRestaurantMenuStats()` (`src/lib/data/restaurants.ts`).
 - `public/mutebites-logo.png` — the one source image behind every app
   icon. `src/lib/app-icon.tsx` reads it once at module scope (it's
