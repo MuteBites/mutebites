@@ -18,6 +18,52 @@ export async function getRestaurants(): Promise<Restaurant[]> {
   return data;
 }
 
+export type SearchableDish = {
+  id: string;
+  name: string;
+  price: number;
+  isVeg: boolean;
+  isAvailable: boolean;
+  restaurantId: string;
+  /** e.g. "Non-Veg Biryani" — searched too, so "veg biryani" finds the whole section. */
+  category: string | null;
+};
+
+/**
+ * Every dish on every menu, trimmed to what Home's search needs — ~100
+ * rows, so the whole list ships with the page and filtering happens on the
+ * client as the student types. Dishes are public-read.
+ */
+export async function getSearchableDishes(): Promise<SearchableDish[]> {
+  const supabase = await createClient();
+  const { data, error } = await supabase
+    .from("dishes")
+    .select("id, name, price, is_veg, is_available, restaurant_id, sort_order, dish_categories(name)")
+    .order("sort_order")
+    .returns<
+      {
+        id: string;
+        name: string;
+        price: number;
+        is_veg: boolean;
+        is_available: boolean;
+        restaurant_id: string;
+        dish_categories: { name: string } | null;
+      }[]
+    >();
+
+  if (error) throw error;
+  return data.map((d) => ({
+    id: d.id,
+    name: d.name,
+    price: Number(d.price),
+    isVeg: d.is_veg,
+    isAvailable: d.is_available,
+    restaurantId: d.restaurant_id,
+    category: d.dish_categories?.name ?? null,
+  }));
+}
+
 export type RestaurantMenuStats = { dishCount: number; minPrice: number };
 
 /**

@@ -7,7 +7,7 @@ import { SignInWelcomeToast } from "@/components/home/sign-in-welcome-toast";
 import { ThursdayNudge } from "@/components/home/thursday-nudge";
 import { YourUsualChip } from "@/components/home/your-usual-chip";
 import { TabBar } from "@/components/nav/tab-bar";
-import { getRestaurantMenuStats, getRestaurants, getThursdaySpecial } from "@/lib/data/restaurants";
+import { getRestaurantMenuStats, getRestaurants, getSearchableDishes, getThursdaySpecial } from "@/lib/data/restaurants";
 import { getOrderingState } from "@/lib/data/settings";
 import { getTrendingDishes } from "@/lib/data/trending";
 import { getUsualCart } from "@/lib/data/usual";
@@ -23,14 +23,16 @@ export default async function Home({ searchParams }: PageProps<"/">) {
   const profilePromise = requireProfile();
   const restaurantsPromise = getRestaurants();
   const menuStatsPromise = getRestaurantMenuStats();
+  const dishesPromise = getSearchableDishes();
   const orderingPromise = getOrderingState();
   const trendingDishesPromise = getTrendingDishes();
   const thursdaySpecialPromise = isThursdayIST() ? getThursdaySpecial() : Promise.resolve(null);
 
   const profile = await profilePromise;
-  const [restaurants, menuStats, ordering, usual, thursdaySpecial, trendingDishes] = await Promise.all([
+  const [restaurants, menuStats, dishes, ordering, usual, thursdaySpecial, trendingDishes] = await Promise.all([
     restaurantsPromise,
     menuStatsPromise,
+    dishesPromise,
     orderingPromise,
     getUsualCart(profile.id),
     thursdaySpecialPromise,
@@ -54,6 +56,7 @@ export default async function Home({ searchParams }: PageProps<"/">) {
             closedChip={ordering.short}
             closedLine={ordering.headline}
             menuStats={menuStats}
+            dishes={dishes}
           />
         </ViewTransition>
       </ViewTransition>

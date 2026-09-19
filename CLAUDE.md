@@ -72,9 +72,16 @@ Food delivery site for VIT-AP University students.
   differently per OS and clashed with the icon set). Toasts take
   `{ icon: "trophy" }` for celebratory ones instead of an emoji in the text.
 - **Dish deep links**: `/restaurants/<id>?dish=<dishId>` opens the menu
-  scrolled to that dish with a brief rose ring (`focusDishId` in
-  `MenuView`). Used by the Trending popup and the Thursday banner
-  (`getThursdaySpecial()` now returns `dishId`).
+  scrolled to that dish with a brief rose outline (`focusDishId` in
+  `MenuView`). Used by Home search's dish results, the Trending popup and
+  the Thursday banner (`getThursdaySpecial()` returns `dishId`).
+- **Home search** searches dishes as well as restaurants: every dish ships
+  with the page (`getSearchableDishes()`, ~100 rows) and `searchDishes()`
+  (`src/lib/search.ts`) filters on the client — every typed word must start
+  a word in the dish name, its category or its restaurant's name, in any
+  order. "veg" / "non veg" filter on the dish's veg flag instead of text
+  (so "veg" never matches inside "Non-Veg Biryani"). A "Dishes" section
+  shows above restaurants; restaurants also appear if they serve a match.
 - **Motion**: CSS only (no Framer Motion). Easing tokens `--ease-out-expo`
   / `--ease-spring` / `--ease-in-quad` (also Tailwind `ease-*` utilities) and
   durations `--dur-press|quick|base|slow` in `globals.css` — use them rather
