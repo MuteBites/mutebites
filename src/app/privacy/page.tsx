@@ -22,6 +22,10 @@ export default function PrivacyPage() {
         <p>We don&apos;t sell or share this data with third parties.</p>
         <p>Orders are shared with partner restaurants to fulfill delivery.</p>
         <p>
+          When you rate an order, your star ratings and optional note are stored with that order
+          and seen only by the MuteBites team — never by other students.
+        </p>
+        <p>
           Contact{" "}
           <a href="mailto:mutebites5@gmail.com" className="font-semibold text-primary hover:underline">
             mutebites5@gmail.com
