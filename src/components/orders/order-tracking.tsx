@@ -55,7 +55,7 @@ async function shareOrderToken(token: string) {
 const CONFETTI_SHOWN_KEY = "mutebites.confetti-shown";
 
 // One icon per row of orderTimeline() (order/status.ts), by position —
-// "Order placed", "Restaurant confirmed", "Preparing & out for delivery".
+// "Order placed", "Pending confirmation" / "Restaurant confirmed", "Preparing & out for delivery".
 const STEP_ICONS: LucideIcon[] = [Receipt, ChefHat, CookingPot];
 
 /**

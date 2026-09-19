@@ -104,7 +104,8 @@ export function orderTimeline(status: OrderStatus): TimelineStep[] {
 
   return [
     { label: "Order placed", state: "done" },
-    { label: "Restaurant confirmed", state: confirmed },
+    // Only claims "confirmed" once it's true; while pending it's still waiting.
+    { label: confirmed === "current" ? "Pending confirmation" : "Restaurant confirmed", state: confirmed },
     { label: "Preparing & out for delivery", state: preparing },
   ];
 }
