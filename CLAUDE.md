@@ -433,12 +433,20 @@ pieces"; a mixed biryani added later needs it set again),
 [`supabase/migrations/20260920030000_bheemasena_mutton_prawn_biryani.sql`](supabase/migrations/20260920030000_bheemasena_mutton_prawn_biryani.sql)
 (data only — adds Mutton Afghani Biryani and Prawn Biryani, ₹400 each, to
 Bheemasena's Non-Veg Biryani section),
-and [`supabase/migrations/20260920040000_bheemasena_new_dishes.sql`](supabase/migrations/20260920040000_bheemasena_new_dishes.sql)
+[`supabase/migrations/20260920040000_bheemasena_new_dishes.sql`](supabase/migrations/20260920040000_bheemasena_new_dishes.sql)
 (data only — 16 more Bheemasena dishes across Non-Veg Biryani, Non-Veg
 Starters, Veg Curries and Non-Veg Curries; the restaurant now has 59
 dishes). Note the shape: the `values` list comes first and the
 restaurant/category are joined onto it — a `cross join` after the join
 can't see `v`.
+And [`supabase/migrations/20260921000000_push_subscriptions.sql`](supabase/migrations/20260921000000_push_subscriptions.sql)
+adds **`push_subscriptions`** — one row per device that turned
+notifications on (`user_id`, unique `endpoint`, `p256dh`, `auth`,
+`user_agent`). RLS: a student reads/writes only their own rows; admins
+`select` every row (that's how a status change reaches the student's
+phone) and `delete` stale ones. The *new order* send can't use any
+student's session, so it goes through the service-role client — see
+**Notifications** above.
 Migrations are applied by hand in the Supabase SQL editor (no CLI setup).
 
 All orders are handed over at **VIT-AP Main Gate** — there is no room
