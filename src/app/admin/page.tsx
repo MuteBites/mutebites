@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { History, PackageX, Star, Users } from "lucide-react";
 import { MarkAllDeliveredButton } from "@/components/admin/mark-all-delivered-button";
+import { NewOrderAlerts } from "@/components/admin/new-order-alerts";
 import { OrderingKillSwitch } from "@/components/admin/ordering-kill-switch";
 import { OrderList } from "@/components/admin/order-list";
 import { RestaurantToggleList } from "@/components/admin/restaurant-toggle-list";
@@ -60,6 +61,8 @@ export default async function AdminPage() {
           Sold out
         </Link>
       </div>
+
+      <NewOrderAlerts />
 
       <section>
         <h2 className="mb-3 font-heading text-title font-bold">Restaurants</h2>

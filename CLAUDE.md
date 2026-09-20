@@ -96,6 +96,30 @@ Food delivery site for VIT-AP University students.
   (mutually exclusive, tap again to clear; red on light red for non-veg)
   and the category chips. The diet toggles only appear on a menu that has
   both kinds of dish.
+- **Notifications** (web push, `src/lib/notifications/`): students get
+  *confirmed*, *delivered* and *cancelled*; the address in
+  `ADMIN_ALERT_EMAILS` (`send.ts`) gets *new order*. `public/sw.js` is a
+  notifications-only service worker — **no fetch handler on purpose**, so
+  it can never serve a stale page. `client.ts` registers it, asks
+  permission and saves the subscription (`actions.ts` → the
+  `push_subscriptions` table); `send.ts` delivers with `web-push` and
+  deletes rows a push service reports as gone (404/410). Sends run inside
+  `after()` so a slow push service never holds up an order or a status
+  change, and never throw. Student sends go through the admin's own
+  session (admins can read every subscription row); the *new order* send
+  can't (a student's session can't see the admin's devices), so it uses
+  the service-role client (`src/lib/supabase/admin.ts` — the only place
+  that key is used; missing key = no admin push, everything else fine).
+  Env: `NEXT_PUBLIC_VAPID_PUBLIC_KEY`, `VAPID_PRIVATE_KEY`,
+  `SUPABASE_SERVICE_ROLE_KEY`. UI: a switch in Profile, a one-time
+  "Get a ping" card on a live order (`mutebites.notify-asked`), and
+  `NewOrderAlerts` on the dashboard — Realtime `orders` inserts play a
+  **loud** repeating alarm (`playAdminAlertSound()`, its own
+  `mutebites.admin-alert-sound` switch, deliberately not the student
+  chime), count new orders and refresh the list. Browsers block audio
+  until a real tap, so the bell both grants permission and arms the sound.
+  A push notification's *own* sound is the phone's setting, not ours —
+  admin pushes only set `requireInteraction` and a long vibrate.
 - **Motion**: CSS only (no Framer Motion). Easing tokens `--ease-out-expo`
   / `--ease-spring` / `--ease-in-quad` (also Tailwind `ease-*` utilities) and
   durations `--dur-press|quick|base|slow` in `globals.css` — use them rather

@@ -1,9 +1,13 @@
 "use server";
 
+import { after } from "next/server";
 import { MAX_NOTES, MAX_QUANTITY } from "@/lib/cart/limits";
 import { getRestaurantMenu } from "@/lib/data/restaurants";
 import { normalizeIndianMobile } from "@/lib/phone";
 import { getSessionProfile } from "@/lib/profile";
+import { notifyAdmins } from "@/lib/notifications/send";
+import { formatRupees } from "@/lib/format";
+import { formatOrderNumber } from "@/lib/orders/status";
 import { createClient } from "@/lib/supabase/server";
 
 export type PlaceOrderInput = {
@@ -109,6 +113,25 @@ export async function placeOrder(input: PlaceOrderInput): Promise<PlaceOrderResu
   if (error || typeof orderId !== "string") {
     return { ok: false, error: PLACE_ORDER_ERRORS[error?.message ?? ""] ?? GENERIC_ERROR };
   }
+
+  // Buzz the admin's phone, after the student already has their response —
+  // a slow push service must never hold up an order.
+  after(async () => {
+    const { data: placed } = await supabase
+      .from("orders")
+      .select("daily_number, total_amount")
+      .eq("id", orderId)
+      .single();
+    if (!placed) return;
+    await notifyAdmins({
+      title: `New order ${formatOrderNumber(placed.daily_number)} · ${formatRupees(placed.total_amount)}`,
+      body: `${menu.restaurant.name} · ${profile.full_name}`,
+      url: "/admin",
+      tag: `order-${orderId}`,
+      urgent: true,
+    });
+  });
+
   return { ok: true, orderId };
 }
 

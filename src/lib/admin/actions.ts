@@ -1,10 +1,12 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
+import { after } from "next/server";
 import { isPastDeliverySlot } from "@/lib/date";
+import { notifyUser, type PushPayload } from "@/lib/notifications/send";
 import type { OrderStatus } from "@/lib/data/types";
 import type { OrderingMode } from "@/lib/ordering";
-import { nextStatus } from "@/lib/orders/status";
+import { formatOrderNumber, nextStatus } from "@/lib/orders/status";
 import { getSessionProfile } from "@/lib/profile";
 import { createClient } from "@/lib/supabase/server";
 
@@ -103,14 +105,47 @@ export async function advanceOrderStatus(
     .update({ status: next })
     .eq("id", orderId)
     .eq("status", currentStatus)
-    .select("id");
+    .select("id, user_id, daily_number, restaurants(name)")
+    .returns<OrderNotifyRow[]>();
   if (error) return { ok: false, error: "Couldn't update that order. Please try again." };
   if (!data || data.length === 0) {
     return { ok: false, error: "That order just changed — refresh and try again." };
   }
 
+  const order = data[0];
+  after(() => notifyUser(supabase, order.user_id, statusPayload(order, next)));
+
   revalidatePath("/admin");
   return { ok: true };
+}
+
+type OrderNotifyRow = {
+  id: string;
+  user_id: string;
+  daily_number: number;
+  restaurants: { name: string } | null;
+};
+
+/** What a student sees on their phone when their order moves on. */
+function statusPayload(order: OrderNotifyRow, status: OrderStatus): PushPayload {
+  const token = formatOrderNumber(order.daily_number);
+  const where = order.restaurants?.name ?? "MuteBites";
+  const copy: Partial<Record<OrderStatus, { title: string; body: string }>> = {
+    confirmed: {
+      title: `Order ${token} confirmed`,
+      body: `${where} is preparing your food. We'll call you at the gate.`,
+    },
+    delivered: {
+      title: `Order ${token} delivered`,
+      body: "Enjoy! Tap to rate what you ate.",
+    },
+    cancelled: {
+      title: `Order ${token} was cancelled`,
+      body: `Your ${where} order won't be delivered. Tap for details.`,
+    },
+  };
+  const { title, body } = copy[status] ?? { title: `Order ${token} updated`, body: `${where} · ${status}` };
+  return { title, body, url: `/orders/${order.id}`, tag: `order-${order.id}` };
 }
 
 /**
@@ -134,11 +169,15 @@ export async function cancelOrder(orderId: string, currentStatus: OrderStatus): 
     .update({ status: "cancelled" })
     .eq("id", orderId)
     .eq("status", currentStatus)
-    .select("id");
+    .select("id, user_id, daily_number, restaurants(name)")
+    .returns<OrderNotifyRow[]>();
   if (error) return { ok: false, error: "Couldn't cancel that order. Please try again." };
   if (!data || data.length === 0) {
     return { ok: false, error: "That order just changed — refresh and try again." };
   }
+
+  const cancelled = data[0];
+  after(() => notifyUser(supabase, cancelled.user_id, statusPayload(cancelled, "cancelled")));
 
   revalidatePath("/admin");
   return { ok: true };
@@ -195,8 +234,17 @@ export async function markAllConfirmedDelivered(): Promise<
     .update({ status: "delivered" })
     .in("id", eligibleIds)
     .eq("status", "confirmed")
-    .select("id");
+    .select("id, user_id, daily_number, restaurants(name)")
+    .returns<OrderNotifyRow[]>();
   if (error) return { ok: false, error: "Couldn't update those orders. Please try again." };
+
+  // One notification per order, so a student who had two orders delivered
+  // hears about both (each carries its own token).
+  after(async () => {
+    for (const order of updated ?? []) {
+      await notifyUser(supabase, order.user_id, statusPayload(order, "delivered"));
+    }
+  });
 
   revalidatePath("/admin");
   return { ok: true, count: updated?.length ?? 0 };

@@ -17,6 +17,7 @@ import {
 import { BlurImage } from "@/components/blur-image";
 import { BrandLogo } from "@/components/brand-logo";
 import { CelebrationOverlay } from "@/components/celebration-overlay";
+import { NotifyMeCard } from "@/components/notifications/notify-me-card";
 import { RateOrder } from "@/components/orders/rate-order";
 import { SupportButtons } from "@/components/support-buttons";
 import type { OrderDetail } from "@/lib/data/orders";
@@ -233,6 +234,9 @@ export function OrderTracking({
               </p>
             </div>
           </div>
+
+          {/* Still on its way: offer notifications instead of watching this page. */}
+          {!cancelled && status !== "delivered" && <NotifyMeCard />}
 
           {cancelled ? (
             <div className="mt-6 rounded-2xl border border-destructive/30 bg-destructive/5 px-5 py-4">

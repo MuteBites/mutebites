@@ -5,6 +5,7 @@ import { TabBar } from "@/components/nav/tab-bar";
 import { MemberCard } from "@/components/profile/member-card";
 import { getUnlockedMilestones, MilestoneBadges } from "@/components/profile/milestone-badges";
 import { MilestoneUnlockWatcher } from "@/components/profile/milestone-unlock-watcher";
+import { NotificationToggle } from "@/components/notifications/notification-toggle";
 import { SoundToggle } from "@/components/profile/sound-toggle";
 import { SupportCard } from "@/components/profile/support-card";
 import { WeeklyRankBadge } from "@/components/profile/weekly-rank-badge";
@@ -109,6 +110,13 @@ export default async function ProfilePage() {
             <div className="flex items-center justify-between gap-3 px-5 py-3.5">
               <p className="font-semibold">Appearance</p>
               <ThemeIconToggle />
+            </div>
+            <div className="flex items-center justify-between gap-3 px-5 py-3.5">
+              <div className="min-w-0">
+                <p className="font-semibold">Order notifications</p>
+                <p className="text-sm text-muted-foreground">Confirmed, delivered and cancelled.</p>
+              </div>
+              <NotificationToggle />
             </div>
             <div className="flex items-center justify-between gap-3 px-5 py-3.5">
               <p className="font-semibold">Order placed sound</p>

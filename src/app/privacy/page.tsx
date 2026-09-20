@@ -26,6 +26,10 @@ export default function PrivacyPage() {
           and seen only by the MuteBites team — never by other students.
         </p>
         <p>
+          If you turn on order notifications, we store the address your browser gives us for
+          that device so we can send you order updates. Turning them off in Profile deletes it.
+        </p>
+        <p>
           Contact{" "}
           <a href="mailto:mutebites5@gmail.com" className="font-semibold text-primary hover:underline">
             mutebites5@gmail.com
