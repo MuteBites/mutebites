@@ -13,7 +13,10 @@ export const config = {
     // render the home-screen icon, sometimes signed out (e.g. from the
     // login page), so like favicon.ico they must never hit the
     // sign-in redirect below. robots.txt (app/robots.ts) is excluded for the
-    // same reason — crawlers fetch it signed out.
-    "/((?!_next/static|_next/image|favicon.ico|robots.txt|manifest.webmanifest|apple-icon|icons/|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)",
+    // same reason — crawlers fetch it signed out. So is sw.js
+    // (public/sw.js): the browser fetches the service worker outside any
+    // page session, and a 307 to /login would hand it HTML instead of
+    // JavaScript, so notifications could never register.
+    "/((?!_next/static|_next/image|favicon.ico|robots.txt|sw.js|manifest.webmanifest|apple-icon|icons/|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)",
   ],
 };
