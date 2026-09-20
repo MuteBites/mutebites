@@ -392,9 +392,12 @@ added to its cuisine tags so search still finds it; its photo folder
 `public/MuteBites/MuteBites Chinese/` keeps the old name on purpose),
 [`supabase/migrations/20260920010000_bheemasena_single_mushroom_price.sql`](supabase/migrations/20260920010000_bheemasena_single_mushroom_price.sql)
 (data only — Single Mushroom Biryani ₹220 → ₹200),
-and [`supabase/migrations/20260920020000_mixed_biryani_note.sql`](supabase/migrations/20260920020000_mixed_biryani_note.sql)
+[`supabase/migrations/20260920020000_mixed_biryani_note.sql`](supabase/migrations/20260920020000_mixed_biryani_note.sql)
 (data only — every mixed biryani's `note` reads "Comes with both dum & fry
-pieces"; a mixed biryani added later needs it set again).
+pieces"; a mixed biryani added later needs it set again),
+and [`supabase/migrations/20260920030000_bheemasena_mutton_prawn_biryani.sql`](supabase/migrations/20260920030000_bheemasena_mutton_prawn_biryani.sql)
+(data only — adds Mutton Afghani Biryani and Prawn Biryani, ₹400 each, to
+Bheemasena's Non-Veg Biryani section; Bheemasena now has 43 dishes).
 Migrations are applied by hand in the Supabase SQL editor (no CLI setup).
 
 All orders are handed over at **VIT-AP Main Gate** — there is no room
