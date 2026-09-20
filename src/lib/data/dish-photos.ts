@@ -75,6 +75,8 @@ export const DISH_PHOTOS: Record<string, Record<string, string>> = {
     "Egg Burji": `${BHEEMASENA}/Egg bhurji.jpg`,
     "Butter Chicken": `${BHEEMASENA}/Butter chicken.jpg`,
     "Chicken Curry": `${BHEEMASENA}/Chicken Curry.jpg`,
+    "Mutton Afghani Biryani": `${BHEEMASENA}/Mutton Afghani biryani.jpg`,
+    "Prawn Biryani": `${BHEEMASENA}/Prawn biryani.jpg`,
     "Chicken Tandoori Half": `${BHEEMASENA}/Chicken tandoori.jpeg`,
     "Chicken Tandoori Full": `${BHEEMASENA}/Chicken tandoori.jpeg`,
     "Kaju Paneer Butter Masala": `${BHEEMASENA}/Kaju Paneer Butter Masala.jpg`,
