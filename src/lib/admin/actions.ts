@@ -64,6 +64,24 @@ export async function setRestaurantActive(
 }
 
 /**
+ * Marks one dish sold out (or back on sale) from /admin/sold-out. The menu
+ * keeps showing a sold-out dish, greyed out and unorderable, and
+ * place_order() refuses it anyway — this only flips the flag.
+ */
+export async function setDishAvailable(dishId: string, available: boolean): Promise<AdminActionResult> {
+  const denied = await assertAdmin();
+  if (denied) return denied;
+
+  const supabase = await createClient();
+  const { error } = await supabase.from("dishes").update({ is_available: available }).eq("id", dishId);
+  if (error) return { ok: false, error: "Couldn't update that dish. Please try again." };
+
+  revalidatePath("/admin/sold-out");
+  revalidatePath("/", "layout"); // student menus, search and Home cards read is_available
+  return { ok: true };
+}
+
+/**
  * Advances one order to the next status in STATUS_FLOW. `currentStatus` is
  * what the admin's screen showed when they clicked — the update only
  * applies if the row is still at that status, so two admins clicking the

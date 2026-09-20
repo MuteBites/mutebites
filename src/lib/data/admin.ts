@@ -289,3 +289,64 @@ export async function getAdminReviews(): Promise<AdminReview[]> {
     })),
   }));
 }
+
+export type AdminDish = {
+  id: string;
+  name: string;
+  price: number;
+  isVeg: boolean;
+  isAvailable: boolean;
+  restaurantId: string;
+  restaurantName: string;
+  category: string | null;
+};
+
+/**
+ * Every dish on every menu for the Sold out page — including the ones
+ * already marked unavailable, which is the whole point: that page is the
+ * only way to put one back on sale.
+ *
+ * Sorted the way the menus read (restaurant, then section, then the
+ * section's own order) rather than by name, so an admin hunting for a
+ * dish looks in the same place they'd look in the app.
+ */
+export async function getAdminDishes(): Promise<AdminDish[]> {
+  const supabase = await createClient();
+  const { data, error } = await supabase
+    .from("dishes")
+    .select(
+      "id, name, price, is_veg, is_available, sort_order, restaurant_id, restaurants(name), dish_categories(name, sort_order)",
+    )
+    .returns<
+      {
+        id: string;
+        name: string;
+        price: number;
+        is_veg: boolean;
+        is_available: boolean;
+        sort_order: number;
+        restaurant_id: string;
+        restaurants: { name: string } | null;
+        dish_categories: { name: string; sort_order: number } | null;
+      }[]
+    >();
+
+  if (error) throw error;
+  return (data ?? [])
+    .sort(
+      (a, b) =>
+        (a.restaurants?.name ?? "").localeCompare(b.restaurants?.name ?? "") ||
+        (a.dish_categories?.sort_order ?? 0) - (b.dish_categories?.sort_order ?? 0) ||
+        a.sort_order - b.sort_order,
+    )
+    .map((d) => ({
+      id: d.id,
+      name: d.name,
+      price: d.price,
+      isVeg: d.is_veg,
+      isAvailable: d.is_available,
+      restaurantId: d.restaurant_id,
+      restaurantName: d.restaurants?.name ?? "",
+      category: d.dish_categories?.name ?? null,
+    }));
+}

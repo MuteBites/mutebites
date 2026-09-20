@@ -168,6 +168,17 @@ instead of straight from the dashboard, and its back-link points to
 `/admin/users` accordingly (`BackToDashboardLink` takes optional
 `href`/`label` overrides for this).
 
+**Sold out** (`/admin/sold-out`, a "Sold out" pill on the dashboard) lists
+every dish on every menu — including the ones already off sale, since this
+is the only way to put one back — grouped by restaurant and section, with
+restaurant tabs, a search box and a "Sold out only" filter. Each row's
+button flips `dishes.is_available` via `setDishAvailable()`
+(`src/lib/admin/actions.ts`, admin-checked like every other admin action,
+with RLS as the real boundary) and updates that row in place. A sold-out
+dish still shows on the student menu — greyed, struck through and
+unorderable (`DishCard`'s `soldOut`) — and `place_order()` refuses it
+anyway, so the flag is never only a UI state.
+
 Visually, admin shares the student app's system: the dashboard's plum
 "Today" card (`StatCards`) carries today's counts with the campus ordering
 control (`OrderingKillSwitch` — a three-way Auto / Open / Closed switch
