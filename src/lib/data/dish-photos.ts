@@ -77,7 +77,8 @@ export const DISH_PHOTOS: Record<string, Record<string, string>> = {
     "Chicken Curry": `${BHEEMASENA}/Chicken Curry.jpg`,
     "Mutton Afghani Biryani": `${BHEEMASENA}/Mutton Afghani biryani.jpg`,
     "Mutton Keema Biryani": `${BHEEMASENA}/Mutton keema biryani.jpg`,
-    "Mutton Mughlai Biryani": `${BHEEMASENA}/Mutton Mughlai biryani.jpg`,
+    // -v2: the first upload had a watermark, replaced after it was already published.
+    "Mutton Mughlai Biryani": `${BHEEMASENA}/Mutton Mughlai biryani-v2.jpg`,
     "Mutton Fry Biryani": `${BHEEMASENA}/Mutton fry biryani.jpg`,
     "Chicken Wings Biryani": `${BHEEMASENA}/Chicken Wings biryani.jpg`,
     "Chicken Tandoori Biryani": `${BHEEMASENA}/Chicken tandoori biryani.jpg`,
