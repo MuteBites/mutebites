@@ -395,9 +395,15 @@ added to its cuisine tags so search still finds it; its photo folder
 [`supabase/migrations/20260920020000_mixed_biryani_note.sql`](supabase/migrations/20260920020000_mixed_biryani_note.sql)
 (data only — every mixed biryani's `note` reads "Comes with both dum & fry
 pieces"; a mixed biryani added later needs it set again),
-and [`supabase/migrations/20260920030000_bheemasena_mutton_prawn_biryani.sql`](supabase/migrations/20260920030000_bheemasena_mutton_prawn_biryani.sql)
+[`supabase/migrations/20260920030000_bheemasena_mutton_prawn_biryani.sql`](supabase/migrations/20260920030000_bheemasena_mutton_prawn_biryani.sql)
 (data only — adds Mutton Afghani Biryani and Prawn Biryani, ₹400 each, to
-Bheemasena's Non-Veg Biryani section; Bheemasena now has 43 dishes).
+Bheemasena's Non-Veg Biryani section),
+and [`supabase/migrations/20260920040000_bheemasena_new_dishes.sql`](supabase/migrations/20260920040000_bheemasena_new_dishes.sql)
+(data only — 16 more Bheemasena dishes across Non-Veg Biryani, Non-Veg
+Starters, Veg Curries and Non-Veg Curries; the restaurant now has 59
+dishes). Note the shape: the `values` list comes first and the
+restaurant/category are joined onto it — a `cross join` after the join
+can't see `v`.
 Migrations are applied by hand in the Supabase SQL editor (no CLI setup).
 
 All orders are handed over at **VIT-AP Main Gate** — there is no room
