@@ -2,6 +2,8 @@ import "server-only";
 
 import { createClient } from "@/lib/supabase/server";
 import { startOfTodayIST } from "@/lib/date";
+import { getUnlockedMilestones, MILESTONES } from "@/components/profile/milestone-badges";
+import { getRestaurantCount } from "./restaurants";
 import type { OrderStatus } from "./types";
 
 export type AdminRestaurant = { id: string; name: string; is_active: boolean };
@@ -174,7 +176,39 @@ export type AdminUser = {
   registrationNumber: string | null;
   isBanned: boolean;
   createdAt: string;
+  /** Every milestone unlocked — the free-biryani reward is due (or already handed over). */
+  rewardEarned: boolean;
+  /** When an admin marked the free biryani handed over, else null. */
+  rewardClaimedAt: string | null;
 };
+
+/**
+ * Delivered-order counts and distinct restaurants per student, the same
+ * inputs the Profile page feeds getUnlockedMilestones(). Paged because
+ * PostgREST caps a single response at 1000 rows.
+ */
+async function getDeliveredStatsByUser(): Promise<Map<string, { delivered: number; restaurants: Set<string> }>> {
+  const supabase = await createClient();
+  const stats = new Map<string, { delivered: number; restaurants: Set<string> }>();
+  const PAGE = 1000;
+  for (let from = 0; ; from += PAGE) {
+    const { data, error } = await supabase
+      .from("orders")
+      .select("user_id, restaurant_id")
+      .eq("status", "delivered")
+      .order("id")
+      .range(from, from + PAGE - 1);
+    if (error) throw error;
+    for (const row of data ?? []) {
+      const s = stats.get(row.user_id) ?? { delivered: 0, restaurants: new Set<string>() };
+      s.delivered += 1;
+      s.restaurants.add(row.restaurant_id);
+      stats.set(row.user_id, s);
+    }
+    if (!data || data.length < PAGE) break;
+  }
+  return stats;
+}
 
 // Capped for the same reason as HISTORY_ORDERS_LIMIT above — keeps the
 // Users page cheap to load as the student base grows.
@@ -183,15 +217,29 @@ const ALL_USERS_LIMIT = 5000;
 /** Every registered student, most recently joined first — for the admin Users page. */
 export async function getAllUsers(): Promise<AdminUser[]> {
   const supabase = await createClient();
-  const { data, error } = await supabase
-    .from("users")
-    .select("id, full_name, phone, email, registration_number, is_banned, created_at")
-    .order("created_at", { ascending: false })
-    .limit(ALL_USERS_LIMIT);
+  const [{ data, error }, deliveredStats, totalRestaurants, rewards] = await Promise.all([
+    supabase
+      .from("users")
+      .select("id, full_name, phone, email, registration_number, is_banned, created_at")
+      .order("created_at", { ascending: false })
+      .limit(ALL_USERS_LIMIT),
+    getDeliveredStatsByUser(),
+    getRestaurantCount(),
+    supabase.from("milestone_rewards").select("user_id, claimed_at"),
+  ]);
 
   if (error) throw error;
+  // A missing milestone_rewards table (migration not applied yet) just means nobody has claimed.
+  const claimedAt = new Map((rewards.data ?? []).map((r) => [r.user_id as string, r.claimed_at as string]));
 
   return (data ?? []).map((u) => ({
+    rewardEarned:
+      getUnlockedMilestones(
+        deliveredStats.get(u.id)?.delivered ?? 0,
+        deliveredStats.get(u.id)?.restaurants.size ?? 0,
+        totalRestaurants,
+      ).length === MILESTONES.length,
+    rewardClaimedAt: claimedAt.get(u.id) ?? null,
     id: u.id,
     fullName: u.full_name,
     phone: u.phone,

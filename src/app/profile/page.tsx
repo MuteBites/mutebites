@@ -13,6 +13,7 @@ import { ThemeIconToggle } from "@/components/theme/theme-icon-toggle";
 import { getOrderStats, hasActiveOrder } from "@/lib/data/orders";
 import { getMyWeeklyRank } from "@/lib/data/rank";
 import { getRestaurantCount } from "@/lib/data/restaurants";
+import { getMilestoneRewardClaimedAt } from "@/lib/data/rewards";
 import { formatMonthYear } from "@/lib/date";
 import { NAV_TRANSITION, REVEAL_ENTER } from "@/lib/nav-transition";
 import { requireProfile } from "@/lib/profile";
@@ -37,11 +38,12 @@ export default async function ProfilePage() {
   const weeklyRankPromise = getMyWeeklyRank();
 
   const profile = await profilePromise;
-  const [orderInProgress, orderStats, totalRestaurants, weeklyRank] = await Promise.all([
+  const [orderInProgress, orderStats, totalRestaurants, weeklyRank, rewardClaimedAt] = await Promise.all([
     hasActiveOrder(profile.id),
     getOrderStats(profile.id),
     totalRestaurantsPromise,
     weeklyRankPromise,
+    getMilestoneRewardClaimedAt(profile.id),
   ]);
 
   // Mirrors the precedence in profile/actions.ts's updatePhone — that
@@ -78,6 +80,7 @@ export default async function ProfilePage() {
             deliveredCount={orderStats.deliveredCount}
             restaurantsVisited={orderStats.restaurantsVisited}
             totalRestaurants={totalRestaurants}
+            rewardClaimedAt={rewardClaimedAt}
           />
 
           <h2 className="mt-8 font-heading text-title font-bold">Your details</h2>

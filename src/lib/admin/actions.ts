@@ -66,6 +66,43 @@ export async function setRestaurantActive(
 }
 
 /**
+ * Marks a student's all-milestones free biryani as handed over (or undoes
+ * it). The Users page only offers this for students who have unlocked
+ * every milestone; the table's primary key keeps it to one per student.
+ */
+export async function setMilestoneRewardClaimed(
+  userId: string,
+  claimed: boolean,
+): Promise<AdminActionResult & { claimedAt?: string }> {
+  const { profile } = await getSessionProfile();
+  if (!profile || profile.role !== "admin") return { ok: false, error: "Admins only." };
+
+  const supabase = await createClient();
+  if (claimed) {
+    const { data, error } = await supabase
+      .from("milestone_rewards")
+      .insert({ user_id: userId, marked_by: profile.id })
+      .select("claimed_at")
+      .single();
+    if (error) {
+      return {
+        ok: false,
+        error: error.code === "23505" ? "Already marked as claimed." : "Couldn't mark it claimed. Please try again.",
+      };
+    }
+    revalidatePath("/admin/users");
+    revalidatePath("/profile");
+    return { ok: true, claimedAt: data.claimed_at };
+  }
+
+  const { error } = await supabase.from("milestone_rewards").delete().eq("user_id", userId);
+  if (error) return { ok: false, error: "Couldn't undo that. Please try again." };
+  revalidatePath("/admin/users");
+  revalidatePath("/profile");
+  return { ok: true };
+}
+
+/**
  * Marks one dish sold out (or back on sale) from /admin/sold-out. The menu
  * keeps showing a sold-out dish, greyed out and unorderable, and
  * place_order() refuses it anyway — this only flips the flag.

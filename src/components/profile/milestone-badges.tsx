@@ -13,6 +13,11 @@ import {
 import { SUPPORT_PHONE } from "@/lib/support";
 import { cn } from "@/lib/utils";
 
+/** "21 Sep", in IST. */
+export function formatDayMonth(iso: string) {
+  return new Date(iso).toLocaleDateString("en-IN", { day: "numeric", month: "short", timeZone: "Asia/Kolkata" });
+}
+
 export type MilestoneKey =
   | "first_bite"
   | "regular"
@@ -103,7 +108,10 @@ export function getUnlockedMilestones(
   return MILESTONES.filter((m) => isUnlocked(m.progress(stats))).map((m) => m.key);
 }
 
-export function MilestoneBadges(stats: MilestoneStats) {
+export function MilestoneBadges({
+  rewardClaimedAt,
+  ...stats
+}: MilestoneStats & { rewardClaimedAt: string | null }) {
   const tiles = MILESTONES.map((m) => {
     const [current, target] = m.progress(stats);
     return { ...m, current, target, unlocked: isUnlocked([current, target]) };
@@ -143,17 +151,22 @@ export function MilestoneBadges(stats: MilestoneStats) {
           </li>
         ))}
       </ul>
-      <MilestoneReward done={unlockedCount === tiles.length} left={tiles.length - unlockedCount} />
+      <MilestoneReward
+        done={unlockedCount === tiles.length}
+        left={tiles.length - unlockedCount}
+        claimedAt={rewardClaimedAt}
+      />
     </section>
   );
 }
 
 /*
  * The client's completion offer: every milestone unlocked earns one free
- * biryani of the student's choice. Not tracked in the app — the student
- * messages support to claim it and the team checks the profile by hand.
+ * biryani of the student's choice. The student messages support to claim
+ * it; an admin marks it handed over on /admin/users (milestone_rewards),
+ * after which this card says so instead of offering the claim link.
  */
-function MilestoneReward({ done, left }: { done: boolean; left: number }) {
+function MilestoneReward({ done, left, claimedAt }: { done: boolean; left: number; claimedAt: string | null }) {
   const claimText = encodeURIComponent("Hi MuteBites! I've unlocked all the milestones — I'd like to claim my free biryani.");
   return (
     <div className="mt-3 flex items-start gap-3 rounded-2xl bg-brand-soft px-4 py-3.5 text-brand-soft-foreground">
@@ -161,7 +174,14 @@ function MilestoneReward({ done, left }: { done: boolean; left: number }) {
         <Gift className="size-4.5" aria-hidden="true" />
       </span>
       <div className="min-w-0 text-sm">
-        {done ? (
+        {claimedAt ? (
+          <>
+            <p className="font-semibold">Free biryani claimed</p>
+            <p className="mt-0.5">
+              Handed over on {formatDayMonth(claimedAt)} — enjoy, and thanks for sticking with us.
+            </p>
+          </>
+        ) : done ? (
           <>
             <p className="font-semibold">You&apos;ve earned a free biryani!</p>
             <p className="mt-0.5">

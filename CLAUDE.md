@@ -63,9 +63,14 @@ Food delivery site for VIT-AP University students.
   counts that only go up (delivered orders, distinct restaurants), so a
   badge never re-locks; locked tiles show a progress ring and "N to go".
   Under the grid, a blush `MilestoneReward` card carries the client's
-  offer: all six milestones = one free biryani of their choice. It's
-  not tracked in the app — the unlocked state links to WhatsApp
-  (`SUPPORT_PHONE`) with a prefilled claim message, checked by hand.
+  offer: all six milestones = one free biryani of their choice. Earned →
+  a WhatsApp link (`SUPPORT_PHONE`) with a prefilled claim message; once
+  an admin marks it handed over on `/admin/users` (`milestone_rewards`,
+  `setMilestoneRewardClaimed()`) the card says "Free biryani claimed".
+  The admin row's "Mark claimed" (confirm dialog, with Undo) only appears
+  for students who've unlocked every milestone, computed server-side in
+  `getAllUsers()` with the same `getUnlockedMilestones()`; a "Free biryani
+  earned" chip filters the list to them.
   A newly unlocked milestone (per device, `mutebites.milestones-seen`)
   plays the same full-screen celebration as "Order placed!" — both use
   `CelebrationOverlay` (`src/components/celebration-overlay.tsx`: plum
@@ -451,6 +456,13 @@ notifications on (`user_id`, unique `endpoint`, `p256dh`, `auth`,
 phone) and `delete` stale ones. The *new order* send can't use any
 student's session, so it goes through the service-role client — see
 **Notifications** above.
+[`supabase/migrations/20260921010000_milestone_rewards.sql`](supabase/migrations/20260921010000_milestone_rewards.sql)
+adds **`milestone_rewards`** — one row per student whose all-milestones
+free biryani was handed over (`user_id` primary key = once per student,
+`claimed_at`, `marked_by` admin). RLS: a student selects only their own
+row; admins select all, insert (with `marked_by = auth.uid()`) and delete
+(undo). No update policy. Whether a student *qualifies* is checked in the
+app (`getUnlockedMilestones()`), not the database — see **Profile** above.
 Migrations are applied by hand in the Supabase SQL editor (no CLI setup).
 
 All orders are handed over at **VIT-AP Main Gate** — there is no room
