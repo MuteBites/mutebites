@@ -4,11 +4,13 @@ import {
   ChefHat,
   Compass,
   Crown,
+  Gift,
   Lock,
   Repeat,
   UtensilsCrossed,
   type LucideIcon,
 } from "lucide-react";
+import { SUPPORT_PHONE } from "@/lib/support";
 import { cn } from "@/lib/utils";
 
 export type MilestoneKey =
@@ -141,7 +143,52 @@ export function MilestoneBadges(stats: MilestoneStats) {
           </li>
         ))}
       </ul>
+      <MilestoneReward done={unlockedCount === tiles.length} left={tiles.length - unlockedCount} />
     </section>
+  );
+}
+
+/*
+ * The client's completion offer: every milestone unlocked earns one free
+ * biryani of the student's choice. Not tracked in the app — the student
+ * messages support to claim it and the team checks the profile by hand.
+ */
+function MilestoneReward({ done, left }: { done: boolean; left: number }) {
+  const claimText = encodeURIComponent("Hi MuteBites! I've unlocked all the milestones — I'd like to claim my free biryani.");
+  return (
+    <div className="mt-3 flex items-start gap-3 rounded-2xl bg-brand-soft px-4 py-3.5 text-brand-soft-foreground">
+      <span className="mt-0.5 flex size-9 shrink-0 items-center justify-center rounded-full bg-card">
+        <Gift className="size-4.5" aria-hidden="true" />
+      </span>
+      <div className="min-w-0 text-sm">
+        {done ? (
+          <>
+            <p className="font-semibold">You&apos;ve earned a free biryani!</p>
+            <p className="mt-0.5">
+              Every milestone done — pick any biryani you like, on us.{" "}
+              <a
+                href={`https://wa.me/${SUPPORT_PHONE.replace("+", "")}?text=${claimText}`}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="font-semibold underline underline-offset-2"
+              >
+                Message us to claim it
+              </a>
+            </p>
+          </>
+        ) : (
+          <>
+            <p className="font-semibold">A free biryani is waiting</p>
+            <p className="mt-0.5">
+              Unlock all {MILESTONES.length} milestones and your next biryani is on us — any one you like.{" "}
+              <span className="font-semibold tabular-nums">
+                {left} to go.
+              </span>
+            </p>
+          </>
+        )}
+      </div>
+    </div>
   );
 }
 

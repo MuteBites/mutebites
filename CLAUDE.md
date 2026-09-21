@@ -62,6 +62,10 @@ Food delivery site for VIT-AP University students.
   `MILESTONES` (`milestone-badges.tsx`) — six tiers, all computed from
   counts that only go up (delivered orders, distinct restaurants), so a
   badge never re-locks; locked tiles show a progress ring and "N to go".
+  Under the grid, a blush `MilestoneReward` card carries the client's
+  offer: all six milestones = one free biryani of their choice. It's
+  not tracked in the app — the unlocked state links to WhatsApp
+  (`SUPPORT_PHONE`) with a prefilled claim message, checked by hand.
   A newly unlocked milestone (per device, `mutebites.milestones-seen`)
   plays the same full-screen celebration as "Order placed!" — both use
   `CelebrationOverlay` (`src/components/celebration-overlay.tsx`: plum
