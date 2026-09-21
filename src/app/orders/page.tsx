@@ -14,7 +14,7 @@ import { formatOrderNumber, isActiveStatus } from "@/lib/orders/status";
 import { requireProfile } from "@/lib/profile";
 import { cn } from "@/lib/utils";
 
-export const metadata: Metadata = { title: "Your orders · MuteBites" };
+export const metadata: Metadata = { title: "Your orders · MuteBites", robots: { index: false, follow: false } };
 
 /*
  * Orders still on their way are pinned in an "In progress" section with a

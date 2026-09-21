@@ -4,6 +4,7 @@ import { AppSplash } from "@/components/splash/app-splash";
 import { SPLASH_DISABLED } from "@/components/splash/config";
 import { SPLASH_INIT_SCRIPT } from "@/components/splash/init-script";
 import { Toaster } from "@/components/toast/toaster";
+import { SITE_DESCRIPTION, SITE_NAME, SITE_TITLE, SITE_URL } from "@/lib/site";
 import { THEME_INIT_SCRIPT } from "@/lib/theme/init-script";
 import "./globals.css";
 
@@ -23,8 +24,39 @@ const fraunces = Fraunces({
 });
 
 export const metadata: Metadata = {
-  title: "MuteBites",
-  description: "Good food. Campus mood. Food delivery for VIT-AP students.",
+  // Makes every relative URL below (and the generated share image) absolute.
+  metadataBase: new URL(SITE_URL),
+  title: SITE_NAME,
+  description: SITE_DESCRIPTION,
+  applicationName: SITE_NAME,
+  keywords: [
+    "MuteBites",
+    "VIT-AP food delivery",
+    "VIT-AP University",
+    "Amaravati food delivery",
+    "campus food delivery",
+    "biryani delivery VIT-AP",
+  ],
+  // Link previews (WhatsApp, Instagram, Google). The image comes from
+  // app/opengraph-image.tsx and is attached automatically.
+  openGraph: {
+    type: "website",
+    siteName: SITE_NAME,
+    title: SITE_TITLE,
+    description: SITE_DESCRIPTION,
+    url: "/",
+    locale: "en_IN",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: SITE_TITLE,
+    description: SITE_DESCRIPTION,
+  },
+  // Google Search Console ownership check — set the token as an env var in
+  // Vercel; nothing is emitted while it's unset.
+  verification: process.env.GOOGLE_SITE_VERIFICATION
+    ? { google: process.env.GOOGLE_SITE_VERIFICATION }
+    : undefined,
   appleWebApp: {
     capable: true,
     title: "MuteBites",

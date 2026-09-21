@@ -1,7 +1,11 @@
+import type { Metadata } from "next";
 import { AdminHeader } from "@/components/admin/admin-header";
 import { AdminPasscodeGate } from "@/components/admin/admin-passcode-gate";
 import { requireAdmin } from "@/lib/admin/guard";
 import { isAdminPasscodeVerified } from "@/lib/admin/passcode";
+
+// Never in search results (robots.txt also disallows /admin).
+export const metadata: Metadata = { robots: { index: false, follow: false } };
 
 export default async function AdminLayout({ children }: LayoutProps<"/admin">) {
   await requireAdmin();

@@ -5,6 +5,7 @@ import { WelcomeForm } from "./welcome-form";
 
 export const metadata: Metadata = {
   title: "Almost there · MuteBites",
+  robots: { index: false, follow: false },
 };
 
 export default async function WelcomePage() {

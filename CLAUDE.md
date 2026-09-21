@@ -261,6 +261,22 @@ silently re-enables the button.
   crawlable). Excluded from the `src/proxy.ts` matcher like `favicon.ico`,
   otherwise the sign-in guard 307s crawlers to `/login` and Lighthouse
   marks robots.txt invalid.
+- **SEO** (search basics only — signed-out visitors, and so search
+  engines, can only load `/login`, `/privacy` and `/terms`; menus are not
+  public, by decision): `src/lib/site.ts` holds the site address
+  (`NEXT_PUBLIC_SITE_URL` overrides it — set that if a custom domain is
+  added), name, search title and description. The root layout sets
+  `metadataBase`, description, keywords, Open Graph / Twitter tags and
+  Google Search Console verification (`GOOGLE_SITE_VERIFICATION` env var,
+  nothing emitted while unset). `src/app/opengraph-image.tsx` renders the
+  link-preview card (mark, name, tagline, four dish photos — literal
+  paths, update them if a photo is renamed). `/login` carries the full
+  search title, a canonical URL and Organization/WebSite JSON-LD.
+  `src/app/sitemap.ts` lists the three public pages; `robots.ts` points
+  to it and disallows `/admin`, `/auth`, `/orders`, `/profile`,
+  `/welcome`, which (plus the admin layout) are also `noindex`.
+  `sitemap.xml` and `opengraph-image` are excluded from the
+  `src/proxy.ts` matcher so bots aren't redirected to `/login`.
 - Every page has exactly one `<h1>` (order tracking's is `sr-only`; the
   admin header's "Admin" is an h1 only on the dashboard itself, since
   sub-pages carry their own). Keep it that way when adding pages.

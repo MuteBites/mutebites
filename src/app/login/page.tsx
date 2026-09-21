@@ -2,11 +2,32 @@ import type { Metadata } from "next";
 import Image from "next/image";
 import Link from "next/link";
 import { BrandLogo } from "@/components/brand-logo";
+import { SITE_DESCRIPTION, SITE_NAME, SITE_TITLE, SITE_URL } from "@/lib/site";
 import { GoogleSignInButton } from "./google-sign-in-button";
 
+// The page search engines land on (everything else needs sign-in), so it
+// carries the full search title and a canonical address.
 export const metadata: Metadata = {
-  title: "Sign in · MuteBites",
+  title: SITE_TITLE,
+  alternates: { canonical: "/login" },
 };
+
+// Tells Google who MuteBites is (name, logo, site) — structured data only,
+// nothing visible.
+const STRUCTURED_DATA = JSON.stringify({
+  "@context": "https://schema.org",
+  "@graph": [
+    {
+      "@type": "Organization",
+      name: SITE_NAME,
+      url: SITE_URL,
+      logo: `${SITE_URL}/icons/icon-512`,
+      description: SITE_DESCRIPTION,
+      areaServed: "VIT-AP University, Amaravati, Andhra Pradesh, India",
+    },
+    { "@type": "WebSite", name: SITE_NAME, url: SITE_URL },
+  ],
+}).replace(/</g, "\\u003c");
 
 /*
  * The first thing a student sees, so it leads with the real food rather
@@ -43,6 +64,7 @@ export default async function LoginPage({ searchParams }: PageProps<"/login">) {
 
   return (
     <main className="relative mx-auto flex w-full max-w-md flex-1 flex-col overflow-hidden">
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: STRUCTURED_DATA }} />
       <div aria-hidden="true" className="relative min-h-44 flex-1 overflow-hidden">
         <div className="absolute -inset-x-12 -top-16 grid -rotate-6 grid-cols-3 gap-3">
           {MOSAIC.map((column, c) => (

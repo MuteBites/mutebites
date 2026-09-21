@@ -16,7 +16,9 @@ export const config = {
     // same reason — crawlers fetch it signed out. So is sw.js
     // (public/sw.js): the browser fetches the service worker outside any
     // page session, and a 307 to /login would hand it HTML instead of
-    // JavaScript, so notifications could never register.
-    "/((?!_next/static|_next/image|favicon.ico|robots.txt|sw.js|manifest.webmanifest|apple-icon|icons/|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)",
+    // JavaScript, so notifications could never register. sitemap.xml and
+    // opengraph-image (app/sitemap.ts, app/opengraph-image.tsx) are fetched
+    // signed out by search engines and link-preview bots.
+    "/((?!_next/static|_next/image|favicon.ico|robots.txt|sitemap.xml|opengraph-image|sw.js|manifest.webmanifest|apple-icon|icons/|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)",
   ],
 };

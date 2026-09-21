@@ -22,7 +22,7 @@ import { EditablePhone } from "./editable-phone";
 import { ACTIVE_ORDER_PHONE_LOCK_MESSAGE, BANNED_PHONE_LOCK_MESSAGE } from "./phone-lock";
 import { SignOutButton } from "./sign-out-button";
 
-export const metadata: Metadata = { title: "Profile · MuteBites" };
+export const metadata: Metadata = { title: "Profile · MuteBites", robots: { index: false, follow: false } };
 
 function initials(name: string) {
   const parts = name.trim().split(/\s+/);
