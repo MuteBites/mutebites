@@ -19,6 +19,8 @@ export const config = {
     // JavaScript, so notifications could never register. sitemap.xml and
     // opengraph-image (app/sitemap.ts, app/opengraph-image.tsx) are fetched
     // signed out by search engines and link-preview bots.
-    "/((?!_next/static|_next/image|favicon.ico|robots.txt|sitemap.xml|opengraph-image|sw.js|manifest.webmanifest|apple-icon|icons/|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)",
+    // api/csp-report receives CSP violation reports, including from the
+    // signed-out login page.
+    "/((?!_next/static|_next/image|favicon.ico|robots.txt|sitemap.xml|opengraph-image|api/csp-report|sw.js|manifest.webmanifest|apple-icon|icons/|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)",
   ],
 };
