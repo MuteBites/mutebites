@@ -26,6 +26,9 @@ async function assertAdmin(): Promise<{ ok: false; error: string } | null> {
 /**
  * Campus-wide ordering override: 'auto' follows the daily schedule
  * (public.ordering_schedule_open()), 'open' / 'closed' force it either way.
+ * 'closed' also turns every restaurant off, so a forced close is total —
+ * switching back to Auto / Open leaves them off, and the admin turns on
+ * whichever restaurants should reopen.
  */
 export async function setOrderingMode(mode: OrderingMode): Promise<AdminActionResult> {
   const denied = await assertAdmin();
@@ -40,6 +43,18 @@ export async function setOrderingMode(mode: OrderingMode): Promise<AdminActionRe
     .update({ ordering_mode: mode, updated_at: new Date().toISOString() })
     .eq("id", true);
   if (error) return { ok: false, error: "Couldn't update ordering. Please try again." };
+
+  if (mode === "closed") {
+    const { error: restaurantsError } = await supabase
+      .from("restaurants")
+      .update({ is_active: false })
+      .eq("is_active", true);
+    if (restaurantsError) {
+      revalidatePath("/admin");
+      return { ok: false, error: "Ordering is paused, but turning the restaurants off failed. Please try again." };
+    }
+    revalidatePath("/", "layout"); // student home + menu pages read is_active
+  }
 
   revalidatePath("/admin");
   return { ok: true };

@@ -1,7 +1,7 @@
 import "server-only";
 
 import { createClient } from "@/lib/supabase/server";
-import { startOfTodayIST } from "@/lib/date";
+import { isPastDeliverySlot, startOfTodayIST } from "@/lib/date";
 import { getUnlockedMilestones, MILESTONES } from "@/components/profile/milestone-badges";
 import { getRestaurantCount } from "./restaurants";
 import type { OrderStatus } from "./types";
@@ -75,7 +75,8 @@ export type AdminOrder = {
   userId: string;
   studentName: string;
   studentBanned: boolean;
-  items: { dishName: string; quantity: number }[];
+  /** In the order they were added; `subtotal` = unit price × quantity, snapshotted at order time. */
+  items: { dishName: string; quantity: number; subtotal: number }[];
   dailyNumber: number;
 };
 
@@ -91,11 +92,11 @@ type AdminOrderRow = {
   restaurant_id: string;
   restaurants: { name: string } | null;
   users: { full_name: string; is_banned: boolean } | null;
-  order_items: { dish_name: string; quantity: number }[];
+  order_items: { dish_name: string; quantity: number; subtotal: number }[];
 };
 
 const ADMIN_ORDER_COLUMNS =
-  "id, status, total_amount, created_at, contact_phone, notes, user_id, restaurant_id, restaurants(name), users(full_name, is_banned), order_items(dish_name, quantity), daily_number";
+  "id, status, total_amount, created_at, contact_phone, notes, user_id, restaurant_id, restaurants(name), users(full_name, is_banned), order_items(dish_name, quantity, subtotal), daily_number";
 
 function toAdminOrder(o: AdminOrderRow): AdminOrder {
   return {
@@ -110,17 +111,11 @@ function toAdminOrder(o: AdminOrderRow): AdminOrder {
     restaurantName: o.restaurants?.name ?? "Restaurant",
     studentName: o.users?.full_name ?? "Student",
     studentBanned: o.users?.is_banned ?? false,
-    items: o.order_items.map((i) => ({ dishName: i.dish_name, quantity: i.quantity })),
+    items: o.order_items.map((i) => ({ dishName: i.dish_name, quantity: i.quantity, subtotal: Number(i.subtotal) })),
     dailyNumber: o.daily_number,
   };
 }
 
-/**
- * Today's orders (IST calendar day) across every student, for the main
- * admin dashboard's order list — the day resets are what "today" means to
- * whoever's standing at the gate, so this always matches their intuition
- * without needing a filter. See getAdminOrderHistory() for every past day.
- */
 /**
  * Every `confirmed` order (any day), just id + placed-at — what the "Mark
  * all delivered" button needs to count eligible orders the same way
@@ -137,7 +132,14 @@ export async function getConfirmedOrderTimes(): Promise<{ id: string; createdAt:
   return (data ?? []).map((o) => ({ id: o.id, createdAt: o.created_at }));
 }
 
-export async function getAdminOrders(): Promise<AdminOrder[]> {
+/**
+ * The main dashboard's "Current orders": today's orders (IST) whose
+ * delivery slot hasn't ended yet, plus any of today's that still need an
+ * admin (pending / confirmed) even past their slot, so nothing actionable
+ * disappears. Delivered or cancelled orders drop off once their slot's
+ * end time passes — they live on /admin/history (getAdminOrderHistory()).
+ */
+export async function getAdminOrders(now: Date = new Date()): Promise<AdminOrder[]> {
   const supabase = await createClient();
   const { data, error } = await supabase
     .from("orders")
@@ -147,7 +149,13 @@ export async function getAdminOrders(): Promise<AdminOrder[]> {
     .returns<AdminOrderRow[]>();
 
   if (error) throw error;
-  return (data ?? []).map(toAdminOrder);
+  return (data ?? [])
+    .map(toAdminOrder)
+    .filter((o) => !isFinished(o.status) || !isPastDeliverySlot(o.createdAt, now));
+}
+
+function isFinished(status: OrderStatus) {
+  return status === "delivered" || status === "cancelled";
 }
 
 // Capped so the history page stays cheap to load as order history grows —

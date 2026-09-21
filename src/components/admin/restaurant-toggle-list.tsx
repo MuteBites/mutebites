@@ -1,35 +1,67 @@
 "use client";
 
 import { useState, useTransition } from "react";
+import { useRouter } from "next/navigation";
 import { Loader2 } from "lucide-react";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 import { BlurImage } from "@/components/blur-image";
 import { getRestaurantCoverPhoto } from "@/lib/data/dish-photos";
 import type { AdminRestaurant } from "@/lib/data/admin";
-import { setRestaurantActive } from "@/lib/admin/actions";
+import { setOrderingMode, setRestaurantActive } from "@/lib/admin/actions";
+import { scheduleOpen } from "@/lib/ordering";
 import { toast } from "@/lib/toast/store";
 import { cn } from "@/lib/utils";
 
 function RestaurantToggleCard({
   restaurant,
   orderingEnabled,
+  forcedClosed,
   closedChip,
 }: {
   restaurant: AdminRestaurant;
   /** Campus-wide kill switch — a restaurant can be individually "open" and still not actually take orders while this is off. */
   orderingEnabled: boolean;
+  /** An admin set ordering to Closed — turning a restaurant on first asks to reopen ordering. */
+  forcedClosed: boolean;
   closedChip: string;
 }) {
+  const router = useRouter();
   const [active, setActive] = useState(restaurant.is_active);
+  // Resync when the server re-fetch changes this restaurant from elsewhere
+  // (pausing ordering turns every restaurant off) — set during render, see
+  // "Adjusting state based on a prop change" in the React docs.
+  const [prevPropActive, setPrevPropActive] = useState(restaurant.is_active);
+  if (restaurant.is_active !== prevPropActive) {
+    setPrevPropActive(restaurant.is_active);
+    setActive(restaurant.is_active);
+  }
   const [pending, startTransition] = useTransition();
+  const [askReopen, setAskReopen] = useState(false);
   // This restaurant itself is open, but campus-wide ordering is off — its
   // own toggle didn't do this, so it gets a distinct label rather than
   // being shown as plain "Open" (which would read as taking orders right
   // now) or "Closed" (which would misattribute the pause to this restaurant).
   const paused = active && !orderingEnabled;
   const cover = getRestaurantCoverPhoto(restaurant.name);
+  // Reopening from a forced close: follow the schedule if it's open right
+  // now, otherwise force ordering open (the admin asked for it open).
+  const reopenMode = scheduleOpen() ? "auto" : "open";
 
   function toggle() {
     const next = !active;
+    if (next && forcedClosed) {
+      setAskReopen(true);
+      return;
+    }
     startTransition(async () => {
       const result = await setRestaurantActive(restaurant.id, next);
       if (result.ok) {
@@ -38,6 +70,25 @@ function RestaurantToggleCard({
       } else {
         toast.error(result.error);
       }
+    });
+  }
+
+  function reopenOrdering() {
+    startTransition(async () => {
+      const ordering = await setOrderingMode(reopenMode);
+      if (!ordering.ok) {
+        toast.error(ordering.error);
+        return;
+      }
+      const result = await setRestaurantActive(restaurant.id, true);
+      if (result.ok) {
+        setActive(true);
+        toast.success(`Ordering is open again, and ${restaurant.name} is on.`);
+      } else {
+        toast.error(`Ordering is open again, but ${restaurant.name} couldn't be turned on. Try again.`);
+      }
+      setAskReopen(false);
+      router.refresh();
     });
   }
 
@@ -82,6 +133,28 @@ function RestaurantToggleCard({
         {pending && <Loader2 className="size-3.5 animate-spin" />}
         {active ? "Turn off" : "Turn on"}
       </button>
+
+      <AlertDialog open={askReopen} onOpenChange={(open) => !open && !pending && setAskReopen(false)}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Ordering is closed</AlertDialogTitle>
+            <AlertDialogDescription>
+              Open ordering first, then turn on the restaurants you want. Do you want to open ordering now?{" "}
+              {restaurant.name} will be turned on too.{" "}
+              {reopenMode === "auto"
+                ? "Ordering will follow the schedule (Auto)."
+                : "It's outside the schedule right now, so ordering will be forced open — switch back to Auto when you're done."}
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel disabled={pending}>No</AlertDialogCancel>
+            <AlertDialogAction disabled={pending} onClick={reopenOrdering}>
+              {pending && <Loader2 className="size-4 animate-spin" />}
+              Open ordering
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }
@@ -89,10 +162,12 @@ function RestaurantToggleCard({
 export function RestaurantToggleList({
   restaurants,
   orderingEnabled,
+  forcedClosed,
   closedChip,
 }: {
   restaurants: AdminRestaurant[];
   orderingEnabled: boolean;
+  forcedClosed: boolean;
   closedChip: string;
 }) {
   return (
@@ -102,6 +177,7 @@ export function RestaurantToggleList({
           key={restaurant.id}
           restaurant={restaurant}
           orderingEnabled={orderingEnabled}
+          forcedClosed={forcedClosed}
           closedChip={closedChip}
         />
       ))}

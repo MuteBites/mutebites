@@ -37,7 +37,7 @@ const CONFIRM: Record<OrderingMode, { title: string; body: string; action: strin
   },
   closed: {
     title: "Pause ordering campus-wide?",
-    body: "No student can place a new order until you switch back, whatever the schedule says. Orders already placed aren't affected.",
+    body: "No student can place a new order until you switch back, whatever the schedule says, and every restaurant is turned off. When you reopen, turn on the restaurants you want. Orders already placed aren't affected.",
     action: "Pause ordering",
   },
 };

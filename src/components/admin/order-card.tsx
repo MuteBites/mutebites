@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useTransition } from "react";
-import { Loader2, MessageCircle } from "lucide-react";
+import { Check, Copy, Loader2, MessageCircle } from "lucide-react";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -19,6 +19,7 @@ import type { AdminOrder } from "@/lib/data/admin";
 import { getDishPhoto } from "@/lib/data/dish-photos";
 import { formatOrderTimestamp } from "@/lib/date";
 import { formatRupees } from "@/lib/format";
+import { itemLine, orderDetailsText, whatsAppConfirmation } from "@/lib/orders/admin-text";
 import { advanceLabel, formatOrderNumber, nextStatus, statusBadge } from "@/lib/orders/status";
 import { formatStoredMobile, whatsAppLink } from "@/lib/phone";
 import { toast } from "@/lib/toast/store";
@@ -39,6 +40,7 @@ export function OrderCard({ order }: { order: AdminOrder }) {
   const [advancing, startAdvance] = useTransition();
   const [cancelOpen, setCancelOpen] = useState(false);
   const [cancelling, startCancel] = useTransition();
+  const [copied, setCopied] = useState(false);
 
   const badge = statusBadge(status);
   const label = advanceLabel(status);
@@ -72,12 +74,21 @@ export function OrderCard({ order }: { order: AdminOrder }) {
     });
   }
 
-  const itemsSummary = order.items.map((i) => `${i.quantity}× ${i.dishName}`).join(", ");
+  async function copyDetails() {
+    try {
+      await navigator.clipboard.writeText(orderDetailsText(order));
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+      toast.success("Order details copied.");
+    } catch {
+      toast.error("Couldn't copy — your browser blocked it.");
+    }
+  }
+
   // First ordered dish that has a photo — same lookup as the student side.
   const photo = order.items
     .map((i) => getDishPhoto(order.restaurantName, i.dishName))
     .find((src): src is string => !!src);
-  const whatsAppMessage = `Hi ${order.studentName.split(" ")[0]}, this is MuteBites — confirming your order ${formatOrderNumber(order.dailyNumber)} from ${order.restaurantName} (${formatRupees(order.totalAmount)}). Do you want to go ahead with this order? Reply yes to confirm.`;
 
   return (
     <div className="rounded-3xl border bg-card p-4 shadow-card">
@@ -98,9 +109,7 @@ export function OrderCard({ order }: { order: AdminOrder }) {
               {badge.label}
             </span>
           </div>
-          <p className="mt-1 truncate text-sm text-muted-foreground">
-            {order.restaurantName} · {formatOrderTimestamp(order.createdAt)}
-          </p>
+          <p className="mt-1 truncate text-sm text-muted-foreground">{formatOrderTimestamp(order.createdAt)}</p>
         </div>
       </div>
 
@@ -114,14 +123,36 @@ export function OrderCard({ order }: { order: AdminOrder }) {
       </div>
       <p className="text-sm text-muted-foreground tabular-nums">{formatStoredMobile(order.contactPhone)}</p>
 
-      {itemsSummary && <p className="mt-2 text-sm">{itemsSummary}</p>}
-      {order.notes && <p className="mt-1 text-sm text-muted-foreground italic">“{order.notes}”</p>}
+      <div className="mt-3 rounded-2xl bg-secondary px-3.5 py-3">
+        <p className="text-label text-muted-foreground">
+          From <span className="font-semibold text-foreground">{order.restaurantName}</span>
+        </p>
+        <ul className="mt-1.5 flex flex-col gap-1 text-sm">
+          {order.items.map((item, i) => (
+            <li key={i} className="flex items-baseline justify-between gap-3">
+              <span className="min-w-0 font-medium">{itemLine(item)}</span>
+              <span className="shrink-0 text-muted-foreground tabular-nums">{formatRupees(item.subtotal)}</span>
+            </li>
+          ))}
+        </ul>
+        {order.notes && <p className="mt-2 text-sm text-muted-foreground italic">“{order.notes}”</p>}
+      </div>
 
-      <div className="mt-3 flex items-center justify-between gap-3">
+      <div className="mt-3 flex items-center justify-between gap-2">
         <span className="font-heading text-xl font-bold tabular-nums">{formatRupees(order.totalAmount)}</span>
 
+        <div className="flex items-center gap-2">
+        <button
+          type="button"
+          onClick={copyDetails}
+          aria-label={copied ? "Order details copied" : "Copy order details"}
+          title="Copy order details"
+          className="flex size-10 items-center justify-center rounded-full border bg-card text-muted-foreground outline-none hover:text-foreground focus-visible:ring-3 focus-visible:ring-ring/80"
+        >
+          {copied ? <Check className="size-4 text-success" aria-hidden="true" /> : <Copy className="size-4" aria-hidden="true" />}
+        </button>
         <a
-          href={whatsAppLink(order.contactPhone, whatsAppMessage)}
+          href={whatsAppLink(order.contactPhone, whatsAppConfirmation(order))}
           target="_blank"
           rel="noopener noreferrer"
           className="flex h-10 items-center gap-1.5 rounded-full bg-success-soft px-4 text-sm font-semibold text-success outline-none hover:brightness-95 focus-visible:ring-3 focus-visible:ring-ring/80"
@@ -129,6 +160,7 @@ export function OrderCard({ order }: { order: AdminOrder }) {
           <MessageCircle className="size-4" aria-hidden="true" />
           WhatsApp
         </a>
+        </div>
       </div>
 
       {(label || cancellable) && (

@@ -185,9 +185,13 @@ Food delivery site for VIT-AP University students.
    closed** — nobody gets in, admin role or not — rather than silently
    letting everyone through.
 
-The main `/admin` dashboard's order list only ever shows **today's**
-orders (IST calendar day) — the stat cards at the top are scoped the same
-way (`getOrderCounts(startOfTodayIST())`). Every order ever placed lives
+The main `/admin` dashboard's list is **Current orders**: today's (IST)
+orders until their delivery slot ends (`slotEndTime()`), after which a
+delivered/cancelled order drops off; pending/confirmed ones stay until
+they're done, so nothing actionable disappears (`getAdminOrders()`).
+`RefreshAt` re-fetches the page the moment the next slot ends. The stat
+cards still count the whole day (`getOrderCounts(startOfTodayIST())`).
+Every order ever placed lives
 at `/admin/history` instead, grouped by day (newest first), reusing the
 same `OrderList` component in a `groupByDate` mode rather than a separate
 one-off component. Every registered student is browsable (read-only, with
@@ -220,6 +224,17 @@ for `app_settings.ordering_mode`, with a live status line such as
 shared `adminPill` style (`src/components/admin/styles.ts`); order cards
 lead with the token and a dish photo; restaurant controls show cover
 photos; no uppercase anywhere.
+
+Order cards list the restaurant ("From …") and one line per dish as
+"Dish name - qty" with its price — never "1× Dish". The WhatsApp button's
+message and the copy button's text come from `src/lib/orders/admin-text.ts`
+(full name; restaurant, each dish and the question on their own lines;
+a total line only for multi-dish orders) — keep all three in step.
+
+Setting ordering to **Closed** also turns every restaurant off
+(`setOrderingMode`); reopening leaves them off. Tapping "Turn on" on a
+restaurant while Closed asks "Open ordering now?" — yes sets Auto if the
+schedule is open right now, otherwise Open, and turns that restaurant on.
 
 "Mark all delivered" counts eligible orders over **every** confirmed order
 (`getConfirmedOrderTimes()`), not just today's list — the same set
