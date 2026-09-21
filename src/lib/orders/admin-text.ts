@@ -1,5 +1,4 @@
 import type { AdminOrder } from "@/lib/data/admin";
-import { formatOrderTimestamp } from "@/lib/date";
 import { formatRupees } from "@/lib/format";
 import { formatStoredMobile } from "@/lib/phone";
 import { formatOrderNumber } from "./status";
@@ -26,13 +25,15 @@ export function whatsAppConfirmation(order: AdminOrder): string {
   ].join("\n");
 }
 
-/** Everything on the card as plain text, for the copy button (e.g. to forward to a restaurant). */
+/**
+ * The copy button's text: restaurant, each dish, name, number — nothing
+ * else (no token, prices or times), same as the card's "From" box.
+ */
 export function orderDetailsText(order: AdminOrder): string {
   return [
-    `Order ${formatOrderNumber(order.dailyNumber)} · ${formatOrderTimestamp(order.createdAt)}`,
-    `From ${order.restaurantName}:`,
-    ...itemLinesWithPrices(order),
-    ...(order.notes ? [`Note: ${order.notes}`] : []),
-    `${order.studentName} · ${formatStoredMobile(order.contactPhone)}`,
+    order.restaurantName,
+    ...order.items.map(itemLine),
+    order.studentName,
+    formatStoredMobile(order.contactPhone),
   ].join("\n");
 }

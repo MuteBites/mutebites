@@ -225,11 +225,21 @@ shared `adminPill` style (`src/components/admin/styles.ts`); order cards
 lead with the token and a dish photo; restaurant controls show cover
 photos; no uppercase anywhere.
 
-Order cards list the restaurant ("From …") and one line per dish as
-"Dish name - qty" with its price — never "1× Dish". The WhatsApp button's
-message and the copy button's text come from `src/lib/orders/admin-text.ts`
-(full name; restaurant, each dish and the question on their own lines;
-a total line only for multi-dish orders) — keep all three in step.
+Order cards carry a "From <restaurant>" box: one line per dish as
+"Dish name - qty" with its price — never "1× Dish" — then the note, then
+the student's name and number. The WhatsApp button's message and the copy
+button's text come from `src/lib/orders/admin-text.ts` (WhatsApp: full
+name; restaurant, each dish and the question on their own lines; a total
+line only for multi-dish orders. Copy: restaurant, each dish, name,
+number — nothing else) — keep them in step with the card.
+Tapping a card opens **`/admin/orders/[id]`** (`getAdminOrderDetail()` +
+`OrderDetailView`): timing (placed, delivery window, delivered at),
+student (phone, reg. number, email, Call / WhatsApp / Copy), each dish
+with unit price, subtotal and the student's stars if rated, total, note,
+review note, and the same Confirm / Mark delivered / Cancel actions
+(`OrderActions`, shared with the card). The card is clickable via a
+stretched link on the token (`after:inset-0`); its buttons sit above it
+with `relative z-10` — keep new controls on the card above it too.
 
 Setting ordering to **Closed** also turns every restaurant off
 (`setOrderingMode`); reopening leaves them off. Tapping "Turn on" on a

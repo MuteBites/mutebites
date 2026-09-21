@@ -3,6 +3,7 @@ import "server-only";
 import { createClient } from "@/lib/supabase/server";
 import { isPastDeliverySlot, startOfTodayIST } from "@/lib/date";
 import { getUnlockedMilestones, MILESTONES } from "@/components/profile/milestone-badges";
+import { isUuid } from "@/lib/ids";
 import { getRestaurantCount } from "./restaurants";
 import type { OrderStatus } from "./types";
 
@@ -113,6 +114,56 @@ function toAdminOrder(o: AdminOrderRow): AdminOrder {
     studentBanned: o.users?.is_banned ?? false,
     items: o.order_items.map((i) => ({ dishName: i.dish_name, quantity: i.quantity, subtotal: Number(i.subtotal) })),
     dailyNumber: o.daily_number,
+  };
+}
+
+export type AdminOrderDetail = AdminOrder & {
+  deliveredAt: string | null;
+  studentEmail: string | null;
+  studentRegistrationNumber: string | null;
+  /** Same order as `items`, with the unit price and the student's star rating (if they rated it). */
+  itemDetails: { unitPrice: number; rating: number | null }[];
+  review: { note: string | null; createdAt: string } | null;
+};
+
+/** One order with everything the admin order page shows. Null for a malformed or unknown id (→ 404). */
+export async function getAdminOrderDetail(id: string): Promise<AdminOrderDetail | null> {
+  if (!isUuid(id)) return null;
+  const supabase = await createClient();
+  const [{ data, error }, reviewResult] = await Promise.all([
+    supabase
+      .from("orders")
+      .select(
+        "id, status, total_amount, created_at, delivered_at, contact_phone, notes, user_id, restaurant_id, daily_number, restaurants(name), users(full_name, is_banned, email, registration_number), order_items(id, dish_name, quantity, unit_price, subtotal)",
+      )
+      .eq("id", id)
+      .maybeSingle<
+        Omit<AdminOrderRow, "users" | "order_items"> & {
+          delivered_at: string | null;
+          users: { full_name: string; is_banned: boolean; email: string | null; registration_number: string | null } | null;
+          order_items: { id: string; dish_name: string; quantity: number; unit_price: number; subtotal: number }[];
+        }
+      >(),
+    supabase
+      .from("order_reviews")
+      .select("note, created_at, order_item_ratings(order_item_id, rating)")
+      .eq("order_id", id)
+      .maybeSingle<{ note: string | null; created_at: string; order_item_ratings: { order_item_id: string; rating: number }[] }>(),
+  ]);
+
+  if (error) throw error;
+  if (!data) return null;
+  // A review is extra context — if it fails to load, show the order without it.
+  const review = reviewResult.data;
+  const ratings = new Map((review?.order_item_ratings ?? []).map((r) => [r.order_item_id, r.rating]));
+
+  return {
+    ...toAdminOrder(data),
+    deliveredAt: data.delivered_at,
+    studentEmail: data.users?.email ?? null,
+    studentRegistrationNumber: data.users?.registration_number ?? null,
+    itemDetails: data.order_items.map((i) => ({ unitPrice: Number(i.unit_price), rating: ratings.get(i.id) ?? null })),
+    review: review ? { note: review.note, createdAt: review.created_at } : null,
   };
 }
 
