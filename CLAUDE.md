@@ -693,7 +693,14 @@ RLS is enabled on every table:
   orders/order_items under RLS — there's no other way to compute a
   cross-student aggregate. Returns only aggregate counts (dish/restaurant
   name + a number), never anything per-student, so nothing here leaks who
-  ordered what.
+  ordered what. Since
+  [`20260921020000_trending_skip_banned.sql`](supabase/migrations/20260921020000_trending_skip_banned.sql)
+  it also skips orders placed before launch (20 Sep 2026, IST) and orders
+  from any **banned phone number** — the pre-launch test accounts were
+  banned to keep them out, so unbanning one brings its orders back into
+  Trending (and into the Home card slide order, which uses the same RPC).
+  `highly_reordered_dishes()` / `my_weekly_rank()` deliberately don't
+  filter either way.
 
 `trending_restaurants(days_back int default 7, result_limit int default 3)`
 was added in the same migration (same pattern) for a "Top restaurants"
