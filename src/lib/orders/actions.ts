@@ -150,4 +150,7 @@ const PLACE_ORDER_ERRORS: Record<string, string> = {
   empty_cart: "Your cart's empty — go pick something tasty.",
   invalid_items: "Something's off with your cart — give it a quick look and try again.",
   dish_unavailable: "Something in your cart just sold out — hop back to the menu to swap it out.",
+  // Rate limits (20260922000000_place_order_rate_limit.sql): 5 a minute, 8 unfinished.
+  order_rate_limited: "That's a lot of orders in a minute — wait a moment and try again. Your cart is saved.",
+  too_many_open_orders: "You already have 8 orders on the way — once one is delivered you can order again.",
 };

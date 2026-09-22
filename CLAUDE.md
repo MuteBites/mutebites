@@ -650,6 +650,23 @@ RLS is enabled on every table:
   ordering closed, or `ordering_closed` if the daily schedule is between
   slots) — enforced in the function itself, not just hidden in the UI,
   since a direct PostgREST call would otherwise bypass an app-level check.
+  Since [`20260922000000_place_order_rate_limit.sql`](supabase/migrations/20260922000000_place_order_rate_limit.sql)
+  it also rate-limits, right after the ban check: at most **5 orders per
+  student per minute** (`order_rate_limited`) and **8 unfinished orders**
+  (not delivered/cancelled) at once (`too_many_open_orders`), under a
+  per-student `pg_advisory_xact_lock` so simultaneous taps can't both slip
+  under. The cart is kept on any refusal. Login needs no limit of ours —
+  Google-only, and Supabase Auth's own rate limits apply.
+- **Security headers** (`next.config.ts`, every path): `X-Frame-Options:
+  DENY`, `nosniff`, `Referrer-Policy: strict-origin-when-cross-origin`,
+  `Permissions-Policy` (no camera/mic/location); HSTS comes from Vercel.
+  CSP is a moderate policy (`'unsafe-inline'` scripts because the
+  theme/splash init scripts and JSON-LD are inline on purpose; connections
+  only to self + Supabase REST/Realtime), currently **report-only** —
+  violations POST to `/api/csp-report` (excluded from the proxy matcher)
+  and land in Vercel logs as `[csp] …`. Switch the header key to
+  `Content-Security-Policy` once the logs are clean; add any new external
+  origin to it.
   It raises short error keys
   (`banned`, `restaurant_closed`, `dish_unavailable`, `ordering_paused`, `ordering_closed`, …) that
   `src/lib/orders/actions.ts` maps to messages. Admins
