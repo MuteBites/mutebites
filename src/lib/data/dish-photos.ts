@@ -24,6 +24,7 @@ export const RESTAURANT_COVER_PHOTOS: Record<string, string> = {
   "Bismillah Fruit Juice": `${BASE}/covers/bismillah-juice.jpg`,
   "Food Corner": `${BASE}/covers/mutebites-chinese-v2.jpg`,
   "MuteBites Fresh Fruits": `${BASE}/covers/mutebites-fresh-fruits.jpg`,
+  "MuteBites Sugarcane Juice": `${BASE}/covers/mutebites-sugarcane-juice.jpg`,
 };
 
 const BHEEMASENA = `${BASE}/Bheemasena`;
@@ -32,6 +33,7 @@ const BISMILLAH = `${BASE}/Bismillah fruit juice`;
 // Folder keeps the restaurant's old name (now "Food Corner") — paths are cached URLs.
 const CHINESE = `${BASE}/MuteBites Chinese`;
 const FRUITS = `${BASE}/Mutebites fresh fruits`;
+const SUGARCANE = `${BASE}/MuteBites Sugarcane Juice`;
 
 /** Restaurant name -> { dish name -> thumbnail photo }. */
 export const DISH_PHOTOS: Record<string, Record<string, string>> = {
@@ -163,6 +165,10 @@ export const DISH_PHOTOS: Record<string, Record<string, string>> = {
     "Dragon Fruit (1 kg)": `${FRUITS}/Dragon fruit 1kg.jpg`,
     "Papaya (1 kg)": `${FRUITS}/Papaya 1kg.jpg`,
   },
+
+  "MuteBites Sugarcane Juice": {
+    "1 Litre Sugarcane Juice Bottle": `${SUGARCANE}/1 Litre Sugarcane Juice Bottle.jpg`,
+  },
 };
 
 /** Cover photo for a restaurant's hero banner, or undefined for the placeholder. */
@@ -188,6 +194,7 @@ const SIGNATURE_DISHES: Record<string, string[]> = {
   "Bismillah Fruit Juice": ["Pomegranate Juice", "Pineapple Juice"],
   "Food Corner": ["Chicken Noodles", "4P Chicken Lollipop"],
   "MuteBites Fresh Fruits": ["Dragon Fruit (500 g)", "Black Grapes (1 kg)"],
+  "MuteBites Sugarcane Juice": ["1 Litre Sugarcane Juice Bottle"],
 };
 
 /** Most dish slides per card — each is another photo download on Home. */

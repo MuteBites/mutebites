@@ -504,6 +504,11 @@ free biryani was handed over (`user_id` primary key = once per student,
 row; admins select all, insert (with `marked_by = auth.uid()`) and delete
 (undo). No update policy. Whether a student *qualifies* is checked in the
 app (`getUnlockedMilestones()`), not the database — see **Profile** above.
+[`supabase/migrations/20260922010000_seed_sugarcane_juice.sql`](supabase/migrations/20260922010000_seed_sugarcane_juice.sql)
+(data only — a sixth restaurant, **MuteBites Sugarcane Juice**: one
+section, one dish, "1 Litre Sugarcane Juice Bottle" ₹90, photos in
+`public/MuteBites/MuteBites Sugarcane Juice/` and
+`covers/mutebites-sugarcane-juice.jpg`).
 Migrations are applied by hand in the Supabase SQL editor (no CLI setup).
 
 All orders are handed over at **VIT-AP Main Gate** — there is no room
