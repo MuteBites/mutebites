@@ -256,6 +256,10 @@ silently re-enables the button.
 
 ## Project structure
 
+- `docs/MUTEBITES-BLUEPRINT.md` — the whole project history (every
+  session, commit and migration), setup steps outside the code, lessons
+  learned, and a porting checklist for rebuilding at another university.
+  Update it alongside this file when something significant changes.
 - `src/app` — routes (App Router)
 - `src/app/robots.ts` — generates `/robots.txt` (everything but `/admin`
   crawlable). Excluded from the `src/proxy.ts` matcher like `favicon.ico`,
