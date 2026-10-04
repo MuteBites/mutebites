@@ -2,6 +2,7 @@
 
 import type { ReactNode } from "react";
 import { BrandLogo } from "@/components/brand-logo";
+import { AboutCredits } from "./about-credits";
 import { Dialog, DialogContent, DialogDescription, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 
 /** Tapping the Home logo pops up a short "what is this app" card — mostly for first-time visitors poking around. */
@@ -30,7 +31,7 @@ export function AboutMuteBitesDialog({ children }: { children: ReactNode }) {
         <p className="mt-4 text-label text-primary">
           Fast · Reliable · Affordable
         </p>
-        <p className="mt-4 text-xs text-muted-foreground">~ mutebites</p>
+        <AboutCredits />
       </DialogContent>
     </Dialog>
   );

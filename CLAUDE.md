@@ -309,7 +309,9 @@ silently re-enables the button.
   `alert-dialog.tsx` (confirmations — "Cancel this order?", "Pause
   ordering campus-wide?", "Mark 3 orders delivered?") and `dialog.tsx`
   (plain popups with no confirm/cancel semantics — the "About MuteBites"
-  card from the Home logo, the Trending popup and the one-time "How was
+  card from the Home logo (footer: `AboutCredits` — "Owned by Harsha & Rishi",
+  "~ Developed & Maintained by Naga Adithya"; the name looks like plain
+  text and tapping it quietly folds open Call · WhatsApp · Mail), the Trending popup and the one-time "How was
   it?" rating prompt). The cart and rating sheets use `sheet.tsx`. Both wrap `@base-ui/react`; reach for whichever already matches
   what you're building rather than hand-rolling a third.
 - `src/lib/supabase/client.ts` — browser Supabase client
