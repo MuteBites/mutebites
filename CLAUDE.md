@@ -163,6 +163,14 @@ Food delivery site for VIT-AP University students.
   bigger than the redundant `auth.getUser()` call fixed alongside it in
   `src/lib/profile.ts`). If Supabase's region ever changes, update this
   to match.
+  **The GitHub repo is public on purpose** (since 2026-10-05): Vercel's
+  Hobby plan blocks git deploys from a *private* repo when the commit
+  author (Pilli9375) isn't the Vercel project owner (`mutebites`) — every
+  push from 22 Sep to 4 Oct showed "Blocked", and CLI deploys were
+  blocked too (they carry the same git author). Making it private again
+  needs Vercel Pro with the author added as a team member. Never commit
+  secrets: history was checked clean before going public, and
+  `.vercelignore` keeps `.env*` out of any CLI upload.
   Every push to `main` auto-deploys (usually ~30 s). The Hobby plan
   allows 100 deployments a day and builds one at a time, so batch small
   follow-up fixes into one push rather than pushing each tweak. The Vercel
