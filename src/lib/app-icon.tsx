@@ -13,6 +13,8 @@ const MARK_SRC = `data:image/png;base64,${markData.toString("base64")}`;
 const MARK_ASPECT = 854 / 683;
 /** Same warm ivory as the startup splash, so the icon, splash and app read as one. */
 const IVORY = "#f5eae1";
+/** Brand plum, for the admin icon's caption pill. */
+const PLUM = "#552c4a";
 
 /**
  * Shared MuteBites app-icon: the mascot mark centred on ivory — used by
@@ -24,6 +26,7 @@ export function appIconResponse({
   height,
   borderRadius = 0,
   markScale = 0.84,
+  label,
 }: {
   width: number;
   height: number;
@@ -35,6 +38,8 @@ export function appIconResponse({
    * which for this mark's aspect means about 0.6.
    */
   markScale?: number;
+  /** Small caption under the mark (the admin app's "Admin"), so the two installed apps are told apart on a home screen. */
+  label?: string;
 }) {
   const markWidth = Math.round(width * markScale);
   const markHeight = Math.round(markWidth / MARK_ASPECT);
@@ -50,10 +55,26 @@ export function appIconResponse({
           overflow: "hidden",
           borderRadius,
           background: IVORY,
+          flexDirection: "column",
         }}
       >
         {/* eslint-disable-next-line @next/next/no-img-element */}
         <img src={MARK_SRC} alt="" width={markWidth} height={markHeight} />
+        {label && (
+          <div
+            style={{
+              marginTop: Math.round(height * 0.03),
+              padding: `${Math.round(height * 0.012)}px ${Math.round(width * 0.06)}px`,
+              borderRadius: 999,
+              background: PLUM,
+              color: IVORY,
+              fontSize: Math.round(height * 0.11),
+              fontWeight: 700,
+            }}
+          >
+            {label}
+          </div>
+        )}
       </div>
     ),
     { width, height },

@@ -6,6 +6,7 @@ import { LogOut, RotateCw } from "lucide-react";
 import { BrandLogo } from "@/components/brand-logo";
 import { signOutAndClearCart } from "@/lib/sign-out";
 import { cn } from "@/lib/utils";
+import { InstallAdminButton } from "./install-admin-button";
 import { adminPill } from "./styles";
 
 export function AdminHeader() {
@@ -23,6 +24,7 @@ export function AdminHeader() {
         <Title className="truncate font-heading text-headline font-bold">Admin</Title>
         <p className="truncate text-sm text-muted-foreground">MuteBites operations</p>
       </div>
+      <InstallAdminButton />
       <button
         type="button"
         disabled={reloading}

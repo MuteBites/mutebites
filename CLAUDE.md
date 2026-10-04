@@ -357,6 +357,17 @@ silently re-enables the button.
     `#f5eae1` tile in every theme — the plum mascot vanishes on dark
     cards and the ink surface, so callers size/round it but never set
     its background.
+  - **Two install profiles** (`src/lib/web-manifest.ts`, served by route
+    handlers `app/manifest.webmanifest` and `app/admin.webmanifest` — not
+    an `app/manifest.ts` file, since file-based metadata outranks a
+    layout's `manifest` field): the root layout links the student app
+    (opens `/`), the admin layout links **MuteBites Admin** (`id`/`scope`/
+    `start_url` `/admin`, icons `icons/admin-*` = the mark with an "Admin"
+    pill via `appIconResponse({ label })`). The admin header's **Install**
+    button (`install-admin-button.tsx`) fires the browser's install prompt
+    (`beforeinstallprompt`, caught at module load) or, on iPhone / when no
+    prompt is available, shows add-to-home-screen steps; it hides inside
+    the installed app. `admin.webmanifest` skips the proxy like the rest.
   - App icons: `src/lib/app-icon.tsx` centres `mark.png` on ivory for
     `apple-icon.tsx` and `icons/icon-192|512|512-maskable` (maskable at
     `markScale: 0.6` to stay inside the ~80% safe circle). The manifest's

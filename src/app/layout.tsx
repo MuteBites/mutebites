@@ -57,6 +57,8 @@ export const metadata: Metadata = {
   verification: process.env.GOOGLE_SITE_VERIFICATION
     ? { google: process.env.GOOGLE_SITE_VERIFICATION }
     : undefined,
+  // Install profile (src/lib/web-manifest.ts); the admin layout swaps in its own.
+  manifest: "/manifest.webmanifest",
   appleWebApp: {
     capable: true,
     title: "MuteBites",

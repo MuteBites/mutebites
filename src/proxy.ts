@@ -21,6 +21,6 @@ export const config = {
     // signed out by search engines and link-preview bots.
     // api/csp-report receives CSP violation reports, including from the
     // signed-out login page.
-    "/((?!_next/static|_next/image|favicon.ico|robots.txt|sitemap.xml|opengraph-image|api/csp-report|sw.js|manifest.webmanifest|apple-icon|icons/|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)",
+    "/((?!_next/static|_next/image|favicon.ico|robots.txt|sitemap.xml|admin.webmanifest|opengraph-image|api/csp-report|sw.js|manifest.webmanifest|apple-icon|icons/|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)",
   ],
 };

@@ -5,7 +5,12 @@ import { requireAdmin } from "@/lib/admin/guard";
 import { isAdminPasscodeVerified } from "@/lib/admin/passcode";
 
 // Never in search results (robots.txt also disallows /admin).
-export const metadata: Metadata = { robots: { index: false, follow: false } };
+// Its own install profile: "MuteBites Admin" opens straight on /admin.
+export const metadata: Metadata = {
+  robots: { index: false, follow: false },
+  manifest: "/admin.webmanifest",
+  appleWebApp: { capable: true, title: "MB Admin", statusBarStyle: "default" },
+};
 
 export default async function AdminLayout({ children }: LayoutProps<"/admin">) {
   await requireAdmin();
