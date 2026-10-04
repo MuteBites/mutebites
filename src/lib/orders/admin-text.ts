@@ -26,14 +26,14 @@ export function whatsAppConfirmation(order: AdminOrder): string {
 }
 
 /**
- * The copy button's text: restaurant, each dish, name, number — nothing
- * else (no token, prices or times), same as the card's "From" box.
+ * The copy button's text: name and number first, then the restaurant and
+ * each dish — nothing else (no token, prices or times).
  */
 export function orderDetailsText(order: AdminOrder): string {
   return [
-    order.restaurantName,
-    ...order.items.map(itemLine),
     order.studentName,
     formatStoredMobile(order.contactPhone),
+    order.restaurantName,
+    ...order.items.map(itemLine),
   ].join("\n");
 }
