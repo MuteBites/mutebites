@@ -11,7 +11,9 @@ export function AboutMuteBitesDialog({ children }: { children: ReactNode }) {
     <Dialog>
       <DialogTrigger
         aria-label="About MuteBites"
-        className="pressable rounded-2xl outline-none focus-visible:ring-3 focus-visible:ring-ring/80"
+        // Same frosted plate as the Trending button next to it, plus a thin
+        // ring, so the logo reads as tappable; .logo-hint ripples twice on load.
+        className="logo-hint pressable flex size-12 shrink-0 items-center justify-center rounded-2xl bg-card/80 shadow-card ring-1 ring-foreground/10 outline-none hover:ring-primary/40 focus-visible:ring-3 focus-visible:ring-ring/80"
       >
         {children}
       </DialogTrigger>

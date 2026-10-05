@@ -450,6 +450,11 @@
  * transform/opacity animation at all, never just a faster one.
  */
 @media (prefers-reduced-motion: no-preference) {
+  /* Home logo: a soft rose ring ripples out twice, after the splash has
+     handed over, so students notice it opens the About card. */
+  .logo-hint {
+    animation: logo-hint 1.6s var(--ease-out-expo) 3.2s 2;
+  }
   .animate-pop-in {
     animation: pop-in var(--dur-quick) var(--ease-spring) both;
   }
@@ -539,6 +544,18 @@
     transform: scale(0.97);
   }
 
+}
+
+@keyframes logo-hint {
+  /* outline, not box-shadow: the plate's ring and shadow are box-shadows */
+  0% {
+    outline: 2px solid color-mix(in oklab, var(--rose) 55%, transparent);
+    outline-offset: 0;
+  }
+  100% {
+    outline: 2px solid color-mix(in oklab, var(--rose) 0%, transparent);
+    outline-offset: 9px;
+  }
 }
 
 @keyframes highlight-arrive {
