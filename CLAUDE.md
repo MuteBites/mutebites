@@ -536,6 +536,11 @@ app (`getUnlockedMilestones()`), not the database — see **Profile** above.
 section, one dish, "1 Litre Sugarcane Juice Bottle" ₹90, photos in
 `public/MuteBites/MuteBites Sugarcane Juice/` and
 `covers/mutebites-sugarcane-juice.jpg`).
+[`supabase/migrations/20261006000000_seed_ramana_fast_food.sql`](supabase/migrations/20261006000000_seed_ramana_fast_food.sql)
+(data only — a seventh restaurant, **Ramana Fast Food**: Fried Rice (7)
+and Noodles (9), ₹90–130; "Dubble" on its menu written "Double". It has no
+photos of its own and borrows Food Corner's dish photos and cover in
+`dish-photos.ts`, since every dish name matches exactly).
 Migrations are applied by hand in the Supabase SQL editor (no CLI setup).
 
 All orders are handed over at **VIT-AP Main Gate** — there is no room

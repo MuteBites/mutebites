@@ -25,6 +25,8 @@ export const RESTAURANT_COVER_PHOTOS: Record<string, string> = {
   "Food Corner": `${BASE}/covers/mutebites-chinese-v2.jpg`,
   "MuteBites Fresh Fruits": `${BASE}/covers/mutebites-fresh-fruits.jpg`,
   "MuteBites Sugarcane Juice": `${BASE}/covers/mutebites-sugarcane-juice.jpg`,
+  // No photos of its own yet — same Indo-Chinese dishes as Food Corner.
+  "Ramana Fast Food": `${BASE}/covers/mutebites-chinese-v2.jpg`,
 };
 
 const BHEEMASENA = `${BASE}/Bheemasena`;
@@ -171,6 +173,10 @@ export const DISH_PHOTOS: Record<string, Record<string, string>> = {
   },
 };
 
+// Ramana Fast Food sends no photos of its own; every one of its 16 dishes
+// has the exact same name at Food Corner, so it borrows those photos.
+DISH_PHOTOS["Ramana Fast Food"] = DISH_PHOTOS["Food Corner"];
+
 /** Cover photo for a restaurant's hero banner, or undefined for the placeholder. */
 export function getRestaurantCoverPhoto(restaurantName: string): string | undefined {
   return RESTAURANT_COVER_PHOTOS[restaurantName];
@@ -195,6 +201,7 @@ const SIGNATURE_DISHES: Record<string, string[]> = {
   "Food Corner": ["Chicken Noodles", "4P Chicken Lollipop"],
   "MuteBites Fresh Fruits": ["Dragon Fruit (500 g)", "Black Grapes (1 kg)"],
   "MuteBites Sugarcane Juice": ["1 Litre Sugarcane Juice Bottle"],
+  "Ramana Fast Food": ["Chicken Fried Rice", "Chicken Noodles"],
 };
 
 /** Most dish slides per card — each is another photo download on Home. */
