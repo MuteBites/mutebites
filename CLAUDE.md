@@ -312,8 +312,8 @@ silently re-enables the button.
   card from the Home logo — the logo sits on the same frosted plate as
   the Trending button with a thin ring, and `.logo-hint` ripples a rose
   outline twice after load so it reads as tappable — (footer: `AboutCredits` — "Owned by Harsha & Rishi",
-  "~ Developed & Maintained by Naga Adithya"; the name looks like plain
-  text and tapping it quietly folds open Call · WhatsApp · Mail), the Trending popup and the one-time "How was
+  "~ Developed & Maintained by Naga Adithya"; the name has a dotted
+  underline and tapping it quietly folds open Call · WhatsApp · Mail), the Trending popup and the one-time "How was
   it?" rating prompt). The cart and rating sheets use `sheet.tsx`. Both wrap `@base-ui/react`; reach for whichever already matches
   what you're building rather than hand-rolling a third.
 - `src/lib/supabase/client.ts` — browser Supabase client

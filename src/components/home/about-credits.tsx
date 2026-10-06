@@ -13,8 +13,8 @@ const DEVELOPER = {
 };
 
 /**
- * "Owned by …" and "Developed & maintained by <name>". The name looks like
- * plain text (a dotted underline only on hover); tapping it quietly opens a
+ * "Owned by …" and "Developed & maintained by <name>". The name carries a
+ * dotted underline (solid on hover) so it reads as tappable; tapping it quietly opens a
  * small "Call · WhatsApp · Mail" line underneath, and tapping again folds it away.
  */
 export function AboutCredits() {
@@ -32,7 +32,7 @@ export function AboutCredits() {
           aria-expanded={open}
           aria-controls="about-dev-contact"
           onClick={() => setOpen((o) => !o)}
-          className="rounded-sm font-semibold text-foreground/80 decoration-dotted underline-offset-4 outline-none hover:underline focus-visible:ring-2 focus-visible:ring-ring/80"
+          className="rounded-sm font-semibold text-foreground/80 underline decoration-dotted decoration-1 underline-offset-4 outline-none hover:text-foreground hover:decoration-solid focus-visible:ring-2 focus-visible:ring-ring/80"
         >
           {DEVELOPER.name}
         </button>
