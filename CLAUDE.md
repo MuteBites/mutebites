@@ -541,6 +541,15 @@ section, one dish, "1 Litre Sugarcane Juice Bottle" ₹90, photos in
 and Noodles (9), ₹90–130; "Dubble" on its menu written "Double". It has no
 photos of its own and borrows Food Corner's dish photos and cover in
 `dish-photos.ts`, since every dish name matches exactly).
+[`supabase/migrations/20261008000000_seed_waffle_pops.sql`](supabase/migrations/20261008000000_seed_waffle_pops.sql)
+(data only — an eighth restaurant, **Waffle Pops**: 65 dishes in 8
+sections — Waffle Pops, Classic Waffles, Red Velvet Love, KitKat Club,
+Chocolate Love, Mini Pancakes, Brownies, Hot Chocolate — every price the
+printed menu + ₹10 by the client's instruction; pops/pancakes carry "Pop" /
+"Mini Pancakes" in their names so flavours don't collide; the menu's paid
+add-ons aren't items (no add-on system). Only 7 dishes and the cover have
+photos — free-licence Unsplash stock in `public/MuteBites/Waffle Pops/`
+and `covers/waffle-pops.jpg`; the rest show the placeholder on purpose).
 Migrations are applied by hand in the Supabase SQL editor (no CLI setup).
 
 All orders are handed over at **VIT-AP Main Gate** — there is no room

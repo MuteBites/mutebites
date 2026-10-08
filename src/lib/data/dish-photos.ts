@@ -27,6 +27,7 @@ export const RESTAURANT_COVER_PHOTOS: Record<string, string> = {
   "MuteBites Sugarcane Juice": `${BASE}/covers/mutebites-sugarcane-juice.jpg`,
   // No photos of its own yet — same Indo-Chinese dishes as Food Corner.
   "Ramana Fast Food": `${BASE}/covers/mutebites-chinese-v2.jpg`,
+  "Waffle Pops": `${BASE}/covers/waffle-pops.jpg`,
 };
 
 const BHEEMASENA = `${BASE}/Bheemasena`;
@@ -36,6 +37,7 @@ const BISMILLAH = `${BASE}/Bismillah fruit juice`;
 const CHINESE = `${BASE}/MuteBites Chinese`;
 const FRUITS = `${BASE}/Mutebites fresh fruits`;
 const SUGARCANE = `${BASE}/MuteBites Sugarcane Juice`;
+const WAFFLE_POPS = `${BASE}/Waffle Pops`;
 
 /** Restaurant name -> { dish name -> thumbnail photo }. */
 export const DISH_PHOTOS: Record<string, Record<string, string>> = {
@@ -171,6 +173,18 @@ export const DISH_PHOTOS: Record<string, Record<string, string>> = {
   "MuteBites Sugarcane Juice": {
     "1 Litre Sugarcane Juice Bottle": `${SUGARCANE}/1 Litre Sugarcane Juice Bottle.jpg`,
   },
+
+  // Free-licence Unsplash stock (the restaurant sent no photos) for a few
+  // signature items only; everything else shows the placeholder by design.
+  "Waffle Pops": {
+    "Belgian Dark Chocolate": `${WAFFLE_POPS}/Belgian Dark Chocolate.jpg`,
+    "Butterscotch": `${WAFFLE_POPS}/Butterscotch.jpg`,
+    "Trio of Chocolate": `${WAFFLE_POPS}/Trio of Chocolate.jpg`,
+    "Classic Fudge Brownie": `${WAFFLE_POPS}/Classic Fudge Brownie.jpg`,
+    "Nuts Overload Brownie": `${WAFFLE_POPS}/Nuts Overload Brownie.jpg`,
+    "Classic Hot Chocolate": `${WAFFLE_POPS}/Classic Hot Chocolate.jpg`,
+    "Hazelnut Hot Chocolate": `${WAFFLE_POPS}/Hazelnut Hot Chocolate.jpg`,
+  },
 };
 
 // Ramana Fast Food sends no photos of its own; every one of its 16 dishes
@@ -202,6 +216,7 @@ const SIGNATURE_DISHES: Record<string, string[]> = {
   "MuteBites Fresh Fruits": ["Dragon Fruit (500 g)", "Black Grapes (1 kg)"],
   "MuteBites Sugarcane Juice": ["1 Litre Sugarcane Juice Bottle"],
   "Ramana Fast Food": ["Chicken Fried Rice", "Chicken Noodles"],
+  "Waffle Pops": ["Belgian Dark Chocolate", "Classic Fudge Brownie", "Classic Hot Chocolate"],
 };
 
 /** Most dish slides per card — each is another photo download on Home. */
