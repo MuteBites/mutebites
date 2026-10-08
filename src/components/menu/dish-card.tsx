@@ -14,9 +14,8 @@ import { cn } from "@/lib/utils";
  * the add control floating in its corner (a round "+", which becomes a
  * "− n +" stepper once the dish is in the cart, while the photo picks up
  * an amber ring), and name + price on the page underneath — no bordered
- * row, no "ADD" button hanging off a thumbnail. Dishes without a photo get
- * a typographic tile (their initial in the display face) instead of a
- * mismatched image.
+ * row, no "ADD" button hanging off a thumbnail. Dishes without a photo
+ * render as a compact list row instead (name, price, same add control).
  */
 export function DishCard({
   dish,
@@ -95,6 +94,52 @@ export function DishCard({
     </div>
   );
 
+  const tag = isFavorite ? (
+    <>
+      <Star className="size-3 shrink-0 fill-primary text-primary" aria-hidden="true" />
+      <span className="truncate">Your favorite</span>
+    </>
+  ) : isHighlyReordered ? (
+    <>
+      <Repeat className="size-3 shrink-0 text-success" aria-hidden="true" />
+      <span className="truncate">Highly re-ordered</span>
+    </>
+  ) : null;
+
+  // No photo: a compact list row instead of a photo tile with an empty
+  // placeholder (MenuView lists these under each section's photo grid).
+  if (!photo) {
+    return (
+      <article
+        id={`dish-${dish.id}`}
+        className={cn(
+          "flex min-w-0 scroll-mt-24 items-center gap-3 px-4 py-3",
+          highlighted &&
+            "animate-highlight rounded-2xl motion-reduce:outline-3 motion-reduce:outline-offset-3 motion-reduce:outline-rose",
+        )}
+      >
+        <div className={cn("min-w-0 flex-1", soldOut && "opacity-55")}>
+          {tag && <p className="mb-0.5 inline-flex items-center gap-1 text-xs font-semibold">{tag}</p>}
+          <h3 className={cn("leading-snug font-semibold", soldOut && "text-muted-foreground line-through")}>
+            <VegMark isVeg={dish.is_veg} className="mr-1.5 inline-flex size-4 -translate-y-px align-middle" />
+            {dish.name}
+          </h3>
+          <p className="mt-0.5 flex flex-wrap items-baseline gap-x-2">
+            <span className="font-heading text-base font-bold">{formatRupees(dish.price)}</span>
+            {dish.note && <span className="text-xs font-semibold text-rose">{dish.note}</span>}
+          </p>
+        </div>
+        {soldOut ? (
+          <span className="shrink-0 rounded-full bg-secondary px-2.5 py-1 text-xs font-semibold text-muted-foreground">
+            Sold out
+          </span>
+        ) : (
+          control && <div className="shrink-0">{control}</div>
+        )}
+      </article>
+    );
+  }
+
   return (
     <article id={`dish-${dish.id}`} className="min-w-0 scroll-mt-24">
       <div
@@ -105,37 +150,18 @@ export function DishCard({
             "animate-highlight motion-reduce:outline-3 motion-reduce:outline-offset-3 motion-reduce:outline-rose",
         )}
       >
-        {photo ? (
-          <div className="absolute inset-0 overflow-hidden rounded-3xl">
-            <BlurImage
-              src={photo}
-              alt=""
-              sizes="(min-width: 448px) 200px, 45vw"
-              className={cn("object-cover", soldOut && "opacity-60 grayscale")}
-            />
-          </div>
-        ) : (
-          <div
-            className="absolute inset-0 flex items-center justify-center rounded-3xl bg-brand-soft font-heading text-6xl font-bold text-brand-soft-foreground/60"
-            aria-hidden="true"
-          >
-            {dish.name.trim().charAt(0)}
-          </div>
-        )}
+        <div className="absolute inset-0 overflow-hidden rounded-3xl">
+          <BlurImage
+            src={photo}
+            alt=""
+            sizes="(min-width: 448px) 200px, 45vw"
+            className={cn("object-cover", soldOut && "opacity-60 grayscale")}
+          />
+        </div>
 
-        {(isFavorite || isHighlyReordered) && (
+        {tag && (
           <span className="absolute top-2 left-2 inline-flex max-w-[calc(100%-1rem)] items-center gap-1 rounded-full bg-card/90 px-2 py-0.5 text-xs font-semibold backdrop-blur-sm">
-            {isFavorite ? (
-              <>
-                <Star className="size-3 shrink-0 fill-primary text-primary" aria-hidden="true" />
-                <span className="truncate">Your favorite</span>
-              </>
-            ) : (
-              <>
-                <Repeat className="size-3 shrink-0 text-success" aria-hidden="true" />
-                <span className="truncate">Highly re-ordered</span>
-              </>
-            )}
+            {tag}
           </span>
         )}
 

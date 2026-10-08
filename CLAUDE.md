@@ -100,6 +100,10 @@ Food delivery site for VIT-AP University students.
   order. "veg" / "non veg" filter on the dish's veg flag instead of text
   (so "veg" never matches inside "Non-Veg Biryani"). A "Dishes" section
   shows above restaurants; restaurants also appear if they serve a match.
+- **Menu layout**: in each section, dishes **with** a photo
+  (`getDishPhoto()`) sit in the two-column photo grid; dishes **without**
+  one render underneath as a compact list (`DishCard`'s row form — name,
+  veg mark, price, note, same add control) instead of a blank tile.
 - **Menu filters** (`MenuView`, `src/components/menu/menu-view.tsx`): one
   sticky row — search icon, then a scrolling rail of **Veg** / **Non-veg**
   (mutually exclusive, tap again to clear; red on light red for non-veg)
@@ -547,7 +551,7 @@ sections — Waffle Pops, Classic Waffles, Red Velvet Love, KitKat Club,
 Chocolate Love, Mini Pancakes, Brownies, Hot Chocolate — every price the
 printed menu + ₹10 by the client's instruction; pops/pancakes carry "Pop" /
 "Mini Pancakes" in their names so flavours don't collide; the menu's paid
-add-ons aren't items (no add-on system). Only 7 dishes and the cover have
+add-ons are now real add-ons, see `addons`. Only 12 dishes and the cover have
 photos — free-licence Unsplash stock in `public/MuteBites/Waffle Pops/`
 and `covers/waffle-pops.jpg`; the rest show the placeholder on purpose).
 Migrations are applied by hand in the Supabase SQL editor (no CLI setup).

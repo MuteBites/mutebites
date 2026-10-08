@@ -184,6 +184,11 @@ export const DISH_PHOTOS: Record<string, Record<string, string>> = {
     "Nuts Overload Brownie": `${WAFFLE_POPS}/Nuts Overload Brownie.jpg`,
     "Classic Hot Chocolate": `${WAFFLE_POPS}/Classic Hot Chocolate.jpg`,
     "Hazelnut Hot Chocolate": `${WAFFLE_POPS}/Hazelnut Hot Chocolate.jpg`,
+    "Oreo": `${WAFFLE_POPS}/Oreo.jpg`,
+    "Red Velvet White Chocolate": `${WAFFLE_POPS}/Red Velvet White Chocolate.jpg`,
+    "Triple Chocolate Mini Pancakes": `${WAFFLE_POPS}/Triple Chocolate Mini Pancakes.jpg`,
+    "Nutella Oreo Crunch": `${WAFFLE_POPS}/Nutella Oreo Crunch.jpg`,
+    "Dark & White": `${WAFFLE_POPS}/Dark & White.jpg`,
   },
 };
 

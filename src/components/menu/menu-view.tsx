@@ -19,6 +19,7 @@ import { addToCart, conflictsWithCart, setQuantity, useCart } from "@/lib/cart/s
 import { AllCategoriesIcon, getCuisineIcon } from "@/lib/cuisine-icons";
 import type { Dish, MenuSection, Restaurant } from "@/lib/data/types";
 import { cn } from "@/lib/utils";
+import { getDishPhoto } from "@/lib/data/dish-photos";
 import { DishCard } from "./dish-card";
 
 const ALL = "all";
@@ -241,8 +242,9 @@ export function MenuView({
               {section.dishes.length}
             </span>
           </h2>
-          <div className="mt-4 grid grid-cols-2 gap-x-3 gap-y-6">
-            {section.dishes.map((dish) => (
+          {(() => {
+            // Photo dishes in the grid; dishes without a photo as a list under it.
+            const card = (dish: (typeof section.dishes)[number]) => (
               <DishCard
                 key={dish.id}
                 dish={dish}
@@ -257,8 +259,20 @@ export function MenuView({
                 onAdd={() => handleAdd(dish)}
                 onChangeQuantity={(q) => setQuantity(dish.id, q)}
               />
-            ))}
-          </div>
+            );
+            const withPhoto = section.dishes.filter((d) => getDishPhoto(restaurant.name, d.name));
+            const withoutPhoto = section.dishes.filter((d) => !getDishPhoto(restaurant.name, d.name));
+            return (
+              <>
+                {withPhoto.length > 0 && (
+                  <div className="mt-4 grid grid-cols-2 gap-x-3 gap-y-6">{withPhoto.map(card)}</div>
+                )}
+                {withoutPhoto.length > 0 && (
+                  <div className="mt-4 divide-y rounded-3xl border bg-card shadow-card">{withoutPhoto.map(card)}</div>
+                )}
+              </>
+            );
+          })()}
         </section>
       ))}
 
