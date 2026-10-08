@@ -25,7 +25,7 @@ function ordersToCsv(orders: AdminOrder[]): string {
       o.studentName,
       formatStoredMobile(o.contactPhone),
       o.restaurantName,
-      o.items.map((i) => `${i.dishName} x${i.quantity}`).join("; "),
+      o.items.map((i) => `${[i.dishName, ...i.extras].join(" + ")} x${i.quantity}`).join("; "),
       formatRupees(o.totalAmount),
       statusBadge(o.status).label,
     ]

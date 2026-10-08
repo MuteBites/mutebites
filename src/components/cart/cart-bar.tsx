@@ -3,7 +3,7 @@
 import { useState } from "react";
 import Image from "next/image";
 import { ArrowRight } from "lucide-react";
-import { cartTotals, useCart } from "@/lib/cart/store";
+import { cartTotals, useCart, lineKey } from "@/lib/cart/store";
 import { getDishPhoto } from "@/lib/data/dish-photos";
 import { formatRupees } from "@/lib/format";
 import { cn } from "@/lib/utils";
@@ -56,7 +56,7 @@ export function CartBar({
                   const photo = cart.restaurantName ? getDishPhoto(cart.restaurantName, line.name) : undefined;
                   return (
                     <span
-                      key={line.dishId}
+                      key={lineKey(line)}
                       className="animate-pop-in relative flex size-11 items-center justify-center overflow-hidden rounded-full bg-ink-foreground/15 font-heading text-lg font-bold ring-2 ring-ink"
                     >
                       {photo ? (

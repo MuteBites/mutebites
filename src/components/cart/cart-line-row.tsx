@@ -3,7 +3,7 @@
 import { useRef, useState, type PointerEvent as ReactPointerEvent } from "react";
 import { Minus, Plus, Trash2 } from "lucide-react";
 import { MAX_QUANTITY } from "@/lib/cart/limits";
-import { setQuantity, type CartLine } from "@/lib/cart/store";
+import { lineKey, linePrice, setQuantity, type CartLine } from "@/lib/cart/store";
 import { getDishPhoto } from "@/lib/data/dish-photos";
 import { formatRupees } from "@/lib/format";
 import { BlurImage } from "@/components/blur-image";
@@ -55,7 +55,7 @@ export function CartLineRow({ line, restaurantName }: { line: CartLine; restaura
     if (commit && dragX <= -SWIPE_THRESHOLD) {
       setRemoving(true);
       setDragX(-400);
-      setTimeout(() => setQuantity(line.dishId, 0), prefersReducedMotion() ? 0 : REMOVE_DELAY);
+      setTimeout(() => setQuantity(lineKey(line), 0), prefersReducedMotion() ? 0 : REMOVE_DELAY);
     } else {
       setDragX(0);
     }
@@ -98,11 +98,14 @@ export function CartLineRow({ line, restaurantName }: { line: CartLine; restaura
             <VegMark isVeg={line.isVeg} className="mr-1.5 inline-flex size-4 -translate-y-px align-middle" />
             {line.name}
           </p>
+          {line.addons?.length ? (
+            <p className="mt-0.5 text-sm text-muted-foreground">+ {line.addons.map((a) => a.name).join(", ")}</p>
+          ) : null}
           <div className="mt-2 flex flex-wrap items-center gap-x-3 gap-y-1">
             <div className="flex h-9 items-center gap-1 rounded-full bg-secondary p-1">
               <button
                 type="button"
-                onClick={() => setQuantity(line.dishId, line.quantity - 1)}
+                onClick={() => setQuantity(lineKey(line), line.quantity - 1)}
                 aria-label={`Remove one ${line.name}`}
                 className="flex size-7 items-center justify-center rounded-full bg-card outline-none hover:bg-border focus-visible:ring-2 focus-visible:ring-ring/80"
               >
@@ -111,7 +114,7 @@ export function CartLineRow({ line, restaurantName }: { line: CartLine; restaura
               <span className="min-w-5 text-center text-sm font-bold tabular-nums">{line.quantity}</span>
               <button
                 type="button"
-                onClick={() => setQuantity(line.dishId, line.quantity + 1)}
+                onClick={() => setQuantity(lineKey(line), line.quantity + 1)}
                 disabled={line.quantity >= MAX_QUANTITY}
                 aria-label={`Add one more ${line.name}`}
                 className="flex size-7 items-center justify-center rounded-full bg-primary text-primary-foreground outline-none hover:brightness-95 focus-visible:ring-2 focus-visible:ring-ring/80 disabled:opacity-40"
@@ -119,11 +122,11 @@ export function CartLineRow({ line, restaurantName }: { line: CartLine; restaura
                 <Plus className="size-3.5" />
               </button>
             </div>
-            <span className="text-sm text-muted-foreground tabular-nums">{formatRupees(line.price)} each</span>
+            <span className="text-sm text-muted-foreground tabular-nums">{formatRupees(linePrice(line))} each</span>
           </div>
         </div>
         <p className="self-start pt-0.5 text-right font-heading text-lg font-bold tabular-nums">
-          {formatRupees(line.price * line.quantity)}
+          {formatRupees(linePrice(line) * line.quantity)}
         </p>
       </div>
     </li>

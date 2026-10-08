@@ -11,10 +11,28 @@ import { MAX_QUANTITY } from "./limits";
 export type CartLine = {
   dishId: string;
   name: string;
+  /** The dish's own price; extras are priced separately in `addons`. */
   price: number;
   isVeg: boolean;
   quantity: number;
+  /** Extras chosen for this line (Waffle Pops' ice cream etc.); absent = none. */
+  addons?: { id: string; name: string; price: number }[];
 };
+
+/**
+ * A line is a dish plus its exact set of extras — the same dish with
+ * different extras is a separate line. With no extras the key is just the
+ * dish id, so carts saved before add-ons existed still match.
+ */
+export function lineKey(line: Pick<CartLine, "dishId" | "addons">) {
+  const ids = (line.addons ?? []).map((a) => a.id).sort();
+  return ids.length ? `${line.dishId}:${ids.join(",")}` : line.dishId;
+}
+
+/** One unit of a line: dish price plus its extras. */
+export function linePrice(line: Pick<CartLine, "price" | "addons">) {
+  return line.price + (line.addons ?? []).reduce((sum, a) => sum + a.price, 0);
+}
 
 export type Cart = {
   restaurantId: string | null;
@@ -101,8 +119,16 @@ function vibrateAdd() {
   }
 }
 
-/** Adds one of a dish. Replaces the cart if it held another restaurant's items. */
-export function addToCart(restaurant: CartRestaurant, dish: CartDish) {
+/**
+ * Adds a dish (with optional extras, `quantity` of them — default one).
+ * Same dish + same extras merges into the existing line. Replaces the cart
+ * if it held another restaurant's items.
+ */
+export function addToCart(
+  restaurant: CartRestaurant,
+  dish: CartDish,
+  options: { addons?: CartLine["addons"]; quantity?: number } = {},
+) {
   vibrateAdd();
   const current = getSnapshot();
   const base =
@@ -110,14 +136,24 @@ export function addToCart(restaurant: CartRestaurant, dish: CartDish) {
       ? current
       : { restaurantId: restaurant.id, restaurantName: restaurant.name, lines: [] };
 
-  const existing = base.lines.find((l) => l.dishId === dish.id);
+  const addons = options.addons?.length ? options.addons : undefined;
+  const add = options.quantity ?? 1;
+  const key = lineKey({ dishId: dish.id, addons });
+  const existing = base.lines.find((l) => lineKey(l) === key);
   const lines = existing
     ? base.lines.map((l) =>
-        l.dishId === dish.id ? { ...l, quantity: Math.min(l.quantity + 1, MAX_QUANTITY) } : l,
+        lineKey(l) === key ? { ...l, quantity: Math.min(l.quantity + add, MAX_QUANTITY) } : l,
       )
     : [
         ...base.lines,
-        { dishId: dish.id, name: dish.name, price: dish.price, isVeg: dish.is_veg, quantity: 1 },
+        {
+          dishId: dish.id,
+          name: dish.name,
+          price: dish.price,
+          isVeg: dish.is_veg,
+          quantity: Math.min(add, MAX_QUANTITY),
+          ...(addons ? { addons } : {}),
+        },
       ];
 
   write({ ...base, lines });
@@ -133,16 +169,16 @@ export function refillCart(restaurant: CartRestaurant, lines: CartLine[]) {
   });
 }
 
-/** Sets a line's quantity; 0 removes it. */
-export function setQuantity(dishId: string, quantity: number) {
+/** Sets a line's quantity (by `lineKey`; a plain dish's key is its id); 0 removes it. */
+export function setQuantity(key: string, quantity: number) {
   const current = getSnapshot();
   const q = Math.max(0, Math.min(quantity, MAX_QUANTITY));
   write({
     ...current,
     lines:
       q === 0
-        ? current.lines.filter((l) => l.dishId !== dishId)
-        : current.lines.map((l) => (l.dishId === dishId ? { ...l, quantity: q } : l)),
+        ? current.lines.filter((l) => lineKey(l) !== key)
+        : current.lines.map((l) => (lineKey(l) === key ? { ...l, quantity: q } : l)),
   });
 }
 
@@ -152,7 +188,7 @@ export function clearCart() {
 
 export function cartTotals(c: Cart) {
   return c.lines.reduce(
-    (t, l) => ({ items: t.items + l.quantity, amount: t.amount + l.price * l.quantity }),
+    (t, l) => ({ items: t.items + l.quantity, amount: t.amount + linePrice(l) * l.quantity }),
     { items: 0, amount: 0 },
   );
 }

@@ -77,7 +77,8 @@ export type AdminOrder = {
   studentName: string;
   studentBanned: boolean;
   /** In the order they were added; `subtotal` = unit price × quantity, snapshotted at order time. */
-  items: { dishName: string; quantity: number; subtotal: number }[];
+  /** `extras`: add-on names on the line; `subtotal` includes them. */
+  items: { dishName: string; extras: string[]; quantity: number; subtotal: number }[];
   dailyNumber: number;
 };
 
@@ -93,11 +94,11 @@ type AdminOrderRow = {
   restaurant_id: string;
   restaurants: { name: string } | null;
   users: { full_name: string; is_banned: boolean } | null;
-  order_items: { dish_name: string; quantity: number; subtotal: number }[];
+  order_items: { dish_name: string; quantity: number; subtotal: number; order_item_addons?: { addon_name: string }[] | null }[];
 };
 
 const ADMIN_ORDER_COLUMNS =
-  "id, status, total_amount, created_at, contact_phone, notes, user_id, restaurant_id, restaurants(name), users(full_name, is_banned), order_items(dish_name, quantity, subtotal), daily_number";
+  "id, status, total_amount, created_at, contact_phone, notes, user_id, restaurant_id, restaurants(name), users(full_name, is_banned), order_items(dish_name, quantity, subtotal, order_item_addons(addon_name)), daily_number";
 
 function toAdminOrder(o: AdminOrderRow): AdminOrder {
   return {
@@ -112,7 +113,12 @@ function toAdminOrder(o: AdminOrderRow): AdminOrder {
     restaurantName: o.restaurants?.name ?? "Restaurant",
     studentName: o.users?.full_name ?? "Student",
     studentBanned: o.users?.is_banned ?? false,
-    items: o.order_items.map((i) => ({ dishName: i.dish_name, quantity: i.quantity, subtotal: Number(i.subtotal) })),
+    items: o.order_items.map((i) => ({
+      dishName: i.dish_name,
+      extras: (i.order_item_addons ?? []).map((a) => a.addon_name),
+      quantity: i.quantity,
+      subtotal: Number(i.subtotal),
+    })),
     dailyNumber: o.daily_number,
   };
 }
@@ -134,14 +140,14 @@ export async function getAdminOrderDetail(id: string): Promise<AdminOrderDetail 
     supabase
       .from("orders")
       .select(
-        "id, status, total_amount, created_at, delivered_at, contact_phone, notes, user_id, restaurant_id, daily_number, restaurants(name), users(full_name, is_banned, email, registration_number), order_items(id, dish_name, quantity, unit_price, subtotal)",
+        "id, status, total_amount, created_at, delivered_at, contact_phone, notes, user_id, restaurant_id, daily_number, restaurants(name), users(full_name, is_banned, email, registration_number), order_items(id, dish_name, quantity, unit_price, addons_price, subtotal, order_item_addons(addon_name))",
       )
       .eq("id", id)
       .maybeSingle<
         Omit<AdminOrderRow, "users" | "order_items"> & {
           delivered_at: string | null;
           users: { full_name: string; is_banned: boolean; email: string | null; registration_number: string | null } | null;
-          order_items: { id: string; dish_name: string; quantity: number; unit_price: number; subtotal: number }[];
+          order_items: { id: string; dish_name: string; quantity: number; unit_price: number; addons_price: number; subtotal: number; order_item_addons?: { addon_name: string }[] | null }[];
         }
       >(),
     supabase
@@ -162,7 +168,10 @@ export async function getAdminOrderDetail(id: string): Promise<AdminOrderDetail 
     deliveredAt: data.delivered_at,
     studentEmail: data.users?.email ?? null,
     studentRegistrationNumber: data.users?.registration_number ?? null,
-    itemDetails: data.order_items.map((i) => ({ unitPrice: Number(i.unit_price), rating: ratings.get(i.id) ?? null })),
+    itemDetails: data.order_items.map((i) => ({
+      unitPrice: Number(i.unit_price) + Number(i.addons_price ?? 0),
+      rating: ratings.get(i.id) ?? null,
+    })),
     review: review ? { note: review.note, createdAt: review.created_at } : null,
   };
 }

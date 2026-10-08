@@ -13,7 +13,8 @@ import { createClient } from "@/lib/supabase/server";
 export type PlaceOrderInput = {
   restaurantId: string;
   /** price = what the student saw, only compared — never charged. */
-  lines: { dishId: string; quantity: number; price: number }[];
+  /** addonIds: extras chosen for the line (empty/absent = none). Same dish twice only with different extras. */
+  lines: { dishId: string; quantity: number; price: number; addonIds?: string[] }[];
   notes: string;
   contactPhone: string;
 };
@@ -52,9 +53,14 @@ export async function placeOrder(input: PlaceOrderInput): Promise<PlaceOrderResu
         typeof l.price !== "number" ||
         !Number.isInteger(l.quantity) ||
         l.quantity < 1 ||
-        l.quantity > MAX_QUANTITY,
+        l.quantity > MAX_QUANTITY ||
+        (l.addonIds !== undefined &&
+          (!Array.isArray(l.addonIds) ||
+            l.addonIds.some((a) => typeof a !== "string") ||
+            new Set(l.addonIds).size !== l.addonIds.length)),
     ) ||
-    new Set(input.lines.map((l) => l.dishId)).size !== input.lines.length
+    new Set(input.lines.map((l) => `${l.dishId}:${[...(l.addonIds ?? [])].sort().join(",")}`)).size !==
+      input.lines.length
   ) {
     return { ok: false, error: "Something's off with your cart — give it a quick look and try again." };
   }
@@ -79,6 +85,13 @@ export async function placeOrder(input: PlaceOrderInput): Promise<PlaceOrderResu
   }
 
   const dishes = new Map(menu.sections.flatMap((s) => s.dishes).map((d) => [d.id, d]));
+  // Extras each dish may carry (its section's add-ons).
+  const allowedAddons = new Map(
+    menu.sections.flatMap((s) => s.dishes.map((d) => [d.id, new Set(s.addons.map((a) => a.id))] as const)),
+  );
+  if (input.lines.some((l) => (l.addonIds ?? []).some((a) => !allowedAddons.get(l.dishId)?.has(a)))) {
+    return { ok: false, error: PLACE_ORDER_ERRORS.addon_unavailable };
+  }
   const removedDishIds: string[] = [];
   const updatedPrices: { dishId: string; price: number }[] = [];
   for (const line of input.lines) {
@@ -105,7 +118,7 @@ export async function placeOrder(input: PlaceOrderInput): Promise<PlaceOrderResu
   const supabase = await createClient();
   const { data: orderId, error } = await supabase.rpc("place_order", {
     p_restaurant_id: input.restaurantId,
-    p_items: input.lines.map((l) => ({ dish_id: l.dishId, quantity: l.quantity })),
+    p_items: input.lines.map((l) => ({ dish_id: l.dishId, quantity: l.quantity, addon_ids: l.addonIds ?? [] })),
     p_contact_phone: contactPhone,
     p_notes: notes || null,
   });
@@ -152,5 +165,6 @@ const PLACE_ORDER_ERRORS: Record<string, string> = {
   dish_unavailable: "Something in your cart just sold out — hop back to the menu to swap it out.",
   // Rate limits (20260922000000_place_order_rate_limit.sql): 5 a minute, 8 unfinished.
   order_rate_limited: "That's a lot of orders in a minute — wait a moment and try again. Your cart is saved.",
+  addon_unavailable: "An extra you picked isn't available any more — remove that item and add it again.",
   too_many_open_orders: "You already have 8 orders on the way — once one is delivered you can order again.",
 };

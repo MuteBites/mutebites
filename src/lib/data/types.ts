@@ -40,4 +40,9 @@ export type MenuSection = {
   /** null = dishes with no category, shown last as "More". */
   category: DishCategory | null;
   dishes: Dish[];
+  /** Extras offered on this section's dishes (category_addons); empty for most restaurants. */
+  addons: AddonOption[];
 };
+
+/** A paid extra on a dish (addons table) — e.g. Waffle Pops' "Ice cream". */
+export type AddonOption = { id: string; name: string; price: number };

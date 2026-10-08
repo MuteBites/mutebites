@@ -4,8 +4,9 @@ import { formatStoredMobile } from "@/lib/phone";
 import { formatOrderNumber } from "./status";
 
 /** "A1 Biryani Dum Biryani - 1" — the one way the admin side writes a line item (card, WhatsApp, copy). */
-export function itemLine(item: { dishName: string; quantity: number }): string {
-  return `${item.dishName} - ${item.quantity}`;
+export function itemLine(item: { dishName: string; extras?: string[]; quantity: number }): string {
+  const extras = item.extras?.length ? ` + ${item.extras.join(" + ")}` : "";
+  return `${item.dishName}${extras} - ${item.quantity}`;
 }
 
 /** Each dish on its own line with its price; a total line only when there's more than one dish. */

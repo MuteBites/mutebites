@@ -554,6 +554,33 @@ printed menu + ₹10 by the client's instruction; pops/pancakes carry "Pop" /
 add-ons are now real add-ons, see `addons`. Only 12 dishes and the cover have
 photos — free-licence Unsplash stock in `public/MuteBites/Waffle Pops/`
 and `covers/waffle-pops.jpg`; the rest show the placeholder on purpose).
+**Add-ons (extras):** [`20261008010000_addons_schema.sql`](supabase/migrations/20261008010000_addons_schema.sql)
+(tables), [`20261008020000_addons_rls_and_data.sql`](supabase/migrations/20261008020000_addons_rls_and_data.sql)
+(access rules + Waffle Pops' four extras) and
+[`20261008030000_place_order_addons.sql`](supabase/migrations/20261008030000_place_order_addons.sql)
+(`place_order()` with add-ons). **`addons`** — per restaurant (`name`,
+`price`, `is_available`, `sort_order`); **`category_addons`** — which menu
+sections offer which extras (Waffle Pops: every section but Hot
+Chocolate, printed prices: Choco chip ₹10, Ice cream ₹30, Chopped
+chocolates ₹10, Oreo ₹10); both public-read, admin-write.
+**`order_item_addons`** — the extras chosen on each order line,
+snapshotted (`addon_name`, `price`) like dish name/price; readable by the
+order's student and admins, written only by `place_order()`.
+`order_items.addons_price` holds a line's extras total and the generated
+`subtotal` is `(unit_price + addons_price) * quantity`. `place_order()`
+takes `addon_ids` per line, checks each is this restaurant's, available
+and offered on the dish's section (`addon_unavailable` otherwise), prices
+them from the database, and allows the same dish twice only with
+different extras. App side: `getRestaurantMenu()` puts each section's
+`addons` on `MenuSection`; a dish in such a section opens `AddonSheet`
+(`src/components/menu/addon-sheet.tsx` — tick extras, quantity, one Add
+with the live total) instead of one-tap add, and its card shows a count
+badge rather than a stepper. Cart lines carry `addons`; `lineKey()` (dish
+id + sorted extra ids) identifies a line and `linePrice()` adds extras.
+Order displays read `order_item_addons(addon_name)` — the ticket lists
+"+ Ice cream" under the dish, and admin `itemLine()` writes
+"Nutella Pop + Ice cream - 1" (card, WhatsApp, copy, CSV). "Your usual"
+skips orders that had extras.
 Migrations are applied by hand in the Supabase SQL editor (no CLI setup).
 
 All orders are handed over at **VIT-AP Main Gate** — there is no room

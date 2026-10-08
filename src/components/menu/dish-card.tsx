@@ -27,6 +27,7 @@ export function DishCard({
   isFavorite = false,
   isHighlyReordered = false,
   highlighted = false,
+  hasAddons = false,
   onAdd,
   onChangeQuantity,
 }: {
@@ -45,6 +46,8 @@ export function DishCard({
   isHighlyReordered?: boolean;
   /** Just arrived here from a deep link (Trending, Thursday banner) — flash a ring. */
   highlighted?: boolean;
+  /** Its section offers extras: + always opens the "Add extras" sheet (no inline stepper — lines differ by extras; the cart edits them). */
+  hasAddons?: boolean;
   onAdd: () => void;
   onChangeQuantity: (quantity: number) => void;
 }) {
@@ -56,14 +59,22 @@ export function DishCard({
     <span className="rounded-full bg-card/90 px-2.5 py-1 text-xs font-semibold text-muted-foreground backdrop-blur-sm">
       {pausedOnly ? pausedLabel : "Closed"}
     </span>
-  ) : !inCart ? (
+  ) : !inCart || hasAddons ? (
     <button
       type="button"
       onClick={onAdd}
-      aria-label={`Add ${dish.name}`}
-      className="animate-pop-in flex size-11 items-center justify-center rounded-full bg-primary text-primary-foreground shadow-raised outline-none hover:brightness-95 focus-visible:ring-3 focus-visible:ring-ring/80"
+      aria-label={inCart ? `Add another ${dish.name} (${quantity} in cart)` : `Add ${dish.name}`}
+      className="animate-pop-in relative flex size-11 items-center justify-center rounded-full bg-primary text-primary-foreground shadow-raised outline-none hover:brightness-95 focus-visible:ring-3 focus-visible:ring-ring/80"
     >
       <Plus className="size-5" strokeWidth={2.5} />
+      {inCart && (
+        <span
+          className="absolute -top-1 -right-1 flex min-w-5 items-center justify-center rounded-full bg-ink px-1 text-xs font-bold text-ink-foreground tabular-nums ring-2 ring-background"
+          aria-hidden="true"
+        >
+          {quantity}
+        </span>
+      )}
     </button>
   ) : (
     <div className="animate-pop-in flex h-11 items-center gap-1 rounded-full bg-primary p-1 text-primary-foreground shadow-raised">

@@ -39,7 +39,22 @@ function hasReview(row: unknown): boolean {
   return Array.isArray(row) ? row.length > 0 : row != null;
 }
 
-export type OrderItem = { id: string; dishName: string; unitPrice: number; quantity: number; subtotal: number };
+/** `extras`: add-on names chosen for the line ("Ice cream"); `unitPrice` includes them. */
+export type OrderItem = {
+  id: string;
+  dishName: string;
+  extras: string[];
+  unitPrice: number;
+  quantity: number;
+  subtotal: number;
+};
+
+type ItemAddonRows = { order_item_addons?: { addon_name: string }[] | null };
+/** "Nutella Pop + Ice cream" — the dish with any extras, for text displays. */
+export function withExtras(name: string, extras: string[]) {
+  return extras.length ? `${name} + ${extras.join(" + ")}` : name;
+}
+const extrasOf = (i: ItemAddonRows) => (i.order_item_addons ?? []).map((a) => a.addon_name);
 
 /** The student's own review of an order (order_reviews + order_item_ratings), if they've left one. */
 export type OrderReview = {
@@ -74,14 +89,19 @@ type OrderSummaryRow = {
   created_at: string;
   restaurant_id: string;
   restaurants: { name: string } | null;
-  order_items: { dish_name: string; quantity: number }[];
+  order_items: ({ dish_name: string; quantity: number } & ItemAddonRows)[];
   daily_number: number;
   delivered_at: string | null;
   order_reviews: { order_id: string } | { order_id: string }[] | null;
 };
 
-function summarizeItems(items: { dish_name: string; quantity: number }[]): string {
-  return items.map((i) => (i.quantity > 1 ? `${i.quantity}× ${i.dish_name}` : i.dish_name)).join(", ");
+function summarizeItems(items: ({ dish_name: string; quantity: number } & ItemAddonRows)[]): string {
+  return items
+    .map((i) => {
+      const name = withExtras(i.dish_name, extrasOf(i));
+      return i.quantity > 1 ? `${i.quantity}× ${name}` : name;
+    })
+    .join(", ");
 }
 
 /**
@@ -94,7 +114,7 @@ export async function getOrderHistory(userId: string): Promise<OrderSummary[]> {
   const { data, error } = await supabase
     .from("orders")
     .select(
-      "id, status, total_amount, created_at, restaurant_id, restaurants(name), order_items(dish_name, quantity), daily_number, delivered_at, order_reviews(order_id)",
+      "id, status, total_amount, created_at, restaurant_id, restaurants(name), order_items(dish_name, quantity, order_item_addons(addon_name)), daily_number, delivered_at, order_reviews(order_id)",
     )
     .eq("user_id", userId)
     .order("created_at", { ascending: false })
@@ -173,7 +193,7 @@ type OrderDetailRow = {
   notes: string | null;
   restaurant_id: string;
   restaurants: { name: string; phone: string } | null;
-  order_items: { id: string; dish_name: string; unit_price: number; quantity: number; subtotal: number }[];
+  order_items: ({ id: string; dish_name: string; unit_price: number; addons_price: number; quantity: number; subtotal: number } & ItemAddonRows)[];
   daily_number: number;
   delivered_at: string | null;
   // One-to-one via order_reviews.order_id; PostgREST may return an object or a one-element array.
@@ -327,7 +347,7 @@ export const getOrder = cache(async function getOrder(
   const { data, error } = await supabase
     .from("orders")
     .select(
-      "id, status, total_amount, created_at, updated_at, delivered_at, contact_phone, notes, restaurant_id, restaurants(name, phone), order_items(id, dish_name, unit_price, quantity, subtotal), daily_number, order_reviews(note, created_at, order_item_ratings(order_item_id, rating))",
+      "id, status, total_amount, created_at, updated_at, delivered_at, contact_phone, notes, restaurant_id, restaurants(name, phone), order_items(id, dish_name, unit_price, addons_price, quantity, subtotal, order_item_addons(addon_name)), daily_number, order_reviews(note, created_at, order_item_ratings(order_item_id, rating))",
     )
     .eq("id", id)
     .eq("user_id", userId)
@@ -352,7 +372,8 @@ export const getOrder = cache(async function getOrder(
     items: data.order_items.map((i) => ({
       id: i.id,
       dishName: i.dish_name,
-      unitPrice: i.unit_price,
+      extras: extrasOf(i),
+      unitPrice: Number(i.unit_price) + Number(i.addons_price ?? 0),
       quantity: i.quantity,
       subtotal: i.subtotal,
     })),

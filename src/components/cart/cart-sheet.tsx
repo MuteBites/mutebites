@@ -9,7 +9,7 @@ import { CartLineRow } from "@/components/cart/cart-line-row";
 import { Sheet, SheetContent, SheetDescription, SheetTitle } from "@/components/ui/sheet";
 import { Textarea } from "@/components/ui/textarea";
 import { MAX_NOTES } from "@/lib/cart/limits";
-import { cartTotals, clearCart, reconcileCart, useCart, type Cart } from "@/lib/cart/store";
+import { cartTotals, clearCart, reconcileCart, useCart, type Cart, lineKey } from "@/lib/cart/store";
 import { formatRupees } from "@/lib/format";
 import { placeOrder } from "@/lib/orders/actions";
 import { formatLocalMobile, formatStoredMobile, normalizeIndianMobile } from "@/lib/phone";
@@ -125,7 +125,12 @@ function CartContents({
     startPlacing(async () => {
       const result = await placeOrder({
         restaurantId: cart.restaurantId!,
-        lines: cart.lines.map((l) => ({ dishId: l.dishId, quantity: l.quantity, price: l.price })),
+        lines: cart.lines.map((l) => ({
+          dishId: l.dishId,
+          quantity: l.quantity,
+          price: l.price,
+          addonIds: (l.addons ?? []).map((a) => a.id),
+        })),
         notes,
         contactPhone,
       });
@@ -153,7 +158,7 @@ function CartContents({
       <div className="min-h-0 flex-1 overflow-y-auto px-6 pb-6 [mask-image:linear-gradient(to_bottom,#000_calc(100%-1.5rem),transparent)]">
         <ul>
           {cart.lines.map((line) => (
-            <CartLineRow key={line.dishId} line={line} restaurantName={cart.restaurantName} />
+            <CartLineRow key={lineKey(line)} line={line} restaurantName={cart.restaurantName} />
           ))}
         </ul>
 

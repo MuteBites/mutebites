@@ -298,7 +298,7 @@ export function OrderTracking({
               {initialOrder.items.map((item) => {
                 const photo = getDishPhoto(initialOrder.restaurantName, item.dishName);
                 return (
-                  <li key={item.dishName} className="flex items-center gap-3 py-2.5">
+                  <li key={item.id} className="flex items-center gap-3 py-2.5">
                     <span className="relative flex size-11 shrink-0 items-center justify-center overflow-hidden rounded-xl bg-brand-soft font-heading font-bold text-brand-soft-foreground/60">
                       {photo ? (
                         <BlurImage src={photo} alt="" sizes="44px" className="object-cover" />
@@ -308,6 +308,9 @@ export function OrderTracking({
                     </span>
                     <span className="min-w-0 flex-1 text-sm">
                       <span className="font-semibold tabular-nums">{item.quantity} ×</span> {item.dishName}
+                      {item.extras.length > 0 && (
+                        <span className="block text-muted-foreground">+ {item.extras.join(", ")}</span>
+                      )}
                     </span>
                     <span className="text-sm tabular-nums">{formatRupees(item.subtotal)}</span>
                   </li>

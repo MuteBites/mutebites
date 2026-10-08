@@ -17,9 +17,10 @@ import {
 import { VegMark } from "@/components/veg-mark";
 import { addToCart, conflictsWithCart, setQuantity, useCart } from "@/lib/cart/store";
 import { AllCategoriesIcon, getCuisineIcon } from "@/lib/cuisine-icons";
-import type { Dish, MenuSection, Restaurant } from "@/lib/data/types";
+import type { AddonOption, Dish, MenuSection, Restaurant } from "@/lib/data/types";
 import { cn } from "@/lib/utils";
 import { getDishPhoto } from "@/lib/data/dish-photos";
+import { AddonSheet } from "./addon-sheet";
 import { DishCard } from "./dish-card";
 
 const ALL = "all";
@@ -81,13 +82,19 @@ export function MenuView({
       clearTimeout(clear);
     };
   }, [focusDishId]);
-  // Dish waiting on "replace your cart?" confirmation.
-  const [pendingDish, setPendingDish] = useState<Dish | null>(null);
+  // Dish (with its chosen extras) waiting on "replace your cart?" confirmation.
+  const [pendingAdd, setPendingAdd] = useState<{ dish: Dish; addons: AddonOption[]; quantity: number } | null>(
+    null,
+  );
+  // Dish whose "Add extras" sheet is open, with the extras its section offers.
+  const [addonTarget, setAddonTarget] = useState<{ dish: Dish; addons: AddonOption[] } | null>(null);
 
   const cartRestaurant = { id: restaurant.id, name: restaurant.name };
+  // Every line of this dish counts — the same dish with different extras is
+  // several lines.
   const quantityOf = (dishId: string) =>
     cart.restaurantId === restaurant.id
-      ? (cart.lines.find((l) => l.dishId === dishId)?.quantity ?? 0)
+      ? cart.lines.filter((l) => l.dishId === dishId).reduce((sum, l) => sum + l.quantity, 0)
       : 0;
 
   function closeSearch() {
@@ -95,9 +102,16 @@ export function MenuView({
     setSearchOpen(false);
   }
 
-  function handleAdd(dish: Dish) {
-    if (conflictsWithCart(restaurant.id)) setPendingDish(dish);
-    else addToCart(cartRestaurant, dish);
+  function commitAdd(dish: Dish, addons: AddonOption[] = [], quantity = 1) {
+    if (conflictsWithCart(restaurant.id)) setPendingAdd({ dish, addons, quantity });
+    else addToCart(cartRestaurant, dish, { addons, quantity });
+  }
+
+  // Dishes in a section with extras open the "Add extras" sheet first;
+  // everything else keeps the one-tap add.
+  function handleAdd(dish: Dish, sectionAddons: AddonOption[]) {
+    if (sectionAddons.length > 0) setAddonTarget({ dish, addons: sectionAddons });
+    else commitAdd(dish);
   }
 
   const q = query.trim().toLowerCase();
@@ -256,7 +270,8 @@ export function MenuView({
                 isFavorite={dish.id === favoriteDishId}
                 isHighlyReordered={highlyReorderedDishIds.has(dish.id)}
                 highlighted={highlighted === dish.id}
-                onAdd={() => handleAdd(dish)}
+                hasAddons={section.addons.length > 0}
+                onAdd={() => handleAdd(dish, section.addons)}
                 onChangeQuantity={(q) => setQuantity(dish.id, q)}
               />
             );
@@ -285,7 +300,17 @@ export function MenuView({
         closedNote={closedNote}
       />
 
-      <AlertDialog open={pendingDish !== null} onOpenChange={(open) => !open && setPendingDish(null)}>
+      <AddonSheet
+        dish={addonTarget?.dish ?? null}
+        addons={addonTarget?.addons ?? []}
+        onClose={() => setAddonTarget(null)}
+        onAdd={(dish, chosen, quantity) => {
+          setAddonTarget(null);
+          commitAdd(dish, chosen, quantity);
+        }}
+      />
+
+      <AlertDialog open={pendingAdd !== null} onOpenChange={(open) => !open && setPendingAdd(null)}>
         <AlertDialogContent>
           <AlertDialogHeader>
             <AlertDialogTitle className="text-lg font-bold">Start a new cart?</AlertDialogTitle>
@@ -298,8 +323,12 @@ export function MenuView({
             <AlertDialogCancel>Keep my cart</AlertDialogCancel>
             <AlertDialogAction
               onClick={() => {
-                if (pendingDish) addToCart(cartRestaurant, pendingDish);
-                setPendingDish(null);
+                if (pendingAdd)
+                  addToCart(cartRestaurant, pendingAdd.dish, {
+                    addons: pendingAdd.addons,
+                    quantity: pendingAdd.quantity,
+                  });
+                setPendingAdd(null);
               }}
             >
               Start new cart

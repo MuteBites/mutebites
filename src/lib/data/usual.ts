@@ -17,7 +17,7 @@ export type UsualCart = {
 type OrderRow = {
   restaurant_id: string;
   created_at: string;
-  order_items: { dish_id: string | null; quantity: number }[];
+  order_items: { dish_id: string | null; quantity: number; addons_price: number }[];
 };
 
 /**
@@ -33,7 +33,7 @@ export async function getUsualCart(userId: string): Promise<UsualCart | null> {
   const supabase = await createClient();
   const { data, error } = await supabase
     .from("orders")
-    .select("restaurant_id, created_at, order_items(dish_id, quantity)")
+    .select("restaurant_id, created_at, order_items(dish_id, quantity, addons_price)")
     .eq("user_id", userId)
     .eq("status", "delivered")
     .order("created_at", { ascending: false })
@@ -48,8 +48,11 @@ export async function getUsualCart(userId: string): Promise<UsualCart | null> {
   const groups = new Map<string, Group>();
 
   for (const o of orders) {
+    // Orders with extras aren't offered as a one-tap usual: the refill
+    // carries dishes only, and would quietly drop the extras.
+    if (o.order_items.some((i) => Number(i.addons_price) > 0)) continue;
     const items = o.order_items.filter(
-      (i): i is { dish_id: string; quantity: number } => i.dish_id !== null,
+      (i): i is { dish_id: string; quantity: number; addons_price: number } => i.dish_id !== null,
     );
     if (items.length === 0) continue;
 

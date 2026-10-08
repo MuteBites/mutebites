@@ -147,7 +147,7 @@ export const getRestaurantMenu = cache(async function getRestaurantMenu(
   if (!isUuid(id)) return null;
   const supabase = await createClient();
 
-  const [restaurantResult, categoriesResult, dishesResult] = await Promise.all([
+  const [restaurantResult, categoriesResult, dishesResult, addonsResult] = await Promise.all([
     supabase
       .from("restaurants")
       .select("id, name, phone, description, cuisine_tags, is_active")
@@ -167,9 +167,16 @@ export const getRestaurantMenu = cache(async function getRestaurantMenu(
       .order("sort_order")
       .order("name")
       .returns<Dish[]>(),
+    supabase
+      .from("category_addons")
+      .select("category_id, addons!inner(id, name, price, is_available, sort_order, restaurant_id)")
+      .eq("addons.restaurant_id", id)
+      .eq("addons.is_available", true)
+      .returns<{ category_id: string; addons: { id: string; name: string; price: number; sort_order: number } }[]>(),
   ]);
 
   if (restaurantResult.error) throw restaurantResult.error;
+  if (addonsResult.error) throw addonsResult.error;
   if (categoriesResult.error) throw categoriesResult.error;
   if (dishesResult.error) throw dishesResult.error;
 
@@ -179,17 +186,29 @@ export const getRestaurantMenu = cache(async function getRestaurantMenu(
   const categories = categoriesResult.data ?? [];
   const dishes = dishesResult.data ?? [];
 
+  const addonsByCategory = new Map<string, { id: string; name: string; price: number; sort_order: number }[]>();
+  for (const row of addonsResult.data ?? []) {
+    const list = addonsByCategory.get(row.category_id) ?? [];
+    list.push(row.addons);
+    addonsByCategory.set(row.category_id, list);
+  }
+  const addonsFor = (categoryId: string) =>
+    (addonsByCategory.get(categoryId) ?? [])
+      .sort((a, b) => a.sort_order - b.sort_order)
+      .map((a) => ({ id: a.id, name: a.name, price: Number(a.price) }));
+
   const sections: MenuSection[] = categories
     .map((category) => ({
       category,
       dishes: dishes.filter((d) => d.category_id === category.id),
+      addons: addonsFor(category.id),
     }))
     .filter((s) => s.dishes.length > 0);
 
   const uncategorized = dishes.filter(
     (d) => !d.category_id || !categories.some((c) => c.id === d.category_id),
   );
-  if (uncategorized.length > 0) sections.push({ category: null, dishes: uncategorized });
+  if (uncategorized.length > 0) sections.push({ category: null, dishes: uncategorized, addons: [] });
 
   return { restaurant, sections };
 });
