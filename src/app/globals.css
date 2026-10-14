@@ -511,6 +511,12 @@
 }
 /* The top edge of a surface catching the light (for surfaces that don't
    use shadow-card: chips, sheets, the tab bar). */
+/* The turning ring around a chosen "What's on your mind?" tile: the brand's
+   plum, rose and amber chasing each other (animate-ring-spin). */
+@utility food-ring {
+  background: conic-gradient(#552c4a, #914955, #c07a35, #f0c38f, #914955, #552c4a);
+}
+
 @utility rim-light {
   box-shadow: inset 0 1px 0 rgb(255 255 255 / 9%);
 }
@@ -558,6 +564,13 @@
   }
   /* Bottom bar: the lit pill squashes as it lands on a tab, and the new
      tab's icon pops in with a little twist. */
+  .animate-ring-spin {
+    animation: ring-spin 5s linear infinite;
+  }
+  /* Home promo: the mascot tile bobs gently. */
+  .animate-float {
+    animation: float 4s ease-in-out infinite;
+  }
   .animate-tab-pop {
     animation: tab-pop var(--dur-slow) var(--ease-spring) both;
   }
@@ -705,6 +718,22 @@
   100% {
     transform: scale(1.9);
     opacity: 0;
+  }
+}
+
+@keyframes ring-spin {
+  to {
+    rotate: 1turn;
+  }
+}
+
+@keyframes float {
+  0%,
+  100% {
+    translate: 0 0;
+  }
+  50% {
+    translate: 0 -6px;
   }
 }
 

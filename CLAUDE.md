@@ -124,10 +124,40 @@ Food delivery site for VIT-AP University students.
   (`rounded-full bg-card/85` with blur), so pages keep `pb-28`; Home's
   `CartBar` (`hasTabBar`) sits just above it. Don't add `<TabBar />` to a
   page.
+- **Home layout** (redesign, 15 Oct 2026; `src/components/home/`): the
+  mood header (logo → About; the student's initials in a lit plum circle →
+  Profile; greeting + question), the closed banner while ordering is
+  Closed, the pill search, **"What's on your mind?"** (`FoodTypeRail`:
+  round photo tiles for `FOOD_TYPES` in `src/lib/home-filters.ts` —
+  Biryani, Fried rice, Noodles, Starters, Curries, Chicken, Paneer, Egg,
+  Juices, Fruits, Desserts; matched on dish name + section, a dish can be in
+  several; tile photos are literal paths there — update them if a photo is
+  renamed; the chosen tile wears a turning plum/rose/amber `food-ring`),
+  the sticky `FilterBar` chips (Filters with a count, Sort, Veg / Non-veg,
+  Under ₹200, and Popular once `POPULAR_MIN` = 3 dishes have 3+ orders in
+  30 days; lit chips use `bg-ink`) and `FilterSheet` (a bottom sheet that
+  edits a draft — sort, diet, price bands, restaurants, popular, show
+  sold-out — with a live "Show N dishes"). No delivery-time filter (slots,
+  not minutes). State lives in the URL (`?type=biryani&diet=veg…`,
+  `parseFilters` / `serializeFilters`, written with
+  `history.replaceState`), so Back from a dish restores it. While
+  searching or filtering, the promo and favourites give way to `DishGrid`
+  (two-column photo cards → `?dish=`, 12 at a time) and the restaurants
+  serving something in it. Browsing: `PromoCard` (only while ordering is
+  open — the lit plum "Hot food, at Main Gate" with the real
+  `deliveryWindow()` for an order placed now, Free delivery / Cash or UPI
+  chips and the mascot tile floating), then `PopularRail` "Campus
+  favourites" (`buildRail()`: the week's trending dishes ranked #1, #2…,
+  then signature dishes, `getSignatureDishes()`, to fill 8) — it replaced
+  the flame-button Trending popup — then the restaurant cards (cuisine
+  chips in blush, dish count + "from ₹X", a glowing amber arrow; the first
+  card's cover loads at high priority). **Campus Closed turns every
+  restaurant off**, so while none is on, tiles / filters / favourites
+  browse every menu (`includeClosed`) instead of coming up empty.
 - **Dish deep links**: `/restaurants/<id>?dish=<dishId>` opens the menu
   scrolled to that dish with a brief rose outline (`focusDishId` in
-  `MenuView`). Used by Home search's dish results, the Trending popup and
-  the Thursday banner (`getThursdaySpecial()` returns `dishId`).
+  `MenuView`). Used by Home's dish grid (search / filters), the "Campus
+  favourites" row and the Thursday banner (`getThursdaySpecial()` returns `dishId`).
 - **Home search** searches dishes as well as restaurants: every dish ships
   with the page (`getSearchableDishes()`, ~100 rows) and `searchDishes()`
   (`src/lib/search.ts`) filters on the client — every typed word must start
@@ -353,11 +383,11 @@ silently re-enables the button.
   `alert-dialog.tsx` (confirmations — "Cancel this order?", "Pause
   ordering campus-wide?", "Mark 3 orders delivered?") and `dialog.tsx`
   (plain popups with no confirm/cancel semantics — the "About MuteBites"
-  card from the Home logo — the logo sits on the same frosted plate as
-  the Trending button with a thin ring, and `.logo-hint` ripples a rose
+  card from the Home logo — the logo sits on a frosted plate with a thin
+  ring, and `.logo-hint` ripples a rose
   outline twice after load so it reads as tappable — (footer: `AboutCredits` — "Owned by Harsha & Rishi",
   "~ Developed & Maintained by Naga Adithya"; the name has a dotted
-  underline and tapping it quietly folds open Call · WhatsApp · Mail), the Trending popup and the one-time "How was
+  underline and tapping it quietly folds open Call · WhatsApp · Mail) and the one-time "How was
   it?" rating prompt). The cart and rating sheets use `sheet.tsx`. Both wrap `@base-ui/react`; reach for whichever already matches
   what you're building rather than hand-rolling a third.
 - `src/lib/supabase/client.ts` — browser Supabase client
@@ -833,10 +863,9 @@ RLS is enabled on every table:
 
 - **`trending_dishes(days_back int default 7, result_limit int default 5)`**
   — security definer, callable by `authenticated` only, same pattern as
-  `place_order()`. Powers Home's "Trending this week" popup
-  (`src/components/home/trending-dialog.tsx`, opened from a flame button in
-  `home-header.tsx` — same trigger/dialog pattern as the logo's "About
-  MuteBites" popup): top ordered dishes campus-wide over a rolling window
+  `place_order()`. Powers the ranked start of Home's "Campus favourites"
+  row (`popular-rail.tsx`; the old flame-button Trending popup is gone):
+  top ordered dishes campus-wide over a rolling window
   (`orders.status <> 'cancelled'`, restaurant `is_active`, dish
   `is_available`). Needed because students can only read their *own*
   orders/order_items under RLS — there's no other way to compute a

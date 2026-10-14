@@ -1,8 +1,7 @@
+import Link from "next/link";
 import { Moon, Sun, Sunrise, Sunset, type LucideIcon } from "lucide-react";
 import { AboutMuteBitesDialog } from "@/components/home/about-mutebites-dialog";
-import { TrendingDialog } from "@/components/home/trending-dialog";
 import { BrandLogo } from "@/components/brand-logo";
-import type { TrendingDish } from "@/lib/data/trending";
 import type { TimeOfDay } from "@/lib/date";
 
 // Each time of day gets its own ambient field (.mood-field.mood-<time> in
@@ -15,15 +14,18 @@ const MOOD: Record<TimeOfDay, { greeting: string; Icon: LucideIcon; heading: str
   night: { greeting: "Hey", Icon: Moon, heading: "Late night craving?" },
 };
 
-export function HomeHeader({
-  fullName,
-  timeOfDay,
-  trendingDishes,
-}: {
-  fullName: string;
-  timeOfDay: TimeOfDay;
-  trendingDishes: TrendingDish[];
-}) {
+function initials(name: string) {
+  const parts = name.trim().split(/\s+/);
+  return ((parts[0]?.[0] ?? "") + (parts.length > 1 ? parts.at(-1)![0] : "")).toUpperCase();
+}
+
+/**
+ * Home's header, over the time-of-day mood field: the logo (opens About)
+ * and the student's initials in a lit plum circle (opens Profile) on top,
+ * then the greeting and the question of the hour. Trending moved out of
+ * here into the "Campus favourites" row (popular-rail.tsx).
+ */
+export function HomeHeader({ fullName, timeOfDay }: { fullName: string; timeOfDay: TimeOfDay }) {
   const { greeting, Icon, heading } = MOOD[timeOfDay];
   const firstName = fullName.trim().split(/\s+/)[0];
 
@@ -40,7 +42,13 @@ export function HomeHeader({
         <AboutMuteBitesDialog>
           <BrandLogo splashTarget className="size-10 rounded-xl" />
         </AboutMuteBitesDialog>
-        <TrendingDialog dishes={trendingDishes} />
+        <Link
+          href="/profile"
+          aria-label="Your profile"
+          className="pressable surface-hero glow-hero flex size-11 items-center justify-center rounded-full bg-hero font-heading text-base font-bold text-hero-accent ring-2 ring-card outline-none focus-visible:ring-3 focus-visible:ring-ring/80"
+        >
+          {initials(fullName)}
+        </Link>
       </div>
       <p className="relative mt-8 flex items-center gap-1.5 font-semibold">
         <Icon className="size-[1.125rem] shrink-0" aria-hidden="true" />

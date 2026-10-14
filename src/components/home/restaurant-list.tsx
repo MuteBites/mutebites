@@ -1,19 +1,44 @@
 "use client";
 
-import { useMemo, useState } from "react";
-import Link from "next/link";
-import { ChevronRight, MapPin, Search, SearchX, X } from "lucide-react";
-import { BlurImage } from "@/components/blur-image";
+import { useEffect, useMemo, useRef, useState } from "react";
+import { useSearchParams } from "next/navigation";
+import { MapPin, Search, SearchX, X } from "lucide-react";
 import { EmptyState } from "@/components/empty-state";
-import { VegMark } from "@/components/veg-mark";
-import { getDishPhoto, getRestaurantCardSlides } from "@/lib/data/dish-photos";
+import { getRestaurantCardSlides } from "@/lib/data/dish-photos";
 import type { RestaurantMenuStats, SearchableDish } from "@/lib/data/restaurants";
+import type { TrendingDish } from "@/lib/data/trending";
 import type { Restaurant } from "@/lib/data/types";
-import { formatRupees } from "@/lib/format";
+import {
+  applyFilters,
+  EMPTY_FILTERS,
+  FOOD_TYPES,
+  isFiltering,
+  isFoodType,
+  parseFilters,
+  popularCount,
+  POPULAR_MIN,
+  serializeFilters,
+  type HomeFilters,
+} from "@/lib/home-filters";
 import { matchesAll, queryTokens, searchDishes } from "@/lib/search";
-import { cn } from "@/lib/utils";
+import { DishGrid } from "./dish-grid";
+import { FilterBar } from "./filter-bar";
+import { FilterSheet } from "./filter-sheet";
+import { FoodTypeRail } from "./food-type-rail";
+import { buildRail, PopularRail } from "./popular-rail";
+import { PromoCard } from "./promo-card";
 import { RestaurantCard } from "./restaurant-card";
 
+/**
+ * Everything on Home below the header: the search pill, "What's on your
+ * mind?" food-type tiles, the sticky quick-filter chips (+ the filter
+ * sheet), and then either
+ *   - browsing: the plum promo (while ordering is open), the "Campus
+ *     favourites" photo row and every restaurant, or
+ *   - searching or filtering: a live dish grid and the restaurants that
+ *     serve something in it.
+ * Filters live in the URL (lib/home-filters.ts); the search text is local.
+ */
 export function RestaurantList({
   restaurants,
   orderingEnabled,
@@ -22,9 +47,11 @@ export function RestaurantList({
   menuStats,
   dishes,
   dishOrderCounts,
+  trendingDishes,
+  slot,
 }: {
   restaurants: Restaurant[];
-  /** Every dish (getSearchableDishes) — searched on the client as the student types. */
+  /** Every dish (getSearchableDishes) — searched and filtered on the client. */
   dishes: SearchableDish[];
   orderingEnabled: boolean;
   /** "Closed" — the card's status chip while ordering is shut. */
@@ -32,12 +59,29 @@ export function RestaurantList({
   /** "Ordering is closed right now" — the card's footer line while ordering is shut. */
   closedLine: string;
   menuStats: Record<string, RestaurantMenuStats>;
-  /** getDishOrderCounts() — the card photos lead with each restaurant's most-ordered dishes. */
+  /** getDishOrderCounts() — card photo order, "Recommended" sort and the Popular chip. */
   dishOrderCounts: Record<string, number>;
+  /** getTrendingDishes() — ranked first in the "Campus favourites" photo row. */
+  trendingDishes: TrendingDish[];
+  /** deliveryWindow() for an order placed now — the promo card's delivery line. */
+  slot: { lead: string; time: string };
 }) {
   const [query, setQuery] = useState("");
+  const [sheetOpen, setSheetOpen] = useState(false);
+  const params = useSearchParams();
+  const filters = useMemo(() => parseFilters(params), [params]);
+  const filterKey = serializeFilters(filters);
+
+  function setFilters(next: HomeFilters) {
+    // Native history: Next syncs useSearchParams with it, and nothing goes
+    // back to the server. Replace, so filter taps don't pile up in Back.
+    window.history.replaceState(null, "", `${window.location.pathname}${serializeFilters(next)}`);
+  }
 
   const q = query.trim();
+  const searching = q.length > 0;
+  const showResults = searching || isFiltering(filters);
+
   const restaurantNames = useMemo(
     () => Object.fromEntries(restaurants.map((r) => [r.id, r.name])),
     [restaurants],
@@ -45,7 +89,9 @@ export function RestaurantList({
   const slidesByRestaurant = useMemo(
     () =>
       Object.fromEntries(
-        restaurants.map((r) => [r.id, getRestaurantCardSlides(
+        restaurants.map((r) => [
+          r.id,
+          getRestaurantCardSlides(
             r.name,
             dishes.filter((d) => d.restaurantId === r.id),
             dishOrderCounts,
@@ -54,147 +100,208 @@ export function RestaurantList({
       ),
     [restaurants, dishes, dishOrderCounts],
   );
-  // Dishes first — that's what people usually type ("dum biryani", "juice").
-  const dishResults = useMemo(() => searchDishes(dishes, restaurantNames, q), [dishes, restaurantNames, q]);
-  // Restaurants match on their own text (every word, any order) or because
-  // they serve one of the matching dishes.
+  // Campus ordering Closed turns every restaurant off; then Home browses
+  // all of them (tiles, filters, favourites) instead of coming up empty.
+  const anyOpen = restaurants.some((r) => r.is_active);
+  const rail = useMemo(
+    () => buildRail(trendingDishes, dishes, restaurants, !anyOpen),
+    [trendingDishes, dishes, restaurants, anyOpen],
+  );
+
+  // Tiles only for food types there's something to order in right now
+  // (or, while everything is closed, something to browse).
+  const foodTypes = useMemo(() => {
+    const open = new Set(restaurants.filter((r) => r.is_active || !anyOpen).map((r) => r.id));
+    return FOOD_TYPES.filter((t) => dishes.some((d) => d.isAvailable && open.has(d.restaurantId) && isFoodType(d, t)));
+  }, [restaurants, dishes, anyOpen]);
+  const showPopular = useMemo(() => popularCount(dishes, dishOrderCounts) >= POPULAR_MIN, [dishes, dishOrderCounts]);
+
+  // Search first (every typed word must start a word in the dish, its
+  // section or its restaurant), then the filters on top.
+  const searched = useMemo(
+    () => (searching ? searchDishes(dishes, restaurantNames, q) : dishes),
+    [searching, dishes, restaurantNames, q],
+  );
+  const ctx = useMemo(
+    () => ({ restaurants, orderCounts: dishOrderCounts, includeClosed: !anyOpen }),
+    [restaurants, dishOrderCounts, anyOpen],
+  );
+  const results = useMemo(
+    () => (showResults ? applyFilters(searched, filters, ctx, searching) : []),
+    [showResults, searched, filters, ctx, searching],
+  );
+
+  // Restaurants: all of them while browsing; otherwise the ones serving
+  // something in the results, plus — while searching — any whose own name,
+  // description or cuisines match and that pass the restaurant filter.
   const tokens = queryTokens(q);
-  const servesMatch = new Set(dishResults.map((d) => d.restaurantId));
-  const visible = q
+  const serving = new Set(results.map((d) => d.restaurantId));
+  const from = new Set(filters.restaurants);
+  const visible = showResults
     ? restaurants.filter(
         (r) =>
-          servesMatch.has(r.id) ||
-          matchesAll([r.name, r.description ?? "", ...r.cuisine_tags].join(" "), tokens),
+          serving.has(r.id) ||
+          (searching &&
+            matchesAll([r.name, r.description ?? "", ...r.cuisine_tags].join(" "), tokens) &&
+            (from.size === 0 || from.has(r.id))),
       )
     : restaurants;
+
+  // When the filters change while you're scrolled past the chips (they're
+  // sticky), bring the top of the results up to meet them.
+  const resultsTopRef = useRef<HTMLDivElement>(null);
+  const lastKeyRef = useRef(filterKey);
+  useEffect(() => {
+    if (lastKeyRef.current === filterKey) return;
+    lastKeyRef.current = filterKey;
+    const el = resultsTopRef.current;
+    if (!el || el.getBoundingClientRect().top >= 0) return;
+    const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    el.scrollIntoView({ behavior: reduce ? "auto" : "smooth", block: "start" });
+  }, [filterKey]);
+
+  const typeLabel = filters.type ? FOOD_TYPES.find((t) => t.key === filters.type)?.label : undefined;
+  const clearAll = () => {
+    setQuery("");
+    setFilters(EMPTY_FILTERS);
+  };
 
   return (
     <>
       <label className="relative mt-6 block">
         <span className="sr-only">Search dishes and restaurants</span>
         <Search
-          className="pointer-events-none absolute top-1/2 left-5 size-5 -translate-y-1/2 text-muted-foreground"
+          className="pointer-events-none absolute top-1/2 left-5 z-10 size-5 -translate-y-1/2 text-primary"
           aria-hidden="true"
         />
         <input
           type="search"
           value={query}
           onChange={(e) => setQuery(e.target.value)}
-          placeholder="Search dishes or restaurants…"
-          className="h-14 w-full rounded-2xl bg-secondary pr-12 pl-13 text-lg outline-none placeholder:text-muted-foreground focus-visible:ring-2 focus-visible:ring-ring/80 [&::-webkit-search-cancel-button]:hidden"
+          placeholder="Search biryani, juice, restaurants…"
+          className="h-14 w-full rounded-full border bg-card/90 pr-12 pl-13 text-base shadow-card backdrop-blur outline-none placeholder:text-muted-foreground focus-visible:border-ring focus-visible:ring-2 focus-visible:ring-ring/80 [&::-webkit-search-cancel-button]:hidden"
         />
         {query && (
           <button
             type="button"
             onClick={() => setQuery("")}
             aria-label="Clear search"
-            className="absolute top-1/2 right-4 flex size-7 -translate-y-1/2 items-center justify-center rounded-full bg-border text-foreground outline-none hover:bg-ink hover:text-ink-foreground focus-visible:ring-2 focus-visible:ring-ring/80"
+            className="absolute top-1/2 right-3.5 flex size-8 -translate-y-1/2 items-center justify-center rounded-full bg-secondary text-foreground outline-none hover:bg-primary hover:text-primary-foreground focus-visible:ring-2 focus-visible:ring-ring/80"
           >
-            <X className="size-4" />
+            <X className="size-4" aria-hidden="true" />
           </button>
         )}
       </label>
 
-      <p className="mt-4 flex items-center gap-2 rounded-xl border border-brand-soft-foreground/15 bg-brand-soft px-4 py-2 text-sm text-brand-soft-foreground">
-        <MapPin className="size-4 shrink-0" aria-hidden="true" />
-        <span>
-          Free delivery to <strong className="font-semibold text-foreground">VIT-AP Main Gate</strong>
-        </span>
-      </p>
+      <FoodTypeRail types={foodTypes} selected={filters.type} onSelect={(type) => setFilters({ ...filters, type })} />
 
-      {q && dishResults.length > 0 && (
-        <section aria-labelledby="dish-results" className="mt-8">
-          <div className="flex items-baseline justify-between">
-            <h2 id="dish-results" className="text-label text-muted-foreground">
-              Dishes
+      <FilterBar
+        filters={filters}
+        onChange={setFilters}
+        onOpenSheet={() => setSheetOpen(true)}
+        showPopular={showPopular}
+      />
+      <FilterSheet
+        open={sheetOpen}
+        onOpenChange={setSheetOpen}
+        filters={filters}
+        onApply={setFilters}
+        countFor={(f) => applyFilters(searched, f, ctx, searching).length}
+        restaurants={restaurants}
+        showPopular={showPopular}
+      />
+      {/* Where "scroll to results" lands: just under the sticky chips. */}
+      <div ref={resultsTopRef} aria-hidden="true" className="scroll-mt-16" />
+
+      {!showResults && (
+        <>
+          {orderingEnabled && <PromoCard slot={slot} />}
+          <PopularRail rail={rail} />
+        </>
+      )}
+
+      {showResults && (
+        <section aria-labelledby="dish-results" className="mt-4">
+          <div className="flex items-end justify-between gap-3">
+            <h2 id="dish-results" className="font-heading text-title font-bold">
+              {typeLabel ?? (searching ? "Dishes" : "Dishes for you")}
             </h2>
-            <span className="text-muted-foreground tabular-nums">{dishResults.length}</span>
+            <p className="shrink-0 pb-0.5 text-sm text-muted-foreground tabular-nums" aria-live="polite">
+              {results.length} {results.length === 1 ? "dish" : "dishes"}
+            </p>
           </div>
-          <ul className="mt-3 divide-y rounded-3xl border bg-card shadow-card">
-            {dishResults.map((d) => (
-              <DishResult key={d.id} dish={d} restaurantName={restaurantNames[d.restaurantId] ?? ""} />
-            ))}
-          </ul>
+          {isFiltering(filters) && (
+            <button
+              type="button"
+              onClick={() => setFilters(EMPTY_FILTERS)}
+              className="mt-1 rounded-full text-sm font-semibold text-primary outline-none hover:underline focus-visible:ring-3 focus-visible:ring-ring/80"
+            >
+              Clear filters
+            </button>
+          )}
+          {results.length > 0 && <DishGrid key={`${q}${filterKey}`} dishes={results} restaurants={restaurants} />}
         </section>
       )}
 
-      <div className="mt-8 flex items-baseline justify-between">
-        <h2 className="text-label text-muted-foreground">
-          {q ? "Restaurants" : "Partner restaurants"}
-        </h2>
-        <span className="text-muted-foreground">
-          {q ? `${visible.length} of ${restaurants.length}` : `${restaurants.length} near campus`}
-        </span>
-      </div>
+      {visible.length > 0 && (
+        <>
+          <div className="mt-9 flex items-end justify-between gap-3">
+            <h2 className="font-heading text-title font-bold">
+              {showResults ? "Restaurants" : "Restaurants near campus"}
+            </h2>
+            <span className="shrink-0 pb-0.5 text-sm text-muted-foreground tabular-nums">
+              {showResults ? `${visible.length} of ${restaurants.length}` : `${restaurants.length} kitchens`}
+            </span>
+          </div>
+          {!showResults && (
+            <p className="mt-1.5 flex items-center gap-1.5 text-sm text-muted-foreground">
+              <MapPin className="size-4 shrink-0 text-rose" aria-hidden="true" />
+              <span>
+                Free delivery to <strong className="font-semibold text-foreground">VIT-AP Main Gate</strong>
+              </span>
+            </p>
+          )}
+          <ul className="mt-4 flex flex-col gap-5">
+            {visible.map((r, i) => (
+              <li
+                key={r.id}
+                className="animate-slide-up-in"
+                style={{ animationDelay: `${Math.min(i, 6) * 70}ms` }}
+              >
+                <RestaurantCard
+                  restaurant={r}
+                  orderingEnabled={orderingEnabled}
+                  closedChip={closedChip}
+                  closedLine={closedLine}
+                  stats={menuStats[r.id]}
+                  slides={slidesByRestaurant[r.id] ?? []}
+                  slideDelay={i * 700}
+                  eager={i === 0 && !showResults}
+                />
+              </li>
+            ))}
+          </ul>
+        </>
+      )}
 
-      {visible.length > 0 || dishResults.length > 0 ? (
-        <ul className="mt-4 flex flex-col gap-5">
-          {visible.map((r, i) => (
-            <li
-              key={r.id}
-              className="animate-slide-up-in"
-              style={{ animationDelay: `${Math.min(i, 6) * 70}ms` }}
+      {showResults && results.length === 0 && visible.length === 0 && (
+        <EmptyState
+          compact
+          icon={SearchX}
+          title={searching ? `No match for “${q}”` : "Nothing matches those filters"}
+          action={
+            <button
+              type="button"
+              onClick={clearAll}
+              className="surface-primary glow-amber flex h-12 items-center rounded-full bg-primary px-6 font-semibold text-primary-foreground outline-none hover:brightness-110 focus-visible:ring-3 focus-visible:ring-ring/80"
             >
-              <RestaurantCard
-                restaurant={r}
-                orderingEnabled={orderingEnabled}
-                closedChip={closedChip}
-                closedLine={closedLine}
-                stats={menuStats[r.id]}
-                slides={slidesByRestaurant[r.id] ?? []}
-                slideDelay={i * 700}
-              />
-            </li>
-          ))}
-        </ul>
-      ) : (
-        <EmptyState compact icon={SearchX} title={`No match for “${q}”`}>
-          Try a dish like biryani, noodles or juice.
+              {searching ? "Clear search and filters" : "Clear filters"}
+            </button>
+          }
+        >
+          {searching ? "Try a dish like biryani, noodles or juice." : "Try fewer filters, or another food type."}
         </EmptyState>
       )}
     </>
-  );
-}
-
-/**
- * One dish search result. Links to the restaurant's menu with ?dish=, which
- * scrolls to that dish and briefly outlines it (MenuView focusDishId) — the
- * same deep link the Trending popup uses.
- */
-function DishResult({ dish, restaurantName }: { dish: SearchableDish; restaurantName: string }) {
-  const photo = getDishPhoto(restaurantName, dish.name);
-  return (
-    <li>
-      <Link
-        href={`/restaurants/${dish.restaurantId}?dish=${dish.id}`}
-        transitionTypes={["nav-forward"]}
-        className="flex items-center gap-3 rounded-3xl py-3 pr-3 pl-3 outline-none focus-visible:ring-3 focus-visible:ring-ring/80 focus-visible:ring-inset"
-      >
-        <span
-          className={cn(
-            "relative flex size-14 shrink-0 items-center justify-center overflow-hidden rounded-2xl bg-brand-soft font-heading text-xl font-bold text-brand-soft-foreground/60",
-            !dish.isAvailable && "grayscale",
-          )}
-        >
-          {photo ? (
-            <BlurImage src={photo} alt="" sizes="56px" className="object-cover" />
-          ) : (
-            <span aria-hidden="true">{dish.name.trim().charAt(0)}</span>
-          )}
-        </span>
-        <span className="min-w-0 flex-1">
-          <span className="block truncate font-semibold">
-            <VegMark isVeg={dish.isVeg} className="mr-1.5 inline-flex size-4 -translate-y-px align-middle" />
-            {dish.name}
-          </span>
-          <span className="block truncate text-sm text-muted-foreground">
-            {restaurantName}
-            {!dish.isAvailable && " · Sold out"}
-          </span>
-        </span>
-        <span className="shrink-0 font-heading font-bold tabular-nums">{formatRupees(dish.price)}</span>
-        <ChevronRight className="size-4 shrink-0 text-muted-foreground" aria-hidden="true" />
-      </Link>
-    </li>
   );
 }

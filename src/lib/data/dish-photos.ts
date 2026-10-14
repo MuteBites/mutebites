@@ -224,6 +224,11 @@ const SIGNATURE_DISHES: Record<string, string[]> = {
   "Waffle Pops": ["Belgian Dark Chocolate", "Classic Fudge Brownie", "Classic Hot Chocolate"],
 };
 
+/** A restaurant's hand-picked signature dishes (by name) — also fill Home's "Campus favourites" row. */
+export function getSignatureDishes(restaurantName: string): string[] {
+  return SIGNATURE_DISHES[restaurantName] ?? [];
+}
+
 /** Most dish slides per card — each is another photo download on Home. */
 const MAX_DISH_SLIDES = 5;
 

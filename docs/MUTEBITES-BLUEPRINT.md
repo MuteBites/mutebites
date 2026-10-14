@@ -645,9 +645,16 @@ see it again.
 - **Mood header** that bleeds to the screen edges and changes with IST
   time of day (morning 5–12, afternoon 12–17, evening 17–21, night),
   greeting heading, logo (tap → "About MuteBites" popup: what it is,
-  cuisines, cash on delivery, UPI at pickup, Main Gate), flame button
-  → **Trending this week** popup (#1 as a big photo, #2–5 as rows, each
-  linking to the dish).
+  cuisines, cash on delivery, UPI at pickup, Main Gate), and the
+  student's initials (→ Profile). (Until 15 Oct 2026 a flame button opened
+  a "Trending this week" popup; the "Campus favourites" row replaced it.)
+- **"What's on your mind?"** food tiles, **sticky filter chips** and a
+  **filter sheet** (diet, price, restaurants, popular, sold-out, sort),
+  kept in the URL; a **dish grid** while searching or filtering; a plum
+  **promo card** with the real delivery time while ordering is open; and
+  **"Campus favourites"** (trending dishes ranked, then signature dishes)
+  — redesign, 15 Oct 2026. While campus ordering is Closed (every
+  restaurant off) they browse all menus.
 - **Search** across restaurants and dishes (~100 dishes ship with the
   page): every typed word must start a word in the dish, its section or
   its restaurant; "veg"/"non veg" filter by the veg flag. Dishes show
@@ -665,9 +672,9 @@ see it again.
   signature dishes), each with a veg mark, name and price; tap a dish to
   open it in the menu. Cover holds 2.5 s (+0.7 s per card down the list),
   dishes 3.2 s; time only counts while visible; pauses 8 s after a touch;
-  no autoplay under reduced motion or when closed. Cuisine line, "24
-  dishes · from ₹60", Open/Closed/Paused chip. "Free delivery to VIT-AP
-  Main Gate" strip.
+  no autoplay under reduced motion or when closed. Cuisine chips, "24
+  dishes · from ₹60", Open/Closed chip, glowing amber arrow. "Free
+  delivery to VIT-AP Main Gate" line above the list.
 - Bottom bar: Food, Orders, Profile — floating, one bar in the root layout;
   a lit amber pill slides to the tapped tab (or follows a finger dragged
   along the bar); it slides away on menus and order tickets (redesign, 14

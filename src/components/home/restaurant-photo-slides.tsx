@@ -36,6 +36,7 @@ export function RestaurantPhotoSlides({
   restaurantHref,
   autoplay,
   startDelay = 0,
+  eager = false,
   children,
 }: {
   slides: CardSlide[];
@@ -44,6 +45,8 @@ export function RestaurantPhotoSlides({
   autoplay: boolean;
   /** Extra hold on the cover, so a list of cards doesn't flip in lockstep. */
   startDelay?: number;
+  /** Load the cover right away at high priority (Home's first card: it's on screen at load). */
+  eager?: boolean;
   /** Overlays that stay put while the photos move (the Open/Closed chip). */
   children?: ReactNode;
 }) {
@@ -126,6 +129,10 @@ export function RestaurantPhotoSlides({
         tabIndex={-1}
         onScroll={onScroll}
         onClick={onClick}
+        // tabIndex -1 keeps it out of the Tab order, but a click would still
+        // focus it — and focus inside aria-hidden is an accessibility error.
+        // Not taking focus on press; taps (onClick) and swipes still work.
+        onMouseDown={(e) => e.preventDefault()}
         onPointerDown={() => {
           pausedUntilRef.current = Date.now() + PAUSE_AFTER_TOUCH_MS;
         }}
@@ -139,7 +146,8 @@ export function RestaurantPhotoSlides({
                 src={slide.src}
                 alt=""
                 sizes="(min-width: 448px) 400px, 90vw"
-                loading={i === 0 ? undefined : "eager"}
+                loading={i === 0 && !eager ? undefined : "eager"}
+                fetchPriority={i === 0 && eager ? "high" : undefined}
                 className="object-cover"
               />
             )}

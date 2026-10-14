@@ -12,7 +12,7 @@ import { getDishOrderCounts, getTrendingDishes } from "@/lib/data/trending";
 import { getUsualCart } from "@/lib/data/usual";
 import { getRatePromptOrder } from "@/lib/data/orders";
 import { RatePrompt } from "@/components/home/rate-prompt";
-import { getTimeOfDayIST, isThursdayIST } from "@/lib/date";
+import { deliveryWindow, getTimeOfDayIST, isThursdayIST } from "@/lib/date";
 import { NAV_TRANSITION, REVEAL_ENTER } from "@/lib/nav-transition";
 import { requireProfile } from "@/lib/profile";
 
@@ -51,7 +51,7 @@ export default async function Home({ searchParams }: PageProps<"/">) {
       {ratePrompt && <RatePrompt order={ratePrompt} />}
       <ViewTransition {...NAV_TRANSITION}>
         <ViewTransition {...REVEAL_ENTER}>
-          <HomeHeader fullName={profile.full_name} timeOfDay={timeOfDay} trendingDishes={trendingDishes} />
+          <HomeHeader fullName={profile.full_name} timeOfDay={timeOfDay} />
           {usual && orderingEnabled && <YourUsualChip usual={usual} />}
           {thursdaySpecial && <ThursdayNudge special={thursdaySpecial} />}
           {!orderingEnabled && <OrderingPausedBanner ordering={ordering} />}
@@ -63,6 +63,8 @@ export default async function Home({ searchParams }: PageProps<"/">) {
             menuStats={menuStats}
             dishes={dishes}
             dishOrderCounts={dishOrderCounts}
+            trendingDishes={trendingDishes}
+            slot={deliveryWindow(new Date().toISOString())}
           />
         </ViewTransition>
       </ViewTransition>
