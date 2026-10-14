@@ -108,6 +108,22 @@ Food delivery site for VIT-AP University students.
 - **Icons**: lucide only — no emoji anywhere in the UI (they render
   differently per OS and clashed with the icon set). Big
   moments get `CelebrationOverlay`, not an emoji-laden toast.
+- **Bottom bar** (`TabBar`, `src/components/nav/tab-bar.tsx`, redesign 14
+  Oct 2026): mounted once in the **root layout**, not per page, so it stays
+  alive across tab changes and its lit amber pill (`surface-primary
+  glow-amber`) slides — with a spring and a squash as it lands — to the
+  tapped tab while the new icon pops in (`animate-tab-pop` /
+  `animate-tab-stretch`; lucide, stroke 2.5 when lit). It shows on exactly
+  `/`, `/orders` and `/profile`; on drill-down screens (`/restaurants/*`,
+  `/orders/*`) it slides down and is `inert`; elsewhere it renders nothing.
+  Tapping the current tab scrolls to the top. It's also a slider: press
+  and slide sideways (past 8px) — the pill follows the finger (pointer
+  capture), the tab under it lights up with a tiny `navigator.vibrate`
+  buzz, and release `router.push`es it; the click after a drag is
+  swallowed; `touch-action: pan-y` keeps vertical scrolling. Floating
+  (`rounded-full bg-card/85` with blur), so pages keep `pb-28`; Home's
+  `CartBar` (`hasTabBar`) sits just above it. Don't add `<TabBar />` to a
+  page.
 - **Dish deep links**: `/restaurants/<id>?dish=<dishId>` opens the menu
   scrolled to that dish with a brief rose outline (`focusDishId` in
   `MenuView`). Used by Home search's dish results, the Trending popup and

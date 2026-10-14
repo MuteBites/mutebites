@@ -556,6 +556,14 @@
   .animate-pop-in {
     animation: pop-in var(--dur-quick) var(--ease-spring) both;
   }
+  /* Bottom bar: the lit pill squashes as it lands on a tab, and the new
+     tab's icon pops in with a little twist. */
+  .animate-tab-pop {
+    animation: tab-pop var(--dur-slow) var(--ease-spring) both;
+  }
+  .animate-tab-stretch {
+    animation: tab-stretch var(--dur-slow) var(--ease-out-expo) both;
+  }
   .animate-bounce-count {
     animation: bounce-count var(--dur-base) var(--ease-spring);
   }
@@ -697,6 +705,27 @@
   100% {
     transform: scale(1.9);
     opacity: 0;
+  }
+}
+
+@keyframes tab-pop {
+  0% {
+    transform: scale(0.6) rotate(-14deg);
+  }
+  60% {
+    transform: scale(1.14) rotate(4deg);
+  }
+  100% {
+    transform: none;
+  }
+}
+
+@keyframes tab-stretch {
+  0% {
+    transform: scaleX(1.16) scaleY(0.88);
+  }
+  100% {
+    transform: none;
   }
 }
 

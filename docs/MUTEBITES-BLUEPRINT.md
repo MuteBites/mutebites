@@ -668,7 +668,10 @@ see it again.
   no autoplay under reduced motion or when closed. Cuisine line, "24
   dishes · from ₹60", Open/Closed/Paused chip. "Free delivery to VIT-AP
   Main Gate" strip.
-- Bottom tab bar: Food, Orders, Profile.
+- Bottom bar: Food, Orders, Profile — floating, one bar in the root layout;
+  a lit amber pill slides to the tapped tab (or follows a finger dragged
+  along the bar); it slides away on menus and order tickets (redesign, 14
+  Oct 2026).
 
 ### Menu (`/restaurants/[id]`)
 - Cover hero, restaurant name, description, Open chip, "You've tried N of
