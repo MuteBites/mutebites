@@ -27,20 +27,20 @@ export function MemberCard({
   noShows: number;
 }) {
   return (
-    <section className="surface-ink shadow-elevated-glow rounded-3xl bg-ink p-5 text-ink-foreground">
+    <section className="surface-hero glow-hero rounded-3xl bg-hero p-5 text-hero-foreground">
       <div className="flex items-center gap-4">
-        <div className="flex size-16 shrink-0 items-center justify-center rounded-2xl bg-ink-foreground/10 font-heading text-2xl font-bold text-ink-accent">
+        <div className="flex size-16 shrink-0 items-center justify-center rounded-2xl bg-hero-foreground/10 font-heading text-2xl font-bold text-hero-accent">
           {initials}
         </div>
         <div className="min-w-0">
           <h1 className="truncate font-heading text-title font-bold">{name}</h1>
-          <p className="text-sm text-ink-foreground/75">Member since {memberSince}</p>
+          <p className="text-sm text-hero-foreground/85">Member since {memberSince}</p>
         </div>
       </div>
 
       <div className="mt-4 empty:hidden">{rankBadge}</div>
 
-      <dl className="mt-5 grid grid-cols-3 divide-x divide-ink-foreground/15 border-t border-ink-foreground/15 pt-4 text-center">
+      <dl className="mt-5 grid grid-cols-3 divide-x divide-hero-foreground/15 border-t border-hero-foreground/15 pt-4 text-center">
         <Stat value={cravingsSolved} label={cravingsSolved === 1 ? "craving solved" : "cravings solved"} />
         <Stat value={streakDays} label="day streak" />
         <Stat value={noShows} label={noShows === 1 ? "no-show" : "no-shows"} danger={noShows > 0} />
@@ -52,8 +52,8 @@ export function MemberCard({
 function Stat({ value, label, danger = false }: { value: number; label: string; danger?: boolean }) {
   return (
     <div className="flex flex-col-reverse justify-end px-1">
-      <dt className="text-xs text-ink-foreground/75">{label}</dt>
-      <dd className={cn("font-heading text-2xl font-bold tabular-nums", danger && "text-ink-danger")}>{value}</dd>
+      <dt className="text-xs text-hero-foreground/85">{label}</dt>
+      <dd className={cn("font-heading text-2xl font-bold tabular-nums", danger && "text-hero-danger")}>{value}</dd>
     </div>
   );
 }

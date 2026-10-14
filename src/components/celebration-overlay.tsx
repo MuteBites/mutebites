@@ -27,7 +27,7 @@ export function CelebrationOverlay({
   confettiOnceKey,
   onDone,
 }: {
-  /** The moment's content: art, headline, detail. Sits on `bg-ink`. */
+  /** The moment's content: art, headline, detail. Sits on `surface-hero bg-hero`. */
   children: ReactNode;
   /** How long it stays up before fading out, in ms. */
   duration?: number;
@@ -83,17 +83,17 @@ export function CelebrationOverlay({
       role="status"
       onClick={finish}
       className={cn(
-        "fixed inset-0 z-[90] flex cursor-pointer flex-col items-center justify-center overflow-hidden bg-ink px-6 text-center text-ink-foreground",
+        "fixed inset-0 z-[90] flex cursor-pointer flex-col items-center justify-center overflow-hidden surface-hero bg-hero px-6 text-center text-hero-foreground",
         phase === "out" ? "animate-overlay-out" : "animate-overlay-in",
       )}
     >
       <span
         aria-hidden="true"
-        className="animate-ping-slow pointer-events-none absolute size-56 rounded-full bg-ink-accent/25 blur-3xl"
+        className="animate-ping-slow pointer-events-none absolute size-56 rounded-full bg-hero-accent/25 blur-3xl"
       />
       {showConfetti && <ConfettiBurst />}
       <div className="relative flex flex-col items-center">{children}</div>
-      <p className="relative mt-6 text-sm text-ink-foreground/50">Tap to continue</p>
+      <p className="relative mt-6 text-sm text-hero-foreground/85">Tap to continue</p>
     </div>
   );
 }

@@ -9,8 +9,9 @@ Food delivery site for VIT-AP University students.
 - **Framework**: Next.js (App Router), TypeScript
 - **Styling**: Tailwind CSS v4 + shadcn/ui (`src/components/ui`)
 - **Design tokens** (`src/app/globals.css`): plum `#552C4A` is ink,
-  amber carries every action (`--primary` `#A25E1D` — a hair darker than
-  the approved `#A9631F`, which fails AA as text on the ivory ground),
+  amber carries every action (`--primary` `#99581B` — a shade darker than
+  the approved `#A9631F`, which fails AA as text on the ivory ground; it
+  was `#A25E1D` until the page sky below needed the headroom),
   rose `#914955` is the secondary accent, blush/lavender are tint surfaces
   only, raw amber `#C07A35` is decorative only (3.5:1, never text). Fixed
   5-step ramps (`plum-`/`rose-`/`amber-`/`ivory-`/`forest-`/`brick-`
@@ -21,9 +22,27 @@ Food delivery site for VIT-AP University students.
   (`text-success-foreground`, `text-destructive-foreground`, …), never
   `text-white` — dark-mode fills are light, so white fails there. Don't
   put `text-primary` on `bg-secondary`/`bg-brand-soft` (below 4.5:1). Use
-  `text-brand-soft-foreground` on blush instead. On the plum `bg-ink` surface
-  (token card, cart bar, banners) use `text-ink-accent` / `-ink-success` /
-  `-ink-danger` — regular amber/green/red are ~2:1 on plum.
+  `text-brand-soft-foreground` on blush instead.
+  **Hero surfaces** (redesign, 14 Oct 2026) — token card, Today card, cart
+  bar, member card, closed banner, celebration, 404 card, admin passcode
+  tile — are `surface-hero bg-hero text-hero-foreground` with `glow-hero`:
+  a lit plum gradient (`--hero-a/-b/-c`, an amber light top-right
+  `--hero-glow`, a rose bloom bottom-left `--hero-bloom`), **the same in
+  both themes**. On it use `text-hero-accent` / `-hero-success` /
+  `-hero-danger`, and secondary lines no fainter than
+  `text-hero-foreground/85` (the audit checks every stop). `bg-ink` stays
+  for **selected chips** (it flips to lavender at night so a selected chip
+  still stands out) — don't use it for new hero surfaces.
+  **Lighting kit:** `glow-amber` (the main action's bloom), `glow-hero`,
+  `glow-rose`, `rim-light`; one bloom per screen region. Every page sits
+  under a soft amber + rose sky (`body`, `--page-glow-a/-b`). Light cards
+  cast warm amber-tinted shadows; dark cards carry a 1px rim light inside
+  `--elevation-card`. Buttons (`components/ui/button.tsx`) are pills; the
+  default one is `surface-primary` (lit amber). Status chips
+  (`statusBadge()`): Placed / Preparing `amber-soft`, Confirmed
+  `plum-soft`, Out for delivery `brand-soft`, Delivered `success-soft`,
+  Cancelled red. Dialog / sheet backdrops are `bg-plum-900/40–50` with a
+  blur. Skeletons shimmer with a warm amber band.
   Focus rings are `ring-ring/80` (3.5:1+ on card) and input borders use
   `--input` (3.4:1+) — both chosen to meet WCAG's 3:1 for non-text UI;
   don't drop them back to /40 or the old pale border. `npm run

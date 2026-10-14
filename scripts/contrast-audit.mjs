@@ -60,6 +60,33 @@ const checks = [
   ['ink text on ink-foreground/10 chip over ink', 'ink-foreground', 1, [T('ink'), T('ink-foreground', 0.1)], 4.5],
   ['frosted chip text (muted on card/90 over ink-ish photo)', 'muted-foreground', 1, [T('ink'), T('card', 0.9)], 4.5],
   ['success on frosted chip (card/90 over dark photo)', 'success', 1, [T('ink'), T('card', 0.9)], 4.5],
+  // Hero (surface-hero): every stop, plus the amber light over the lightest
+  // plum (the top-right corner) and the rose bloom over the deepest.
+  ...[
+    ['stop a', [T('hero-a')]],
+    ['stop b', [T('hero-b')]],
+    ['stop c', [T('hero-c')]],
+    ['amber light over stop a', [T('hero-a'), T('hero-glow')]],
+    ['amber light over stop b', [T('hero-b'), T('hero-glow')]],
+    ['rose bloom over stop c', [T('hero-c'), T('hero-bloom')]],
+  ].flatMap(([where, bg]) => [
+    [`hero text on hero ${where}`, 'hero-foreground', 1, bg, 4.5],
+    [`hero text/85 on hero ${where}`, 'hero-foreground', 0.85, bg, 4.5],
+    [`hero-accent on hero ${where}`, 'hero-accent', 1, bg, 4.5],
+    [`hero-success on hero ${where}`, 'hero-success', 1, bg, 4.5],
+    [`hero-danger on hero ${where}`, 'hero-danger', 1, bg, 4.5],
+    [`hero text on hero-foreground/10 chip over ${where}`, 'hero-foreground', 1, [...bg, T('hero-foreground', 0.1)], 4.5],
+    [`hero-danger on hero-foreground/10 chip over ${where}`, 'hero-danger', 1, [...bg, T('hero-foreground', 0.1)], 4.5],
+  ]),
+  ['hero text on hero-foreground fill (active switch)', 'hero', 1, [T('hero-foreground')], 4.5],
+  ['hero text on hero-success fill', 'hero', 1, [T('hero-success')], 4.5],
+  // The sky over the top of every page.
+  ['body text under the page sky', 'foreground', 1, [T('background'), T('page-glow-a'), T('page-glow-b')], 4.5],
+  ['muted text under the page sky', 'muted-foreground', 1, [T('background'), T('page-glow-a'), T('page-glow-b')], 4.5],
+  ['amber text under the page sky', 'primary', 1, [T('background'), T('page-glow-a'), T('page-glow-b')], 4.5],
+  // Status chips (statusBadge).
+  ['Placed chip (amber-soft)', 'amber-soft-foreground', 1, [T('amber-soft')], 4.5],
+  ['Confirmed chip (plum-soft)', 'plum-soft-foreground', 1, [T('plum-soft')], 4.5],
   ['amber button vs ground (non-text, 3:1)', 'primary', 1, [T('background')], 3.0],
   ['input border vs card (non-text, 3:1 — WCAG 1.4.11)', 'input', 1, [T('card')], 3.0],
   ['focus ring (ring/80) vs card (non-text, 3:1)', 'ring', 0.8, [T('card')], 3.0],

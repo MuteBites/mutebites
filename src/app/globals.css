@@ -112,6 +112,15 @@
   --color-ink-accent: var(--ink-accent);
   --color-ink-success: var(--ink-success);
   --color-ink-danger: var(--ink-danger);
+  --color-hero: var(--hero);
+  --color-hero-foreground: var(--hero-foreground);
+  --color-hero-accent: var(--hero-accent);
+  --color-hero-success: var(--hero-success);
+  --color-hero-danger: var(--hero-danger);
+  --color-amber-soft: var(--amber-soft);
+  --color-amber-soft-foreground: var(--amber-soft-foreground);
+  --color-plum-soft: var(--plum-soft);
+  --color-plum-soft-foreground: var(--plum-soft-foreground);
   --color-brand-soft: var(--brand-soft);
   --color-brand-soft-foreground: var(--brand-soft-foreground);
   --color-rose: var(--rose);
@@ -174,14 +183,15 @@
  *
  * Contrast (WCAG 2.x, checked for every pair below):
  *   light  foreground/ground 13:1 · muted-fg on secondary 5.1:1
- *          primary text on ground 4.6:1 · white on primary 5.05:1
+ *          primary text on ground 5.1:1 · white on primary 5.6:1
  *   dark   foreground/ground 15.9:1 · muted-fg on secondary 6.4:1
  *          primary text on ground 7.6:1 · primary-fg on primary 7:1
  *
- * --primary is #A25E1D, a ~2% nudge darker than the approved #A9631F:
+ * --primary is #99581B, a shade darker than the approved #A9631F:
  * #A9631F is 4.68:1 with white (passes as a button fill) but only 4.25:1
  * as TEXT on the ivory ground, and text-primary is used for prices/links
- * all over. #A25E1D passes both and is visually indistinguishable.
+ * all over. It was #A25E1D (4.6:1) until the redesign's page sky (14 Oct
+ * 2026) tinted the top of every page and needed the headroom.
  * The raw #C07A35 (--amber) is decorative-only: 3.5:1, never text.
  */
 :root {
@@ -191,7 +201,7 @@
   --card-foreground: #3f2037;
   --popover: #ffffff;
   --popover-foreground: #3f2037;
-  --primary: #a25e1d;
+  --primary: #99581b;
   --primary-foreground: #ffffff;
   --secondary: #f3e7dd;
   --secondary-foreground: #3f2037;
@@ -204,7 +214,7 @@
   --border: #e5d3c8;
   /* 3.5:1 against card — WCAG 1.4.11 wants 3:1 for a control's boundary. */
   --input: #9d8478;
-  --ring: #a25e1d;
+  --ring: #99581b;
   --ink: #552c4a;
   --ink-foreground: #fff8f2;
   /* Accents that sit ON the ink surface (token card, cart bar, banners).
@@ -214,6 +224,41 @@
   --ink-accent: #f0c38f;
   --ink-success: #a6d9bd;
   --ink-danger: #f6ada1;
+
+  /* Hero — the lit plum surface (surface-hero): ticket, Today card, cart
+     bar, member card, banners, celebration, 404. Identical in BOTH themes
+     (unlike --ink, which flips to lavender at night so selected chips stay
+     legible): a lighter plum lit from the top-left, a warm amber light in
+     the top-right corner (--hero-glow), a rose bloom bottom-left, deep plum
+     at the far edge. Text is ivory; secondary lines go no fainter than /85.
+     The audit checks text over every stop, including amber light over the
+     lightest plum. */
+  --hero: #552c4a;
+  --hero-a: #633250;
+  --hero-b: #552c4a;
+  --hero-c: #3a1b31;
+  --hero-glow: rgb(224 150 86 / 18%);
+  --hero-bloom: rgb(145 73 85 / 45%);
+  --hero-foreground: #fff8f2;
+  --hero-accent: #f6d2a4;
+  --hero-success: #bfe8d1;
+  --hero-danger: #ffdad3;
+
+  /* Light: soft glows (glow-amber / -rose / -hero) and the sky over the top
+     of every page (body, --page-glow-*) so no screen sits on a flat ground. */
+  --glow-amber: rgb(192 122 53 / 42%);
+  --glow-rose: rgb(145 73 85 / 34%);
+  --glow-hero: rgb(85 44 74 / 42%);
+  --page-glow-a: rgb(240 200 150 / 18%);
+  --page-glow-b: rgb(236 196 208 / 18%);
+
+  /* Status chips (statusBadge): Placed amber, Confirmed lavender, Out for
+     delivery blush (brand-soft), Delivered green, Cancelled red. */
+  --amber-soft: #f7e6d2;
+  --amber-soft-foreground: #6b3d12;
+  --plum-soft: #efe3ea;
+  --plum-soft-foreground: #552c4a;
+
   --brand-soft: #f8dedc;
   --brand-soft-foreground: #7a3743;
   --rose: #914955;
@@ -232,17 +277,17 @@
   --radius: 0.875rem;
   --sidebar: #faf3ec;
   --sidebar-foreground: #3f2037;
-  --sidebar-primary: #a25e1d;
+  --sidebar-primary: #99581b;
   --sidebar-primary-foreground: #ffffff;
   --sidebar-accent: #f3e7dd;
   --sidebar-accent-foreground: #3f2037;
   --sidebar-border: #e5d3c8;
-  --sidebar-ring: #a25e1d;
+  --sidebar-ring: #99581b;
 
   /* Elevation — plum-tinted in light mode so shadows read as part of the
      palette rather than grey smudges on ivory. */
-  --elevation-card: 0 1px 2px rgb(85 44 74 / 6%), 0 4px 12px -4px rgb(85 44 74 / 10%);
-  --elevation-raised: 0 2px 4px rgb(85 44 74 / 6%), 0 12px 28px -8px rgb(85 44 74 / 18%);
+  --elevation-card: 0 1px 2px rgb(85 44 74 / 6%), 0 8px 22px -10px rgb(192 122 53 / 22%);
+  --elevation-raised: 0 2px 4px rgb(85 44 74 / 6%), 0 16px 32px -12px rgb(145 73 85 / 24%);
   --elevation-overlay: 0 4px 8px rgb(85 44 74 / 8%), 0 24px 48px -12px rgb(85 44 74 / 28%);
 
   /* Home header ambient field, three stops per time of day — see
@@ -292,6 +337,15 @@
   --ink-accent: #7a4511;
   --ink-success: #22503a;
   --ink-danger: #8e2416;
+  --glow-amber: rgb(217 151 79 / 34%);
+  --glow-rose: rgb(215 168 184 / 22%);
+  --glow-hero: rgb(145 73 85 / 40%);
+  --page-glow-a: rgb(217 151 79 / 11%);
+  --page-glow-b: rgb(145 73 85 / 20%);
+  --amber-soft: #33220f;
+  --amber-soft-foreground: #f0c38f;
+  --plum-soft: #34202c;
+  --plum-soft-foreground: #ebd9e2;
   --brand-soft: #3b2029;
   --brand-soft-foreground: #f2c3c8;
   --rose: #d7a8b8;
@@ -316,8 +370,10 @@
   --sidebar-border: rgb(245 234 225 / 11%);
   --sidebar-ring: #d9974f;
 
-  --elevation-card: 0 1px 2px rgb(0 0 0 / 30%), 0 4px 12px -4px rgb(0 0 0 / 35%);
-  --elevation-raised: 0 2px 4px rgb(0 0 0 / 30%), 0 12px 28px -8px rgb(0 0 0 / 50%);
+  /* Dark cards carry a 1px rim light on their top edge, so they read as
+     lit objects rather than holes in the ground. */
+  --elevation-card: inset 0 1px 0 rgb(255 255 255 / 6%), 0 1px 2px rgb(0 0 0 / 35%), 0 10px 26px -12px rgb(0 0 0 / 55%);
+  --elevation-raised: inset 0 1px 0 rgb(255 255 255 / 7%), 0 2px 4px rgb(0 0 0 / 30%), 0 16px 32px -12px rgb(0 0 0 / 60%);
   --elevation-overlay: 0 4px 8px rgb(0 0 0 / 35%), 0 24px 48px -12px rgb(0 0 0 / 60%);
 
   --mood-morning-a: #c07a3566;
@@ -413,15 +469,50 @@
   );
 }
 
-/* Elevation for the surfaces above: a neutral drop shadow plus a soft
-   brand-colored glow underneath, instead of a plain grey shadow-xl.
-   Fixed black for the neutral layer (not var(--ink), which flips to a
-   near-white "high-contrast chip" color in dark mode) — a shadow should
-   always read as occlusion, not as the surface's own fill color. */
+/* The lit plum hero (tokens --hero-* above). Layered over bg-hero, which
+   stays as the flat fallback. */
+@utility surface-hero {
+  background-image:
+    radial-gradient(90% 80% at 100% 0%, var(--hero-glow), transparent 65%),
+    radial-gradient(70% 60% at 0% 100%, var(--hero-bloom), transparent 70%),
+    linear-gradient(150deg, var(--hero-a) 0%, var(--hero-b) 55%, var(--hero-c) 100%);
+}
+
+/*
+ * Lighting kit. Blooms are coloured light under a surface, not grey
+ * smudges: glow-amber for the main action, glow-hero for hero surfaces,
+ * glow-rose for a highlighted card. One bloom per screen region — the main
+ * action or the hero; everything else gets shadow-card. The neutral layer
+ * is fixed black (not var(--ink), which flips at night): a shadow should
+ * always read as occlusion.
+ */
+@utility glow-amber {
+  box-shadow:
+    0 2px 6px -2px rgb(0 0 0 / 22%),
+    0 14px 30px -12px var(--glow-amber);
+}
+@utility glow-rose {
+  box-shadow:
+    0 2px 6px -2px rgb(0 0 0 / 18%),
+    0 12px 28px -12px var(--glow-rose);
+}
+@utility glow-hero {
+  box-shadow:
+    0 6px 14px -6px rgb(0 0 0 / 40%),
+    0 22px 44px -18px var(--glow-hero),
+    0 12px 28px -16px var(--glow-amber);
+}
+/* Kept for existing callers: the hero bloom. */
 @utility shadow-elevated-glow {
   box-shadow:
-    0 14px 30px -10px rgb(0 0 0 / 45%),
-    0 10px 22px -12px color-mix(in srgb, var(--primary) 50%, transparent);
+    0 6px 14px -6px rgb(0 0 0 / 40%),
+    0 22px 44px -18px var(--glow-hero),
+    0 12px 28px -16px var(--glow-amber);
+}
+/* The top edge of a surface catching the light (for surfaces that don't
+   use shadow-card: chips, sheets, the tab bar). */
+@utility rim-light {
+  box-shadow: inset 0 1px 0 rgb(255 255 255 / 9%);
 }
 
 @layer base {
@@ -430,6 +521,13 @@
   }
   body {
     @apply bg-background text-foreground;
+    /* The sky over every page: two soft lights above the top edge (amber
+       and rose) that fade out within the first screen, so no page sits on
+       a flat, unlit ground. */
+    background-image:
+      radial-gradient(70rem 30rem at 110% -12rem, var(--page-glow-a), transparent 70%),
+      radial-gradient(56rem 26rem at -20% -10rem, var(--page-glow-b), transparent 70%);
+    background-repeat: no-repeat;
   }
   html {
     @apply font-sans;
@@ -510,7 +608,7 @@
     background-image: linear-gradient(
       90deg,
       transparent,
-      color-mix(in srgb, var(--foreground) 12%, transparent),
+      color-mix(in srgb, var(--amber) 22%, transparent),
       transparent
     );
     animation: shimmer-sweep 1.6s ease-in-out infinite;

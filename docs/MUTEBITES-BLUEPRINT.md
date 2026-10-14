@@ -865,12 +865,21 @@ only in the top half and with ≥5 students.
 ## 11. Design system
 
 - **Colours** (`src/app/globals.css`): plum `#552C4A` is ink; amber
-  `--primary #A25E1D` for every action (a shade darker than the approved
-  `#A9631F`, which failed contrast as text); rose `#914955` accent;
-  blush/lavender tint surfaces only; raw amber `#C07A35` decorative only.
-  Fixed 100–900 ramps plus semantic tokens that flip per theme — use the
-  semantic ones. Surfaces: background → card → popover with
-  `shadow-card` / `shadow-raised` / `shadow-overlay`.
+  `--primary #99581B` for every action (a shade darker than the approved
+  `#A9631F`, which failed contrast as text; `#A25E1D` until 14 Oct 2026);
+  rose `#914955` accent; blush/lavender tint surfaces only; raw amber
+  `#C07A35` decorative only. Fixed 100–900 ramps plus semantic tokens that
+  flip per theme — use the semantic ones. Surfaces: background → card →
+  popover with `shadow-card` / `shadow-raised` / `shadow-overlay`.
+- **Redesign lighting (14 Oct 2026):** hero surfaces (ticket, Today card,
+  cart bar, member card, banners, celebration, 404) are a lit plum
+  gradient with an amber light and a rose bloom, the same in both themes
+  (`surface-hero`, `--hero-*`); a soft amber + rose sky over every page;
+  warm card shadows in light, a rim light on dark cards; bloom utilities
+  `glow-amber` / `glow-hero` / `glow-rose`; pill buttons with a lit amber
+  fill; coloured status chips; plum blurred dialog backdrops. Kept the
+  plum / amber identity — borrowed College Bites' "lit, not flat" approach,
+  not its palette.
 - **Rules:** text on a filled colour uses its `*-foreground` token, never
   `text-white`; no `text-primary` on blush; on plum use
   `text-ink-accent` / `-ink-success` / `-ink-danger`; focus rings
