@@ -47,11 +47,11 @@ const hourMinuteFmt = new Intl.DateTimeFormat("en-GB", {
 
 /**
  * The delivery slot an order falls in, purely from when it was placed (IST)
- * — the same cut-offs as the ordering schedule in src/lib/ordering.ts /
- * public.ordering_schedule_open(). Split into a lead-in and the time so the
- * UI can keep the time on one line; spaces inside `time` are no-break.
- * An order placed after the last cut-off can only exist if an admin forced
- * ordering open, so it has no slot: "to be confirmed".
+ * — the old daily schedule's cut-offs, kept for delivery promises after
+ * ordering became a plain Open / Closed switch (14 Oct 2026). Split into a
+ * lead-in and the time so the UI can keep the time on one line; spaces
+ * inside `time` are no-break. An order placed after the last cut-off (7:00
+ * PM) has no slot: "to be confirmed".
  */
 export function deliveryWindow(iso: string): { lead: string; time: string } {
   const [h, m] = hourMinuteFmt.format(new Date(iso)).split(":").map(Number);

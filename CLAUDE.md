@@ -50,11 +50,11 @@ Food delivery site for VIT-AP University students.
   a dashed tear line with edge notches (`bg-background` circles), then the
   token and the delivery window. `deliveryWindow()` (`src/lib/date.ts`)
   returns `{ lead, time }` with no-break spaces inside `time`, so "8:15 PM"
-  can never wrap apart. Its cut-offs follow the daily ordering schedule
-  (placed before 12:45 PM → by 1:30 PM, before 6:00 PM → by 7:30 PM,
-  before 7:00 PM → by 8:15 PM, later only when an admin forced ordering
-  open → "to be confirmed") and mirror `slotEndTime()` — see `app_settings`
-  under Database schema. Once delivered, the ticket page also carries the
+  can never wrap apart. Its cut-offs are the old daily schedule's, kept by
+  decision when ordering became Open / Closed only (14 Oct 2026): placed
+  before 12:45 PM → by 1:30 PM, before 6:00 PM → by 7:30 PM, before 7:00 PM
+  → by 8:15 PM, later → "to be confirmed"; they mirror `slotEndTime()` —
+  see `app_settings` under Database schema. Once delivered, the ticket page also carries the
   rating card (`RateOrder`, see `order_reviews`).
 - **Profile**: one plum `MemberCard` (`src/components/profile/member-card.tsx`)
   holds identity, the weekly-rank pill and the three stats (cravings
@@ -233,9 +233,9 @@ anyway, so the flag is never only a UI state.
 
 Visually, admin shares the student app's system: the dashboard's plum
 "Today" card (`StatCards`) carries today's counts with the campus ordering
-control (`OrderingKillSwitch` — a three-way Auto / Open / Closed switch
-for `app_settings.ordering_mode`, with a live status line such as
-"Following the schedule — open until 12:45 PM") as its footer row; secondary actions use the
+control (`OrderingKillSwitch` — a two-way Open / Closed switch for
+`app_settings.ordering_mode` with a confirm dialog each way and a status
+line, "Open until you close it" / "Closed until you open it") as its footer row; secondary actions use the
 shared `adminPill` style (`src/components/admin/styles.ts`); order cards
 lead with the token and a dish photo; restaurant controls show cover
 photos; no uppercase anywhere.
@@ -258,8 +258,8 @@ with `relative z-10` — keep new controls on the card above it too.
 
 Setting ordering to **Closed** also turns every restaurant off
 (`setOrderingMode`); reopening leaves them off. Tapping "Turn on" on a
-restaurant while Closed asks "Open ordering now?" — yes sets Auto if the
-schedule is open right now, otherwise Open, and turns that restaurant on.
+restaurant while Closed asks "Open ordering now?" — yes sets Open and
+turns that restaurant on.
 
 "Mark all delivered" counts eligible orders over **every** confirmed order
 (`getConfirmedOrderTimes()`), not just today's list — the same set
@@ -690,25 +690,24 @@ on `orders`).
   order history. `dish_id` is `on delete set null` for the same reason.
 - **`app_settings`** — single-row table (`id boolean primary key default
   true check (id)` caps it at one row) holding `ordering_mode`
-  (`'auto' | 'open' | 'closed'`, default `'auto'`), the campus-wide
-  ordering override the admin dashboard's Today card sets. Public-read (the
-  student app needs to know whether it can order), admin-only update.
-  `'auto'` follows the **daily schedule** (IST), enforced by
-  `public.ordering_schedule_open()`: open 10:30 AM – 12:45 PM (slot 1,
-  delivered by 1:30 PM), closed 12:45 – 1:30 PM, open 1:30 – 7:00 PM
-  (orders before 6:00 PM → delivered by 7:30 PM, 6:00 – 7:00 PM → by
-  8:15 PM), closed from 7:00 PM until 10:30 AM. `'open'` / `'closed'`
-  force it either way (e.g. testing at night). `public.ordering_is_open()`
-  (security definer, callable by anon + authenticated) combines the two
-  and is the single source of truth — `place_order()` checks it, and the
-  app reads it via `getOrderingState()` (`src/lib/data/settings.ts`), with
-  the wording ("Ordering opens again at 1:30 PM") from
-  `describeOrdering()` in `src/lib/ordering.ts`, which mirrors the schedule
-  constants — change the SQL function and that file together.
-  `deliveryWindow()` / `slotEndTime()` (`src/lib/date.ts`) use the same
-  cut-offs; an order placed after 7:00 PM can only exist when an admin
-  forced ordering open, so it gets "Delivery time to be confirmed" and
-  counts as past its slot immediately. The old `ordering_enabled` boolean
+  — the campus-wide **Open / Closed** switch the admin dashboard's Today
+  card sets (since 14 Oct 2026 — no daily schedule in the app).
+  Public-read (the student app needs to know whether it can order),
+  admin-only update. **Not yet migrated (do it at launch, SQL shown
+  first):** the database still allows `'auto' | 'open' | 'closed'`
+  (default `'auto'`) and `public.ordering_schedule_open()` still exists,
+  because the live site's code reads and sends `'auto'` until the redesign
+  ships. Until then the app reads a stored `'auto'` as Open or Closed by
+  what `ordering_is_open()` says (`toOrderingMode()`, `src/lib/ordering.ts`).
+  `public.ordering_is_open()` (security definer, callable by anon +
+  authenticated) is the single source of truth — `place_order()` checks
+  it, and the app reads it via `getOrderingState()`
+  (`src/lib/data/settings.ts`), with the wording ("Ordering is closed
+  right now") from `describeOrdering()`. Delivery promises keep the old
+  slot cut-offs: `deliveryWindow()` / `slotEndTime()` (`src/lib/date.ts`) —
+  before 12:45 PM → by 1:30 PM, before 6:00 PM → by 7:30 PM, before 7:00
+  PM → by 8:15 PM; an order placed after 7:00 PM gets "Delivery time to be
+  confirmed" and counts as past its slot immediately. The old `ordering_enabled` boolean
   it replaced was dropped in
   [`20260919010000_drop_ordering_enabled.sql`](supabase/migrations/20260919010000_drop_ordering_enabled.sql).
 
@@ -728,9 +727,9 @@ RLS is enabled on every table:
   the restaurant and `is_available`; snapshots dish name/price from
   `dishes` (never from the client); leaves `status` at `pending`; and
   computes `total_amount` itself. It also checks `public.ordering_is_open()`
-  before anything else (raising `ordering_paused` if an admin forced
-  ordering closed, or `ordering_closed` if the daily schedule is between
-  slots) — enforced in the function itself, not just hidden in the UI,
+  before anything else (raising `ordering_paused` while the admin has it
+  Closed; `ordering_closed` came from the old schedule's `'auto'` and goes
+  with it at launch) — enforced in the function itself, not just hidden in the UI,
   since a direct PostgREST call would otherwise bypass an app-level check.
   Since [`20260922000000_place_order_rate_limit.sql`](supabase/migrations/20260922000000_place_order_rate_limit.sql)
   it also rate-limits, right after the ban check: at most **5 orders per

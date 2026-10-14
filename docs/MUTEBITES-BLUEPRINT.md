@@ -814,18 +814,22 @@ action buttons.
 
 ## 10. Business rules in one place
 
-### Ordering schedule (IST) and delivery windows
-| Placed | Ordering | Delivery by |
-|---|---|---|
-| 10:30 AM – 12:45 PM | open | 1:30 PM |
-| 12:45 – 1:30 PM | closed | — |
-| 1:30 – 6:00 PM | open | 7:30 PM |
-| 6:00 – 7:00 PM | open | 8:15 PM |
-| 7:00 PM – 10:30 AM | closed | only if admin forces Open → "to be confirmed" |
+### Ordering and delivery windows
+Since 14 Oct 2026 (redesign) ordering is a plain **Open / Closed** switch
+the admin flips — no daily schedule, no Auto. Closed also turns every
+restaurant off. Delivery promises keep the old slot cut-offs (by decision):
 
-Lives in three places that must change together: `ordering_schedule_open()`
-(SQL), `src/lib/ordering.ts` (wording), `deliveryWindow()` / `slotEndTime()`
-(`src/lib/date.ts`). All times are IST (fixed +5:30).
+| Placed (IST) | Delivery by |
+|---|---|
+| before 12:45 PM | 1:30 PM |
+| 12:45 – 6:00 PM | 7:30 PM |
+| 6:00 – 7:00 PM | 8:15 PM |
+| after 7:00 PM | "to be confirmed" |
+
+`deliveryWindow()` / `slotEndTime()` (`src/lib/date.ts`). All times are IST
+(fixed +5:30). The database still allows `'auto'` and keeps
+`ordering_schedule_open()` until the launch migration (the live code still
+uses them); the redesign reads a stored `'auto'` as Open or Closed.
 
 ### Tokens
 `#1, #2, …` per IST day, across all restaurants, from the database
@@ -1060,6 +1064,12 @@ entries in `dish-photos.ts`. Run it once.
 
 - ~~Switch the content policy to enforced~~ — done 14 Oct 2026 (redesign
   branch, ships with the redesign launch).
+- **At the redesign launch — drop Auto from the database** (SQL shown
+  first): set any stored `'auto'` to Open or Closed, restrict
+  `ordering_mode` to `'open' | 'closed'` (default `'open'`), simplify
+  `ordering_is_open()` to read it, drop `ordering_schedule_open()`, and
+  re-create `place_order()` without the `ordering_closed` branch. Not
+  before: the live site's code still sends `'auto'`.
 - **Raise Supabase's sign-in limit to ~100** (campus Wi-Fi).
 - **Fully automated WhatsApp confirmation** (WhatsApp Business Cloud API +
   webhook that confirms on "yes"): waiting on the client for cost (~₹0.115

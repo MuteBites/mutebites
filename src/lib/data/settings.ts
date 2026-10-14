@@ -1,13 +1,12 @@
 import "server-only";
 
-import { describeOrdering, type OrderingMode, type OrderingState } from "@/lib/ordering";
+import { describeOrdering, toOrderingMode, type OrderingState } from "@/lib/ordering";
 import { createClient } from "@/lib/supabase/server";
 
 /**
  * Whether students can order right now, and what to tell them if not.
  * `open` comes straight from public.ordering_is_open() — the same function
- * place_order() enforces — so the UI can't drift from the database; the
- * admin override (app_settings.ordering_mode) picks the wording.
+ * place_order() enforces — so the UI can't drift from the database.
  */
 export async function getOrderingState(): Promise<OrderingState> {
   const supabase = await createClient();
@@ -18,5 +17,6 @@ export async function getOrderingState(): Promise<OrderingState> {
 
   if (settings.error) throw settings.error;
   if (open.error) throw open.error;
-  return describeOrdering(settings.data.ordering_mode as OrderingMode, open.data === true);
+  const isOpen = open.data === true;
+  return describeOrdering(toOrderingMode(settings.data.ordering_mode, isOpen), isOpen);
 }

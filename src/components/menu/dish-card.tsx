@@ -23,7 +23,7 @@ export function DishCard({
   quantity,
   orderable,
   pausedOnly = false,
-  pausedLabel = "Paused",
+  pausedLabel = "Closed",
   isFavorite = false,
   isHighlyReordered = false,
   highlighted = false,
@@ -38,7 +38,7 @@ export function DishCard({
   orderable: boolean;
   /** True when `orderable` is false only because of the campus-wide pause, not this restaurant's own status. */
   pausedOnly?: boolean;
-  /** Chip text when pausedOnly, e.g. "Opens 1:30 PM". */
+  /** Chip text when pausedOnly, e.g. "Closed". */
   pausedLabel?: string;
   /** This student's most-ordered dish at this restaurant. */
   isFavorite?: boolean;

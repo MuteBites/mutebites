@@ -19,8 +19,8 @@ import { RestaurantPhotoSlides } from "./restaurant-photo-slides";
 export function RestaurantCard({
   restaurant,
   orderingEnabled,
-  closedChip = "Paused",
-  closedLine = "Ordering paused",
+  closedChip = "Closed",
+  closedLine = "Ordering is closed right now",
   stats,
   slides,
   slideDelay,

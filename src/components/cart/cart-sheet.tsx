@@ -216,7 +216,7 @@ function CartContents({
       <footer className="border-t bg-background px-6 pt-3 pb-[max(1rem,env(safe-area-inset-bottom))]">
         {!orderingEnabled && (
           <p className="mb-3 rounded-2xl bg-secondary px-4 py-3 text-center text-sm">
-            {closedNote ? `${closedNote}.` : "Ordering is paused campus-wide right now."} Your cart will
+            {closedNote ? `${closedNote}.` : "Ordering is closed right now."} Your cart will
             wait.
           </p>
         )}
