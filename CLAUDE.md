@@ -146,7 +146,8 @@ Food delivery site for VIT-AP University students.
   skipped: the menu has a `loading.tsx`, so the pair rarely forms.
 - **Backend**: Supabase (Postgres + Auth + Row Level Security)
 - **Auth**: "Continue with Google" via Supabase Auth (Google OAuth
-  provider). No email/password, no OTP. On first login (no matching
+  provider). Sign-out is `scope: "local"` (this device only; the default
+  "global" logged students out everywhere). No email/password, no OTP. On first login (no matching
   `public.users` row yet), the app collects full name + mobile number
   before continuing; returning users skip straight in.
 - **Payments**: Cash on delivery only — there are no payment fields or
@@ -192,8 +193,10 @@ Food delivery site for VIT-AP University students.
 2. A separate passcode, checked in `src/app/admin/layout.tsx` after (1)
    passes. The passcode lives only in the `ADMIN_PASSCODE` env var —
    never hardcoded, never committed. Entering it right sets an httpOnly,
-   `/admin`-scoped session cookie (`src/lib/admin/passcode.ts` /
-   `passcode-actions.ts`); no `ADMIN_PASSCODE` set means the gate **fails
+   `/admin`-scoped session cookie holding an HMAC of the admin's user id
+   keyed by the passcode, never the passcode itself, compared in constant
+   time (`src/lib/admin/passcode.ts` / `passcode-actions.ts`) — it only
+   works for that admin, and changing the passcode logs every device out; no `ADMIN_PASSCODE` set means the gate **fails
    closed** — nobody gets in, admin role or not — rather than silently
    letting everyone through.
 
@@ -286,7 +289,9 @@ silently re-enables the button.
   Google Search Console verification (`GOOGLE_SITE_VERIFICATION` env var,
   nothing emitted while unset). `src/app/opengraph-image.tsx` renders the
   link-preview card (mark, name, tagline, four dish photos — literal
-  paths, update them if a photo is renamed). `/login` carries the full
+  paths, update them if a photo is renamed) with `ImageResponse`, then
+  re-encodes it as a ~116 KB JPEG with `sharp` (a declared dependency) —
+  WhatsApp drops previews as big as the PNG was. `/login` carries the full
   search title, a canonical URL and Organization/WebSite JSON-LD.
   `src/app/sitemap.ts` lists the three public pages; `robots.ts` points
   to it and disallows `/admin`, `/auth`, `/orders`, `/profile`,
@@ -739,11 +744,11 @@ RLS is enabled on every table:
   `Permissions-Policy` (no camera/mic/location); HSTS comes from Vercel.
   CSP is a moderate policy (`'unsafe-inline'` scripts because the
   theme/splash init scripts and JSON-LD are inline on purpose; connections
-  only to self + Supabase REST/Realtime), currently **report-only** —
+  only to self + Supabase REST/Realtime), **enforced** (since the redesign
+  branch, 14 Oct 2026 — the same policy College Bites enforces) —
   violations POST to `/api/csp-report` (excluded from the proxy matcher)
-  and land in Vercel logs as `[csp] …`. Switch the header key to
-  `Content-Security-Policy` once the logs are clean; add any new external
-  origin to it.
+  and land in Vercel logs as `[csp] …`. Add any new external origin to it,
+  or the browser blocks it.
   It raises short error keys
   (`banned`, `restaurant_closed`, `dish_unavailable`, `ordering_paused`, `ordering_closed`, …) that
   `src/lib/orders/actions.ts` maps to messages. Admins

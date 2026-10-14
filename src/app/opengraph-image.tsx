@@ -1,6 +1,7 @@
 import { ImageResponse } from "next/og";
 import { readFile } from "node:fs/promises";
 import { join } from "node:path";
+import sharp from "sharp";
 import { SITE_URL } from "@/lib/site";
 
 /*
@@ -9,11 +10,15 @@ import { SITE_URL } from "@/lib/site";
  * on the right. Built once at build time — nothing here depends on the
  * request. Served at /opengraph-image, which src/proxy.ts lets through
  * signed out (link-preview bots never sign in).
+ *
+ * Drawn with ImageResponse (always a PNG), then re-encoded as a JPEG: a
+ * photo-heavy PNG card runs to ~1 MB, too big for WhatsApp to preview
+ * reliably; the JPEG is ~100 KB.
  */
 
 export const alt = "MuteBites — food delivery for VIT-AP students, pickup at Main Gate";
 export const size = { width: 1200, height: 630 };
-export const contentType = "image/png";
+export const contentType = "image/jpeg";
 
 const PLUM = "#552C4A";
 const IVORY = "#f5eae1";
@@ -42,7 +47,7 @@ export default async function OpengraphImage() {
     <img src={src} alt="" width={280} height={height} style={{ objectFit: "cover", borderRadius: 32 }} />
   );
 
-  return new ImageResponse(
+  const card = new ImageResponse(
     (
       <div style={{ width: "100%", height: "100%", display: "flex", background: IVORY, color: PLUM }}>
         <div style={{ display: "flex", flexDirection: "column", justifyContent: "center", padding: "0 56px", width: 580 }}>
@@ -83,4 +88,8 @@ export default async function OpengraphImage() {
     ),
     size,
   );
+
+  const png = Buffer.from(await card.arrayBuffer());
+  const jpeg = await sharp(png).jpeg({ quality: 82, mozjpeg: true, progressive: true }).toBuffer();
+  return new Response(new Uint8Array(jpeg), { headers: { "Content-Type": contentType } });
 }

@@ -972,7 +972,9 @@ can see (menus stay private, by decision).
 ## 16. Security
 
 - **Two-layer admin** (role + passcode), passcode only in env vars, fails
-  closed.
+  closed; the cookie is an HMAC bound to the admin's account, never the
+  passcode (14 Oct 2026).
+- **Sign-out** is this device only (`scope: "local"`).
 - **Everything enforced in the database** (RLS, triggers,
   security-definer functions); the app's checks are only for friendly
   messages.
@@ -985,9 +987,11 @@ can see (menus stay private, by decision).
   comes from Vercel.
 - **Content policy (CSP):** self + Supabase (REST and Realtime), inline
   scripts allowed (theme/splash/structured data are inline on purpose),
-  **report-only** for now; violations go to `/api/csp-report` and show in
-  Vercel logs as `[csp]`.
-- `npm audit`: 0 vulnerabilities (22 Sep).
+  **enforced** since 14 Oct 2026 (was report-only); violations go to
+  `/api/csp-report` and show in Vercel logs as `[csp]`.
+- Next.js 16.3.8 (14 Oct 2026, for a critical `next/og` advisory).
+  `npm audit --omit=dev` only flags packages pulled in by the `shadcn` CLI
+  (build-time tooling, not shipped).
 - Supabase sign-in rate limits; Google-only sign-in (no passwords to
   guess).
 
@@ -1054,16 +1058,15 @@ entries in `dish-photos.ts`. Run it once.
 
 ## 19. Still open
 
-- **Switch the content policy from report-only to enforced** after a day
-  of clean `[csp]` logs (one-line change in `next.config.ts`).
+- ~~Switch the content policy to enforced~~ — done 14 Oct 2026 (redesign
+  branch, ships with the redesign launch).
 - **Raise Supabase's sign-in limit to ~100** (campus Wi-Fi).
 - **Fully automated WhatsApp confirmation** (WhatsApp Business Cloud API +
   webhook that confirms on "yes"): waiting on the client for cost (~₹0.115
   + GST per message), giving up normal WhatsApp on the number, and
   template approval. Needs its own migration.
-- **Harden the admin passcode cookie:** today it stores the passcode value
-  itself; better to store a signed hash (HMAC) and compare in constant
-  time. Do this from the start in the new project.
+- ~~Harden the admin passcode cookie~~ — done 14 Oct 2026: an HMAC of the
+  admin's user id, compared in constant time.
 - Restaurant phone numbers are all MuteBites' support number; set real
   ones if the admin should call restaurants from the app.
 

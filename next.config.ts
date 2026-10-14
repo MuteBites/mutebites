@@ -35,9 +35,10 @@ const nextConfig: NextConfig = {
       {
         source: "/:path*",
         headers: [
-          // Report-only while we confirm nothing legitimate is blocked —
-          // switch the key to "Content-Security-Policy" to enforce.
-          { key: "Content-Security-Policy-Report-Only", value: csp },
+          // Enforced — the same policy College Bites has enforced since 1 Oct
+          // 2026. Violations still POST to /api/csp-report. A new external
+          // origin must be added above.
+          { key: "Content-Security-Policy", value: csp },
           { key: "X-Frame-Options", value: "DENY" },
           { key: "X-Content-Type-Options", value: "nosniff" },
           { key: "Referrer-Policy", value: "strict-origin-when-cross-origin" },

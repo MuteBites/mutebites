@@ -13,11 +13,11 @@ export const metadata: Metadata = {
 };
 
 export default async function AdminLayout({ children }: LayoutProps<"/admin">) {
-  await requireAdmin();
+  const admin = await requireAdmin();
 
   // Second layer on top of the role check above: even a signed-in admin
   // needs this browser session to know the separate ADMIN_PASSCODE too.
-  if (!(await isAdminPasscodeVerified())) {
+  if (!(await isAdminPasscodeVerified(admin.id))) {
     return <AdminPasscodeGate />;
   }
 
