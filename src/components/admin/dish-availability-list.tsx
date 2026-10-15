@@ -91,7 +91,7 @@ export function DishAvailabilityList({ dishes }: { dishes: AdminDish[] }) {
             value={query}
             onChange={(e) => setQuery(e.target.value)}
             placeholder="Search dishes…"
-            className="h-11 w-full rounded-2xl border bg-card pr-3 pl-10 shadow-card outline-none placeholder:text-muted-foreground focus-visible:ring-3 focus-visible:ring-ring/40 [&::-webkit-search-cancel-button]:hidden"
+            className="h-11 w-full rounded-2xl border bg-card pr-3 pl-10 shadow-card outline-none placeholder:text-muted-foreground focus-visible:ring-3 focus-visible:ring-ring/80 [&::-webkit-search-cancel-button]:hidden"
           />
         </label>
         <button
@@ -99,7 +99,7 @@ export function DishAvailabilityList({ dishes }: { dishes: AdminDish[] }) {
           onClick={() => setSoldOutOnly((v) => !v)}
           aria-pressed={soldOutOnly}
           className={cn(
-            "flex h-11 shrink-0 items-center gap-2 rounded-2xl border px-4 text-sm font-semibold shadow-card outline-none transition-colors focus-visible:ring-3 focus-visible:ring-ring/40",
+            "flex h-11 shrink-0 items-center gap-2 rounded-2xl border px-4 text-sm font-semibold shadow-card outline-none transition-colors focus-visible:ring-3 focus-visible:ring-ring/80",
             soldOutOnly
               ? "border-destructive bg-destructive/10 text-destructive"
               : "bg-card hover:bg-secondary",

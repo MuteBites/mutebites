@@ -120,7 +120,7 @@ export function OrderingKillSwitch({ ordering }: { ordering: OrderingState }) {
                 <AlertDialogAction
                   disabled={pending}
                   onClick={confirm}
-                  className={cn(target === "closed" && "bg-destructive text-destructive-foreground hover:bg-destructive/90")}
+                  variant={target === "closed" ? "danger" : "default"}
                 >
                   {pending && <Loader2 className="size-4 animate-spin" />}
                   {CONFIRM[target].action}

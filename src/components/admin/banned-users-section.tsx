@@ -186,7 +186,7 @@ function BanStudentSearch({ onBanned }: { onBanned: (user: StudentSearchResult) 
             <AlertDialogAction
               disabled={banPending}
               onClick={confirmBan}
-              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+              variant="danger"
             >
               {banPending && <Loader2 className="size-4 animate-spin" />}
               Ban student

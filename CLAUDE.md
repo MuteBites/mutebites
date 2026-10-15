@@ -38,7 +38,13 @@ Food delivery site for VIT-AP University students.
   under a soft amber + rose sky (`body`, `--page-glow-a/-b`). Light cards
   cast warm amber-tinted shadows; dark cards carry a 1px rim light inside
   `--elevation-card`. Buttons (`components/ui/button.tsx`) are pills; the
-  default one is `surface-primary` (lit amber). Status chips
+  default one is `surface-primary` (lit amber). **For a red or green button
+  use `variant="danger"` / `variant="success"`** (dialog confirms: Cancel
+  order, Close ordering, Ban, Sign out, Mark all delivered) — never
+  `className="bg-destructive"` on the default variant: its amber gradient is
+  a background-image and still paints over any `bg-*` colour (that made
+  every red confirm amber until 15 Oct 2026). A one-off colour (Google's
+  white sign-in button) uses `variant="ghost"`. Status chips
   (`statusBadge()`): Placed / Preparing `amber-soft`, Confirmed
   `plum-soft`, Out for delivery `brand-soft`, Delivered `success-soft`,
   Cancelled red. Dialog / sheet backdrops are `bg-plum-900/40–50` with a

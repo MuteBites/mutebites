@@ -906,7 +906,11 @@ only in the top half and with ≥5 students.
   (`surface-hero`, `--hero-*`); a soft amber + rose sky over every page;
   warm card shadows in light, a rim light on dark cards; bloom utilities
   `glow-amber` / `glow-hero` / `glow-rose`; pill buttons with a lit amber
-  fill; coloured status chips; plum blurred dialog backdrops. Kept the
+  fill; coloured status chips; plum blurred dialog backdrops. Red / green
+  confirms use the Button's `danger` / `success` variants (the default
+  variant's amber gradient painted over `bg-destructive`). Admin (step 10):
+  pill actions on order cards (lit amber Confirm, green Mark delivered),
+  amber totals, focus rings back at /80 on the shared admin pills. Kept the
   plum / amber identity — borrowed College Bites' "lit, not flat" approach,
   not its palette.
 - **Rules:** text on a filled colour uses its `*-foreground` token, never

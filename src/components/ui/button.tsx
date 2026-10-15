@@ -14,6 +14,13 @@ const buttonVariants = cva(
           "bg-secondary text-secondary-foreground hover:bg-[color-mix(in_oklch,var(--secondary),var(--foreground)_5%)] aria-expanded:bg-secondary aria-expanded:text-secondary-foreground",
         ghost:
           "hover:bg-muted hover:text-foreground aria-expanded:bg-muted aria-expanded:text-foreground dark:hover:bg-muted/50",
+        // Solid red for confirms ("Cancel order", "Close ordering", "Ban").
+        // Use this rather than className="bg-destructive" on the default
+        // variant — that one's amber gradient is a background-image and
+        // still paints over a bg-* colour.
+        danger: "bg-destructive text-destructive-foreground hover:bg-destructive/90",
+        // Solid green for "Mark delivered" confirms (same reason as danger).
+        success: "bg-success text-success-foreground hover:bg-success/90",
         destructive:
           "bg-destructive/10 text-destructive hover:bg-destructive/20 focus-visible:border-destructive/40 focus-visible:ring-destructive/20 dark:bg-destructive/20 dark:hover:bg-destructive/30 dark:focus-visible:ring-destructive/40",
         link: "text-primary underline-offset-4 hover:underline",

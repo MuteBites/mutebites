@@ -112,7 +112,7 @@ export function MarkAllDeliveredButton({
           <AlertDialogAction
             disabled={pending}
             onClick={confirm}
-            className="bg-success text-success-foreground hover:bg-success/90"
+            variant="success"
           >
             {pending && <Loader2 className="size-4 animate-spin" />}
             Mark all delivered
