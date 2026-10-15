@@ -6,6 +6,7 @@ import { MAX_QUANTITY } from "@/lib/cart/limits";
 import { lineKey, linePrice, setQuantity, type CartLine } from "@/lib/cart/store";
 import { getDishPhoto } from "@/lib/data/dish-photos";
 import { formatRupees } from "@/lib/format";
+import { splitPortion } from "@/lib/menu/portions";
 import { BlurImage } from "@/components/blur-image";
 import { VegMark } from "@/components/veg-mark";
 
@@ -25,6 +26,7 @@ function prefersReducedMotion() {
  */
 export function CartLineRow({ line, restaurantName }: { line: CartLine; restaurantName: string | null }) {
   const photo = restaurantName ? getDishPhoto(restaurantName, line.name) : undefined;
+  const { base, portion } = splitPortion(line.name);
   const [dragX, setDragX] = useState(0);
   const [dragging, setDragging] = useState(false);
   const [removing, setRemoving] = useState(false);
@@ -96,7 +98,17 @@ export function CartLineRow({ line, restaurantName }: { line: CartLine; restaura
         <div className="min-w-0 flex-1">
           <p className="leading-snug font-semibold">
             <VegMark isVeg={line.isVeg} className="mr-1.5 inline-flex size-4 -translate-y-px align-middle" />
-            {line.name}
+            {/* "Apples (500 g)" reads as "Apples" with a "500 g" chip. */}
+            {portion ? (
+              <>
+                {base}
+                <span className="ml-1.5 inline-block rounded-full bg-brand-soft px-2 py-0.5 align-middle text-xs font-bold text-brand-soft-foreground">
+                  {portion}
+                </span>
+              </>
+            ) : (
+              line.name
+            )}
           </p>
           {line.addons?.length ? (
             <p className="mt-0.5 text-sm text-muted-foreground">+ {line.addons.map((a) => a.name).join(", ")}</p>

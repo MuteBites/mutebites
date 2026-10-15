@@ -365,6 +365,11 @@ there are real — avoided):
     one after another, the About card opens on a strip of the lit hero,
     Home's headline is "Hey, <name>" with the hour's question under it,
     and `/terms` has a photo-credits note (Unsplash / Pexels stock).
+14. **Sizes as one card** (no database change): Fresh Fruits' 500 g / 1 kg,
+    Bismillah's Sugarcane Juice Glass / 1 Bottle and Bheemasena's Chicken
+    Tandoori Half / Full each show as one menu card with every size's
+    price; "+" opens a "Choose a size" sheet. Each size stays its own dish,
+    cart line and order item; the cart shows a size chip.
 
 ---
 
@@ -760,6 +765,9 @@ see it again.
 - **One sticky filter row:** search icon, then Veg / Non-veg (mutually
   exclusive, only if the menu has both) and the section chips.
 - Section headings with a food icon on a blush tile and a count.
+- Dishes that differ only by size (Apples 500 g / 1 kg, Sugarcane Juice
+  Glass / 1 Bottle, Chicken Tandoori Half / Full) are one card; "+" opens
+  a "Choose a size" sheet (`lib/menu/portions.ts`, `portion-sheet.tsx`).
 - Photo-grid dish cards with a lit amber add pill that widens into a − n +
   stepper (glowing once in the cart); amber prices; veg/non-veg mark; note; **"Your favorite"** or **"Highly
   re-ordered"** tag; sold-out dishes greyed, struck through, not

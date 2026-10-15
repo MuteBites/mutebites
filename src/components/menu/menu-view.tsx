@@ -20,8 +20,10 @@ import { AllCategoriesIcon, getCuisineIcon } from "@/lib/cuisine-icons";
 import type { AddonOption, Dish, MenuSection, Restaurant } from "@/lib/data/types";
 import { cn } from "@/lib/utils";
 import { getDishPhoto } from "@/lib/data/dish-photos";
+import { menuItems, type MenuItem } from "@/lib/menu/portions";
 import { AddonSheet } from "./addon-sheet";
 import { DishCard } from "./dish-card";
+import { PortionSheet, type PortionPick } from "./portion-sheet";
 
 const ALL = "all";
 const sectionKey = (s: MenuSection) => s.category?.id ?? "uncategorized";
@@ -88,6 +90,8 @@ export function MenuView({
   );
   // Dish whose "Add extras" sheet is open, with the extras its section offers.
   const [addonTarget, setAddonTarget] = useState<{ dish: Dish; addons: AddonOption[] } | null>(null);
+  // Sized dish (Apples 500 g / 1 kg…) whose "Choose a size" sheet is open.
+  const [portionPick, setPortionPick] = useState<PortionPick | null>(null);
 
   const cartRestaurant = { id: restaurant.id, name: restaurant.name };
   // Every line of this dish counts — the same dish with different extras is
@@ -103,8 +107,11 @@ export function MenuView({
   }
 
   function commitAdd(dish: Dish, addons: AddonOption[] = [], quantity = 1) {
-    if (conflictsWithCart(restaurant.id)) setPendingAdd({ dish, addons, quantity });
-    else addToCart(cartRestaurant, dish, { addons, quantity });
+    if (conflictsWithCart(restaurant.id)) {
+      // One modal at a time: the size sheet gives way to "Start a new cart?".
+      setPortionPick(null);
+      setPendingAdd({ dish, addons, quantity });
+    } else addToCart(cartRestaurant, dish, { addons, quantity });
   }
 
   // Dishes in a section with extras open the "Add extras" sheet first;
@@ -253,30 +260,60 @@ export function MenuView({
           <SectionHeading
             id={`sec-${sectionKey(section)}`}
             name={sectionName(section)}
-            count={section.dishes.length}
+            count={menuItems(section).length}
             icon={getCuisineIcon(sectionName(section))}
           />
           {(() => {
+            const items = menuItems(section);
             // Photo dishes in the grid; dishes without a photo as a list under it.
-            const card = (dish: (typeof section.dishes)[number]) => (
-              <DishCard
-                key={dish.id}
-                dish={dish}
-                restaurantName={restaurant.name}
-                quantity={quantityOf(dish.id)}
-                orderable={restaurant.is_active && orderingEnabled}
-                pausedOnly={restaurant.is_active && !orderingEnabled}
-                pausedLabel={closedChip}
-                isFavorite={dish.id === favoriteDishId}
-                isHighlyReordered={highlyReorderedDishIds.has(dish.id)}
-                highlighted={highlighted === dish.id}
-                hasAddons={section.addons.length > 0}
-                onAdd={() => handleAdd(dish, section.addons)}
-                onChangeQuantity={(q) => setQuantity(dish.id, q)}
-              />
-            );
-            const withPhoto = section.dishes.filter((d) => getDishPhoto(restaurant.name, d.name));
-            const withoutPhoto = section.dishes.filter((d) => !getDishPhoto(restaurant.name, d.name));
+            const card = (item: MenuItem) => {
+              if (item.kind === "portions") {
+                const ids = item.portions.map((p) => p.dish.id);
+                const open = () => setPortionPick({ base: item.base, portions: item.portions });
+                return (
+                  <DishCard
+                    key={ids[0]}
+                    dish={item.portions[0].dish}
+                    restaurantName={restaurant.name}
+                    quantity={ids.reduce((sum, id) => sum + quantityOf(id), 0)}
+                    orderable={restaurant.is_active && orderingEnabled}
+                    pausedOnly={restaurant.is_active && !orderingEnabled}
+                    pausedLabel={closedChip}
+                    isFavorite={favoriteDishId !== null && ids.includes(favoriteDishId)}
+                    isHighlyReordered={ids.some((id) => highlyReorderedDishIds.has(id))}
+                    highlighted={highlighted !== null && ids.includes(highlighted)}
+                    portions={item.portions}
+                    onChoosePortion={open}
+                    onAdd={open}
+                    onChangeQuantity={open}
+                  />
+                );
+              }
+              const { dish } = item;
+              return (
+                <DishCard
+                  key={dish.id}
+                  dish={dish}
+                  restaurantName={restaurant.name}
+                  quantity={quantityOf(dish.id)}
+                  orderable={restaurant.is_active && orderingEnabled}
+                  pausedOnly={restaurant.is_active && !orderingEnabled}
+                  pausedLabel={closedChip}
+                  isFavorite={dish.id === favoriteDishId}
+                  isHighlyReordered={highlyReorderedDishIds.has(dish.id)}
+                  highlighted={highlighted === dish.id}
+                  hasAddons={section.addons.length > 0}
+                  onAdd={() => handleAdd(dish, section.addons)}
+                  onChangeQuantity={(q) => setQuantity(dish.id, q)}
+                />
+              );
+            };
+            const hasPhoto = (item: MenuItem) =>
+              (item.kind === "dish" ? [item.dish] : item.portions.map((p) => p.dish)).some((d) =>
+                getDishPhoto(restaurant.name, d.name),
+              );
+            const withPhoto = items.filter(hasPhoto);
+            const withoutPhoto = items.filter((item) => !hasPhoto(item));
             return (
               <>
                 {withPhoto.length > 0 && (
@@ -298,6 +335,15 @@ export function MenuView({
         currentRestaurantId={restaurant.id}
         orderingEnabled={orderingEnabled}
         closedNote={closedNote}
+      />
+
+      <PortionSheet
+        pick={portionPick}
+        restaurantName={restaurant.name}
+        quantityOf={quantityOf}
+        onAdd={(dish) => commitAdd(dish)}
+        onChangeQuantity={(dishId, quantity) => setQuantity(dishId, quantity)}
+        onClose={() => setPortionPick(null)}
       />
 
       <AddonSheet

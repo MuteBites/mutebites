@@ -7,7 +7,8 @@ import { BlurImage } from "@/components/blur-image";
 import { MenuProgress } from "@/components/menu/menu-progress";
 import { MenuView } from "@/components/menu/menu-view";
 import { getRestaurantCoverPhoto } from "@/lib/data/dish-photos";
-import { getDishesTried, getFavoriteDishId } from "@/lib/data/orders";
+import { getFavoriteDishId, getTriedDishIds } from "@/lib/data/orders";
+import { menuItems } from "@/lib/menu/portions";
 import { getHighlyReorderedDishIds } from "@/lib/data/reorders";
 import { getRestaurantMenu } from "@/lib/data/restaurants";
 import { isUuid } from "@/lib/ids";
@@ -43,10 +44,10 @@ export default async function RestaurantPage({ params, searchParams }: PageProps
   const focusDishId = typeof dish === "string" && isUuid(dish) ? dish : null;
 
   const profile = await profilePromise;
-  const [menu, ordering, dishesTried, favoriteDishId, highlyReorderedDishIds] = await Promise.all([
+  const [menu, ordering, triedDishIds, favoriteDishId, highlyReorderedDishIds] = await Promise.all([
     menuPromise,
     orderingPromise,
-    getDishesTried(profile.id, id),
+    getTriedDishIds(profile.id, id),
     getFavoriteDishId(profile.id, id),
     highlyReorderedPromise,
   ]);
@@ -57,7 +58,13 @@ export default async function RestaurantPage({ params, searchParams }: PageProps
   const orderingEnabled = ordering.open;
   const orderable = active && orderingEnabled;
   const paused = active && !orderingEnabled;
-  const totalDishes = sections.reduce((sum, s) => sum + s.dishes.length, 0);
+  // Counted in menu cards, like the menu shows them: a dish's sizes (Apples
+  // 500 g / 1 kg) are one card, tried if any size is.
+  const cards = sections.flatMap(menuItems);
+  const totalDishes = cards.length;
+  const dishesTried = cards.filter((c) =>
+    c.kind === "dish" ? triedDishIds.has(c.dish.id) : c.portions.some((p) => triedDishIds.has(p.dish.id)),
+  ).length;
   const cover = getRestaurantCoverPhoto(restaurant.name);
   const statusBadge = (
     <span

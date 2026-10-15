@@ -264,6 +264,25 @@ Food delivery site for VIT-AP University students.
   (`getDishPhoto()`) sit in the two-column photo grid; dishes **without**
   one render underneath as a compact list (`DishCard`'s row form — name,
   veg mark, price, note, same add control) instead of a blank tile.
+- **Sizes (portion picker)** (`src/lib/menu/portions.ts`, ported from
+  College Bites, 15 Oct 2026): dishes that differ only by size are ONE menu
+  card — "<name> (500 g)" / "(1 kg)" (Fresh Fruits), "(Glass)" /
+  "(1 Bottle)" (Bismillah's Sugarcane Juice), "<name> Half" / "Full"
+  (Bheemasena's Chicken Tandoori). Only those size words count ("Sweet
+  Lemon Juice (Mosambi)" is a name); a size with no sibling stays a plain
+  dish (Papaya (1 kg)). The card shows the base name, every size's price
+  and one photo (whichever size has one); its "+" (or "n ›" once any size
+  is in the cart) opens `PortionSheet` (`portion-sheet.tsx`, "Choose a
+  size": a row per size with its own Add / stepper, sold-out rows
+  disabled, Done). Each size is still its own dish underneath (id, price,
+  cart line, order item, `place_order()`), so nothing server-side changed;
+  the cart line shows the base name with a blush size chip
+  (`splitPortion()`). `menuItems(section)` is the one grouping rule — never
+  in a section with add-ons — used for the cards, the section counts and
+  the "tried N of M" bar (`getTriedDishIds()`; a sized card counts as tried
+  if any size was delivered). `?dish=` links to any size land on the card.
+  A new sized dish just needs one of those spellings, or a new word in
+  `TAGGED` / `ORDER`.
 - **Menu filters** (`MenuView`, `src/components/menu/menu-view.tsx`): one
   sticky row — search icon, then a scrolling rail of **Veg** / **Non-veg**
   (mutually exclusive, tap again to clear; red on light red for non-veg)

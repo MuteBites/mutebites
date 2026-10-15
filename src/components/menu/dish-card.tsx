@@ -1,13 +1,14 @@
 "use client";
 
 import { useEffect, useRef } from "react";
-import { Minus, Plus, Repeat, Star } from "lucide-react";
+import { ChevronRight, Minus, Plus, Repeat, Star } from "lucide-react";
 import { BlurImage } from "@/components/blur-image";
 import { VegMark } from "@/components/veg-mark";
 import { MAX_QUANTITY } from "@/lib/cart/store";
 import { getDishPhoto } from "@/lib/data/dish-photos";
 import type { Dish } from "@/lib/data/types";
 import { formatRupees } from "@/lib/format";
+import { splitPortion, type Portion } from "@/lib/menu/portions";
 import { cn } from "@/lib/utils";
 
 /*
@@ -17,6 +18,11 @@ import { cn } from "@/lib/utils";
  * while the photo picks up an amber ring), prices in amber, and name + price on the page underneath — no bordered
  * row, no "ADD" button hanging off a thumbnail. Dishes without a photo
  * render as a compact list row instead (name, price, same add control).
+ *
+ * Size mode (`portions`, e.g. Apples 500 g / 1 kg): one card for the dish —
+ * base name, every size's price, the photo — whose "+" opens the menu's
+ * size picker instead of adding straight away; once any size is in the
+ * cart the control shows the total with a chevron and reopens it.
  */
 export function DishCard({
   dish,
@@ -29,6 +35,8 @@ export function DishCard({
   isHighlyReordered = false,
   highlighted = false,
   hasAddons = false,
+  portions,
+  onChoosePortion,
   onAdd,
   onChangeQuantity,
 }: {
@@ -49,11 +57,20 @@ export function DishCard({
   highlighted?: boolean;
   /** Its section offers extras: + always opens the "Add extras" sheet (no inline stepper — lines differ by extras; the cart edits them). */
   hasAddons?: boolean;
+  /** Size mode: the dish's sizes (`dish` is the first one), smallest first. */
+  portions?: Portion[];
+  /** Size mode: open the size picker for this dish. */
+  onChoosePortion?: () => void;
   onAdd: () => void;
   onChangeQuantity: (quantity: number) => void;
 }) {
-  const soldOut = !dish.is_available;
-  const photo = getDishPhoto(restaurantName, dish.name);
+  const sized = portions !== undefined && portions.length > 1;
+  const soldOut = sized ? portions.every((p) => !p.dish.is_available) : !dish.is_available;
+  // A sized card shows whichever size has a photo (they share one).
+  const photo = sized
+    ? portions.map((p) => getDishPhoto(restaurantName, p.dish.name)).find(Boolean)
+    : getDishPhoto(restaurantName, dish.name);
+  const name = sized ? splitPortion(dish.name).base : dish.name;
   const inCart = quantity > 0;
 
   // Keyboard focus follows the control as it grows and shrinks: "+" → the
@@ -71,6 +88,33 @@ export function DishCard({
     <span className="rounded-full bg-card/90 px-2.5 py-1 text-xs font-semibold text-muted-foreground backdrop-blur-sm">
       {pausedOnly ? pausedLabel : "Closed"}
     </span>
+  ) : sized ? (
+    // Size mode: "+" (or the count, once something's in) opens the picker.
+    <button
+      type="button"
+      onClick={onChoosePortion}
+      aria-haspopup="dialog"
+      aria-label={
+        inCart
+          ? `Change ${name}, ${quantity} in cart`
+          : `Choose ${name}: ${portions.map((p) => p.label).join(" or ")}`
+      }
+      className={cn(
+        "surface-primary flex h-11 items-center justify-center gap-0.5 rounded-full bg-primary font-bold text-primary-foreground outline-none hover:brightness-110 focus-visible:ring-3 focus-visible:ring-ring/80",
+        inCart ? "glow-amber min-w-11 pr-2 pl-3.5" : "w-11 shadow-raised",
+      )}
+    >
+      {inCart ? (
+        <>
+          <span key={quantity} className="animate-bounce-count tabular-nums">
+            {quantity}
+          </span>
+          <ChevronRight className="size-4" strokeWidth={2.5} />
+        </>
+      ) : (
+        <Plus className="size-5" strokeWidth={2.5} />
+      )}
+    </button>
   ) : hasAddons ? (
     // Extras mode: "+" always opens the extras sheet (lines differ by
     // extras, so there's no inline stepper); a count badge once it's in.
@@ -165,6 +209,29 @@ export function DishCard({
     </>
   ) : null;
 
+  // Price line: every size with its price on a sized card ("500 g ₹140
+  // 1 kg ₹265"), otherwise the price and the dish's note.
+  const prices = (size: "text-base" | "text-lg") =>
+    sized ? (
+      portions.map((p) => (
+        <span key={p.dish.id} className={cn("text-sm whitespace-nowrap", !p.dish.is_available && "line-through")}>
+          <span className="text-muted-foreground">{p.label}</span>{" "}
+          <span className={cn("font-heading font-bold text-primary", size)}>{formatRupees(p.dish.price)}</span>
+        </span>
+      ))
+    ) : (
+      <>
+        <span className={cn("font-heading font-bold text-primary", size)}>{formatRupees(dish.price)}</span>
+        {dish.note && <span className="text-xs font-semibold text-rose">{dish.note}</span>}
+      </>
+    );
+  // Deep links (?dish=) to another size land on this card too.
+  const sizeAnchors =
+    sized &&
+    portions
+      .slice(1)
+      .map((p) => <span key={p.dish.id} id={`dish-${p.dish.id}`} className="block scroll-mt-24" aria-hidden="true" />);
+
   // No photo: a compact list row instead of a photo tile with an empty
   // placeholder (MenuView lists these under each section's photo grid).
   if (!photo) {
@@ -181,12 +248,10 @@ export function DishCard({
           {tag && <p className="mb-0.5 inline-flex items-center gap-1 text-xs font-semibold">{tag}</p>}
           <h3 className={cn("leading-snug font-semibold", soldOut && "text-muted-foreground line-through")}>
             <VegMark isVeg={dish.is_veg} className="mr-1.5 inline-flex size-4 -translate-y-px align-middle" />
-            {dish.name}
+            {name}
           </h3>
-          <p className="mt-0.5 flex flex-wrap items-baseline gap-x-2">
-            <span className="font-heading text-base font-bold text-primary">{formatRupees(dish.price)}</span>
-            {dish.note && <span className="text-xs font-semibold text-rose">{dish.note}</span>}
-          </p>
+          <p className="mt-0.5 flex flex-wrap items-baseline gap-x-2">{prices("text-base")}</p>
+          {sizeAnchors}
         </div>
         {soldOut ? (
           <span className="shrink-0 rounded-full bg-secondary px-2.5 py-1 text-xs font-semibold text-muted-foreground">
@@ -201,6 +266,7 @@ export function DishCard({
 
   return (
     <article id={`dish-${dish.id}`} className="min-w-0 scroll-mt-24">
+      {sizeAnchors}
       <div
         className={cn(
           "group/photo relative aspect-square rounded-3xl bg-secondary transition-shadow",
@@ -245,12 +311,9 @@ export function DishCard({
           )}
         >
           <VegMark isVeg={dish.is_veg} className="mr-1.5 inline-flex size-4 -translate-y-px align-middle" />
-          {dish.name}
+          {name}
         </h3>
-        <p className="mt-1 flex flex-wrap items-baseline gap-x-2">
-          <span className="font-heading text-lg font-bold text-primary">{formatRupees(dish.price)}</span>
-          {dish.note && <span className="text-xs font-semibold text-rose">{dish.note}</span>}
-        </p>
+        <p className="mt-1 flex flex-wrap items-baseline gap-x-2">{prices("text-lg")}</p>
       </div>
     </article>
   );
