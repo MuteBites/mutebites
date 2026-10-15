@@ -2,7 +2,8 @@ import { ViewTransition } from "react";
 import { Skeleton } from "@/components/ui/skeleton";
 import { REVEAL_EXIT } from "@/lib/nav-transition";
 
-// Mirrors page.tsx's layout (header, search, promo strip, restaurant
+// Mirrors page.tsx's layout (header with the logo and initials circle,
+// pill search, "What's on your mind?" tiles, filter chips, restaurant
 // cards) so nothing jumps once the real data replaces it.
 export default function Loading() {
   return (
@@ -12,18 +13,32 @@ export default function Loading() {
       <ViewTransition {...REVEAL_EXIT}>
         <div className="flex items-center justify-between">
           <Skeleton className="size-12 rounded-2xl" />
-          <Skeleton className="size-12 shrink-0 rounded-2xl" />
+          <Skeleton className="size-11 shrink-0 rounded-full" />
         </div>
         <Skeleton className="mt-8 h-5 w-32" />
         <Skeleton className="mt-2 h-9 w-4/5" />
         <Skeleton className="mt-2 h-9 w-1/2" />
 
-        <Skeleton className="mt-6 h-14 w-full rounded-2xl" />
-        <Skeleton className="mt-4 h-14 w-full rounded-2xl" />
+        <Skeleton className="mt-6 h-14 w-full rounded-full" />
 
-        <div className="mt-8 flex items-baseline justify-between">
-          <Skeleton className="h-4 w-32" />
-          <Skeleton className="h-4 w-20" />
+        <Skeleton className="mt-7 h-7 w-56" />
+        <div className="-mx-6 mt-3 flex gap-3.5 overflow-hidden px-6 pt-1 pb-2">
+          {[0, 1, 2, 3, 4].map((i) => (
+            <div key={i} className="flex w-[4.75rem] shrink-0 flex-col items-center gap-1.5">
+              <Skeleton className="size-[4.5rem] rounded-full" />
+              <Skeleton className="h-3 w-12" />
+            </div>
+          ))}
+        </div>
+        <div className="mt-3 flex gap-2 overflow-hidden py-2.5">
+          {[20, 16, 16, 24].map((w, i) => (
+            <Skeleton key={i} className="h-9 shrink-0 rounded-full" style={{ width: `${w * 0.25}rem` }} />
+          ))}
+        </div>
+
+        <div className="mt-8 flex items-end justify-between">
+          <Skeleton className="h-7 w-52" />
+          <Skeleton className="h-4 w-16" />
         </div>
 
         <div className="mt-4 flex flex-col gap-5">
@@ -33,7 +48,7 @@ export default function Loading() {
               <div className="px-3 pt-3.5 pb-2.5">
                 <div className="flex items-start justify-between gap-3">
                   <Skeleton className="h-7 w-2/3" />
-                  <Skeleton className="size-9 shrink-0 rounded-full" />
+                  <Skeleton className="size-10 shrink-0 rounded-full" />
                 </div>
                 <Skeleton className="mt-2 h-4 w-3/4" />
                 <Skeleton className="mt-3 h-4 w-1/2" />

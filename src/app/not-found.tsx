@@ -19,7 +19,7 @@ export default function NotFound() {
       <div className="mt-8 flex w-full max-w-xs flex-col gap-3">
         <Link
           href="/"
-          className="pressable surface-primary flex h-14 items-center justify-center rounded-2xl bg-primary text-lg font-bold text-primary-foreground outline-none hover:brightness-95 focus-visible:ring-3 focus-visible:ring-ring/80"
+          className="pressable surface-primary flex h-14 items-center justify-center glow-amber rounded-full bg-primary text-lg font-bold text-primary-foreground outline-none hover:brightness-95 focus-visible:ring-3 focus-visible:ring-ring/80"
         >
           Back to restaurants
         </Link>

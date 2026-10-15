@@ -142,7 +142,7 @@ export function UsersList({ users: initialUsers }: { users: AdminUser[] }) {
                     <button
                       type="button"
                       onClick={() => setTarget(user)}
-                      className="flex h-9 shrink-0 items-center rounded-full bg-primary px-4 text-sm font-bold text-primary-foreground outline-none hover:bg-primary/90 focus-visible:ring-3 focus-visible:ring-ring/80"
+                      className="surface-primary flex h-9 shrink-0 items-center rounded-full bg-primary px-4 text-sm font-bold text-primary-foreground outline-none hover:bg-primary/90 focus-visible:ring-3 focus-visible:ring-ring/80"
                     >
                       Mark claimed
                     </button>

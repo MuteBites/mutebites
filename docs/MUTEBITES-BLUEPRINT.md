@@ -77,13 +77,14 @@ produced.
 | Pickup | Everything is handed over at **VIT-AP Main Gate**. No room delivery. |
 | Payment | **Cash on delivery only.** UPI is accepted informally at pickup; the app never processes payments. |
 | Sign-in | "Continue with Google" only |
-| Restaurants | 6: Bheemasena Restaurant (59 dishes), A1 Biryani Point (3), Bismillah Fruit Juice (12), Food Corner (24, was "MuteBites Chinese"), MuteBites Fresh Fruits (13), MuteBites Sugarcane Juice (1) |
-| Stack | Next.js 16.3.5 (App Router, customised build), React 19.2.8, TypeScript, Tailwind CSS v4, shadcn/ui on `@base-ui/react`, lucide-react icons, Supabase (Postgres, Auth, RLS, Realtime), `web-push`, Vercel (Hobby plan) |
+| Restaurants | 8: Bheemasena Restaurant (59 dishes), A1 Biryani Point (3), Bismillah Fruit Juice (12), Food Corner (24, was "MuteBites Chinese"), MuteBites Fresh Fruits (13), MuteBites Sugarcane Juice (1), Ramana Fast Food (16), Waffle Pops (65, with paid add-ons) |
+| Ordering | An **Open / Closed** switch the admin flips (since the redesign; the database still allows the old `'auto'` schedule until the launch migration). Delivery promises keep the slot times (by 1:30 / 7:30 / 8:15 PM). |
+| Stack | Next.js 16.3.8 (App Router, customised build), React 19.2.8, TypeScript, Tailwind CSS v4, shadcn/ui on `@base-ui/react`, lucide-react icons, Supabase (Postgres, Auth, RLS, Realtime), `web-push`, Vercel (Hobby plan) |
 | Regions | Supabase `ap-south-1` (Mumbai), Vercel functions pinned to `bom1` (Mumbai) |
 | Admin alerts go to | mutebites5@gmail.com |
 | Support number | +91 82470 75652 (call + WhatsApp) |
-| Built | 15–22 Sep 2026; launched to real students 20 Sep 2026 |
-| Size | 114 commits, 35 migrations, 171 source files |
+| Built | 15–22 Sep 2026; launched to real students 20 Sep 2026; more restaurants and add-ons 4–8 Oct; the redesign 14–15 Oct 2026 (local commits, ships as one update on the launch date) |
+| Size | 137 commits, 40 migrations, 187 source files (15 Oct 2026) |
 
 ---
 
@@ -298,6 +299,58 @@ approved on the phone before the next:
 - Supabase sign-in limits reviewed (raise sign-ins to ~100 per 5 min
   because campus Wi-Fi shares one IP).
 - MuteBites Sugarcane Juice added (one dish, ₹90).
+
+### 25 Sep – 8 Oct — Blueprint, admin app, credits, two more restaurants, add-ons
+- This blueprint written.
+- **Admin as its own installable app** ("MuteBites Admin", opens on
+  `/admin`) with an Install button in the admin header.
+- The GitHub repo made **public** (Vercel Hobby blocks private-repo deploys
+  by a non-owner author); `.vercelignore` keeps `.env*` out of CLI uploads.
+- About popup credits (owners; the developer's name folds open Call ·
+  WhatsApp · Mail). Admin Copy text: name and number first.
+- **Ramana Fast Food** (16 dishes; borrows Food Corner's photos — same
+  dish names).
+- **Waffle Pops** (65 dishes in 8 sections, printed price + ₹10; stock
+  photos for a few). Dishes without a photo show as a compact list under
+  each section's photo grid.
+- **Add-ons (extras):** `addons`, `category_addons`, `order_item_addons`,
+  `order_items.addons_price`, and `place_order()` taking `addon_ids` per
+  line (checked and priced in the database). A dish in a section with
+  extras opens an "Add extras" sheet; cart lines and every order display
+  show them.
+
+### 14–15 Oct — The redesign (local only until the launch date)
+Built in 11 steps, committed locally and **not pushed** (a push deploys),
+tested on localhost against the live database (which means test orders
+there are real — avoided):
+1. **Safety:** Next.js 16.3.8 (critical `next/og` advisory), admin
+   passcode cookie as an HMAC bound to the admin, CSP enforced, sign-out
+   this device only, `cn()` keeps named type sizes, share card as JPEG.
+2. **Ordering: Open / Closed only** (no Auto schedule in the app; delivery
+   promises keep the slot times; the database migration waits for launch).
+3. **Look and feel foundation:** lit plum hero surfaces (same in both
+   themes), a soft amber + rose sky over every page, warm shadows / dark
+   rim light, pill buttons, coloured status chips, plum dialog backdrops.
+4. **Bottom bar:** one floating bar in the root layout, a sliding amber
+   pill, drag to switch, slides away on menus and tickets.
+5. **Home:** "What's on your mind?" food tiles, sticky filter chips and a
+   filter sheet (state in the URL), a dish grid while searching/filtering,
+   "Campus favourites" (replaced the Trending popup), a promo card; Home
+   browses every menu while campus ordering is Closed.
+6. **Menu and cart:** chips header, a lit "tried N of M" bar, section icons,
+   one amber pill that widens into the stepper, a pill cart and sheet.
+7. **Order tracking:** the lit ticket and a **delivery road** timed by the
+   order's slot (cooking pot → rider → Main Gate) with Gen Z lines.
+8. **Profile:** the campus pass, glowing milestones, a reward bar; **fix**:
+   Campus Explorer counted only switched-on restaurants (showed "-5 more"
+   and re-locked every night).
+9. **Sign-in / welcome:** a sheet over the mosaic, Google's white button,
+   headline visible from the first frame; splash hydration warning fixed.
+10. **Admin:** pill actions; **fix**: every red / green dialog confirm was
+    painted amber by the default button's gradient (new `danger` /
+    `success` variants).
+11. **Final pass:** 404 / error / rating buttons as pills, a Home skeleton
+    matching the new layout, this blueprint brought up to date.
 
 ---
 
@@ -1063,6 +1116,16 @@ needs its own. How photos work:
 - Photos with watermarks or a rival's logo were rejected; cover photos
   came from free-licence stock (Unsplash/Pexels) when the client had none.
 
+Ramana Fast Food has no photos of its own: `DISH_PHOTOS["Ramana Fast Food"]`
+points at Food Corner's (every dish name matches). Waffle Pops' photos are
+free-licence stock (Unsplash) for 12 dishes and the cover; the rest use the
+list view. Home's "What's on your mind?" tiles (`FOOD_TYPES` in
+`src/lib/home-filters.ts`) also reference photo paths directly.
+
+**Add-ons (extras)** are per restaurant (`addons`), offered per menu section
+(`category_addons`), snapshotted on each order line (`order_item_addons`), and
+priced and checked only in `place_order()` (`addon_unavailable`).
+
 Adding a restaurant (template: `20260922010000_seed_sugarcane_juice.sql`):
 one migration inserting the restaurant, its sections and dishes (put the
 `values` list first and join restaurant/section onto it), plus photo
@@ -1229,7 +1292,7 @@ in order, without the MuteBites menu data.
 
 ---
 
-## Appendix A: all 114 commits
+## Appendix A: all commits (114 to 22 Sep, then the list continues)
 
 ```
 09-15 04:07 Initial commit from Create Next App
@@ -1346,11 +1409,33 @@ in order, without the MuteBites menu data.
 09-21 15:31 Security headers (CSP report-only) and a CSP violation log endpoint
 09-22 08:17 Rate-limit place_order(): 5 a minute, 8 unfinished, with clear messages
 09-22 08:42 Add MuteBites Sugarcane Juice (migration + photos)
+09-25 11:35 Docs: full MuteBites blueprint (history, setup, rules, porting checklist)
+10-04 21:39 Admin: separate installable app (MuteBites Admin) with an Install button
+10-05 01:14 Add .vercelignore so CLI deploys never upload secrets
+10-05 01:16 Docs: why the repo is public (Vercel Hobby deploy rule)
+10-05 01:32 About popup: owners and developer credit with a quiet contact reveal
+10-05 01:37 Admin copy text: name and number first, then restaurant and dishes
+10-05 20:31 Home: make the logo look tappable (button plate, ring, two-ripple hint)
+10-06 08:18 Add Ramana Fast Food (migration; borrows Food Corner photos)
+10-06 18:51 About credits: dotted underline on the developer name so it reads as tappable
+10-08 10:31 Add Waffle Pops (migration, 65 dishes; stock photos for a few)
+10-08 10:50 Menu: list view for dishes without photos; 5 more Waffle Pops photos; record add-on migrations
+10-08 10:58 Add-ons: extras sheet on the menu, cart lines with extras, place_order() with addon_ids, extras on every order display
+10-14 23:31 Safety pass: Next 16.3.8, HMAC admin cookie, enforced CSP, local sign-out
+10-14 23:40 Ordering: Open / Closed only (no Auto schedule in the app)
+10-15 00:01 Redesign foundation: lit plum hero, page sky, pill buttons, status colours
+10-15 00:06 Bottom bar: one floating bar in the root layout with a sliding amber pill
+10-15 00:17 Home redesign: food tiles, sticky filters + sheet, dish grid, favourites row, promo
+10-15 07:33 Menu and cart redesign: lit add pill, section icons, progress bar, cart pills
+10-15 07:45 Order tracking: lit pickup ticket with a slot-timed delivery road
+10-15 08:46 Profile redesign: campus pass, glowing milestones, reward bar; fix Campus Explorer
+10-15 12:56 Sign-in and welcome redesign; fix splash hydration warning
+10-15 13:38 Admin polish; fix red and green dialog confirms rendering amber
 ```
 
 ---
 
-## Appendix B: all 35 migrations
+## Appendix B: all 40 migrations
 
 "New project" says whether to run it when rebuilding elsewhere:
 **Run** (structure), **Skip** (MuteBites data or a one-off fix), or
@@ -1393,7 +1478,13 @@ in order, without the MuteBites menu data.
 | 33 | `20260921020000_trending_skip_banned.sql` | trending skips pre-launch + banned | Run (**edit launch date**) |
 | 34 | `20260922000000_place_order_rate_limit.sql` | final `place_order()` with rate limits | Run |
 | 35 | `20260922010000_seed_sugarcane_juice.sql` | sixth restaurant | **Replace** (good template) |
+| 36 | `20261006000000_seed_ramana_fast_food.sql` | seventh restaurant (Ramana Fast Food) | Skip |
+| 37 | `20261008000000_seed_waffle_pops.sql` | eighth restaurant (Waffle Pops, 65 dishes) | Skip |
+| 38 | `20261008010000_addons_schema.sql` | add-on tables, `order_items.addons_price` | Run |
+| 39 | `20261008020000_addons_rls_and_data.sql` | add-on access rules + Waffle Pops' four extras | Run (rules); **Replace** (extras) |
+| 40 | `20261008030000_place_order_addons.sql` | final `place_order()` with add-ons | Run |
 
-Run them in this order; each one assumes the ones before it. After #34,
+Run them in this order; each one assumes the ones before it. After #40,
 `place_order()` is in its final form, so the earlier versions (#6, #9, #12,
-#21) only matter as steps along the way.
+#21, #34) only matter as steps along the way. A **41st**, written for the
+redesign launch, removes the old `'auto'` ordering mode (see Still open).

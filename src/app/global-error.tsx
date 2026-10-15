@@ -25,7 +25,7 @@ export default function GlobalError({ retry }: { error: Error & { digest?: strin
         <button
           type="button"
           onClick={() => retry()}
-          className="mt-8 h-14 rounded-2xl bg-primary px-8 text-lg font-bold text-primary-foreground"
+          className="surface-primary mt-8 h-14 rounded-full bg-primary px-8 text-lg font-bold text-primary-foreground"
         >
           Try again
         </button>

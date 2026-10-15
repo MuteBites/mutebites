@@ -40,7 +40,7 @@ export default function Error({
         <button
           type="button"
           onClick={() => retry()}
-          className="surface-primary flex h-14 items-center justify-center gap-2 rounded-2xl bg-primary text-lg font-bold text-primary-foreground outline-none hover:brightness-95 focus-visible:ring-3 focus-visible:ring-ring/80"
+          className="surface-primary flex h-14 items-center justify-center gap-2 glow-amber rounded-full bg-primary text-lg font-bold text-primary-foreground outline-none hover:brightness-95 focus-visible:ring-3 focus-visible:ring-ring/80"
         >
           <RotateCw className="size-5" aria-hidden="true" />
           Try again
