@@ -38,6 +38,7 @@ export function MenuView({
   closedNote,
   favoriteDishId,
   highlyReorderedDishIds,
+  likedDishIds = [],
   focusDishId = null,
 }: {
   restaurant: Restaurant;
@@ -53,6 +54,8 @@ export function MenuView({
   favoriteDishId: string | null;
   /** Dishes campus-wide with a strong repeat-purchase signal — tags them "Highly re-ordered". */
   highlyReorderedDishIds: Set<string>;
+  /** Dishes on this menu the student has hearted (favorite_dishes). */
+  likedDishIds?: string[];
   /** Dish to scroll to and briefly highlight on arrival (from ?dish=). */
   focusDishId?: string | null;
 }) {
@@ -282,6 +285,7 @@ export function MenuView({
                     isFavorite={favoriteDishId !== null && ids.includes(favoriteDishId)}
                     isHighlyReordered={ids.some((id) => highlyReorderedDishIds.has(id))}
                     highlighted={highlighted !== null && ids.includes(highlighted)}
+                    liked={ids.some((id) => likedDishIds.includes(id))}
                     portions={item.portions}
                     onChoosePortion={open}
                     onAdd={open}
@@ -302,6 +306,7 @@ export function MenuView({
                   isFavorite={dish.id === favoriteDishId}
                   isHighlyReordered={highlyReorderedDishIds.has(dish.id)}
                   highlighted={highlighted === dish.id}
+                  liked={likedDishIds.includes(dish.id)}
                   hasAddons={section.addons.length > 0}
                   onAdd={() => handleAdd(dish, section.addons)}
                   onChangeQuantity={(q) => setQuantity(dish.id, q)}

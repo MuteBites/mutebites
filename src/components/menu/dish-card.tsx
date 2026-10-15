@@ -10,6 +10,7 @@ import type { Dish } from "@/lib/data/types";
 import { formatRupees } from "@/lib/format";
 import { splitPortion, type Portion } from "@/lib/menu/portions";
 import { cn } from "@/lib/utils";
+import { HeartButton } from "./heart-button";
 
 /*
  * One dish in the menu's two-column photo grid: a big square photo with
@@ -23,6 +24,10 @@ import { cn } from "@/lib/utils";
  * base name, every size's price, the photo — whose "+" opens the menu's
  * size picker instead of adding straight away; once any size is in the
  * cart the control shows the total with a chevron and reopens it.
+ *
+ * A heart (top-right of the photo, or beside the control in a list row)
+ * saves the dish to the student's private liked dishes (HeartButton). A
+ * sized card has one heart, on its first size.
  */
 export function DishCard({
   dish,
@@ -35,6 +40,7 @@ export function DishCard({
   isHighlyReordered = false,
   highlighted = false,
   hasAddons = false,
+  liked = false,
   portions,
   onChoosePortion,
   onAdd,
@@ -57,6 +63,8 @@ export function DishCard({
   highlighted?: boolean;
   /** Its section offers extras: + always opens the "Add extras" sheet (no inline stepper — lines differ by extras; the cart edits them). */
   hasAddons?: boolean;
+  /** The student has hearted this dish (favorite_dishes). */
+  liked?: boolean;
   /** Size mode: the dish's sizes (`dish` is the first one), smallest first. */
   portions?: Portion[];
   /** Size mode: open the size picker for this dish. */
@@ -239,7 +247,7 @@ export function DishCard({
       <article
         id={`dish-${dish.id}`}
         className={cn(
-          "flex min-w-0 scroll-mt-24 items-center gap-3 px-4 py-3",
+          "flex min-w-0 scroll-mt-24 items-center gap-2 px-4 py-3",
           highlighted &&
             "animate-highlight rounded-2xl motion-reduce:outline-3 motion-reduce:outline-offset-3 motion-reduce:outline-rose",
         )}
@@ -253,6 +261,7 @@ export function DishCard({
           <p className="mt-0.5 flex flex-wrap items-baseline gap-x-2">{prices("text-base")}</p>
           {sizeAnchors}
         </div>
+        <HeartButton dishId={dish.id} dishName={name} initialLiked={liked} tone="row" />
         {soldOut ? (
           <span className="shrink-0 rounded-full bg-secondary px-2.5 py-1 text-xs font-semibold text-muted-foreground">
             Sold out
@@ -288,11 +297,9 @@ export function DishCard({
           </div>
         </div>
 
-        {tag && (
-          <span className="absolute top-2 left-2 inline-flex max-w-[calc(100%-1rem)] items-center gap-1 rounded-full bg-card/90 px-2 py-0.5 text-xs font-semibold backdrop-blur-sm">
-            {tag}
-          </span>
-        )}
+        <div className="absolute top-2 right-2">
+          <HeartButton dishId={dish.id} dishName={name} initialLiked={liked} />
+        </div>
 
         {soldOut && (
           <span className="absolute inset-x-0 bottom-3 mx-auto w-fit rounded-full bg-card/90 px-3 py-1 text-xs font-semibold text-muted-foreground backdrop-blur-sm">
@@ -304,6 +311,9 @@ export function DishCard({
       </div>
 
       <div className={cn("px-1 pt-2.5", soldOut && "opacity-55")}>
+        {/* Under the photo, not on it: the heart has the photo's corner, and
+            a half-width card at 320px had no room for both. */}
+        {tag && <p className="mb-0.5 flex min-w-0 items-center gap-1 text-xs font-semibold">{tag}</p>}
         <h3
           className={cn(
             "line-clamp-2 leading-snug font-semibold",

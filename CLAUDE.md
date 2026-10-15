@@ -174,6 +174,11 @@ Food delivery site for VIT-AP University students.
   `MILESTONES` (`milestone-badges.tsx`) — six tiers, all computed from
   counts that only go up (delivered orders, distinct restaurants), so a
   badge never re-locks; locked tiles show a progress ring and "N to go".
+  Under the milestones, **Liked dishes** (`LikedDishes`,
+  `src/components/profile/liked-dishes.tsx`, ported from College Bites,
+  15 Oct 2026): every dish the student hearted, newest first, as a
+  snap-scrolling row of photo cards → the `?dish=` deep link; sold-out
+  ones greyed; an empty hint pointing at the heart.
   Under the grid, a blush `MilestoneReward` card carries the client's
   offer: all six milestones = one free biryani of their choice. Earned →
   a WhatsApp link (`SUPPORT_PHONE`) with a prefilled claim message; once
@@ -304,7 +309,19 @@ Food delivery site for VIT-AP University students.
   it. Add-on dishes keep a round "+" that opens the extras sheet, with a
   count badge. Prices are amber (`text-primary`). A dish photo leans in
   (`scale-105`) on mouse hover — on a wrapper round `BlurImage`, so it
-  doesn't fight the image's own fade-in transition. Cart: the cart bar is a
+  doesn't fight the image's own fade-in transition. **Hearts**
+  (`HeartButton`, `src/components/menu/heart-button.tsx`, see
+  `favorite_dishes`): a frosted heart in the photo's top-right corner (in a
+  photo-less list row, a plain one beside the add control) fills at once
+  with a pop and a 10 ms buzz, saves through `setDishLiked()`
+  (`src/lib/favorites/actions.ts`) in the background and reverts with a
+  toast if that fails. The action does **not** `revalidatePath` — in this
+  Next.js a revalidating action re-renders the current page in the same
+  round trip, i.e. the whole menu per tap — so the button remembers taps
+  for the session (module-level `TAPPED`), and Profile reads fresh. A sized
+  card has one heart, on its first size. Since the heart took the photo's
+  corner, the "Your favorite" / "Highly re-ordered" tag sits under the
+  photo, above the name (it was cut to "You…" at 320px). Cart: the cart bar is a
   plum pill with a lit "View cart" pill; the sheet's handover and contact
   rows lead with `IconTile` (`src/components/icon-tile.tsx`), "Change" is
   a small pill, Delivery shows a green "Free" chip, the total is amber
@@ -764,6 +781,17 @@ free biryani was handed over (`user_id` primary key = once per student,
 row; admins select all, insert (with `marked_by = auth.uid()`) and delete
 (undo). No update policy. Whether a student *qualifies* is checked in the
 app (`getUnlockedMilestones()`), not the database — see **Profile** above.
+[`supabase/migrations/20261015010000_favorite_dishes.sql`](supabase/migrations/20261015010000_favorite_dishes.sql)
+(applied 15 Oct 2026 through the Supabase connector — the live code
+doesn't use it until the redesign is pushed) adds **`favorite_dishes`** —
+the dishes a student hearted: `user_id` → `users` and `dish_id` →
+`dishes` (both cascade), `created_at`, primary key `(user_id, dish_id)` —
+one heart per dish per student. Indexes on `(user_id, created_at desc)`
+(Profile's list) and `dish_id`. RLS (`(select auth.uid())` form): a
+student selects, inserts and deletes only their own rows; no update
+policy, no admin access, and no counts shown to anyone — hearts are
+private. Read by `getLikedDishes()` (`src/lib/data/favorites.ts`,
+request-cached; errors read as "no hearts").
 [`supabase/migrations/20260922010000_seed_sugarcane_juice.sql`](supabase/migrations/20260922010000_seed_sugarcane_juice.sql)
 (data only — a sixth restaurant, **MuteBites Sugarcane Juice**: one
 section, one dish, "1 Litre Sugarcane Juice Bottle" ₹90, photos in

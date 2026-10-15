@@ -374,6 +374,11 @@ there are real — avoided):
     MuteBites team (admin access, the admin app, Open / Closed, alerts,
     handling orders, delivery slots, sold out, bans, rewards), written
     for the app after this update and checked against the admin's labels.
+16. **Hearts** (one migration, `favorite_dishes`, applied early — the live
+    code doesn't touch it): a heart on every menu dish, private to the
+    student, saved in the background; a "Liked dishes" row on Profile that
+    opens each dish on its menu. The "Your favorite" tag moved under the
+    photo to make room.
 
 ---
 
@@ -648,6 +653,10 @@ only write path is `submit_review()`. Never shown to other students.
 `marked_by`. Students read their own; admins read, insert (with
 `marked_by = auth.uid()`) and delete (undo). No update.
 
+**`favorite_dishes`** — `user_id`, `dish_id` (both cascade), `created_at`;
+primary key `(user_id, dish_id)`. A student reads, adds and removes only
+their own hearts; no admin access, no counts anywhere — hearts are private.
+
 ### 7.2 Functions
 | Function | What | Who can call |
 |---|---|---|
@@ -775,8 +784,9 @@ see it again.
   a "Choose a size" sheet (`lib/menu/portions.ts`, `portion-sheet.tsx`).
 - Photo-grid dish cards with a lit amber add pill that widens into a − n +
   stepper (glowing once in the cart); amber prices; veg/non-veg mark; note; **"Your favorite"** or **"Highly
-  re-ordered"** tag; sold-out dishes greyed, struck through, not
-  addable.
+  re-ordered"** tag (under the photo); a **heart** in the photo's corner
+  (private, saved in the background); sold-out dishes greyed, struck
+  through, not addable.
 - `?dish=<id>` scrolls that dish into view and outlines it in rose for
   ~3 s.
 - Adding from a different restaurant asks to start a new cart (one
@@ -833,6 +843,8 @@ button, and an amber "Rate your order" pill on rateable orders.
   (Top orderer ≤10% / Frequent ≤25% / Active ≤50%, only with ≥5 students
   that week), three stats: cravings solved (delivered), day streak,
   no-shows (cancelled).
+- **Liked dishes** (after the milestones): every hearted dish as a row of
+  photo cards that open it on its menu.
 - **Milestones:** six tiles in a 3×2 grid with "N of 6" and "Next up",
   locked tiles show a plum → amber progress ring, a lock and "N to go";
   unlocked ones glow with a light band sweeping across; new unlocks play
@@ -1528,3 +1540,4 @@ Run them in this order; each one assumes the ones before it. After #40,
 | # | File | What | New project |
 |---|---|---|---|
 | 41 | `20261015000000_ordering_open_closed_only.sql` | ordering is Open / Closed only; drops `ordering_schedule_open()` | Run |
+| 42 | `20261015010000_favorite_dishes.sql` | hearts (`favorite_dishes`) — Profile's "Liked dishes" | Run |

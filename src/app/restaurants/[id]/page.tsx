@@ -7,6 +7,7 @@ import { BlurImage } from "@/components/blur-image";
 import { MenuProgress } from "@/components/menu/menu-progress";
 import { MenuView } from "@/components/menu/menu-view";
 import { getRestaurantCoverPhoto } from "@/lib/data/dish-photos";
+import { getLikedDishes } from "@/lib/data/favorites";
 import { getFavoriteDishId, getTriedDishIds } from "@/lib/data/orders";
 import { menuItems } from "@/lib/menu/portions";
 import { getHighlyReorderedDishIds } from "@/lib/data/reorders";
@@ -44,12 +45,13 @@ export default async function RestaurantPage({ params, searchParams }: PageProps
   const focusDishId = typeof dish === "string" && isUuid(dish) ? dish : null;
 
   const profile = await profilePromise;
-  const [menu, ordering, triedDishIds, favoriteDishId, highlyReorderedDishIds] = await Promise.all([
+  const [menu, ordering, triedDishIds, favoriteDishId, highlyReorderedDishIds, liked] = await Promise.all([
     menuPromise,
     orderingPromise,
     getTriedDishIds(profile.id, id),
     getFavoriteDishId(profile.id, id),
     highlyReorderedPromise,
+    getLikedDishes(profile.id),
   ]);
   if (!menu) notFound();
 
@@ -149,6 +151,7 @@ export default async function RestaurantPage({ params, searchParams }: PageProps
               closedNote={ordering.headline}
               favoriteDishId={favoriteDishId}
               highlyReorderedDishIds={highlyReorderedDishIds}
+              likedDishIds={liked.filter((d) => d.restaurantId === id).map((d) => d.id)}
               focusDishId={focusDishId}
             />
           </div>

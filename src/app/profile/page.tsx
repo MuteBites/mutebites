@@ -4,6 +4,7 @@ import { Bell, Lock, Mail, MapPin, Palette, SunMoon, Volume2 } from "lucide-reac
 import { PalettePicker } from "@/components/theme/palette-picker";
 import { IconTile } from "@/components/icon-tile";
 import { MemberCard } from "@/components/profile/member-card";
+import { LikedDishes } from "@/components/profile/liked-dishes";
 import { getUnlockedMilestones, MilestoneBadges } from "@/components/profile/milestone-badges";
 import { MilestoneUnlockWatcher } from "@/components/profile/milestone-unlock-watcher";
 import { NotificationToggle } from "@/components/notifications/notification-toggle";
@@ -14,6 +15,7 @@ import { ThemeIconToggle } from "@/components/theme/theme-icon-toggle";
 import { getOrderStats, hasActiveOrder } from "@/lib/data/orders";
 import { getMyWeeklyRank } from "@/lib/data/rank";
 import { getRestaurantCount } from "@/lib/data/restaurants";
+import { getLikedDishes } from "@/lib/data/favorites";
 import { getMilestoneRewardClaimedAt } from "@/lib/data/rewards";
 import { formatMonthYear } from "@/lib/date";
 import { NAV_TRANSITION, REVEAL_ENTER } from "@/lib/nav-transition";
@@ -39,12 +41,13 @@ export default async function ProfilePage() {
   const weeklyRankPromise = getMyWeeklyRank();
 
   const profile = await profilePromise;
-  const [orderInProgress, orderStats, totalRestaurants, weeklyRank, rewardClaimedAt] = await Promise.all([
+  const [orderInProgress, orderStats, totalRestaurants, weeklyRank, rewardClaimedAt, liked] = await Promise.all([
     hasActiveOrder(profile.id),
     getOrderStats(profile.id),
     totalRestaurantsPromise,
     weeklyRankPromise,
     getMilestoneRewardClaimedAt(profile.id),
+    getLikedDishes(profile.id),
   ]);
 
   // Mirrors the precedence in profile/actions.ts's updatePhone — that
@@ -83,6 +86,8 @@ export default async function ProfilePage() {
             totalRestaurants={totalRestaurants}
             rewardClaimedAt={rewardClaimedAt}
           />
+
+          <LikedDishes dishes={liked} />
 
           <h2 className="mt-8 font-heading text-title font-bold">Your details</h2>
           <p className="text-sm text-muted-foreground">Tap a field to edit it.</p>
