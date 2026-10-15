@@ -3,7 +3,7 @@
  * NEXT_PUBLIC_SITE_URL overrides the address (e.g. after moving to a
  * custom domain) without a code change.
  */
-export const SITE_URL = (process.env.NEXT_PUBLIC_SITE_URL ?? "https://mutebites.vercel.app").replace(/\/$/, "");
+export const SITE_URL = (process.env.NEXT_PUBLIC_SITE_URL ?? "https://mutebites.in").replace(/\/$/, "");
 
 export const SITE_NAME = "MuteBites";
 
