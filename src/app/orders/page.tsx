@@ -9,7 +9,8 @@ import { getOrderHistory, type OrderSummary } from "@/lib/data/orders";
 import { formatDayHeading, formatTime, istDayKey } from "@/lib/date";
 import { formatRupees } from "@/lib/format";
 import { NAV_TRANSITION, REVEAL_ENTER } from "@/lib/nav-transition";
-import { formatOrderNumber, isActiveStatus } from "@/lib/orders/status";
+import { formatOrderNumber, isActiveStatus, statusBadge } from "@/lib/orders/status";
+import { DeliveryRoad } from "@/components/orders/delivery-road";
 import { requireProfile } from "@/lib/profile";
 import { cn } from "@/lib/utils";
 
@@ -51,10 +52,14 @@ export default async function OrdersPage() {
 
           {inProgress.length > 0 && (
             <section aria-labelledby="in-progress" className="mt-6">
-              <h2 id="in-progress" className="text-label text-muted-foreground">
+              <h2 id="in-progress" className="flex items-center gap-2 text-label text-muted-foreground">
+                <span className="relative flex size-2" aria-hidden="true">
+                  <span className="animate-ping-slow absolute inset-0 rounded-full bg-primary" />
+                  <span className="relative size-2 rounded-full bg-primary" />
+                </span>
                 In progress
               </h2>
-              <ul className="mt-2 flex flex-col gap-3">
+              <ul className="mt-2.5 flex flex-col gap-3">
                 {inProgress.map((order) => (
                   <li key={order.id}>
                     <ActiveOrderCard order={order} />
@@ -72,7 +77,7 @@ export default async function OrdersPage() {
                   {day.orders.length} {day.orders.length === 1 ? "order" : "orders"}
                 </span>
               </h2>
-              <ul className="mt-2 divide-y rounded-3xl border bg-card shadow-card">
+              <ul className="mt-2 divide-y rounded-[1.5rem] border bg-card shadow-card">
                 {day.orders.map((order) => (
                   <PastOrderRow key={order.id} order={order} />
                 ))}
@@ -94,7 +99,7 @@ function EmptyOrders() {
       action={
         <Link
           href="/"
-          className="pressable flex h-14 items-center rounded-2xl bg-primary px-8 text-lg font-bold text-primary-foreground outline-none hover:bg-primary/90 focus-visible:ring-3 focus-visible:ring-ring/80"
+          className="pressable surface-primary glow-amber flex h-14 items-center rounded-full bg-primary px-8 text-lg font-bold text-primary-foreground outline-none hover:brightness-110 focus-visible:ring-3 focus-visible:ring-ring/80"
         >
           Order something
         </Link>
@@ -132,11 +137,12 @@ function OrderThumb({ order, className }: { order: OrderSummary; className?: str
 }
 
 function ActiveOrderCard({ order }: { order: OrderSummary }) {
+  const badge = statusBadge(order.status);
   return (
     <Link
       href={`/orders/${order.id}`}
       transitionTypes={["nav-forward"]}
-      className="pressable block rounded-3xl border border-primary/40 bg-card p-4 shadow-card outline-none focus-visible:ring-3 focus-visible:ring-ring/80"
+      className="pressable block rounded-[1.75rem] border bg-card p-4 shadow-raised outline-none focus-visible:ring-3 focus-visible:ring-ring/80"
     >
       <div className="flex gap-3.5">
         <OrderThumb order={order} className="size-16 rounded-2xl text-2xl" />
@@ -148,13 +154,25 @@ function ActiveOrderCard({ order }: { order: OrderSummary }) {
             </p>
           </div>
           <p className="truncate text-sm">{order.itemsSummary}</p>
-          <p className="mt-0.5 text-sm text-muted-foreground tabular-nums">
-            {formatDayHeading(order.createdAt)}, {formatTime(order.createdAt)} · Token{" "}
-            <span className="font-semibold text-foreground">{formatOrderNumber(order.dailyNumber)}</span>
+          <p className="mt-1 flex flex-wrap items-center gap-x-2 gap-y-1 text-sm text-muted-foreground tabular-nums">
+            <span className={`rounded-full px-2 py-0.5 text-xs font-semibold ${badge.className}`}>{badge.label}</span>
+            <span>
+              {formatDayHeading(order.createdAt)}, {formatTime(order.createdAt)} · Token{" "}
+              <span className="font-semibold text-foreground">{formatOrderNumber(order.dailyNumber)}</span>
+            </span>
           </p>
         </div>
       </div>
-      <span className="mt-3.5 flex h-11 items-center justify-center gap-1.5 rounded-2xl bg-primary text-sm font-bold text-primary-foreground">
+      <div className="mt-3">
+        <DeliveryRoad
+          status={order.status}
+          restaurantName={order.restaurantName}
+          createdAt={order.createdAt}
+          tone="card"
+          showMessage={false}
+        />
+      </div>
+      <span className="surface-primary mt-3 flex h-11 items-center justify-center gap-1.5 rounded-full bg-primary text-sm font-bold text-primary-foreground">
         Track order <ArrowRight className="size-4" aria-hidden="true" />
       </span>
     </Link>
@@ -181,13 +199,13 @@ function PastOrderRow({ order }: { order: OrderSummary }) {
           </div>
           <p className="truncate text-sm text-muted-foreground">{order.itemsSummary}</p>
           <p className="mt-0.5 text-xs text-muted-foreground tabular-nums">
-            <span className={cn("font-semibold", delivered ? "text-success" : "text-destructive")}>
-              {delivered ? "Delivered" : "Cancelled"}
+            <span className={cn("rounded-full px-2 py-0.5 font-semibold", statusBadge(order.status).className)}>
+              {statusBadge(order.status).label}
             </span>{" "}
             · {formatTime(order.createdAt)} · {formatOrderNumber(order.dailyNumber)}
           </p>
           {order.rateable && (
-            <span className="mt-1.5 inline-flex items-center gap-1 rounded-full bg-primary px-2.5 py-0.5 text-xs font-bold text-primary-foreground">
+            <span className="surface-primary mt-1.5 inline-flex items-center gap-1 rounded-full bg-primary px-2.5 py-0.5 text-xs font-bold text-primary-foreground shadow-[0_4px_12px_-4px_var(--glow-amber)]">
               <Star className="size-3 fill-current" aria-hidden="true" />
               Rate your order
             </span>

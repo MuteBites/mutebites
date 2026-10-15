@@ -75,6 +75,26 @@ Food delivery site for VIT-AP University students.
   → by 8:15 PM, later → "to be confirmed"; they mirror `slotEndTime()` —
   see `app_settings` under Database schema. Once delivered, the ticket page also carries the
   rating card (`RateOrder`, see `order_reviews`).
+  Redesign (15 Oct 2026): the stub is the lit plum hero, the token is
+  `text-6xl`, the gate line is a pill ("Collect at VIT-AP Main Gate · pay
+  on delivery"), the step list sits in a card, and while the order is live
+  a footer strip carries **`DeliveryRoad`**
+  (`src/components/orders/delivery-road.tsx`): the road from the kitchen
+  (chef's hat) to Main Gate (pin), timed by the order's **slot**, not
+  minutes — a jiggling `CookingPot` with steam (`animate-cook`,
+  `cook-steam`) at the kitchen with a kitchen line (`COOK_LINES`) while
+  it's made, then lucide's `Motorbike` (`animate-scooter`) riding for the
+  last `RIDE_MINUTES` (35) before `slotEndTime()` (never before 40% of the
+  way), reaching just short of the gate at slot end with ride lines; past
+  slot end the bubble apologises (`LATE_LINES`). An order after 7 PM (no
+  slot) gets a 60-minute run. Re-read every 15 s; lines change every 30 s.
+  Status keeps it honest: pending stays at the kitchen with no line, out
+  for delivery always shows the rider (from 50%), delivered → a tick at the
+  gate. Before the first tick (and on the server) it shows the pot, so
+  hydration matches. Positions are a `--p` custom property moved by CSS
+  transitions. The Orders list's in-progress card reuses it (`tone="card"`,
+  no message) with its status chip; past rows show the coloured
+  Delivered / Cancelled chip.
 - **Profile**: one plum `MemberCard` (`src/components/profile/member-card.tsx`)
   holds identity, the weekly-rank pill and the three stats (cravings
   solved, day streak, no-shows). Milestones are data-driven in

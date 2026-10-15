@@ -717,7 +717,13 @@ see it again.
 - **Ticket stub:** up to three dish photos on top, restaurant and time,
   **Live** dot while Realtime is connected, dashed tear line with notches,
   "Show this token" **#N**, delivery window ("Delivery by 1:30 PM" —
-  the time never wraps), "Collect at VIT-AP Main Gate".
+  the time never wraps), "Collect at VIT-AP Main Gate · pay on delivery".
+  Since the redesign (15 Oct 2026) it's the lit plum hero with a bigger
+  token, and while the order is live a **delivery road** strip at its foot:
+  a cooking pot at the kitchen while it's made, then a rider moving to Main
+  Gate over the last ~35 minutes of the slot, with short speech-bubble
+  lines (apologies once past the slot). The Orders list's in-progress card
+  shows the same road.
 - Timeline: Order placed → Pending confirmation / Restaurant confirmed →
   Preparing & out for delivery → Delivered; cancelled orders get a red
   state.

@@ -564,6 +564,25 @@
   }
   /* Bottom bar: the lit pill squashes as it lands on a tab, and the new
      tab's icon pops in with a little twist. */
+  /* The order road (DeliveryRoad): the rider bobs while it rides… */
+  .animate-scooter {
+    animation: scooter-bob 0.9s ease-in-out infinite alternate;
+  }
+  /* …the cooking pot simmers with a little hop now and then… */
+  .animate-cook {
+    animation: cook-jiggle 1.6s ease-in-out infinite;
+    transform-origin: 50% 90%;
+  }
+  /* …and its steam: each wisp rises and fades, a beat apart. */
+  .cook-steam {
+    animation: cook-steam 1.8s ease-out infinite;
+  }
+  .cook-steam:nth-child(2) {
+    animation-delay: -0.6s;
+  }
+  .cook-steam:nth-child(3) {
+    animation-delay: -1.2s;
+  }
   .animate-ring-spin {
     animation: ring-spin 5s linear infinite;
   }
@@ -731,6 +750,54 @@
   100% {
     transform: scale(1.9);
     opacity: 0;
+  }
+}
+
+@keyframes cook-steam {
+  0% {
+    opacity: 0;
+    translate: 0 4px;
+  }
+  30% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+    translate: 0 -7px;
+  }
+}
+
+@keyframes cook-jiggle {
+  0%,
+  100% {
+    transform: none;
+  }
+  10% {
+    transform: rotate(-6deg);
+  }
+  20% {
+    transform: rotate(5deg);
+  }
+  30% {
+    transform: rotate(-3deg);
+  }
+  40% {
+    transform: none;
+  }
+  70% {
+    transform: translateY(-2px) scale(1.04);
+  }
+  80% {
+    transform: none;
+  }
+}
+
+@keyframes scooter-bob {
+  from {
+    transform: translateY(1px) rotate(-3deg);
+  }
+  to {
+    transform: translateY(-2px) rotate(2deg);
   }
 }
 

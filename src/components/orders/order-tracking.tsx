@@ -17,6 +17,7 @@ import {
 import { BlurImage } from "@/components/blur-image";
 import { BrandLogo } from "@/components/brand-logo";
 import { CelebrationOverlay } from "@/components/celebration-overlay";
+import { DeliveryRoad } from "@/components/orders/delivery-road";
 import { NotifyMeCard } from "@/components/notifications/notify-me-card";
 import { RateOrder } from "@/components/orders/rate-order";
 import { SupportButtons } from "@/components/support-buttons";
@@ -151,7 +152,7 @@ export function OrderTracking({
               href="/orders"
               aria-label="Back to your orders"
               transitionTypes={["nav-back"]}
-              className="flex size-11 items-center justify-center rounded-full bg-secondary outline-none hover:bg-border focus-visible:ring-3 focus-visible:ring-ring/80"
+              className="flex size-11 items-center justify-center rounded-full border bg-card shadow-card outline-none hover:border-ring/50 focus-visible:ring-3 focus-visible:ring-ring/80"
             >
               <ArrowLeft className="size-5" />
             </Link>
@@ -160,9 +161,11 @@ export function OrderTracking({
           <h1 className="sr-only">
             Order {formatOrderNumber(initialOrder.dailyNumber)} from {initialOrder.restaurantName}
           </h1>
-          {/* The token as a ticket stub: what you ordered (photos) above
-              the tear line, what you show at the gate below it. */}
-          <div className="surface-hero glow-hero relative overflow-hidden rounded-3xl bg-hero text-hero-foreground">
+          {/* The token as a lit plum ticket stub: what you ordered (photos)
+              above the tear line, what you show at the gate below it, and —
+              while the order is live — the road from the kitchen to Main
+              Gate at its foot (DeliveryRoad, moved live by Realtime). */}
+          <div className="surface-hero glow-hero relative overflow-hidden rounded-[1.75rem] bg-hero text-hero-foreground">
             {photos.length > 0 && (
               <div
                 className={cn("grid h-36 gap-1 p-2 pb-0", cancelled && "opacity-60 grayscale")}
@@ -208,7 +211,7 @@ export function OrderTracking({
                 <div className="min-w-0">
                   <p className="text-label text-hero-accent">{cancelled ? "Order token" : "Show this token"}</p>
                   <div className="mt-1 flex items-center gap-2">
-                    <p className={cn("font-heading text-5xl leading-none font-bold", cancelled && "line-through opacity-60")}>
+                    <p className={cn("font-heading text-6xl leading-none font-bold tracking-tight", cancelled && "line-through opacity-60")}>
                       {formatOrderNumber(initialOrder.dailyNumber)}
                     </p>
                     <button
@@ -228,11 +231,19 @@ export function OrderTracking({
                   </p>
                 )}
               </div>
-              <p className="mt-5 flex items-center gap-2 rounded-xl bg-hero-foreground/10 px-4 py-2.5 text-sm">
+              <p className="mt-5 flex items-center gap-2 rounded-full bg-hero-foreground/10 px-4 py-2.5 text-sm">
                 <MapPin className="size-4 shrink-0 text-hero-accent" aria-hidden="true" />
-                Collect at VIT-AP Main Gate
+                <span>
+                  Collect at <strong className="font-semibold">VIT-AP Main Gate</strong> · pay on delivery
+                </span>
               </p>
             </div>
+
+            {!cancelled && status !== "delivered" && (
+              <div className="border-t border-hero-foreground/15 bg-hero-foreground/5 px-6 pt-4 pb-5">
+                <DeliveryRoad status={status} restaurantName={initialOrder.restaurantName} createdAt={initialOrder.createdAt} />
+              </div>
+            )}
           </div>
 
           {/* Still on its way: offer notifications instead of watching this page. */}
@@ -247,7 +258,7 @@ export function OrderTracking({
               </p>
             </div>
           ) : (
-            <ol className="mt-6 flex flex-col">
+            <ol className="mt-6 flex flex-col rounded-[1.5rem] border bg-card px-5 pt-5 pb-0 shadow-card">
               {steps.map((step, i) => (
                 <li key={step.label} className="flex gap-4">
                   <div className="flex flex-col items-center">
@@ -292,7 +303,7 @@ export function OrderTracking({
             />
           )}
 
-          <div className="mt-4 rounded-2xl border bg-card shadow-card p-5">
+          <div className="mt-4 rounded-[1.5rem] border bg-card p-5 shadow-card">
             <p className="text-label text-muted-foreground">Your order</p>
             <ul className="mt-2 divide-y">
               {initialOrder.items.map((item) => {
@@ -324,11 +335,11 @@ export function OrderTracking({
             )}
             <div className="mt-3 flex items-center justify-between border-t pt-3">
               <p className="font-semibold">To pay at pickup</p>
-              <p className="font-heading text-xl font-bold tabular-nums">{formatRupees(initialOrder.totalAmount)}</p>
+              <p className="font-heading text-xl font-bold text-primary tabular-nums">{formatRupees(initialOrder.totalAmount)}</p>
             </div>
           </div>
 
-          <div className="mt-4 flex items-center justify-between rounded-2xl border bg-card shadow-card px-5 py-4">
+          <div className="mt-4 flex items-center justify-between rounded-[1.5rem] border bg-card px-5 py-4 shadow-card">
             <div>
               <p className="text-sm text-muted-foreground">Something wrong?</p>
               <p className="font-semibold">Contact MuteBites</p>
@@ -355,7 +366,7 @@ function StepDot({ state, Icon }: { state: TimelineStepState; Icon: LucideIcon }
     return (
       <span className="relative flex size-9 shrink-0 items-center justify-center" aria-hidden="true">
         <span className="animate-ping-slow absolute inset-0 rounded-full bg-primary/50" />
-        <span className="relative flex size-9 items-center justify-center rounded-full bg-primary text-primary-foreground">
+        <span className="surface-primary glow-amber relative flex size-9 items-center justify-center rounded-full bg-primary text-primary-foreground">
           <Icon className="size-4" />
         </span>
       </span>
