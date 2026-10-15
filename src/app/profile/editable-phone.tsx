@@ -1,7 +1,8 @@
 "use client";
 
 import { useActionState, useState } from "react";
-import { Loader2 } from "lucide-react";
+import { Loader2, Phone } from "lucide-react";
+import { IconTile } from "@/components/icon-tile";
 import { formatLocalMobile, formatStoredMobile, normalizeIndianMobile } from "@/lib/phone";
 import { toast } from "@/lib/toast/store";
 import { cn } from "@/lib/utils";
@@ -41,8 +42,11 @@ export function EditablePhone({
 
   if (!editing) {
     return (
-      <div className="flex items-center justify-between gap-3 px-5 py-4">
-        <div className="min-w-0">
+      <div className="flex items-center gap-3 px-5 py-4">
+        <IconTile>
+          <Phone className="size-5" aria-hidden="true" />
+        </IconTile>
+        <div className="min-w-0 flex-1">
           <p className={eyebrow}>Mobile number</p>
           <p className="mt-0.5 font-semibold tabular-nums">{formatStoredMobile(value)}</p>
           {lockedReason && (
@@ -58,7 +62,7 @@ export function EditablePhone({
               setDraft(formatLocalMobile(value.replace(/^\+91/, "")));
               setEditing(true);
             }}
-            className="shrink-0 rounded-md font-semibold text-primary outline-none hover:underline focus-visible:ring-2 focus-visible:ring-ring/80"
+            className="shrink-0 rounded-full bg-brand-soft px-3.5 py-1.5 text-sm font-semibold text-brand-soft-foreground outline-none hover:brightness-95 focus-visible:ring-2 focus-visible:ring-ring/80"
           >
             Edit
           </button>
@@ -95,7 +99,7 @@ export function EditablePhone({
         <button
           type="submit"
           disabled={pending}
-          className="flex h-11 items-center gap-1.5 rounded-xl bg-primary px-4 font-semibold text-primary-foreground outline-none hover:bg-primary/90 focus-visible:ring-3 focus-visible:ring-ring/80 disabled:opacity-70"
+          className="surface-primary flex h-11 items-center gap-1.5 rounded-full bg-primary px-5 font-semibold text-primary-foreground outline-none hover:brightness-110 focus-visible:ring-3 focus-visible:ring-ring/80 disabled:opacity-70"
         >
           {pending && <Loader2 className="size-4 animate-spin" />}
           Save

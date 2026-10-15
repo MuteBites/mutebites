@@ -741,16 +741,22 @@ a photo, dishes, Delivered/Cancelled, time and token, a small Reorder
 button, and an amber "Rate your order" pill on rateable orders.
 
 ### Profile (`/profile`)
-- **Plum member card:** initials, name, "Member since", weekly-rank pill
+- **Plum member card** ("campus pass" since the 15 Oct 2026 redesign:
+  initials inside a turning plum/rose/amber ring, lit stat tiles):
+  initials, name, "Member since", weekly-rank pill
   (Top orderer ≤10% / Frequent ≤25% / Active ≤50%, only with ≥5 students
   that week), three stats: cravings solved (delivered), day streak,
   no-shows (cancelled).
 - **Milestones:** six tiles in a 3×2 grid with "N of 6" and "Next up",
-  locked tiles show a progress ring, a lock and "N to go"; new unlocks
-  play the celebration overlay once per device.
-- **Free-biryani card:** "A free biryani is waiting … N to go" → "You've
-  earned a free biryani! Message us to claim it" (WhatsApp with a typed
-  message) → "Free biryani claimed, handed over on 21 Sep".
+  locked tiles show a plum → amber progress ring, a lock and "N to go";
+  unlocked ones glow with a light band sweeping across; new unlocks play
+  the celebration overlay once per device. Campus Explorer needs every
+  restaurant on the platform (all rows, not just the ones switched on —
+  fixed 15 Oct 2026, it showed "-5 more" and re-locked at night).
+- **Free-biryani card:** "A free biryani is waiting … N to go" with a
+  progress bar → "You've earned a free biryani!" with a lit "Claim it on
+  WhatsApp" pill (a typed message) → "Free biryani claimed, handed over
+  on 21 Sep".
 - **Your details:** name (editable), phone (editable unless an order is
   open or the account is banned, with the reason shown), email (locked),
   handover point.

@@ -97,7 +97,21 @@ Food delivery site for VIT-AP University students.
   Delivered / Cancelled chip.
 - **Profile**: one plum `MemberCard` (`src/components/profile/member-card.tsx`)
   holds identity, the weekly-rank pill and the three stats (cravings
-  solved, day streak, no-shows). Milestones are data-driven in
+  solved, day streak, no-shows). Since the redesign (15 Oct 2026) it's the
+  "campus pass": the lit plum hero, the initials in a plum circle inside a
+  turning `food-ring`, stats as lit tiles (`bg-hero-foreground/10
+  rim-light`, full-strength labels). Milestone tiles: unlocked = a lit plum
+  circle with an amber icon and `animate-shine` (a light band sweeping
+  across now and then); locked = a plum → rose → amber progress ring (SVG
+  `linearGradient`, one id per tile, `ring-<key>`). `MilestoneReward`: a
+  blush card with a plum → amber "N to go" bar until everything's
+  unlocked, then the lit hero with a "Claim it on WhatsApp" pill (until
+  an admin marks it claimed). Details and settings rows lead with
+  `IconTile`; Edit buttons are blush pills, Save is the lit amber pill;
+  switches glow amber when on. **Campus Explorer counts every restaurant
+  row** (`getRestaurantCount()`), not just `is_active` ones — Closed turns
+  them all off nightly, which made the target 0 ("-5 more restaurants",
+  and the badge re-locked overnight) until 15 Oct 2026. Milestones are data-driven in
   `MILESTONES` (`milestone-badges.tsx`) — six tiers, all computed from
   counts that only go up (delivered orders, distinct restaurants), so a
   badge never re-locks; locked tiles show a progress ring and "N to go".

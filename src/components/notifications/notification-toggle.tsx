@@ -55,12 +55,12 @@ export function NotificationToggle() {
       onClick={toggle}
       className={cn(
         "relative inline-flex h-8 w-14 shrink-0 items-center rounded-full outline-none transition-colors focus-visible:ring-2 focus-visible:ring-ring/80 disabled:opacity-60",
-        on ? "bg-primary" : "bg-secondary",
+        on ? "surface-primary glow-amber bg-primary" : "bg-secondary",
       )}
     >
       <span
         className={cn(
-          "flex size-6 items-center justify-center rounded-full bg-white text-ink shadow transition-transform",
+          "flex size-6 items-center justify-center rounded-full bg-white text-plum-500 shadow transition-transform",
           on ? "translate-x-7" : "translate-x-1",
         )}
       >

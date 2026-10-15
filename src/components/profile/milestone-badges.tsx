@@ -135,7 +135,7 @@ export function MilestoneBadges({
       {next && (
         <p className="mt-0.5 text-sm text-muted-foreground">
           Next up: <span className="font-semibold text-foreground">{next.label}</span> —{" "}
-          {next.remaining(next.target - next.current).toLowerCase()}
+          {next.remaining(Math.max(0, next.target - next.current)).toLowerCase()}
         </p>
       )}
       <ul className="mt-3 grid grid-cols-3 gap-2.5">
@@ -146,14 +146,16 @@ export function MilestoneBadges({
               label={t.label}
               unlocked={t.unlocked}
               progress={t.target > 0 ? t.current / t.target : 0}
-              caption={t.unlocked ? "Unlocked" : t.remaining(t.target - t.current)}
+              caption={t.unlocked ? "Unlocked" : t.remaining(Math.max(0, t.target - t.current))}
+              ringId={`ring-${t.key}`}
             />
           </li>
         ))}
       </ul>
       <MilestoneReward
         done={unlockedCount === tiles.length}
-        left={tiles.length - unlockedCount}
+        unlocked={unlockedCount}
+        total={tiles.length}
         claimedAt={rewardClaimedAt}
       />
     </section>
@@ -164,13 +166,37 @@ export function MilestoneBadges({
  * The client's completion offer: every milestone unlocked earns one free
  * biryani of the student's choice. The student messages support to claim
  * it; an admin marks it handed over on /admin/users (milestone_rewards),
- * after which this card says so instead of offering the claim link.
+ * after which this card says so instead of offering the claim link. Until
+ * then it's a blush card with a plum → amber "N to go" bar; once earned it
+ * becomes the lit plum hero with a "Claim it on WhatsApp" pill.
  */
-function MilestoneReward({ done, left, claimedAt }: { done: boolean; left: number; claimedAt: string | null }) {
+function MilestoneReward({
+  done,
+  unlocked,
+  total,
+  claimedAt,
+}: {
+  done: boolean;
+  unlocked: number;
+  total: number;
+  claimedAt: string | null;
+}) {
   const claimText = encodeURIComponent("Hi MuteBites! I've unlocked all the milestones — I'd like to claim my free biryani.");
+  const left = total - unlocked;
+  const lit = done && !claimedAt;
   return (
-    <div className="mt-3 flex items-start gap-3 rounded-2xl bg-brand-soft px-4 py-3.5 text-brand-soft-foreground">
-      <span className="mt-0.5 flex size-9 shrink-0 items-center justify-center rounded-full bg-card">
+    <div
+      className={cn(
+        "mt-3 flex items-start gap-3 rounded-[1.5rem] px-4 py-3.5",
+        lit ? "surface-hero glow-hero bg-hero text-hero-foreground" : "bg-brand-soft text-brand-soft-foreground",
+      )}
+    >
+      <span
+        className={cn(
+          "mt-0.5 flex size-9 shrink-0 items-center justify-center rounded-full",
+          lit ? "bg-hero-foreground/10 text-hero-accent" : "bg-card text-primary",
+        )}
+      >
         <Gift className="size-4.5" aria-hidden="true" />
       </span>
       <div className="min-w-0 text-sm">
@@ -184,17 +210,15 @@ function MilestoneReward({ done, left, claimedAt }: { done: boolean; left: numbe
         ) : done ? (
           <>
             <p className="font-semibold">You&apos;ve earned a free biryani!</p>
-            <p className="mt-0.5">
-              Every milestone done — pick any biryani you like, on us.{" "}
-              <a
-                href={`https://wa.me/${SUPPORT_PHONE.replace("+", "")}?text=${claimText}`}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="font-semibold underline underline-offset-2"
-              >
-                Message us to claim it
-              </a>
-            </p>
+            <p className="mt-0.5">Every milestone done — pick any biryani you like, on us.</p>
+            <a
+              href={`https://wa.me/${SUPPORT_PHONE.replace("+", "")}?text=${claimText}`}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="surface-primary glow-amber mt-3 inline-flex h-10 items-center rounded-full bg-primary px-4 font-semibold text-primary-foreground outline-none hover:brightness-110 focus-visible:ring-3 focus-visible:ring-hero-foreground/80"
+            >
+              Claim it on WhatsApp
+            </a>
           </>
         ) : (
           <>
@@ -205,6 +229,19 @@ function MilestoneReward({ done, left, claimedAt }: { done: boolean; left: numbe
                 {left} to go.
               </span>
             </p>
+            <div
+              role="progressbar"
+              aria-valuenow={unlocked}
+              aria-valuemin={0}
+              aria-valuemax={total}
+              aria-label="Milestones toward the free biryani"
+              className="mt-2.5 h-2 w-full overflow-hidden rounded-full bg-card"
+            >
+              <div
+                className="progress-fill h-full w-(--fill) rounded-full bg-[linear-gradient(90deg,var(--hero-a),#914955,var(--amber))]"
+                style={{ "--fill": `${Math.round((unlocked / total) * 100)}%` } as CSSProperties}
+              />
+            </div>
           </>
         )}
       </div>
@@ -224,6 +261,7 @@ function BadgeTile({
   unlocked,
   progress,
   caption,
+  ringId,
 }: {
   Icon: LucideIcon;
   label: string;
@@ -231,6 +269,8 @@ function BadgeTile({
   /** 0–1 fraction toward this milestone, drawn as a ring around a locked icon. */
   progress: number;
   caption: string;
+  /** A unique id for the locked ring's gradient (one SVG gradient per tile). */
+  ringId: string;
 }) {
   const dashOffset = RING_CIRCUMFERENCE * (1 - Math.max(0, Math.min(1, progress)));
 
@@ -238,12 +278,19 @@ function BadgeTile({
     <div
       className={cn(
         "flex h-full flex-col items-center rounded-2xl px-1.5 pt-3.5 pb-3 text-center",
-        unlocked ? "border bg-card shadow-card" : "border border-dashed bg-transparent",
+        unlocked ? "rim-light border bg-card shadow-card" : "border border-dashed bg-transparent",
       )}
     >
       <span className="relative flex size-12 shrink-0 items-center justify-center">
         {!unlocked && (
           <svg viewBox={`0 0 ${RING_SIZE} ${RING_SIZE}`} className="absolute inset-0 -rotate-90" aria-hidden="true">
+            <defs>
+              <linearGradient id={ringId} x1="0" y1="0" x2="1" y2="1">
+                <stop offset="0%" stopColor="#552c4a" />
+                <stop offset="55%" stopColor="#914955" />
+                <stop offset="100%" stopColor="#c07a35" />
+              </linearGradient>
+            </defs>
             <circle
               cx={RING_SIZE / 2}
               cy={RING_SIZE / 2}
@@ -261,7 +308,8 @@ function BadgeTile({
               strokeLinecap="round"
               strokeDasharray={RING_CIRCUMFERENCE}
               strokeDashoffset={dashOffset}
-              className="ring-fill stroke-rose"
+              stroke={`url(#${ringId})`}
+              className="ring-fill"
               style={{ "--ring-empty": RING_CIRCUMFERENCE } as CSSProperties}
             />
           </svg>
@@ -269,7 +317,9 @@ function BadgeTile({
         <span
           className={cn(
             "relative flex items-center justify-center rounded-full",
-            unlocked ? "size-12 bg-primary text-primary-foreground" : "size-9 bg-secondary text-muted-foreground",
+            unlocked
+              ? "surface-hero glow-hero animate-shine size-12 overflow-hidden bg-hero text-hero-accent"
+              : "size-9 bg-secondary text-muted-foreground",
           )}
         >
           <Icon className={unlocked ? "size-5.5" : "size-4.5"} aria-hidden="true" />

@@ -89,18 +89,19 @@ export async function getRestaurantMenuStats(): Promise<Record<string, Restauran
 }
 
 /**
- * Number of currently-active restaurants — the "all 3" in the profile's
- * Campus Explorer badge. Deliberately excludes deactivated restaurants:
- * counting them would make the badge permanently unreachable for every
- * student the moment any one restaurant is ever retired, since
- * `place_order()` only allows ordering from `is_active` restaurants.
+ * Number of restaurants on the platform — the "all of them" in the
+ * profile's Campus Explorer badge (and the admin's "Free biryani earned"
+ * check, via getUnlockedMilestones). Counts every row, NOT just `is_active`:
+ * campus ordering Closed switches every restaurant off (every night), and
+ * counting only active ones made the target 0 — the badge showed "-5 more
+ * restaurants" and re-locked overnight (fixed 15 Oct 2026). A restaurant
+ * that's retired for good should be deleted, not just switched off.
  */
 export async function getRestaurantCount(): Promise<number> {
   const supabase = await createClient();
   const { count, error } = await supabase
     .from("restaurants")
-    .select("id", { count: "exact", head: true })
-    .eq("is_active", true);
+    .select("id", { count: "exact", head: true });
 
   if (error) throw error;
   return count ?? 0;

@@ -583,6 +583,20 @@
   .cook-steam:nth-child(3) {
     animation-delay: -1.2s;
   }
+  /* Unlocked milestone badges: a band of light sweeps across now and then,
+     like a medal catching the light. The element needs overflow: hidden. */
+  .animate-shine {
+    position: relative;
+  }
+  .animate-shine::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(115deg, transparent 30%, rgb(255 255 255 / 45%) 50%, transparent 70%);
+    translate: -110% 0;
+    animation: shine-sweep 5.5s var(--ease-out-expo) 1s infinite;
+    pointer-events: none;
+  }
   .animate-ring-spin {
     animation: ring-spin 5s linear infinite;
   }
@@ -798,6 +812,16 @@
   }
   to {
     transform: translateY(-2px) rotate(2deg);
+  }
+}
+
+@keyframes shine-sweep {
+  0%,
+  70% {
+    translate: -110% 0;
+  }
+  100% {
+    translate: 110% 0;
   }
 }
 
