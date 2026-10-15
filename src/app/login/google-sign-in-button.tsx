@@ -29,12 +29,18 @@ export function GoogleSignInButton() {
 
   return (
     <div className="flex w-full flex-col gap-3">
+      {/* Google's own light button (their branding guidance): white, the grey
+          #747775 outline, #1F1F1F text — fixed colours in both themes, with a
+          warm glow under it so it still reads as the page's action. "ghost",
+          not the default variant: the default's lit amber gradient is a
+          background-image that bg-white can't override. */}
       <Button
+        variant="ghost"
         onClick={signIn}
         disabled={pending}
-        className="surface-ink shadow-elevated-glow h-14 w-full gap-3 rounded-2xl bg-ink text-base font-semibold text-ink-foreground hover:brightness-95"
+        className="glow-amber h-14 w-full gap-3 rounded-full border border-[#747775] bg-white text-base font-semibold text-[#1f1f1f] hover:bg-[#f8f8f8] hover:text-[#1f1f1f] dark:hover:bg-[#f8f8f8]"
       >
-        <span className="flex size-8 items-center justify-center rounded-full bg-white">
+        <span className="flex size-8 items-center justify-center rounded-full">
           {pending ? (
             <Loader2 className="size-4 animate-spin text-plum-700" />
           ) : (

@@ -467,6 +467,15 @@ silently re-enables the button.
   The login screen's photo mosaic (`src/app/login/page.tsx`, `MOSAIC`)
   also references a dozen of these files by path directly — renaming or
   removing a photo means updating that list too, or its tile goes blank.
+  Since the redesign (15 Oct 2026) a solid `bg-card` sheet rises over the
+  mosaic with the logo tile on its top edge, the headline, two blush chips
+  (free delivery to Main Gate, pay on delivery — cash or UPI) and Google's
+  own white "Continue with Google" button (fixed `#747775` outline and
+  `#1F1F1F` text in both themes, `variant="ghost"` — the default variant's
+  amber gradient is a background-image `bg-white` can't override). The h1
+  only settles (`animate-settle`, a 10 px rise) — never fades in from
+  opacity 0, which would hide it from Largest Contentful Paint. `/welcome`
+  leads with the lit plum hero as one header card.
   Home's restaurant cards slide through photos (`RestaurantPhotoSlides`,
   `src/components/home/restaurant-photo-slides.tsx`): the cover first,
   then up to five available dishes with a "veg mark · name · price" chip

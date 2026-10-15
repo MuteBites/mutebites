@@ -39,7 +39,9 @@ export function AppSplash() {
                 <div className="sp-fill" data-sp="bob">
                   <Layer name="trails" hook="trails" />
 
-                  <div className="sp-fill sp-rig" data-sp="rig">
+                  {/* The splash script makes the rig visible before React hydrates
+                      (engine.ts) — expected, so the style difference isn't a mismatch. */}
+                  <div className="sp-fill sp-rig" data-sp="rig" suppressHydrationWarning>
                     <Leg name="back" rig={LEGS.back} />
                     <Leg name="front" rig={LEGS.front} />
                   </div>

@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import Image from "next/image";
 import Link from "next/link";
+import { Banknote, MapPin } from "lucide-react";
 import { BrandLogo } from "@/components/brand-logo";
 import { SITE_DESCRIPTION, SITE_NAME, SITE_TITLE, SITE_URL } from "@/lib/site";
 import { GoogleSignInButton } from "./google-sign-in-button";
@@ -90,20 +91,22 @@ export default async function LoginPage({ searchParams }: PageProps<"/login">) {
             </div>
           ))}
         </div>
-        <div className="absolute inset-0 bg-linear-to-b from-transparent via-background/30 to-background" />
+        <div className="absolute inset-0 bg-linear-to-b from-transparent via-transparent to-hero/25" />
       </div>
 
-      <div className="relative -mt-24 flex flex-col px-6 pb-[max(2rem,env(safe-area-inset-bottom))]">
+      {/* A solid sheet rising over the food, with the logo tile sitting on
+          its top edge. The headline only settles (a small rise) — never
+          fades from invisible: an element first painted at opacity 0 isn't
+          counted as Largest Contentful Paint, and Lighthouse then finds no
+          LCP on this page at all (a College Bites lesson). */}
+      <div className="relative -mt-8 flex flex-col rounded-t-[2rem] bg-card px-6 pt-0 pb-[max(2rem,env(safe-area-inset-bottom))] shadow-[0_-14px_34px_-18px_var(--glow-hero)]">
         <BrandLogo
           preload
           splashTarget
-          className="animate-pop-in size-20 rounded-3xl shadow-raised ring-4 ring-background"
+          className="animate-pop-in -mt-10 size-20 rounded-3xl shadow-raised ring-4 ring-card"
         />
 
-        <h1
-          className="animate-slide-up-in mt-6 font-heading text-display font-bold"
-          style={{ animationDelay: "90ms" }}
-        >
+        <h1 className="animate-settle mt-5 font-heading text-display font-bold">
           Good food.
           <br />
           Campus mood.
@@ -115,9 +118,22 @@ export default async function LoginPage({ searchParams }: PageProps<"/login">) {
           Biryani, Chinese, fresh juice and fruit from campus kitchens — handed over at VIT-AP
           Main Gate. Pay when you collect.
         </p>
+        <ul
+          className="animate-slide-up-in mt-4 flex flex-wrap gap-1.5 text-xs font-semibold"
+          style={{ animationDelay: "150ms" }}
+        >
+          <li className="inline-flex items-center gap-1 rounded-full bg-brand-soft px-2.5 py-1 text-brand-soft-foreground">
+            <MapPin className="size-3.5 shrink-0" aria-hidden="true" />
+            Free delivery to Main Gate
+          </li>
+          <li className="inline-flex items-center gap-1 rounded-full bg-brand-soft px-2.5 py-1 text-brand-soft-foreground">
+            <Banknote className="size-3.5 shrink-0" aria-hidden="true" />
+            Pay on delivery — cash or UPI
+          </li>
+        </ul>
 
         <div
-          className="animate-slide-up-in mt-8 w-full"
+          className="animate-slide-up-in mt-7 w-full"
           style={{ animationDelay: "170ms" }}
         >
           {error && (

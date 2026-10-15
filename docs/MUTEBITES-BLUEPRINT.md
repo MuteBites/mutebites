@@ -633,7 +633,11 @@ Tilted 3-column mosaic of real dish photos fading into the page, logo tile
 (the splash lands here), "Good food. Campus mood.", a one-line pitch,
 "Continue with Google" (always shows Google's account picker), a sign-in
 error line, Terms and Privacy links. Carries the full search title,
-canonical link and business details for Google.
+canonical link and business details for Google. Redesign (15 Oct 2026): a
+solid sheet rising over the mosaic, chips for free delivery and pay on
+delivery, and Google's own white button; the headline is visible from the
+first frame (an invisible-then-fade-in headline isn't counted as Largest
+Contentful Paint).
 
 ### First-login (`/welcome`)
 Full name (pre-filled from Google) and phone, with "Make sure this is your

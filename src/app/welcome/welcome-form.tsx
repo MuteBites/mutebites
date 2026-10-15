@@ -1,7 +1,8 @@
 "use client";
 
 import { useActionState, useState } from "react";
-import { Loader2 } from "lucide-react";
+import { Loader2, MapPin } from "lucide-react";
+import { BrandLogo } from "@/components/brand-logo";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -31,13 +32,15 @@ export function WelcomeForm({ defaultName }: { defaultName: string }) {
 
   return (
     <form action={formAction} className="flex flex-1 flex-col" noValidate>
-      <div className="flex-1 px-6 pt-10 pb-8">
-        <h1 className="font-heading text-display font-bold">
-          Almost there
-        </h1>
-        <p className="mt-2 text-lg leading-relaxed text-muted-foreground">
-          We only ask once. Shown once, then you go straight to the food.
-        </p>
+      <div className="flex-1 px-6 pt-6 pb-8">
+        {/* The lit plum hero, as one header card. */}
+        <header className="animate-slide-up-in surface-hero glow-hero relative overflow-hidden rounded-[2rem] bg-hero p-5 text-hero-foreground">
+          <BrandLogo className="relative size-14 rounded-2xl shadow-raised ring-2 ring-hero-foreground/15" />
+          <h1 className="relative mt-4 font-heading text-display font-bold">Almost there</h1>
+          <p className="relative mt-1.5 text-lg leading-snug text-hero-foreground/85">
+            We only ask once, then you go straight to the food.
+          </p>
+        </header>
 
         <div className="mt-8 flex flex-col gap-2.5">
           <Label htmlFor="fullName" className={eyebrow}>
@@ -96,10 +99,12 @@ export function WelcomeForm({ defaultName }: { defaultName: string }) {
           </p>
         </div>
 
-        <p className="mt-8 rounded-2xl bg-secondary px-5 py-4 leading-relaxed text-muted-foreground">
-          All orders are handed over at{" "}
-          <strong className="font-semibold text-foreground">VIT-AP Main Gate</strong>, never
-          at your room. Payment is cash on delivery.
+        <p className="mt-8 flex gap-3 rounded-2xl border border-brand-soft-foreground/15 bg-brand-soft px-5 py-4 leading-relaxed text-brand-soft-foreground">
+          <MapPin className="mt-0.5 size-5 shrink-0" aria-hidden="true" />
+          <span>
+            All orders are handed over at <strong className="font-semibold">VIT-AP Main Gate</strong>,
+            never at your room. Pay on delivery — cash or UPI.
+          </span>
         </p>
       </div>
 
@@ -107,7 +112,7 @@ export function WelcomeForm({ defaultName }: { defaultName: string }) {
         <Button
           type="submit"
           disabled={pending}
-          className="h-14 w-full rounded-2xl text-lg font-semibold"
+          className="glow-amber h-14 w-full rounded-full text-lg font-semibold"
         >
           {pending && <Loader2 className="size-5 animate-spin" />}
           {pending ? "Saving…" : "Save & start ordering"}
