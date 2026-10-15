@@ -27,6 +27,25 @@ export default function TermsPage() {
         <p>MuteBites reserves the right to restrict access for repeated no-shows or misuse.</p>
       </div>
 
+      {/* Where a restaurant sent no photos, some covers and a few dishes
+          (most of Waffle Pops') are free stock. Neither licence asks for
+          credit; this is a courtesy. The photographers weren't recorded when
+          the photos were added — a photo under a licence that does need
+          credit (CC BY and the like) must be named here. */}
+      <h2 className="mt-10 font-heading text-title font-bold">Photo credits</h2>
+      <p className="mt-3 leading-relaxed text-muted-foreground">
+        Where a partner restaurant had no photos of its own, a few cover and dish photos are free
+        stock photos from{" "}
+        <a href="https://unsplash.com/license" target="_blank" rel="noopener noreferrer" className="font-semibold text-primary outline-none hover:underline focus-visible:ring-2 focus-visible:ring-ring/80">
+          Unsplash
+        </a>{" "}
+        and{" "}
+        <a href="https://www.pexels.com/license/" target="_blank" rel="noopener noreferrer" className="font-semibold text-primary outline-none hover:underline focus-visible:ring-2 focus-visible:ring-ring/80">
+          Pexels
+        </a>
+        , used under their free licences.
+      </p>
+
       <Link
         href="/"
         className="mt-10 inline-block font-semibold text-primary outline-none hover:underline focus-visible:ring-2 focus-visible:ring-ring/80"

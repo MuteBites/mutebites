@@ -139,8 +139,9 @@ export function MilestoneBadges({
         </p>
       )}
       <ul className="mt-3 grid grid-cols-3 gap-2.5">
-        {tiles.map((t) => (
-          <li key={t.key}>
+        {/* The tiles rise in one after another. */}
+        {tiles.map((t, i) => (
+          <li key={t.key} className="animate-slide-up-in" style={{ animationDelay: `${i * 50}ms` }}>
             <BadgeTile
               Icon={t.Icon}
               label={t.label}

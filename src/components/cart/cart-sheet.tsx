@@ -200,7 +200,10 @@ function CartContents({
             </div>
             <div className="flex items-baseline justify-between border-t border-dashed pt-2.5">
               <dt className="font-semibold">To pay at pickup</dt>
-              <dd className="font-heading text-2xl font-bold text-primary tabular-nums">{formatRupees(amount)}</dd>
+              {/* Keyed on the amount, so it gives a little bounce whenever it changes. */}
+              <dd key={amount} className="animate-bounce-count font-heading text-2xl font-bold text-primary tabular-nums">
+                {formatRupees(amount)}
+              </dd>
             </div>
           </dl>
           <ul className="mt-3 space-y-1.5 border-t pt-3 text-sm text-muted-foreground">

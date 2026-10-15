@@ -146,11 +146,13 @@ Food delivery site for VIT-AP University students.
   slot) gets a 60-minute run. Re-read every 15 s; lines change every 30 s.
   Status keeps it honest: pending stays at the kitchen with no line, out
   for delivery always shows the rider (from 50%), delivered → a tick at the
-  gate. Before the first tick (and on the server) it shows the pot, so
+  gate (the road stays on the ticket after delivery, "At the gate. Enjoy!";
+  only a cancelled order drops it). Before the first tick (and on the server) it shows the pot, so
   hydration matches. Positions are a `--p` custom property moved by CSS
   transitions. The Orders list's in-progress card reuses it (`tone="card"`,
   no message) with its status chip; past rows show the coloured
-  Delivered / Cancelled chip.
+  Delivered / Cancelled chip. In the step list, done stretches of the
+  connector are solid green and the ones still to come are dashed.
 - **Profile**: one plum `MemberCard` (`src/components/profile/member-card.tsx`)
   holds identity, the weekly-rank pill and the three stats (cravings
   solved, day streak, no-shows). Since the redesign (15 Oct 2026) it's the
@@ -159,7 +161,8 @@ Food delivery site for VIT-AP University students.
   rim-light`, full-strength labels). Milestone tiles: unlocked = a lit plum
   circle with an amber icon and `animate-shine` (a light band sweeping
   across now and then); locked = a plum → rose → amber progress ring (SVG
-  `linearGradient`, one id per tile, `ring-<key>`). `MilestoneReward`: a
+  `linearGradient`, one id per tile, `ring-<key>`); the six tiles rise in
+  one after another (`animate-slide-up-in`, 50 ms apart). `MilestoneReward`: a
   blush card with a plum → amber "N to go" bar until everything's
   unlocked, then the lit hero with a "Claim it on WhatsApp" pill (until
   an admin marks it claimed). Details and settings rows lead with
@@ -216,7 +219,9 @@ Food delivery site for VIT-AP University students.
   page.
 - **Home layout** (redesign, 15 Oct 2026; `src/components/home/`): the
   mood header (logo → About; the student's initials in a lit plum circle →
-  Profile; greeting + question), the closed banner while ordering is
+  Profile; a small time-of-day line — "Good morning / afternoon / evening",
+  "Still up" — then "Hey, <first name>" as the h1 in `text-heading`, then
+  the hour's question), the closed banner while ordering is
   Closed, the pill search, **"What's on your mind?"** (`FoodTypeRail`:
   round photo tiles for `FOOD_TYPES` in `src/lib/home-filters.ts` —
   Biryani, Fried rice, Noodles, Starters, Curries, Chicken, Paneer, Egg,
@@ -278,10 +283,13 @@ Food delivery site for VIT-AP University students.
   (`transition-[width]`, `ease-spring`) and shrinks back; it only glows
   (`glow-amber`) once the dish is in the cart, and keyboard focus follows
   it. Add-on dishes keep a round "+" that opens the extras sheet, with a
-  count badge. Prices are amber (`text-primary`). Cart: the cart bar is a
+  count badge. Prices are amber (`text-primary`). A dish photo leans in
+  (`scale-105`) on mouse hover — on a wrapper round `BlurImage`, so it
+  doesn't fight the image's own fade-in transition. Cart: the cart bar is a
   plum pill with a lit "View cart" pill; the sheet's handover and contact
   rows lead with `IconTile` (`src/components/icon-tile.tsx`), "Change" is
-  a small pill, Delivery shows a green "Free" chip, the total is amber,
+  a small pill, Delivery shows a green "Free" chip, the total is amber
+  and bounces (`animate-bounce-count`, keyed on the amount) when it changes,
   and "Place order" is a pill that shimmers (white band) while placing.
 - **Notifications** (web push, `src/lib/notifications/`): students get
   *confirmed*, *delivered* and *cancelled*; the address in
@@ -494,7 +502,10 @@ silently re-enables the button.
   (plain popups with no confirm/cancel semantics — the "About MuteBites"
   card from the Home logo — the logo sits on a frosted plate with a thin
   ring, and `.logo-hint` ripples a rose
-  outline twice after load so it reads as tappable — (footer: `AboutCredits` — "Owned by Harsha & Rishi",
+  outline twice after load so it reads as tappable; the card opens on a
+  strip of the lit hero (`KaapiMotif` under Kaapi) with the logo tile
+  rising out of it, and its close button takes `text-hero-foreground` —
+  (footer: `AboutCredits` — "Owned by Harsha & Rishi",
   "~ Developed & Maintained by Naga Adithya"; the name has a dotted
   underline and tapping it quietly folds open Call · WhatsApp · Mail) and the one-time "How was
   it?" rating prompt). The cart and rating sheets use `sheet.tsx`. Both wrap `@base-ui/react`; reach for whichever already matches
@@ -520,6 +531,11 @@ silently re-enables the button.
   verified-fresh server responses and full dev-server restarts, so a
   changed cover photo should get a new filename, not overwrite the old one
   in place, to guarantee cache-safety.
+  `/terms` ends with a short **Photo credits** note: where a restaurant
+  had no photos, some covers and a few dishes (most of Waffle Pops') are
+  free Unsplash / Pexels stock — neither licence needs credit and the
+  photographers weren't recorded, so it names the sources only. A photo
+  under a licence that does need credit (CC BY etc.) must be named there.
   The login screen's photo mosaic (`src/app/login/page.tsx`, `MOSAIC`)
   also references a dozen of these files by path directly — renaming or
   removing a photo means updating that list too, or its tile goes blank.

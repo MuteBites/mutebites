@@ -6,12 +6,12 @@ import type { TimeOfDay } from "@/lib/date";
 
 // Each time of day gets its own ambient field (.mood-field.mood-<time> in
 // globals.css) — sunrise amber, bright afternoon, rose dusk, plum night —
-// plus a greeting and a hero question to match.
-const MOOD: Record<TimeOfDay, { greeting: string; Icon: LucideIcon; heading: string }> = {
-  morning: { greeting: "Good morning", Icon: Sunrise, heading: "Fuel up for the day?" },
-  afternoon: { greeting: "Hey", Icon: Sun, heading: "What are we craving now?" },
-  evening: { greeting: "Good evening", Icon: Sunset, heading: "Dinner o'clock?" },
-  night: { greeting: "Hey", Icon: Moon, heading: "Late night craving?" },
+// plus a small time-of-day line and a question to match.
+const MOOD: Record<TimeOfDay, { greeting: string; Icon: LucideIcon; question: string }> = {
+  morning: { greeting: "Good morning", Icon: Sunrise, question: "Fuel up for the day?" },
+  afternoon: { greeting: "Good afternoon", Icon: Sun, question: "What are we craving now?" },
+  evening: { greeting: "Good evening", Icon: Sunset, question: "Dinner o'clock?" },
+  night: { greeting: "Still up", Icon: Moon, question: "Late night craving?" },
 };
 
 function initials(name: string) {
@@ -22,11 +22,12 @@ function initials(name: string) {
 /**
  * Home's header, over the time-of-day mood field: the logo (opens About)
  * and the student's initials in a lit plum circle (opens Profile) on top,
- * then the greeting and the question of the hour. Trending moved out of
+ * then a small time-of-day line, "Hey, <first name>" as the headline and
+ * the question of the hour under it. Trending moved out of
  * here into the "Campus favourites" row (popular-rail.tsx).
  */
 export function HomeHeader({ fullName, timeOfDay }: { fullName: string; timeOfDay: TimeOfDay }) {
-  const { greeting, Icon, heading } = MOOD[timeOfDay];
+  const { greeting, Icon, question } = MOOD[timeOfDay];
   const firstName = fullName.trim().split(/\s+/)[0];
 
   return (
@@ -50,13 +51,12 @@ export function HomeHeader({ fullName, timeOfDay }: { fullName: string; timeOfDa
           {initials(fullName)}
         </Link>
       </div>
-      <p className="relative mt-8 flex items-center gap-1.5 font-semibold">
-        <Icon className="size-[1.125rem] shrink-0" aria-hidden="true" />
-        <span className="truncate">
-          {greeting}, {firstName}
-        </span>
+      <p className="relative mt-8 flex items-center gap-1.5 text-sm font-semibold">
+        <Icon className="size-4 shrink-0" aria-hidden="true" />
+        {greeting}
       </p>
-      <h1 className="text-heading relative mt-1 font-heading text-display font-bold">{heading}</h1>
+      <h1 className="text-heading relative mt-1 font-heading text-display font-bold break-words">Hey, {firstName}</h1>
+      <p className="relative mt-1.5 text-lg leading-snug">{question}</p>
     </header>
   );
 }

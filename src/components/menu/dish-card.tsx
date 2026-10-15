@@ -203,19 +203,23 @@ export function DishCard({
     <article id={`dish-${dish.id}`} className="min-w-0 scroll-mt-24">
       <div
         className={cn(
-          "relative aspect-square rounded-3xl bg-secondary transition-shadow",
+          "group/photo relative aspect-square rounded-3xl bg-secondary transition-shadow",
           inCart && "ring-3 ring-primary ring-offset-2 ring-offset-background",
           highlighted &&
             "animate-highlight motion-reduce:outline-3 motion-reduce:outline-offset-3 motion-reduce:outline-rose",
         )}
       >
         <div className="absolute inset-0 overflow-hidden rounded-3xl">
-          <BlurImage
-            src={photo}
-            alt=""
-            sizes="(min-width: 448px) 200px, 45vw"
-            className={cn("object-cover", soldOut && "opacity-60 grayscale")}
-          />
+          {/* The photo leans in a little on hover (mouse only). On a wrapper,
+              so it doesn't fight BlurImage's own fade-in transition. */}
+          <div className="absolute inset-0 transition-transform duration-(--dur-slow) ease-out-expo group-hover/photo:scale-105">
+            <BlurImage
+              src={photo}
+              alt=""
+              sizes="(min-width: 448px) 200px, 45vw"
+              className={cn("object-cover", soldOut && "opacity-60 grayscale")}
+            />
+          </div>
         </div>
 
         {tag && (

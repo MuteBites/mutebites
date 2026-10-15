@@ -358,6 +358,13 @@ there are real — avoided):
     cinnamon buttons, CB's hero wash, the gradient headline, CB's promo
     campus scene with the delivery run, the campus-pass tumbler detail, the
     Kaapi sign-in scene and the celebration motif (icons stay lucide).
+13. **Small polish from College Bites** (no database change): the delivery
+    road stays on the ticket after delivery (a tick at Main Gate), dashed
+    connectors for steps still to come, the cart total bounces when it
+    changes, dish photos lean in on mouse hover, milestone tiles rise in
+    one after another, the About card opens on a strip of the lit hero,
+    Home's headline is "Hey, <name>" with the hour's question under it,
+    and `/terms` has a photo-credits note (Unsplash / Pexels stock).
 
 ---
 
@@ -708,7 +715,9 @@ see it again.
 ### Home (`/`)
 - **Mood header** that bleeds to the screen edges and changes with IST
   time of day (morning 5–12, afternoon 12–17, evening 17–21, night),
-  greeting heading, logo (tap → "About MuteBites" popup: what it is,
+  a small time-of-day line, "Hey, <first name>" as the headline and the
+  hour's question under it, logo (tap → "About MuteBites" popup on a strip
+  of the lit hero: what it is,
   cuisines, cash on delivery, UPI at pickup, Main Gate), and the
   student's initials (→ Profile). (Until 15 Oct 2026 a flame button opened
   a "Trending this week" popup; the "Campus favourites" row replaced it.)
@@ -1134,7 +1143,8 @@ needs its own. How photos work:
 Ramana Fast Food has no photos of its own: `DISH_PHOTOS["Ramana Fast Food"]`
 points at Food Corner's (every dish name matches). Waffle Pops' photos are
 free-licence stock (Unsplash) for 12 dishes and the cover; the rest use the
-list view. Home's "What's on your mind?" tiles (`FOOD_TYPES` in
+list view. `/terms` credits the stock sources (Unsplash, Pexels) by name
+only — the photographers weren't recorded. Home's "What's on your mind?" tiles (`FOOD_TYPES` in
 `src/lib/home-filters.ts`) also reference photo paths directly.
 
 **Add-ons (extras)** are per restaurant (`addons`), offered per menu section

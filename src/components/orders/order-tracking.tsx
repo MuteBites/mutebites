@@ -239,7 +239,8 @@ export function OrderTracking({
               </p>
             </div>
 
-            {!cancelled && status !== "delivered" && (
+            {/* Stays once delivered: the rider turns into a tick at the gate. */}
+            {!cancelled && (
               <div className="border-t border-hero-foreground/15 bg-hero-foreground/5 px-6 pt-4 pb-5">
                 <DeliveryRoad status={status} restaurantName={initialOrder.restaurantName} createdAt={initialOrder.createdAt} />
               </div>
@@ -265,7 +266,13 @@ export function OrderTracking({
                     <StepDot state={step.state} Icon={STEP_ICONS[i] ?? Check} />
                     {i < steps.length - 1 && (
                       <span
-                        className={cn("w-0.5 flex-1", step.state === "done" ? "bg-success" : "bg-border")}
+                        className={cn(
+                          "w-0.5 flex-1 rounded-full",
+                          // Done stretches are solid green; what's still to come is dashed.
+                          step.state === "done"
+                            ? "bg-success"
+                            : "bg-[repeating-linear-gradient(to_bottom,var(--border)_0_4px,transparent_4px_8px)]",
+                        )}
                         aria-hidden="true"
                       />
                     )}
