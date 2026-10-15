@@ -608,6 +608,15 @@
     outline: 3px solid transparent;
     animation: highlight-arrive 3s var(--ease-out-expo) both;
   }
+  /* The menu's "tried N of M" bar fills from empty on first paint. */
+  .progress-fill {
+    transition: width 900ms var(--ease-out-expo) 200ms;
+  }
+  @starting-style {
+    .progress-fill {
+      width: 0;
+    }
+  }
   /* Milestone progress rings fill from empty the first time they paint. */
   .ring-fill {
     transition: stroke-dashoffset 900ms var(--ease-out-expo) 150ms;
@@ -620,6 +629,10 @@
   .animate-shimmer {
     position: relative;
     overflow: hidden;
+  }
+  /* On a lit amber button (Place order) the band is white light. */
+  .animate-shimmer.surface-primary::after {
+    background-image: linear-gradient(90deg, transparent, rgb(255 255 255 / 28%), transparent);
   }
   .animate-shimmer::after {
     content: "";

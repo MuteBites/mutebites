@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { ViewTransition } from "react";
-import { ArrowLeft } from "lucide-react";
+import { ArrowLeft, MapPin } from "lucide-react";
 import { BlurImage } from "@/components/blur-image";
 import { MenuProgress } from "@/components/menu/menu-progress";
 import { MenuView } from "@/components/menu/menu-view";
@@ -66,17 +66,18 @@ export default async function RestaurantPage({ params, searchParams }: PageProps
         orderable ? "text-success" : "text-muted-foreground",
       )}
     >
-      <span
-        className={cn("size-1.5 rounded-full", orderable ? "bg-success" : "bg-muted-foreground")}
-        aria-hidden="true"
-      />
+      <span className="relative flex size-1.5" aria-hidden="true">
+        {orderable && <span className="animate-ping-slow absolute inset-0 rounded-full bg-success" />}
+        <span className={cn("relative size-1.5 rounded-full", orderable ? "bg-success" : "bg-muted-foreground")} />
+      </span>
       {!active ? "Closed" : paused ? ordering.short : "Open"}
     </span>
   );
 
   // Same anatomy as Home's restaurant card: the photo is just a photo (no
   // black scrim, no name printed over it) and the page itself rises over
-  // its bottom edge as a rounded sheet carrying the name.
+  // its bottom edge as a rounded sheet carrying the name, the facts as chips
+  // (cuisines, free delivery to Main Gate) and the lit "tried N of M" bar.
   return (
     <main className="mx-auto w-full max-w-md">
       <ViewTransition {...NAV_TRANSITION}>
@@ -101,15 +102,23 @@ export default async function RestaurantPage({ params, searchParams }: PageProps
             <div className="absolute top-5 right-4">{statusBadge}</div>
           </div>
 
-          <div className="relative -mt-7 rounded-t-[1.75rem] bg-background px-6">
+          <div className="relative -mt-7 rounded-t-[1.75rem] bg-background px-6 shadow-[0_-12px_30px_-18px_var(--glow-hero)]">
             <header className="pt-6 pb-3">
               <h1 className="font-heading text-headline font-bold">{restaurant.name}</h1>
-              {restaurant.cuisine_tags.length > 0 && (
-                <p className="mt-1 font-medium text-rose">{restaurant.cuisine_tags.join(" · ")}</p>
-              )}
               {restaurant.description && (
                 <p className="mt-1 text-muted-foreground">{restaurant.description}</p>
               )}
+              <ul className="mt-3 flex flex-wrap items-center gap-1.5 text-xs font-semibold">
+                {restaurant.cuisine_tags.map((tag) => (
+                  <li key={tag} className="rounded-full bg-brand-soft px-2.5 py-1 text-brand-soft-foreground">
+                    {tag}
+                  </li>
+                ))}
+                <li className="inline-flex items-center gap-1 rounded-full bg-secondary px-2.5 py-1">
+                  <MapPin className="size-3.5 shrink-0 text-primary" aria-hidden="true" />
+                  Free to Main Gate
+                </li>
+              </ul>
               <MenuProgress restaurantName={restaurant.name} tried={dishesTried} total={totalDishes} />
               {!active && (
                 <p className="mt-4 rounded-2xl bg-secondary px-4 py-3 text-sm">

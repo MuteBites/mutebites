@@ -5,6 +5,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { Banknote, Loader2, MapPin, Phone, QrCode, X } from "lucide-react";
 import { EmptyState } from "@/components/empty-state";
+import { IconTile } from "@/components/icon-tile";
 import { CartLineRow } from "@/components/cart/cart-line-row";
 import { Sheet, SheetContent, SheetDescription, SheetTitle } from "@/components/ui/sheet";
 import { Textarea } from "@/components/ui/textarea";
@@ -88,7 +89,7 @@ function EmptyCart({ onBrowse }: { onBrowse: () => void }) {
           <Link
             href="/"
             onClick={onBrowse}
-            className="pressable surface-ink flex h-14 items-center rounded-2xl bg-ink px-8 text-lg font-bold text-ink-foreground outline-none hover:brightness-95 focus-visible:ring-3 focus-visible:ring-ring/80"
+            className="pressable surface-primary glow-amber flex h-14 items-center rounded-full bg-primary px-8 text-lg font-bold text-primary-foreground outline-none hover:brightness-110 focus-visible:ring-3 focus-visible:ring-ring/80"
           >
             Browse restaurants
           </Link>
@@ -170,13 +171,15 @@ function CartContents({
             maxLength={MAX_NOTES}
             rows={2}
             placeholder="Order notes — e.g. “less spicy”"
-            className="min-h-14 resize-none rounded-2xl border-0 bg-secondary px-5 py-4 text-base md:text-base"
+            className="min-h-14 resize-none rounded-2xl bg-card px-5 py-4 text-base shadow-card md:text-base"
           />
         </label>
 
-        <div className="mt-4 divide-y rounded-2xl border bg-card shadow-card">
-          <div className="flex items-center gap-4 px-5 py-4">
-            <MapPin className="size-5 shrink-0 text-rose" aria-hidden="true" />
+        <div className="mt-4 divide-y overflow-hidden rounded-[1.5rem] border bg-card shadow-card">
+          <div className="flex items-center gap-3.5 px-5 py-4">
+            <IconTile>
+              <MapPin className="size-5" aria-hidden="true" />
+            </IconTile>
             <div>
               <p className={eyebrow}>Handover point</p>
               <p className="font-semibold">VIT-AP Main Gate</p>
@@ -185,7 +188,7 @@ function CartContents({
           <ContactPhone value={contactPhone} onChange={setContactPhone} />
         </div>
 
-        <div className="mt-4 rounded-2xl border bg-card px-5 py-4 shadow-card">
+        <div className="mt-4 rounded-[1.5rem] border bg-card px-5 py-4 shadow-card">
           <dl className="space-y-1.5">
             <div className="flex justify-between text-muted-foreground">
               <dt>Item total</dt>
@@ -193,11 +196,11 @@ function CartContents({
             </div>
             <div className="flex justify-between text-muted-foreground">
               <dt>Delivery</dt>
-              <dd className="font-semibold text-success">Free</dd>
+              <dd className="rounded-full bg-success-soft px-2.5 py-0.5 text-sm font-semibold text-success">Free</dd>
             </div>
             <div className="flex items-baseline justify-between border-t border-dashed pt-2.5">
               <dt className="font-semibold">To pay at pickup</dt>
-              <dd className="font-heading text-2xl font-bold tabular-nums">{formatRupees(amount)}</dd>
+              <dd className="font-heading text-2xl font-bold text-primary tabular-nums">{formatRupees(amount)}</dd>
             </div>
           </dl>
           <ul className="mt-3 space-y-1.5 border-t pt-3 text-sm text-muted-foreground">
@@ -232,7 +235,11 @@ function CartContents({
           onClick={submit}
           disabled={placing || !orderingEnabled}
           aria-describedby={error ? "place-order-error" : undefined}
-          className="surface-primary flex h-14 w-full items-center justify-between gap-2 rounded-2xl bg-primary px-6 text-lg font-bold text-primary-foreground outline-none hover:brightness-95 focus-visible:ring-3 focus-visible:ring-ring/80 disabled:opacity-70"
+          className={cn(
+            "surface-primary glow-amber flex h-14 w-full items-center justify-between gap-2 rounded-full bg-primary px-6 text-lg font-bold text-primary-foreground outline-none hover:brightness-110 focus-visible:ring-3 focus-visible:ring-ring/80 disabled:opacity-70 disabled:shadow-none",
+            // A band of light sweeps across while the order goes through.
+            placing && "animate-shimmer",
+          )}
         >
           <span className="flex items-center gap-2">
             {placing && <Loader2 className="size-5 animate-spin" />}
@@ -260,8 +267,10 @@ function ContactPhone({ value, onChange }: { value: string; onChange: (v: string
 
   if (!editing) {
     return (
-      <div className="flex items-center gap-4 px-5 py-4">
-        <Phone className="size-5 shrink-0 text-rose" aria-hidden="true" />
+      <div className="flex items-center gap-3.5 px-5 py-4">
+        <IconTile>
+          <Phone className="size-5" aria-hidden="true" />
+        </IconTile>
         <div className="min-w-0 flex-1">
           <p className={eyebrow}>Your number</p>
           <p className="font-semibold tabular-nums">{formatStoredMobile(value)}</p>
@@ -276,7 +285,7 @@ function ContactPhone({ value, onChange }: { value: string; onChange: (v: string
             setInvalid(false);
             setEditing(true);
           }}
-          className="rounded-md font-semibold text-primary outline-none hover:underline focus-visible:ring-2 focus-visible:ring-ring/80"
+          className="shrink-0 rounded-full bg-secondary px-3.5 py-1.5 text-sm font-semibold outline-none hover:bg-border focus-visible:ring-2 focus-visible:ring-ring/80"
         >
           Change
         </button>
@@ -318,7 +327,7 @@ function ContactPhone({ value, onChange }: { value: string; onChange: (v: string
         <button
           type="button"
           onClick={save}
-          className="h-12 rounded-xl bg-primary px-4 font-semibold text-primary-foreground outline-none hover:bg-primary/90 focus-visible:ring-3 focus-visible:ring-ring/80"
+          className="surface-primary h-12 rounded-full bg-primary px-5 font-semibold text-primary-foreground outline-none hover:brightness-110 focus-visible:ring-3 focus-visible:ring-ring/80"
         >
           Save
         </button>

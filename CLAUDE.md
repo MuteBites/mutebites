@@ -174,6 +174,25 @@ Food delivery site for VIT-AP University students.
   (mutually exclusive, tap again to clear; red on light red for non-veg)
   and the category chips. The diet toggles only appear on a menu that has
   both kinds of dish.
+- **Menu and cart look** (redesign, 15 Oct 2026): the cover photo is
+  untinted; the sheet rising over it (with a soft plum glow on its top
+  edge) carries the name, description, chips (cuisines in blush, "Free to
+  Main Gate") and `MenuProgress` — a plum → rose → amber bar that fills
+  from empty on first paint (`.progress-fill`, `@starting-style`) with "N
+  to go". Section headings put their food icon on a blush tile
+  (`SectionHeading`; `getCuisineIcon` passed in as a prop — the React
+  compiler lint rejects choosing a component during render; Waffle Pops'
+  sections have dessert icons) with a count pill. Idle chips are cards
+  with a shadow; selected ones `bg-ink`. `DishCard`'s add control is ONE
+  lit amber pill that widens from a round "+" into the "− n +" stepper
+  (`transition-[width]`, `ease-spring`) and shrinks back; it only glows
+  (`glow-amber`) once the dish is in the cart, and keyboard focus follows
+  it. Add-on dishes keep a round "+" that opens the extras sheet, with a
+  count badge. Prices are amber (`text-primary`). Cart: the cart bar is a
+  plum pill with a lit "View cart" pill; the sheet's handover and contact
+  rows lead with `IconTile` (`src/components/icon-tile.tsx`), "Change" is
+  a small pill, Delivery shows a green "Free" chip, the total is amber,
+  and "Place order" is a pill that shimmers (white band) while placing.
 - **Notifications** (web push, `src/lib/notifications/`): students get
   *confirmed*, *delivered* and *cancelled*; the address in
   `ADMIN_ALERT_EMAILS` (`send.ts`) gets *new order*. `public/sw.js` is a

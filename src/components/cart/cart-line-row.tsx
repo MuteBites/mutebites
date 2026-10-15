@@ -117,7 +117,7 @@ export function CartLineRow({ line, restaurantName }: { line: CartLine; restaura
                 onClick={() => setQuantity(lineKey(line), line.quantity + 1)}
                 disabled={line.quantity >= MAX_QUANTITY}
                 aria-label={`Add one more ${line.name}`}
-                className="flex size-7 items-center justify-center rounded-full bg-primary text-primary-foreground outline-none hover:brightness-95 focus-visible:ring-2 focus-visible:ring-ring/80 disabled:opacity-40"
+                className="surface-primary flex size-7 items-center justify-center rounded-full bg-primary text-primary-foreground outline-none hover:brightness-110 focus-visible:ring-2 focus-visible:ring-ring/80 disabled:opacity-40"
               >
                 <Plus className="size-3.5" />
               </button>
@@ -125,7 +125,7 @@ export function CartLineRow({ line, restaurantName }: { line: CartLine; restaura
             <span className="text-sm text-muted-foreground tabular-nums">{formatRupees(linePrice(line))} each</span>
           </div>
         </div>
-        <p className="self-start pt-0.5 text-right font-heading text-lg font-bold tabular-nums">
+        <p className="self-start pt-0.5 text-right font-heading text-lg font-bold text-primary tabular-nums">
           {formatRupees(linePrice(line) * line.quantity)}
         </p>
       </div>

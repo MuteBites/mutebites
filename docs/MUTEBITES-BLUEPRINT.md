@@ -681,12 +681,14 @@ see it again.
   Oct 2026).
 
 ### Menu (`/restaurants/[id]`)
-- Cover hero, restaurant name, description, Open chip, "You've tried N of
-  M" progress bar.
+- Cover hero, restaurant name, description, cuisine chips and "Free to
+  Main Gate", a pulsing Open chip, and a lit "You've tried N of M · N to
+  go" bar that fills in on arrival (redesign, 15 Oct 2026).
 - **One sticky filter row:** search icon, then Veg / Non-veg (mutually
   exclusive, only if the menu has both) and the section chips.
-- Photo-grid dish cards with a corner add button that becomes a − n +
-  stepper; veg/non-veg mark; note; **"Your favorite"** or **"Highly
+- Section headings with a food icon on a blush tile and a count.
+- Photo-grid dish cards with a lit amber add pill that widens into a − n +
+  stepper (glowing once in the cart); amber prices; veg/non-veg mark; note; **"Your favorite"** or **"Highly
   re-ordered"** tag; sold-out dishes greyed, struck through, not
   addable.
 - `?dish=<id>` scrolls that dish into view and outlines it in rose for
@@ -696,14 +698,15 @@ see it again.
 - Paused/closed states say so on the page and on each dish.
 
 ### Cart (bottom sheet from the cart bar)
-- Cart bar: up to two overlapping dish photos, item count, total, View
-  cart (photos hidden under 360 px).
+- Cart bar: a plum pill — up to two overlapping dish photos, item count,
+  total, a lit View cart pill (photos hidden under 360 px).
 - Sheet: each line with photo, stepper (max 20), line total; notes (max
   200); **"Your number"** with "Make sure this is your WhatsApp number
   before placing the order" and Change; bill card (Item total, Delivery
   Free, To pay at pickup); "Cash at the gate — exact change helps." and
   "UPI works too — scan and pay when you collect."; only the Place order
-  button is pinned.
+  pill is pinned (it shimmers while placing). Handover and number rows
+  lead with blush icon tiles; Delivery shows a green "Free" chip.
 - Before calling the database, the server compares the cart with the live
   menu: removed/sold-out dishes are dropped from the cart and prices
   updated, with a message. The cart is only cleared after success.

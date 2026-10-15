@@ -47,7 +47,7 @@ export function CartBar({
               hasTabBar ? "bottom-[calc(max(0.75rem,env(safe-area-inset-bottom))+4.5rem)] pb-0" : "bottom-0 pb-[max(1rem,env(safe-area-inset-bottom))]",
             )}
           >
-            <div className="surface-hero glow-hero flex items-center gap-3 rounded-3xl bg-hero p-3 pl-3.5 text-hero-foreground">
+            <div className="surface-hero glow-hero flex items-center gap-3 rounded-full bg-hero p-2 pl-3 text-hero-foreground">
               {/* The actual food in the cart, not just a count: up to two
                   dish photos overlapping, falling back to the dish's initial.
                   Dropped below 360px so the total never gets squeezed. */}
@@ -81,7 +81,7 @@ export function CartBar({
               <button
                 type="button"
                 onClick={() => setOpen(true)}
-                className="surface-primary flex h-14 shrink-0 items-center gap-2 rounded-2xl bg-primary px-5 text-lg font-bold text-primary-foreground outline-none hover:brightness-95 focus-visible:ring-3 focus-visible:ring-hero-foreground/80"
+                className="surface-primary glow-amber flex h-14 shrink-0 items-center gap-2 rounded-full bg-primary px-5 text-lg font-bold text-primary-foreground outline-none hover:brightness-110 focus-visible:ring-3 focus-visible:ring-hero-foreground/80"
               >
                 View cart <ArrowRight className="size-5" />
               </button>

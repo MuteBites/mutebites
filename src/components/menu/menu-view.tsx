@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { Drumstick, Leaf, Search, SearchX, UtensilsCrossed, X } from "lucide-react";
+import { Drumstick, Leaf, Search, SearchX, UtensilsCrossed, X, type LucideIcon } from "lucide-react";
 import { EmptyState } from "@/components/empty-state";
 import { CartBar } from "@/components/cart/cart-bar";
 import {
@@ -151,7 +151,7 @@ export function MenuView({
               <label className="relative min-w-0 flex-1">
                 <span className="sr-only">Search dishes</span>
                 <Search
-                  className="pointer-events-none absolute top-1/2 left-3.5 size-4 -translate-y-1/2 text-muted-foreground"
+                  className="pointer-events-none absolute top-1/2 left-3.5 z-10 size-4 -translate-y-1/2 text-primary"
                   aria-hidden="true"
                 />
                 <input
@@ -161,7 +161,7 @@ export function MenuView({
                   onChange={(e) => setQuery(e.target.value)}
                   onKeyDown={(e) => e.key === "Escape" && closeSearch()}
                   placeholder="Search this menu…"
-                  className="h-10 w-full rounded-full bg-secondary pr-3 pl-10 outline-none placeholder:text-muted-foreground focus-visible:ring-2 focus-visible:ring-ring/80 [&::-webkit-search-cancel-button]:hidden"
+                  className="animate-pop-in h-10 w-full rounded-full border bg-card pr-3 pl-10 shadow-card outline-none placeholder:text-muted-foreground focus-visible:border-ring focus-visible:ring-2 focus-visible:ring-ring/80 [&::-webkit-search-cancel-button]:hidden"
                 />
               </label>
             ) : (
@@ -169,7 +169,7 @@ export function MenuView({
                 type="button"
                 onClick={() => setSearchOpen(true)}
                 aria-label="Search this menu"
-                className="flex size-10 shrink-0 items-center justify-center rounded-full bg-secondary outline-none hover:bg-border focus-visible:ring-3 focus-visible:ring-ring/80"
+                className="flex size-10 shrink-0 items-center justify-center rounded-full border bg-card text-primary shadow-card outline-none hover:border-ring/50 focus-visible:ring-3 focus-visible:ring-ring/80"
               >
                 <Search className="size-4.5" />
               </button>
@@ -180,7 +180,7 @@ export function MenuView({
                 type="button"
                 onClick={closeSearch}
                 aria-label="Close search"
-                className="flex size-10 shrink-0 items-center justify-center rounded-full bg-secondary outline-none hover:bg-border focus-visible:ring-3 focus-visible:ring-ring/80"
+                className="flex size-10 shrink-0 items-center justify-center rounded-full border bg-card shadow-card outline-none hover:border-ring/50 focus-visible:ring-3 focus-visible:ring-ring/80"
               >
                 <X className="size-4.5" />
               </button>
@@ -213,10 +213,10 @@ export function MenuView({
                           onClick={() => setFilter(chip.key)}
                           aria-pressed={filter === chip.key}
                           className={cn(
-                            "flex h-10 items-center gap-1.5 rounded-full px-4 text-sm font-semibold whitespace-nowrap outline-none transition-colors focus-visible:ring-3 focus-visible:ring-ring/80",
+                            "flex h-10 items-center gap-1.5 rounded-full border px-4 text-sm font-semibold whitespace-nowrap outline-none transition-[background-color,color,border-color,box-shadow] duration-(--dur-base) focus-visible:ring-3 focus-visible:ring-ring/80",
                             filter === chip.key
-                              ? "bg-ink text-ink-foreground"
-                              : "bg-secondary text-secondary-foreground hover:bg-border",
+                              ? "border-transparent bg-ink text-ink-foreground shadow-raised"
+                              : "bg-card text-foreground shadow-card hover:border-ring/50",
                           )}
                         >
                           <Icon className="size-4" aria-hidden="true" />
@@ -250,12 +250,12 @@ export function MenuView({
 
       {visible.map((section) => (
         <section key={sectionKey(section)} aria-labelledby={`sec-${sectionKey(section)}`} className="pt-7">
-          <h2 id={`sec-${sectionKey(section)}`} className="flex items-baseline gap-2">
-            <span className="font-heading text-title font-bold">{sectionName(section)}</span>
-            <span className="text-sm font-semibold text-muted-foreground tabular-nums">
-              {section.dishes.length}
-            </span>
-          </h2>
+          <SectionHeading
+            id={`sec-${sectionKey(section)}`}
+            name={sectionName(section)}
+            count={section.dishes.length}
+            icon={getCuisineIcon(sectionName(section))}
+          />
           {(() => {
             // Photo dishes in the grid; dishes without a photo as a list under it.
             const card = (dish: (typeof section.dishes)[number]) => (
@@ -342,6 +342,25 @@ export function MenuView({
 
 type Diet = "all" | "veg" | "nonveg";
 
+/**
+ * A menu section's heading: its food icon on a blush tile, the name, and a
+ * count pill. The icon is picked by the caller and passed in — the React
+ * compiler lint rejects choosing a component during render.
+ */
+function SectionHeading({ id, name, count, icon: Icon }: { id: string; name: string; count: number; icon: LucideIcon }) {
+  return (
+    <h2 id={id} className="flex items-center gap-2.5">
+      <span className="flex size-9 shrink-0 items-center justify-center rounded-xl bg-brand-soft text-brand-soft-foreground">
+        <Icon className="size-5" aria-hidden="true" />
+      </span>
+      <span className="min-w-0 font-heading text-title font-bold">{name}</span>
+      <span className="shrink-0 rounded-full bg-secondary px-2 py-0.5 text-xs font-semibold text-muted-foreground tabular-nums">
+        {count}
+      </span>
+    </h2>
+  );
+}
+
 /** One half of the Veg / Non-veg filter — tap again to show everything. */
 function DietToggle({ kind, active, onToggle }: { kind: "veg" | "nonveg"; active: boolean; onToggle: () => void }) {
   const veg = kind === "veg";
@@ -353,7 +372,7 @@ function DietToggle({ kind, active, onToggle }: { kind: "veg" | "nonveg"; active
       aria-label={veg ? "Veg only" : "Non-veg only"}
       className={cn(
         "flex h-10 items-center gap-1.5 rounded-full border px-3 text-sm font-semibold whitespace-nowrap outline-none transition-colors focus-visible:ring-3 focus-visible:ring-ring/80",
-        !active && "bg-card text-muted-foreground hover:bg-secondary",
+        !active && "bg-card text-foreground shadow-card hover:border-ring/50",
         active && veg && "border-success bg-success-soft text-success",
         active && !veg && "border-destructive bg-destructive/10 text-destructive",
       )}
