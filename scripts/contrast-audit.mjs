@@ -1,17 +1,38 @@
 // Contrast audit over the token pairs the app actually uses, read straight
-// from src/app/globals.css (:root and .dark), with alpha compositing.
-// Run: npm run audit:contrast — exits non-zero if any pair fails.
+// from src/app/globals.css, with alpha compositing — for every palette
+// (MuteBites Plum, Desi Kaapi) in both light and dark. Also fails if a
+// palette leaves out a token the plum blocks define (it would silently
+// inherit plum's value).
+// Run: npm run audit:contrast — exits non-zero if anything fails.
 import fs from 'node:fs';
 const css = fs.readFileSync('src/app/globals.css', 'utf8');
-// Every top-level block for this selector (:root appears more than once).
+// Every top-level block whose selector list includes this selector (a
+// block can list several, e.g. ":root,\n[data-palette=\"plum\"]").
 const block = (sel) => {
-  const re = new RegExp(`\\n${sel.replace('.', '\\.')} \\{([\\s\\S]*?)\\n\\}`, 'g');
   const out = {};
-  for (const m of css.matchAll(re))
-    for (const x of m[1].matchAll(/--([a-z0-9-]+):\s*([^;]+);/g)) out[x[1]] = x[2].trim();
+  for (const m of css.matchAll(/\n((?:[^\n{}@/]+,\n)*[^\n{}@/]+) \{([\s\S]*?)\n\}/g)) {
+    const sels = m[1].split(',').map((x) => x.trim());
+    if (!sels.includes(sel)) continue;
+    for (const x of m[2].matchAll(/--([a-z0-9-]+):\s*([^;]+);/g)) out[x[1]] = x[2].trim();
+  }
   return out;
 };
-const themes = { light: block(':root'), dark: { ...block(':root'), ...block('.dark') } };
+const root = block(':root');
+const dark = block('.dark');
+const kaapi = block('[data-palette="kaapi"]');
+const kaapiDark = block('.dark[data-palette="kaapi"]');
+const themes = {
+  'plum light': root,
+  'plum dark': { ...root, ...dark },
+  'kaapi light': { ...root, ...kaapi },
+  'kaapi dark': { ...root, ...dark, ...kaapi, ...kaapiDark },
+};
+
+// Completeness: Kaapi must define every palette token plum does (not the
+// motion / view-transition / radius ones, which aren't per palette).
+const notPalette = (k) => /^(dur-|vt-|radius$)/.test(k);
+const missing = Object.keys({ ...root, ...dark }).filter((k) => !notPalette(k) && !(k in kaapi));
+if (missing.length) console.log(`FAIL  Desi Kaapi is missing tokens: ${missing.join(', ')}`);
 
 const parse = (v) => {
   v = v.trim();
@@ -49,9 +70,8 @@ const checks = [
   ['destructive text on destructive/5 over card (outlined buttons)', 'destructive', 1, [T('card'), T('destructive', 0.05)], 4.5],
   ['text on success fill', 'success-foreground', 1, [T('success')], 4.5],
   ['text on destructive fill', 'destructive-foreground', 1, [T('destructive')], 4.5],
-  ['ink text on ink', 'ink-foreground', 1, [T('ink')], 4.5],
-  ['ink text/75 on ink (secondary lines)', 'ink-foreground', 0.75, [T('ink')], 4.5],
-  ['ink text/75 ("/5" in admin)', 'ink-foreground', 0.75, [T('ink')], 3.0],
+  // bg-ink is now only the selected-chip / count-badge colour (hero surfaces moved to --hero-*).
+  ['selected chip text on ink', 'ink-foreground', 1, [T('ink')], 4.5],
   ['ink-accent on ink', 'ink-accent', 1, [T('ink')], 4.5],
   ['ink-success on ink', 'ink-success', 1, [T('ink')], 4.5],
   ['ink-danger on ink', 'ink-danger', 1, [T('ink')], 4.5],
@@ -92,7 +112,7 @@ const checks = [
   ['focus ring (ring/80) vs card (non-text, 3:1)', 'ring', 0.8, [T('card')], 3.0],
 ];
 
-let fails = 0;
+let fails = missing.length ? 1 : 0;
 for (const [name, t] of Object.entries(themes)) {
   console.log(`\n== ${name}`);
   for (const [label, fg, fa, stack, min] of checks) {

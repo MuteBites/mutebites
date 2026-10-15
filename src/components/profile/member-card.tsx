@@ -1,4 +1,5 @@
 import type { ReactNode } from "react";
+import { KaapiMotif } from "@/components/theme/kaapi-motif";
 import { cn } from "@/lib/utils";
 
 /*
@@ -31,8 +32,9 @@ export function MemberCard({
 }) {
   return (
     <section className="surface-hero glow-hero relative overflow-hidden rounded-[1.75rem] bg-hero p-5 text-hero-foreground">
-      <p className="text-label text-hero-accent">Campus pass</p>
-      <div className="mt-3 flex items-center gap-4">
+      <KaapiMotif className="-top-2 -right-3 size-28" />
+      <p className="relative text-label text-hero-accent">Campus pass</p>
+      <div className="relative mt-3 flex items-center gap-4">
         <span className="relative block size-[4.5rem] shrink-0 rounded-full p-[3px]">
           <span aria-hidden="true" className="food-ring animate-ring-spin absolute inset-0 rounded-full" />
           <span className="relative flex size-full items-center justify-center rounded-full bg-hero font-heading text-2xl font-bold text-hero-accent ring-2 ring-hero">
@@ -45,9 +47,9 @@ export function MemberCard({
         </div>
       </div>
 
-      <div className="mt-4 empty:hidden">{rankBadge}</div>
+      <div className="relative mt-4 empty:hidden">{rankBadge}</div>
 
-      <dl className="mt-5 grid grid-cols-3 gap-2 text-center">
+      <dl className="relative mt-5 grid grid-cols-3 gap-2 text-center">
         <Stat value={cravingsSolved} label={cravingsSolved === 1 ? "craving solved" : "cravings solved"} />
         <Stat value={streakDays} label="day streak" />
         <Stat value={noShows} label={noShows === 1 ? "no-show" : "no-shows"} danger={noShows > 0} />

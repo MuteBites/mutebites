@@ -65,6 +65,40 @@ Food delivery site for VIT-AP University students.
   Small captions above fields/sections use `text-label`: sentence case,
   sans, no letter-spacing. No mono font is loaded any more; don't bring
   back the mono-uppercase eyebrow style, and no `uppercase` anywhere.
+- **Themes (palettes)** — two, picked per device (Profile → Settings →
+  Theme, and the first-login form's "Pick a theme"), independent of the
+  Light / Dark / System switch: **MuteBites Plum** (`plum`, the default —
+  everything described above) and **Desi Kaapi** (`kaapi`: cream ground,
+  espresso text, coffee-brown actions with cream text, a turmeric → caramel
+  → rose-milk hero with espresso text on it, rose-milk selected chips and
+  tints, teal focus rings; dark is an espresso night with turmeric actions
+  — ported from College Bites' "Kaapi"). Each is a complete light + dark
+  token set in `globals.css`: the plum blocks are `:root,
+  [data-palette="plum"]` and `.dark, .dark [data-palette="plum"]`; Kaapi's
+  are `[data-palette="kaapi"]` and `.dark[data-palette="kaapi"], .dark
+  [data-palette="kaapi"]`. `[data-palette]` ties with `.dark` on
+  specificity, so Kaapi's light block (later) overrides plum dark and its
+  dark block then wins — so **Kaapi must define every token the plum blocks
+  do**; `npm run audit:contrast` fails on a missing one and checks all four
+  sets (plum / kaapi × light / dark). `data-palette` on `<html>` is set
+  before first paint by the theme-init script and kept by `setPalette()` /
+  `usePalette()` (`src/lib/theme/store.ts`, localStorage
+  `mutebites.palette`, a cross-fade like Light / Dark); names, blurbs and
+  each palette's ground live in `src/lib/theme/palettes.ts` (the ground
+  also drives the browser-bar `theme-color`). The palette blocks key on
+  the attribute alone, so it works on ANY element — the picker's preview
+  cards (`PalettePicker`) set `data-palette` on themselves. Per-palette
+  tokens for what used to be fixed plum: `--brand-1/2/3` (food ring,
+  progress bars, milestone rings), `--scrim` (dialog / sheet backdrops,
+  `bg-scrim/40–50`), `--knob-ink` (switch knob icon), `--promo-light`,
+  `--confetti-1…5`. Kaapi's own touch is `KaapiMotif`
+  (`src/components/theme/kaapi-motif.tsx`): a filter-coffee tumbler in its
+  davara with rising steam (`motif-steam`) on the promo, campus pass,
+  admin Today card and the picker — always in the markup, shown only under
+  Kaapi by `only-kaapi` (`display: var(--show-kaapi)`, which follows the
+  nearest data-palette). Adding a palette = a light and a dark block in
+  `globals.css`, an entry in `palettes.ts`, and its blocks in the audit.
+  Never hard-code a brand colour in a component — use a token.
 - **Home header mood field**: `HomeHeader` bleeds to the screen edges over
   `.mood-field.mood-<morning|afternoon|evening|night>` (`globals.css`),
   driven by `getTimeOfDayIST()`. Each mood has three `--mood-<time>-a/b/c`

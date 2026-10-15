@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { ViewTransition } from "react";
-import { Bell, Lock, Mail, MapPin, Palette, Volume2 } from "lucide-react";
+import { Bell, Lock, Mail, MapPin, Palette, SunMoon, Volume2 } from "lucide-react";
+import { PalettePicker } from "@/components/theme/palette-picker";
 import { IconTile } from "@/components/icon-tile";
 import { MemberCard } from "@/components/profile/member-card";
 import { getUnlockedMilestones, MilestoneBadges } from "@/components/profile/milestone-badges";
@@ -115,9 +116,21 @@ export default async function ProfilePage() {
 
           <h2 className="mt-8 font-heading text-title font-bold">Settings</h2>
           <div className="mt-3 divide-y overflow-hidden rounded-[1.5rem] border bg-card shadow-card">
+            <div className="px-5 pt-3.5 pb-5">
+              <div className="flex items-center gap-3">
+                <IconTile>
+                  <Palette className="size-5" aria-hidden="true" />
+                </IconTile>
+                <div className="min-w-0 flex-1">
+                  <p className="font-semibold">Theme</p>
+                  <p className="text-sm text-muted-foreground">Just on this device.</p>
+                </div>
+              </div>
+              <PalettePicker className="mt-3.5" />
+            </div>
             <div className="flex items-center gap-3 px-5 py-3.5">
               <IconTile>
-                <Palette className="size-5" aria-hidden="true" />
+                <SunMoon className="size-5" aria-hidden="true" />
               </IconTile>
               <p className="min-w-0 flex-1 font-semibold">Appearance</p>
               <ThemeIconToggle />

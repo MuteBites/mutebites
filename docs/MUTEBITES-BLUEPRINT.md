@@ -351,6 +351,9 @@ there are real — avoided):
     `success` variants).
 11. **Final pass:** 404 / error / rating buttons as pills, a Home skeleton
     matching the new layout, this blueprint brought up to date.
+12. **Desi Kaapi theme:** a second palette (light + dark), a picker in
+    Profile and on the welcome form, the Kaapi tumbler motif; every fixed
+    plum colour in components became a per-palette token.
 
 ---
 
@@ -968,6 +971,12 @@ only in the top half and with ≥5 students.
   amber totals, focus rings back at /80 on the shared admin pills. Kept the
   plum / amber identity — borrowed College Bites' "lit, not flat" approach,
   not its palette.
+- **Two themes (15 Oct 2026):** **MuteBites Plum** (default) and **Desi
+  Kaapi** (filter coffee, turmeric and rose milk — College Bites' Kaapi
+  mapped onto MuteBites' tokens, with its filter-coffee tumbler on the hero
+  cards), picked per device in Profile → Settings → Theme and on the
+  first-login form, on top of Light / Dark / System. Applied before first
+  paint; the contrast audit checks all four sets.
 - **Rules:** text on a filled colour uses its `*-foreground` token, never
   `text-white`; no `text-primary` on blush; on plum use
   `text-ink-accent` / `-ink-success` / `-ink-danger`; focus rings

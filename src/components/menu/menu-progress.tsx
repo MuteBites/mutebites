@@ -1,8 +1,8 @@
 import type { CSSProperties } from "react";
 
 /**
- * "You've tried N of M here" on the menu page, with a thin bar in the lit
- * plum → rose of the hero that fills in from empty the first time it
+ * "You've tried N of M here" on the menu page, with a thin bar in the
+ * palette's brand gradient (--brand-1 → -3) that fills in from empty the first time it
  * paints (`progress-fill`, instant under reduced motion) and a note of how
  * many are left.
  */
@@ -36,7 +36,7 @@ export function MenuProgress({
         className="mt-1.5 h-2 w-full overflow-hidden rounded-full bg-secondary"
       >
         <div
-          className="progress-fill h-full w-(--fill) rounded-full bg-[linear-gradient(90deg,var(--hero-a),#914955,var(--amber))] shadow-[0_0_10px_var(--glow-amber)]"
+          className="progress-fill h-full w-(--fill) rounded-full bg-[linear-gradient(90deg,var(--brand-1),var(--brand-2),var(--brand-3))] shadow-[0_0_10px_var(--glow-amber)]"
           style={{ "--fill": `${pct}%` } as CSSProperties}
         />
       </div>

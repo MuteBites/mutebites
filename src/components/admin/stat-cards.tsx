@@ -1,4 +1,5 @@
 import type { ReactNode } from "react";
+import { KaapiMotif } from "@/components/theme/kaapi-motif";
 import { cn } from "@/lib/utils";
 
 /*
@@ -28,12 +29,13 @@ export function StatCards({
   children?: ReactNode;
 }) {
   return (
-    <section className="surface-hero glow-hero rounded-3xl bg-hero text-hero-foreground">
-      <div className="px-5 pt-5 sm:px-6">
+    <section className="surface-hero glow-hero relative overflow-hidden rounded-3xl bg-hero text-hero-foreground">
+      <KaapiMotif className="-top-3 right-2 size-28" />
+      <div className="relative px-5 pt-5 sm:px-6">
         <h2 className="font-heading text-title font-bold">Today</h2>
         <p className="text-sm text-hero-foreground/85">{todayLabel} · VIT-AP Main Gate</p>
       </div>
-      <dl className="mt-4 grid grid-cols-2 gap-y-4 px-5 pb-5 sm:grid-cols-4 sm:px-6">
+      <dl className="relative mt-4 grid grid-cols-2 gap-y-4 px-5 pb-5 sm:grid-cols-4 sm:px-6">
         <Stat label="Orders" value={totalOrders} />
         <Stat label="Confirmed" value={confirmedOrders} />
         <Stat label="Completed" value={completedOrders} tone="success" />
@@ -47,7 +49,7 @@ export function StatCards({
           }
         />
       </dl>
-      {children && <div className="border-t border-hero-foreground/15 px-5 py-4 sm:px-6">{children}</div>}
+      {children && <div className="relative border-t border-hero-foreground/15 px-5 py-4 sm:px-6">{children}</div>}
     </section>
   );
 }

@@ -238,7 +238,7 @@ function MilestoneReward({
               className="mt-2.5 h-2 w-full overflow-hidden rounded-full bg-card"
             >
               <div
-                className="progress-fill h-full w-(--fill) rounded-full bg-[linear-gradient(90deg,var(--hero-a),#914955,var(--amber))]"
+                className="progress-fill h-full w-(--fill) rounded-full bg-[linear-gradient(90deg,var(--brand-1),var(--brand-2),var(--brand-3))]"
                 style={{ "--fill": `${Math.round((unlocked / total) * 100)}%` } as CSSProperties}
               />
             </div>
@@ -286,9 +286,9 @@ function BadgeTile({
           <svg viewBox={`0 0 ${RING_SIZE} ${RING_SIZE}`} className="absolute inset-0 -rotate-90" aria-hidden="true">
             <defs>
               <linearGradient id={ringId} x1="0" y1="0" x2="1" y2="1">
-                <stop offset="0%" stopColor="#552c4a" />
-                <stop offset="55%" stopColor="#914955" />
-                <stop offset="100%" stopColor="#c07a35" />
+                <stop offset="0%" style={{ stopColor: "var(--brand-1)" }} />
+                <stop offset="55%" style={{ stopColor: "var(--brand-2)" }} />
+                <stop offset="100%" style={{ stopColor: "var(--brand-3)" }} />
               </linearGradient>
             </defs>
             <circle

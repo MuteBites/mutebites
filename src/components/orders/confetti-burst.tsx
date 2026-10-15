@@ -11,7 +11,8 @@ type Piece = {
   color: string;
 };
 
-const COLORS = ["#c07a35", "#914955", "#d7a8b8", "#2f6b4f", "#552c4a"];
+// The palette's own confetti (--confetti-1…5 in globals.css).
+const COLORS = [1, 2, 3, 4, 5].map((n) => `var(--confetti-${n})`);
 const PIECE_COUNT = 20;
 
 function makePieces(): Piece[] {

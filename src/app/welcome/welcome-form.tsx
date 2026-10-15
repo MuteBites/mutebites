@@ -3,6 +3,8 @@
 import { useActionState, useState } from "react";
 import { Loader2, MapPin } from "lucide-react";
 import { BrandLogo } from "@/components/brand-logo";
+import { PalettePicker } from "@/components/theme/palette-picker";
+import { ThemeIconToggle } from "@/components/theme/theme-icon-toggle";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -97,6 +99,19 @@ export function WelcomeForm({ defaultName }: { defaultName: string }) {
             {phoneError ??
               "Required — the delivery person calls this at the gate. Make sure this is your WhatsApp number."}
           </p>
+        </div>
+
+        {/* Per device and instant (localStorage, like Light / Dark), so it's
+            not part of the form: the page itself recolours as they tap. */}
+        <div className="mt-8">
+          <div className="flex items-center justify-between gap-3">
+            <div className="min-w-0">
+              <p className={eyebrow}>Pick a theme</p>
+              <p className="mt-0.5 text-sm text-muted-foreground">Change it any time in Profile.</p>
+            </div>
+            <ThemeIconToggle />
+          </div>
+          <PalettePicker className="mt-3.5" />
         </div>
 
         <p className="mt-8 flex gap-3 rounded-2xl border border-brand-soft-foreground/15 bg-brand-soft px-5 py-4 leading-relaxed text-brand-soft-foreground">

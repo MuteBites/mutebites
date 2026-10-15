@@ -117,6 +117,8 @@
   --color-hero-accent: var(--hero-accent);
   --color-hero-success: var(--hero-success);
   --color-hero-danger: var(--hero-danger);
+  --color-scrim: var(--scrim);
+  --color-knob-ink: var(--knob-ink);
   --color-amber-soft: var(--amber-soft);
   --color-amber-soft-foreground: var(--amber-soft-foreground);
   --color-plum-soft: var(--plum-soft);
@@ -194,7 +196,8 @@
  * 2026) tinted the top of every page and needed the headroom.
  * The raw #C07A35 (--amber) is decorative-only: 3.5:1, never text.
  */
-:root {
+:root,
+[data-palette="plum"] {
   --background: #faf3ec;
   --foreground: #3f2037;
   --card: #ffffff;
@@ -294,6 +297,23 @@
      .mood-field below and HomeHeader. Alpha is baked into each stop so the
      field reads clearly on ivory while the plum heading on top of its
      densest point stays above 7:1. */
+  /* Per-palette pieces that used to be fixed plum: the brand gradient
+     (food ring, progress bars, milestone rings), dialog backdrops, the
+     switch knob's icon, the promo's warm light, confetti, and which
+     palette motif shows (only-kaapi). */
+  --brand-1: #552c4a;
+  --brand-2: #914955;
+  --brand-3: #c07a35;
+  --scrim: #26121f;
+  --knob-ink: #552c4a;
+  --promo-light: rgb(240 195 143 / 45%);
+  --confetti-1: #c07a35;
+  --confetti-2: #914955;
+  --confetti-3: #d7a8b8;
+  --confetti-4: #2f6b4f;
+  --confetti-5: #552c4a;
+  --show-kaapi: none;
+
   --mood-morning-a: #f0c38fcc;
   --mood-morning-b: #f8dedc;
   --mood-morning-c: #e0ae7866;
@@ -312,7 +332,8 @@
    night. Fills that carry text (success/destructive/primary) get a dark
    *-foreground instead of white — the dark-mode fills are light enough
    that white text on them would fail. */
-.dark {
+.dark,
+.dark [data-palette="plum"] {
   --background: #170f14;
   --foreground: #f5eae1;
   --card: #21161c;
@@ -388,6 +409,223 @@
   --mood-night-a: #552c4a;
   --mood-night-b: #3f2a6bcc;
   --mood-night-c: #91495555;
+}
+
+/*
+ * Desi Kaapi — filter coffee. Cream ground, espresso text, coffee-brown
+ * actions (cream text), a turmeric → caramel → rose-milk hero with espresso
+ * text on it (a coffee wash with crema light, not the plum's amber corner),
+ * rose milk for selected chips and tints, a teal counterpoint for focus.
+ * Dark is an espresso night: turmeric actions with espresso text, the same
+ * warm hero. Ported from College Bites' "Kaapi" and mapped onto MuteBites'
+ * tokens. Every token the plum blocks define must be defined here too —
+ * the contrast audit fails on a missing one.
+ */
+[data-palette="kaapi"] {
+  --background: #f6eee3;
+  --foreground: #2b1a12;
+  --card: #fffaf4;
+  --card-foreground: #2b1a12;
+  --popover: #fffdf9;
+  --popover-foreground: #2b1a12;
+  --primary: #6f3b1f;
+  --primary-foreground: #fff8f0;
+  --secondary: #f0e3d3;
+  --secondary-foreground: #2b1a12;
+  --muted: #f0e3d3;
+  --muted-foreground: #614a3b;
+  --accent: #f0e3d3;
+  --accent-foreground: #2b1a12;
+  --destructive: #a8321f;
+  --destructive-foreground: #ffffff;
+  --border: #e8d8c6;
+  --input: #9c8472;
+  --ring: #2e6b62;
+  --ink: #e98fa6;
+  --ink-foreground: #2b1a12;
+  --ink-accent: #5a1f10;
+  --ink-success: #0f3a1c;
+  --ink-danger: #4a0c08;
+
+  --hero: #eba566;
+  --hero-a: #f2c14e;
+  --hero-b: #eba566;
+  --hero-c: #eba0b3;
+  --hero-glow: rgb(255 255 255 / 28%);
+  --hero-bloom: rgb(255 255 255 / 14%);
+  --hero-foreground: #2b1a12;
+  --hero-accent: #5a1f10;
+  --hero-success: #0f3a1c;
+  --hero-danger: #4a0c08;
+
+  --glow-amber: rgb(111 59 31 / 35%);
+  --glow-rose: rgb(233 143 166 / 45%);
+  --glow-hero: rgb(235 165 102 / 45%);
+  --page-glow-a: rgb(235 165 102 / 16%);
+  --page-glow-b: rgb(242 193 78 / 22%);
+
+  --amber-soft: #f8ecd0;
+  --amber-soft-foreground: #6b4a0a;
+  --plum-soft: #efe1d6;
+  --plum-soft-foreground: #5a3220;
+
+  --brand-soft: #f7e0e6;
+  --brand-soft-foreground: #8a2945;
+  --rose: #8a2945;
+  --rose-foreground: #ffffff;
+  --amber: #c9892a;
+  --success: #1e6e3e;
+  --success-foreground: #ffffff;
+  --success-soft: #e0efdf;
+  --stripe-a: #efe0cf;
+  --stripe-b: #f8efe4;
+  --chart-1: #6f3b1f;
+  --chart-2: #f2c14e;
+  --chart-3: #e98fa6;
+  --chart-4: #2e6b62;
+  --chart-5: #eba566;
+  --sidebar: #f6eee3;
+  --sidebar-foreground: #2b1a12;
+  --sidebar-primary: #6f3b1f;
+  --sidebar-primary-foreground: #fff8f0;
+  --sidebar-accent: #f0e3d3;
+  --sidebar-accent-foreground: #2b1a12;
+  --sidebar-border: #e8d8c6;
+  --sidebar-ring: #2e6b62;
+
+  --elevation-card: 0 1px 2px rgb(43 26 18 / 6%), 0 8px 22px -10px rgb(160 100 50 / 26%);
+  --elevation-raised: 0 2px 4px rgb(43 26 18 / 6%), 0 16px 32px -12px rgb(160 100 50 / 32%);
+  --elevation-overlay: 0 4px 8px rgb(43 26 18 / 8%), 0 28px 56px -16px rgb(111 59 31 / 28%);
+
+  --mood-morning-a: #f2c14e88;
+  --mood-morning-b: #fbeedb;
+  --mood-morning-c: #eba56633;
+  --mood-afternoon-a: #2e6b6222;
+  --mood-afternoon-b: #f9efe2;
+  --mood-afternoon-c: #f2c14e44;
+  --mood-evening-a: #eba56699;
+  --mood-evening-b: #f8e4e0;
+  --mood-evening-c: #e98fa655;
+  --mood-night-a: #6f3b1f22;
+  --mood-night-b: #f3e6da;
+  --mood-night-c: #e98fa633;
+
+  --brand-1: #6f3b1f;
+  --brand-2: #eba566;
+  --brand-3: #f2c14e;
+  --scrim: #1c120d;
+  --knob-ink: #6f3b1f;
+  --promo-light: rgb(255 241 214 / 55%);
+  --confetti-1: #f2c14e;
+  --confetti-2: #e98fa6;
+  --confetti-3: #eba566;
+  --confetti-4: #6f3b1f;
+  --confetti-5: #2e6b62;
+  --show-kaapi: block;
+}
+
+.dark[data-palette="kaapi"],
+.dark [data-palette="kaapi"] {
+  --background: #1c120d;
+  --foreground: #f5e9dc;
+  --card: #2a1c15;
+  --card-foreground: #f5e9dc;
+  --popover: #35251c;
+  --popover-foreground: #f5e9dc;
+  --primary: #f2c14e;
+  --primary-foreground: #1c120d;
+  --secondary: #35251c;
+  --secondary-foreground: #f5e9dc;
+  --muted: #35251c;
+  --muted-foreground: #c9b6a3;
+  --accent: #35251c;
+  --accent-foreground: #f5e9dc;
+  --destructive: #ff8a7a;
+  --destructive-foreground: #2a0e09;
+  --border: rgb(245 233 220 / 12%);
+  --input: #85705e;
+  --ring: #8fd3c6;
+  --ink: #e98fa6;
+  --ink-foreground: #1c120d;
+  --ink-accent: #4d1a0c;
+  --ink-success: #0c3018;
+  --ink-danger: #420b07;
+
+  --hero: #eba566;
+  --hero-a: #f2c14e;
+  --hero-b: #e9a060;
+  --hero-c: #e893a9;
+  --hero-glow: rgb(255 255 255 / 22%);
+  --hero-bloom: rgb(255 255 255 / 12%);
+  --hero-foreground: #1c120d;
+  --hero-accent: #4d1a0c;
+  --hero-success: #0c3018;
+  --hero-danger: #420b07;
+
+  --glow-amber: rgb(242 193 78 / 42%);
+  --glow-rose: rgb(233 143 166 / 40%);
+  --glow-hero: rgb(235 165 102 / 45%);
+  --page-glow-a: rgb(242 193 78 / 10%);
+  --page-glow-b: rgb(233 143 166 / 9%);
+
+  --amber-soft: #33280f;
+  --amber-soft-foreground: #f2c14e;
+  --plum-soft: #35251c;
+  --plum-soft-foreground: #e8cdb8;
+
+  --brand-soft: #3b2228;
+  --brand-soft-foreground: #f4bccb;
+  --rose: #f4bccb;
+  --rose-foreground: #2a1420;
+  --amber: #f2c14e;
+  --success: #7fd4a0;
+  --success-foreground: #0b2614;
+  --success-soft: #173424;
+  --stripe-a: #2e2019;
+  --stripe-b: #261912;
+  --chart-1: #f2c14e;
+  --chart-2: #e98fa6;
+  --chart-3: #eba566;
+  --chart-4: #8fd3c6;
+  --chart-5: #f5e9dc;
+  --sidebar: #2a1c15;
+  --sidebar-foreground: #f5e9dc;
+  --sidebar-primary: #f2c14e;
+  --sidebar-primary-foreground: #1c120d;
+  --sidebar-accent: #35251c;
+  --sidebar-accent-foreground: #f5e9dc;
+  --sidebar-border: rgb(245 233 220 / 12%);
+  --sidebar-ring: #8fd3c6;
+
+  --elevation-card: inset 0 1px 0 rgb(255 255 255 / 6%), 0 1px 2px rgb(0 0 0 / 45%), 0 10px 26px -12px rgb(0 0 0 / 65%);
+  --elevation-raised: inset 0 1px 0 rgb(255 255 255 / 8%), 0 2px 4px rgb(0 0 0 / 45%), 0 16px 34px -12px rgb(242 193 78 / 22%);
+  --elevation-overlay: inset 0 1px 0 rgb(255 255 255 / 9%), 0 4px 8px rgb(0 0 0 / 50%), 0 28px 56px -16px rgb(233 143 166 / 20%);
+
+  --mood-morning-a: #f2c14e24;
+  --mood-morning-b: #2a1c15cc;
+  --mood-morning-c: #eba56620;
+  --mood-afternoon-a: #8fd3c61f;
+  --mood-afternoon-b: #241810cc;
+  --mood-afternoon-c: #f2c14e1a;
+  --mood-evening-a: #eba56630;
+  --mood-evening-b: #2c1a16cc;
+  --mood-evening-c: #e98fa62a;
+  --mood-night-a: #6f3b1f55;
+  --mood-night-b: #1f1510cc;
+  --mood-night-c: #e98fa620;
+
+  --brand-1: #f2c14e;
+  --brand-2: #eba566;
+  --brand-3: #e98fa6;
+  --scrim: #0e0806;
+  --knob-ink: #6f3b1f;
+  --promo-light: rgb(255 241 214 / 40%);
+  --confetti-1: #f2c14e;
+  --confetti-2: #e98fa6;
+  --confetti-3: #eba566;
+  --confetti-4: #8fd3c6;
+  --confetti-5: #fff1d6;
+  --show-kaapi: block;
 }
 
 /*
@@ -514,7 +752,13 @@
 /* The turning ring around a chosen "What's on your mind?" tile: the brand's
    plum, rose and amber chasing each other (animate-ring-spin). */
 @utility food-ring {
-  background: conic-gradient(#552c4a, #914955, #c07a35, #f0c38f, #914955, #552c4a);
+  background: conic-gradient(var(--brand-1), var(--brand-2), var(--brand-3), var(--brand-2), var(--brand-1));
+}
+
+/* Shows only under Desi Kaapi (--show-kaapi follows the NEAREST
+   data-palette, so it's right inside the picker's preview cards too). */
+@utility only-kaapi {
+  display: var(--show-kaapi);
 }
 
 @utility rim-light {
@@ -596,6 +840,10 @@
     translate: -110% 0;
     animation: shine-sweep 5.5s var(--ease-out-expo) 1s infinite;
     pointer-events: none;
+  }
+  /* Desi Kaapi's tumbler: three wisps of steam rising, a beat apart. */
+  .motif-steam {
+    animation: motif-steam 3.2s ease-in-out infinite;
   }
   .animate-ring-spin {
     animation: ring-spin 5s linear infinite;
@@ -827,6 +1075,20 @@
   }
   100% {
     translate: 110% 0;
+  }
+}
+
+@keyframes motif-steam {
+  0% {
+    opacity: 0;
+    translate: 0 6%;
+  }
+  35% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+    translate: 0 -10%;
   }
 }
 

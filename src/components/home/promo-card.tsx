@@ -1,5 +1,6 @@
 import { Banknote, Clock, MapPin } from "lucide-react";
 import { BrandLogo } from "@/components/brand-logo";
+import { KaapiMotif } from "@/components/theme/kaapi-motif";
 
 /**
  * Home's promo card, shown while ordering is open (when it's closed, the
@@ -16,10 +17,11 @@ export function PromoCard({ slot }: { slot: { lead: string; time: string } }) {
       aria-labelledby="promo-heading"
       className="surface-hero glow-hero relative mt-6 overflow-hidden rounded-[1.75rem] bg-hero p-5 pr-28 text-hero-foreground"
     >
+      <KaapiMotif className="right-20 -bottom-6 size-24" />
       {/* Warm light behind the mascot. */}
       <span
         aria-hidden="true"
-        className="absolute top-1/2 -right-6 size-40 -translate-y-1/2 rounded-full bg-[radial-gradient(closest-side,rgb(240_195_143/0.45),transparent)]"
+        className="absolute top-1/2 -right-6 size-40 -translate-y-1/2 rounded-full bg-[radial-gradient(closest-side,var(--promo-light),transparent)]"
       />
       <h2 id="promo-heading" className="relative font-heading text-title font-bold">
         Hot food, at Main Gate
