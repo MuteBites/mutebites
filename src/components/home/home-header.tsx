@@ -1,7 +1,8 @@
-import Link from "next/link";
 import { Moon, Sun, Sunrise, Sunset, type LucideIcon } from "lucide-react";
 import { AboutMuteBitesDialog } from "@/components/home/about-mutebites-dialog";
 import { BrandLogo } from "@/components/brand-logo";
+import { Avatar, initialsOf } from "@/components/taste/avatar";
+import { OpenTasteSheetButton } from "@/components/taste/taste-sheet";
 import type { TimeOfDay } from "@/lib/date";
 
 // Each time of day gets its own ambient field (.mood-field.mood-<time> in
@@ -14,19 +15,24 @@ const MOOD: Record<TimeOfDay, { greeting: string; Icon: LucideIcon; question: st
   night: { greeting: "Still up", Icon: Moon, question: "Late night craving?" },
 };
 
-function initials(name: string) {
-  const parts = name.trim().split(/\s+/);
-  return ((parts[0]?.[0] ?? "") + (parts.length > 1 ? parts.at(-1)![0] : "")).toUpperCase();
-}
-
 /**
  * Home's header, over the time-of-day mood field: the logo (opens About)
- * and the student's initials in a lit plum circle (opens Profile) on top,
+ * and the student's avatar — their food icon, or their initials in a lit
+ * plum circle until they pick one — which opens the "Your taste" sheet;
  * then a small time-of-day line, "Hey, <first name>" as the headline and
  * the question of the hour under it. Trending moved out of
  * here into the "Campus favourites" row (popular-rail.tsx).
  */
-export function HomeHeader({ fullName, timeOfDay }: { fullName: string; timeOfDay: TimeOfDay }) {
+export function HomeHeader({
+  fullName,
+  timeOfDay,
+  avatar,
+}: {
+  fullName: string;
+  timeOfDay: TimeOfDay;
+  /** The taste profile's avatar id, or null for the student's initials. */
+  avatar: string | null;
+}) {
   const { greeting, Icon, question } = MOOD[timeOfDay];
   const firstName = fullName.trim().split(/\s+/)[0];
 
@@ -43,13 +49,12 @@ export function HomeHeader({ fullName, timeOfDay }: { fullName: string; timeOfDa
         <AboutMuteBitesDialog>
           <BrandLogo splashTarget className="size-10 rounded-xl" />
         </AboutMuteBitesDialog>
-        <Link
-          href="/profile"
-          aria-label="Your profile"
-          className="pressable surface-hero glow-hero flex size-11 items-center justify-center rounded-full bg-hero font-heading text-base font-bold text-hero-accent ring-2 ring-card outline-none focus-visible:ring-3 focus-visible:ring-ring/80"
+        <OpenTasteSheetButton
+          aria-label="Your avatar and taste"
+          className="pressable rounded-full outline-none focus-visible:ring-3 focus-visible:ring-ring/80"
         >
-          {initials(fullName)}
-        </Link>
+          <Avatar id={avatar} initials={initialsOf(fullName)} className="glow-hero size-11 text-base ring-2 ring-card" />
+        </OpenTasteSheetButton>
       </div>
       <p className="relative mt-8 flex items-center gap-1.5 text-sm font-semibold">
         <Icon className="size-4 shrink-0" aria-hidden="true" />

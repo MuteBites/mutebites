@@ -379,6 +379,12 @@ there are real — avoided):
     student, saved in the background; a "Liked dishes" row on Profile that
     opens each dish on its menu. The "Your favorite" tag moved under the
     photo to make room.
+17. **Taste profile and avatars** (one migration, `taste_profiles`,
+    applied early): a "Your taste" sheet — a food avatar (or keep your
+    initials), spice, diet, cravings — from the Home avatar, the campus
+    pass and Profile; cravings and hearts reorder Home's food tiles; mild
+    or extra-spicy answers offer a one-tap spice note in the cart; a
+    "Finish your profile" card on Home after a student's first order.
 
 ---
 
@@ -657,6 +663,11 @@ only write path is `submit_review()`. Never shown to other students.
 primary key `(user_id, dish_id)`. A student reads, adds and removes only
 their own hearts; no admin access, no counts anywhere — hearts are private.
 
+**`taste_profiles`** — one row per student (`user_id` PK, cascade):
+`avatar` (null = their initials), `spice_level` 1–5, `diet` veg / egg /
+nonveg, `cravings` (Home's food-type keys only), `updated_at`. Students
+read, create and update only their own row; no delete, no admin access.
+
 ### 7.2 Functions
 | Function | What | Who can call |
 |---|---|---|
@@ -738,7 +749,7 @@ see it again.
   hour's question under it, logo (tap → "About MuteBites" popup on a strip
   of the lit hero: what it is,
   cuisines, cash on delivery, UPI at pickup, Main Gate), and the
-  student's initials (→ Profile). (Until 15 Oct 2026 a flame button opened
+  student's avatar — initials until they pick a food icon (→ the "Your taste" sheet). (Until 15 Oct 2026 a flame button opened
   a "Trending this week" popup; the "Campus favourites" row replaced it.)
 - **"What's on your mind?"** food tiles, **sticky filter chips** and a
   **filter sheet** (diet, price, restaurants, popular, sold-out, sort),
@@ -845,6 +856,8 @@ button, and an amber "Rate your order" pill on rateable orders.
   no-shows (cancelled).
 - **Liked dishes** (after the milestones): every hearted dish as a row of
   photo cards that open it on its menu.
+- **Your taste** row (in Your details) and the campus-pass avatar both
+  open the "Your taste" sheet (avatar, spice, diet, cravings).
 - **Milestones:** six tiles in a 3×2 grid with "N of 6" and "Next up",
   locked tiles show a plum → amber progress ring, a lock and "N to go";
   unlocked ones glow with a light band sweeping across; new unlocks play
@@ -1541,3 +1554,4 @@ Run them in this order; each one assumes the ones before it. After #40,
 |---|---|---|---|
 | 41 | `20261015000000_ordering_open_closed_only.sql` | ordering is Open / Closed only; drops `ordering_schedule_open()` | Run |
 | 42 | `20261015010000_favorite_dishes.sql` | hearts (`favorite_dishes`) — Profile's "Liked dishes" | Run |
+| 43 | `20261015020000_taste_profiles.sql` | taste profile and avatars (`taste_profiles`) | Run (**edit the cravings list** to the new Home food types) |

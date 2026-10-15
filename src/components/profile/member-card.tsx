@@ -1,6 +1,8 @@
 import type { ReactNode } from "react";
 import { KaapiMotif } from "@/components/theme/kaapi-motif";
 import { PassArt } from "@/components/theme/pass-art";
+import { Avatar } from "@/components/taste/avatar";
+import { OpenTasteSheetButton } from "@/components/taste/taste-sheet";
 import { cn } from "@/lib/utils";
 
 /*
@@ -15,6 +17,7 @@ import { cn } from "@/lib/utils";
  */
 export function MemberCard({
   initials,
+  avatar,
   name,
   memberSince,
   rankBadge,
@@ -23,6 +26,8 @@ export function MemberCard({
   noShows,
 }: {
   initials: string;
+  /** The taste profile's avatar id, or null for the initials. */
+  avatar: string | null;
   name: string;
   memberSince: string;
   /** <WeeklyRankBadge/>, which renders nothing when it has nothing flattering to say. */
@@ -39,12 +44,14 @@ export function MemberCard({
       <PassArt className="top-3.5 right-4" />
       <p className="relative text-label text-hero-accent">Campus pass</p>
       <div className="relative mt-3 flex items-center gap-4">
-        <span className="relative block size-[4.5rem] shrink-0 rounded-full p-[3px]">
+        {/* Tapping the avatar opens "Your taste" (the page hosts the sheet). */}
+        <OpenTasteSheetButton
+          aria-label="Your avatar and taste"
+          className="pressable relative block size-[4.5rem] shrink-0 rounded-full p-[3px] outline-none focus-visible:ring-3 focus-visible:ring-hero-foreground"
+        >
           <span aria-hidden="true" className="food-ring animate-ring-spin absolute inset-0 rounded-full" />
-          <span className="relative flex size-full items-center justify-center rounded-full bg-hero font-heading text-2xl font-bold text-hero-accent ring-2 ring-hero">
-            {initials}
-          </span>
-        </span>
+          <Avatar id={avatar} initials={initials} tone="pass" className="relative size-full text-2xl ring-2 ring-hero" />
+        </OpenTasteSheetButton>
         <div className="min-w-0">
           <h1 className="truncate font-heading text-title font-bold">{name}</h1>
           <p className="text-sm text-hero-foreground/85">Member since {memberSince}</p>

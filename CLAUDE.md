@@ -179,6 +179,39 @@ Food delivery site for VIT-AP University students.
   15 Oct 2026): every dish the student hearted, newest first, as a
   snap-scrolling row of photo cards → the `?dish=` deep link; sold-out
   ones greyed; an empty hint pointing at the heart.
+- **Taste profile and avatars** (`public.taste_profiles`, see the schema
+  below; `src/lib/taste/`, `src/components/taste/`; ported from College
+  Bites, 15 Oct 2026): a student keeps their **initials** until they pick
+  one of 11 lucide food avatars (`AVATARS` in `src/lib/taste/options.ts` —
+  biryani pot, noodle bowl, chilli heat, drumstick, fried egg, burger,
+  chai, juice, grapes, ice cream, donut; with "Your initials" first the
+  picker is an even 4 × 3), each on a round tile in an audited palette
+  surface (`Avatar`, `src/components/taste/avatar.tsx`: hero / action /
+  selected-chip ink / blush / plum-soft / amber-soft; `tone="pass"` on the
+  campus pass) — no uploads. Plus three questions: spice 1–5 (Mild …
+  Extra spicy), diet (Veg / Egg is fine / Non-veg) and cravings (any of
+  Home's `FOOD_TYPES`). One "Your taste" bottom sheet per page
+  (`TasteSheetHost` on Home and Profile, opened through
+  `src/lib/taste/sheet-store.ts`) by the Home header avatar, the campus
+  pass avatar, Profile's "Your taste" row (`tasteSummary()`, e.g. "Gentle
+  · Veg · Biryani, Desserts", blush Edit pill) and the nudge; it saves in
+  one `saveTasteProfile()` upsert (`src/lib/taste/actions.ts`,
+  `revalidatePath("/", "layout")`). `getTasteProfile()`
+  (`src/lib/data/taste.ts`, request-cached) returns the defaults when
+  there's no row. What the answers do: cravings, then the food types of
+  the student's hearted dishes (`heartCravings()` → `cravingOrder()`),
+  lead "What's on your mind?" (`RestaurantList`'s `cravings`; the sheet
+  marks the heart-derived ones "From your hearts" while no cravings are
+  picked); spice 1–2 / 5 offers a one-tap blush "Less spicy please" /
+  "Extra spicy please" chip under the cart's notes box (`spiceNote()`,
+  passed from Home and the menu through `CartBar` → `CartSheet`) — never
+  typed in for them. The **"Finish your profile"** card
+  (`FinishProfileNudge`) floats above the bottom bar on Home once the
+  student has placed an order (`hasPlacedOrder()`) and hasn't answered all
+  three (`answeredCount()`), after the splash plus ~1.8 s; "Later" hides
+  it for 3 days, × for good, and saving in the sheet also snoozes it
+  (localStorage `mutebites.taste-nudge`); it hides while the cart bar or
+  the sheet is showing.
   Under the grid, a blush `MilestoneReward` card carries the client's
   offer: all six milestones = one free biryani of their choice. Earned →
   a WhatsApp link (`SUPPORT_PHONE`) with a prefilled claim message; once
@@ -223,8 +256,9 @@ Food delivery site for VIT-AP University students.
   `CartBar` (`hasTabBar`) sits just above it. Don't add `<TabBar />` to a
   page.
 - **Home layout** (redesign, 15 Oct 2026; `src/components/home/`): the
-  mood header (logo → About; the student's initials in a lit plum circle →
-  Profile; a small time-of-day line — "Good morning / afternoon / evening",
+  mood header (logo → About; the student's avatar — their initials in a
+  lit plum circle until they pick a food icon — → the "Your taste" sheet;
+  a small time-of-day line — "Good morning / afternoon / evening",
   "Still up" — then "Hey, <first name>" as the h1 in `text-heading`, then
   the hour's question), the closed banner while ordering is
   Closed, the pill search, **"What's on your mind?"** (`FoodTypeRail`:
@@ -792,6 +826,20 @@ student selects, inserts and deletes only their own rows; no update
 policy, no admin access, and no counts shown to anyone — hearts are
 private. Read by `getLikedDishes()` (`src/lib/data/favorites.ts`,
 request-cached; errors read as "no hearts").
+[`supabase/migrations/20261015020000_taste_profiles.sql`](supabase/migrations/20261015020000_taste_profiles.sql)
+(applied 15 Oct 2026 through the connector, ahead of the redesign's push)
+adds **`taste_profiles`** — one row per student, created the first time
+they save the "Your taste" sheet: `user_id` (primary key → `users`,
+cascade), `avatar` (nullable text, `^[a-z0-9-]{1,32}$` — null = show their
+initials; the app holds the list), `spice_level` (1–5, null = not
+answered), `diet` (`'veg' | 'egg' | 'nonveg'`, null = not answered),
+`cravings` (text array, only `FOOD_TYPES` keys — biryani, fried-rice,
+noodles, starters, curries, chicken, paneer, egg, juices, fruits,
+desserts; adding a food type to Home needs this check widened in a
+migration), `updated_at` (`set_updated_at` trigger). No row = the
+defaults. RLS (`(select auth.uid())` form): a student selects, inserts
+and updates only their own row; no delete policy, no admin access —
+nobody else ever sees it.
 [`supabase/migrations/20260922010000_seed_sugarcane_juice.sql`](supabase/migrations/20260922010000_seed_sugarcane_juice.sql)
 (data only — a sixth restaurant, **MuteBites Sugarcane Juice**: one
 section, one dish, "1 Litre Sugarcane Juice Bottle" ₹90, photos in

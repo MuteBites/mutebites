@@ -1,10 +1,14 @@
 import type { Metadata } from "next";
 import { ViewTransition } from "react";
-import { Bell, Lock, Mail, MapPin, Palette, SunMoon, Volume2 } from "lucide-react";
+import { Bell, Flame, Lock, Mail, MapPin, Palette, SunMoon, Volume2 } from "lucide-react";
 import { PalettePicker } from "@/components/theme/palette-picker";
 import { IconTile } from "@/components/icon-tile";
 import { MemberCard } from "@/components/profile/member-card";
 import { LikedDishes } from "@/components/profile/liked-dishes";
+import { initialsOf } from "@/components/taste/avatar";
+import { OpenTasteSheetButton, TasteSheetHost } from "@/components/taste/taste-sheet";
+import { getTasteProfile } from "@/lib/data/taste";
+import { heartCravings, tasteSummary } from "@/lib/taste/options";
 import { getUnlockedMilestones, MilestoneBadges } from "@/components/profile/milestone-badges";
 import { MilestoneUnlockWatcher } from "@/components/profile/milestone-unlock-watcher";
 import { NotificationToggle } from "@/components/notifications/notification-toggle";
@@ -27,10 +31,6 @@ import { SignOutButton } from "./sign-out-button";
 
 export const metadata: Metadata = { title: "Profile · MuteBites", robots: { index: false, follow: false } };
 
-function initials(name: string) {
-  const parts = name.trim().split(/\s+/);
-  return ((parts[0]?.[0] ?? "") + (parts.length > 1 ? parts.at(-1)![0] : "")).toUpperCase();
-}
 
 export default async function ProfilePage() {
   // Kicked off up front rather than after requireProfile() resolves —
@@ -41,14 +41,16 @@ export default async function ProfilePage() {
   const weeklyRankPromise = getMyWeeklyRank();
 
   const profile = await profilePromise;
-  const [orderInProgress, orderStats, totalRestaurants, weeklyRank, rewardClaimedAt, liked] = await Promise.all([
+  const [orderInProgress, orderStats, totalRestaurants, weeklyRank, rewardClaimedAt, liked, taste] = await Promise.all([
     hasActiveOrder(profile.id),
     getOrderStats(profile.id),
     totalRestaurantsPromise,
     weeklyRankPromise,
     getMilestoneRewardClaimedAt(profile.id),
     getLikedDishes(profile.id),
+    getTasteProfile(profile.id),
   ]);
+  const initials = initialsOf(profile.full_name);
 
   // Mirrors the precedence in profile/actions.ts's updatePhone — that
   // server check is the real enforcement; this just tells the UI which
@@ -68,10 +70,12 @@ export default async function ProfilePage() {
   return (
     <main className="mx-auto w-full max-w-md px-6 pt-6 pb-28">
       <MilestoneUnlockWatcher unlockedCsv={unlockedMilestones.join(",")} />
+      <TasteSheetHost taste={taste} initials={initials} fromHearts={heartCravings(liked)} />
       <ViewTransition {...NAV_TRANSITION}>
         <ViewTransition {...REVEAL_ENTER}>
           <MemberCard
-            initials={initials(profile.full_name)}
+            initials={initials}
+            avatar={taste.avatar}
             name={profile.full_name}
             memberSince={formatMonthYear(profile.created_at)}
             rankBadge={<WeeklyRankBadge rank={weeklyRank} />}
@@ -98,6 +102,21 @@ export default async function ProfilePage() {
               lockedReason={phoneLockReason}
               banned={profile.is_banned}
             />
+            <div className="flex items-center gap-3 px-5 py-4">
+              <IconTile>
+                <Flame className="size-5" aria-hidden="true" />
+              </IconTile>
+              <div className="min-w-0 flex-1">
+                <p className="text-label text-muted-foreground">Your taste</p>
+                <p className="mt-0.5 font-semibold">{tasteSummary(taste) || "Not set yet"}</p>
+              </div>
+              <OpenTasteSheetButton
+                aria-label="Edit your taste and avatar"
+                className="shrink-0 rounded-full bg-brand-soft px-3.5 py-1.5 text-sm font-semibold text-brand-soft-foreground outline-none hover:brightness-95 focus-visible:ring-2 focus-visible:ring-ring/80"
+              >
+                Edit
+              </OpenTasteSheetButton>
+            </div>
             <div className="flex items-center gap-3 px-5 py-4">
               <IconTile>
                 <Mail className="size-5" aria-hidden="true" />

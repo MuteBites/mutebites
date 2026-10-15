@@ -3,13 +3,14 @@
 import { useState, useTransition } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { Banknote, Loader2, MapPin, Phone, QrCode, X } from "lucide-react";
+import { Banknote, Loader2, MapPin, Phone, Plus, QrCode, X } from "lucide-react";
 import { EmptyState } from "@/components/empty-state";
 import { IconTile } from "@/components/icon-tile";
 import { CartLineRow } from "@/components/cart/cart-line-row";
 import { Sheet, SheetContent, SheetDescription, SheetTitle } from "@/components/ui/sheet";
 import { Textarea } from "@/components/ui/textarea";
 import { MAX_NOTES } from "@/lib/cart/limits";
+import { spiceNote } from "@/lib/taste/options";
 import { cartTotals, clearCart, reconcileCart, useCart, type Cart, lineKey } from "@/lib/cart/store";
 import { formatRupees } from "@/lib/format";
 import { placeOrder } from "@/lib/orders/actions";
@@ -25,6 +26,7 @@ export function CartSheet({
   profilePhone,
   orderingEnabled,
   closedNote,
+  spiceLevel = null,
 }: {
   open: boolean;
   onOpenChange: (open: boolean) => void;
@@ -33,6 +35,8 @@ export function CartSheet({
   /** Campus-wide kill switch — disables the "Place order" button when off. */
   orderingEnabled: boolean;
   closedNote?: string;
+  /** The taste profile's spice answer — offers a one-tap spice note. */
+  spiceLevel?: number | null;
 }) {
   const cart = useCart();
   const empty = cart.lines.length === 0;
@@ -71,6 +75,7 @@ export function CartSheet({
             profilePhone={profilePhone}
             orderingEnabled={orderingEnabled}
             closedNote={closedNote}
+            spiceLevel={spiceLevel}
             onPlaced={() => onOpenChange(false)}
           />
         )}
@@ -106,12 +111,14 @@ function CartContents({
   profilePhone,
   orderingEnabled,
   closedNote,
+  spiceLevel,
   onPlaced,
 }: {
   cart: Cart;
   profilePhone: string;
   orderingEnabled: boolean;
   closedNote?: string;
+  spiceLevel: number | null;
   onPlaced: () => void;
 }) {
   const router = useRouter();
@@ -120,6 +127,12 @@ function CartContents({
   const [error, setError] = useState<string | null>(null);
   const [placing, startPlacing] = useTransition();
   const { amount } = cartTotals(cart);
+  // From the taste profile: a one-tap note, offered until it's in the box.
+  const suggestedNote = spiceNote(spiceLevel);
+  const showSuggestion =
+    suggestedNote !== null &&
+    !notes.toLowerCase().includes(suggestedNote.toLowerCase()) &&
+    notes.length + suggestedNote.length + 2 <= MAX_NOTES;
 
   function submit() {
     setError(null);
@@ -174,6 +187,16 @@ function CartContents({
             className="min-h-14 resize-none rounded-2xl bg-card px-5 py-4 text-base shadow-card md:text-base"
           />
         </label>
+        {showSuggestion && (
+          <button
+            type="button"
+            onClick={() => setNotes((n) => (n.trim() ? `${n.trim()}. ${suggestedNote}` : suggestedNote))}
+            className="mt-2 inline-flex h-9 items-center gap-1.5 rounded-full bg-brand-soft px-3.5 text-sm font-semibold text-brand-soft-foreground outline-none hover:brightness-95 focus-visible:ring-3 focus-visible:ring-ring/80"
+          >
+            <Plus className="size-3.5" aria-hidden="true" />
+            {suggestedNote}
+          </button>
+        )}
 
         <div className="mt-4 divide-y overflow-hidden rounded-[1.5rem] border bg-card shadow-card">
           <div className="flex items-center gap-3.5 px-5 py-4">

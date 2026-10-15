@@ -39,6 +39,7 @@ export function MenuView({
   favoriteDishId,
   highlyReorderedDishIds,
   likedDishIds = [],
+  spiceLevel = null,
   focusDishId = null,
 }: {
   restaurant: Restaurant;
@@ -56,6 +57,8 @@ export function MenuView({
   highlyReorderedDishIds: Set<string>;
   /** Dishes on this menu the student has hearted (favorite_dishes). */
   likedDishIds?: string[];
+  /** The taste profile's spice answer — the cart's one-tap spice note. */
+  spiceLevel?: number | null;
   /** Dish to scroll to and briefly highlight on arrival (from ?dish=). */
   focusDishId?: string | null;
 }) {
@@ -340,6 +343,7 @@ export function MenuView({
         currentRestaurantId={restaurant.id}
         orderingEnabled={orderingEnabled}
         closedNote={closedNote}
+        spiceLevel={spiceLevel}
       />
 
       <PortionSheet

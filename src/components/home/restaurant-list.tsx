@@ -49,6 +49,7 @@ export function RestaurantList({
   dishOrderCounts,
   trendingDishes,
   slot,
+  cravings = [],
 }: {
   restaurants: Restaurant[];
   /** Every dish (getSearchableDishes) — searched and filtered on the client. */
@@ -65,6 +66,9 @@ export function RestaurantList({
   trendingDishes: TrendingDish[];
   /** deliveryWindow() for an order placed now — the promo card's delivery line. */
   slot: { lead: string; time: string };
+  /** Food-type keys to lead "What's on your mind?": the taste profile's
+   *  cravings, then what the student's hearted dishes point to (cravingOrder()). */
+  cravings?: string[];
 }) {
   const [query, setQuery] = useState("");
   const [sheetOpen, setSheetOpen] = useState(false);
@@ -112,8 +116,14 @@ export function RestaurantList({
   // (or, while everything is closed, something to browse).
   const foodTypes = useMemo(() => {
     const open = new Set(restaurants.filter((r) => r.is_active || !anyOpen).map((r) => r.id));
-    return FOOD_TYPES.filter((t) => dishes.some((d) => d.isAvailable && open.has(d.restaurantId) && isFoodType(d, t)));
-  }, [restaurants, dishes, anyOpen]);
+    const orderable = FOOD_TYPES.filter((t) =>
+      dishes.some((d) => d.isAvailable && open.has(d.restaurantId) && isFoodType(d, t)),
+    );
+    // What they said they crave first (in the order they picked), then what
+    // their hearts point to, then the rest as before.
+    const rank = (key: string) => (cravings.includes(key) ? cravings.indexOf(key) : cravings.length);
+    return [...orderable].sort((a, b) => rank(a.key) - rank(b.key));
+  }, [restaurants, dishes, anyOpen, cravings]);
   const showPopular = useMemo(() => popularCount(dishes, dishOrderCounts) >= POPULAR_MIN, [dishes, dishOrderCounts]);
 
   // Search first (every typed word must start a word in the dish, its

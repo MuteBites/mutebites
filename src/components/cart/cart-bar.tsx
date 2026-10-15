@@ -18,6 +18,7 @@ export function CartBar({
   currentRestaurantId,
   orderingEnabled,
   closedNote,
+  spiceLevel = null,
   hasTabBar = false,
 }: {
   profilePhone: string;
@@ -27,6 +28,8 @@ export function CartBar({
   orderingEnabled: boolean;
   /** Why ordering is shut ("Ordering opens again at 1:30 PM"), shown in the cart sheet. */
   closedNote?: string;
+  /** The taste profile's spice answer — offers a one-tap spice note in the cart. */
+  spiceLevel?: number | null;
   /** True on pages where the floating <TabBar/> shows (Home) — stacks the bar above it. */
   hasTabBar?: boolean;
 }) {
@@ -95,6 +98,7 @@ export function CartBar({
         profilePhone={profilePhone}
         orderingEnabled={orderingEnabled}
         closedNote={closedNote}
+        spiceLevel={spiceLevel}
       />
     </>
   );
