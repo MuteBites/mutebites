@@ -9,6 +9,7 @@ import { MenuView } from "@/components/menu/menu-view";
 import { getRestaurantCoverPhoto } from "@/lib/data/dish-photos";
 import { getLikedDishes } from "@/lib/data/favorites";
 import { getTasteProfile } from "@/lib/data/taste";
+import { getOffers } from "@/lib/data/offers";
 import { getFavoriteDishId, getTriedDishIds } from "@/lib/data/orders";
 import { menuItems } from "@/lib/menu/portions";
 import { getHighlyReorderedDishIds } from "@/lib/data/reorders";
@@ -46,7 +47,7 @@ export default async function RestaurantPage({ params, searchParams }: PageProps
   const focusDishId = typeof dish === "string" && isUuid(dish) ? dish : null;
 
   const profile = await profilePromise;
-  const [menu, ordering, triedDishIds, favoriteDishId, highlyReorderedDishIds, liked, taste] = await Promise.all([
+  const [menu, ordering, triedDishIds, favoriteDishId, highlyReorderedDishIds, liked, taste, offers] = await Promise.all([
     menuPromise,
     orderingPromise,
     getTriedDishIds(profile.id, id),
@@ -54,6 +55,7 @@ export default async function RestaurantPage({ params, searchParams }: PageProps
     highlyReorderedPromise,
     getLikedDishes(profile.id),
     getTasteProfile(profile.id),
+    getOffers(),
   ]);
   if (!menu) notFound();
 
@@ -155,6 +157,7 @@ export default async function RestaurantPage({ params, searchParams }: PageProps
               highlyReorderedDishIds={highlyReorderedDishIds}
               likedDishIds={liked.filter((d) => d.restaurantId === id).map((d) => d.id)}
               spiceLevel={taste.spiceLevel}
+              offers={offers}
               focusDishId={focusDishId}
             />
           </div>

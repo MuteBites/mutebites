@@ -22,6 +22,7 @@ import { getDishPhoto } from "@/lib/data/dish-photos";
 import { formatOrderTimestamp } from "@/lib/date";
 import { formatRupees } from "@/lib/format";
 import { itemLine, orderDetailsText, whatsAppConfirmation } from "@/lib/orders/admin-text";
+import { OFFERS } from "@/lib/offers";
 import { advanceLabel, formatOrderNumber, nextStatus, statusBadge } from "@/lib/orders/status";
 import { formatStoredMobile, whatsAppLink } from "@/lib/phone";
 import { toast } from "@/lib/toast/store";
@@ -108,9 +109,17 @@ export function OrderSummaryBox({ order, className }: { order: AdminOrder; class
         {order.items.map((item, i) => (
           <li key={i} className="flex items-baseline justify-between gap-3">
             <span className="min-w-0 font-medium">{itemLine(item)}</span>
-            <span className="shrink-0 text-muted-foreground tabular-nums">{formatRupees(item.subtotal)}</span>
+            <span className="shrink-0 text-muted-foreground tabular-nums">
+              {item.isFree ? "Free" : formatRupees(item.subtotal)}
+            </span>
           </li>
         ))}
+        {order.discountOffer && (
+          <li className="flex items-baseline justify-between gap-3 font-semibold text-success">
+            <span className="min-w-0">{OFFERS[order.discountOffer].short}</span>
+            <span className="shrink-0 tabular-nums">−{formatRupees(order.discountAmount)}</span>
+          </li>
+        )}
       </ul>
       {order.notes && <p className="mt-2 text-sm text-muted-foreground italic">“{order.notes}”</p>}
       <div className="mt-2.5 border-t border-foreground/10 pt-2.5">

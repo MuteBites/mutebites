@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { History, PackageX, Star, Users } from "lucide-react";
+import { BadgePercent, History, PackageX, Star, Users } from "lucide-react";
 import { MarkAllDeliveredButton } from "@/components/admin/mark-all-delivered-button";
 import { NewOrderAlerts } from "@/components/admin/new-order-alerts";
 import { OrderingKillSwitch } from "@/components/admin/ordering-kill-switch";
@@ -10,15 +10,17 @@ import { StatCards } from "@/components/admin/stat-cards";
 import { adminPill } from "@/components/admin/styles";
 import { getAdminOrders, getAdminRestaurants, getConfirmedOrderTimes, getOrderCounts } from "@/lib/data/admin";
 import { formatShortDay, formatTime, isPastDeliverySlot, slotEndTime, startOfTodayIST } from "@/lib/date";
+import { getOffers } from "@/lib/data/offers";
 import { getOrderingState } from "@/lib/data/settings";
 
 export default async function AdminPage() {
-  const [restaurants, orderCounts, ordering, orders, confirmedAll] = await Promise.all([
+  const [restaurants, orderCounts, ordering, orders, confirmedAll, offers] = await Promise.all([
     getAdminRestaurants(),
     getOrderCounts(startOfTodayIST()),
     getOrderingState(),
     getAdminOrders(),
     getConfirmedOrderTimes(),
+    getOffers(),
   ]);
 
   const activeRestaurants = restaurants.filter((r) => r.is_active).length;
@@ -64,6 +66,15 @@ export default async function AdminPage() {
         <Link href="/admin/sold-out" className={adminPill}>
           <PackageX className="size-4" aria-hidden="true" />
           Sold out
+        </Link>
+        <Link href="/admin/offers" className={adminPill}>
+          <BadgePercent className="size-4" aria-hidden="true" />
+          Offers
+          {offers.active.length > 0 && (
+            <span className="rounded-full bg-success-soft px-2 py-0.5 text-xs font-bold text-success">
+              {offers.active.length} on
+            </span>
+          )}
         </Link>
       </div>
 

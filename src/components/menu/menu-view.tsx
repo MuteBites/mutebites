@@ -21,6 +21,7 @@ import type { AddonOption, Dish, MenuSection, Restaurant } from "@/lib/data/type
 import { cn } from "@/lib/utils";
 import { getDishPhoto } from "@/lib/data/dish-photos";
 import { menuItems, type MenuItem } from "@/lib/menu/portions";
+import type { OffersState } from "@/lib/offers";
 import { AddonSheet } from "./addon-sheet";
 import { DishCard } from "./dish-card";
 import { PortionSheet, type PortionPick } from "./portion-sheet";
@@ -40,6 +41,7 @@ export function MenuView({
   highlyReorderedDishIds,
   likedDishIds = [],
   spiceLevel = null,
+  offers,
   focusDishId = null,
 }: {
   restaurant: Restaurant;
@@ -59,6 +61,8 @@ export function MenuView({
   likedDishIds?: string[];
   /** The taste profile's spice answer — the cart's one-tap spice note. */
   spiceLevel?: number | null;
+  /** Discount offers the admin has on — the cart's "Apply discount" bar. */
+  offers?: OffersState;
   /** Dish to scroll to and briefly highlight on arrival (from ?dish=). */
   focusDishId?: string | null;
 }) {
@@ -344,6 +348,7 @@ export function MenuView({
         orderingEnabled={orderingEnabled}
         closedNote={closedNote}
         spiceLevel={spiceLevel}
+        offers={offers}
       />
 
       <PortionSheet

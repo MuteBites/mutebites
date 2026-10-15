@@ -20,6 +20,7 @@ import { FinishProfileNudge } from "@/components/taste/finish-profile-nudge";
 import { TasteSheetHost } from "@/components/taste/taste-sheet";
 import { getLikedDishes } from "@/lib/data/favorites";
 import { getTasteProfile, hasPlacedOrder } from "@/lib/data/taste";
+import { getOffers } from "@/lib/data/offers";
 import { answeredCount, cravingOrder, heartCravings } from "@/lib/taste/options";
 
 export default async function Home({ searchParams }: PageProps<"/">) {
@@ -50,6 +51,7 @@ export default async function Home({ searchParams }: PageProps<"/">) {
     taste,
     placedOrder,
     liked,
+    offers,
   ] = await Promise.all([
     restaurantsPromise,
     menuStatsPromise,
@@ -63,6 +65,7 @@ export default async function Home({ searchParams }: PageProps<"/">) {
     getTasteProfile(profile.id),
     hasPlacedOrder(profile.id),
     getLikedDishes(profile.id),
+    getOffers(),
   ]);
   const fromHearts = heartCravings(liked);
   const initials = initialsOf(profile.full_name);
@@ -95,7 +98,7 @@ export default async function Home({ searchParams }: PageProps<"/">) {
           />
         </ViewTransition>
       </ViewTransition>
-      <CartBar profilePhone={profile.phone} orderingEnabled={orderingEnabled} closedNote={ordering.headline} spiceLevel={taste.spiceLevel} hasTabBar />
+      <CartBar profilePhone={profile.phone} orderingEnabled={orderingEnabled} closedNote={ordering.headline} spiceLevel={taste.spiceLevel} offers={offers} hasTabBar />
     </main>
   );
 }

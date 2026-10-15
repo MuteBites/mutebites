@@ -492,6 +492,45 @@ instead of straight from the dashboard, and its back-link points to
 `/admin/users` accordingly (`BackToDashboardLink` takes optional
 `href`/`label` overrides for this).
 
+**Offers** (`/admin/offers`, an "Offers" pill on the dashboard next to
+"Sold out" with an "N on" chip while any is on; ported from College Bites,
+15 Oct 2026; the switches are `OffersCard`,
+`src/components/admin/offers-card.tsx`): three switches, any mix on —
+**10% off**, **20% off** and **Buy 3 full biryanis, get 1 single free** —
+saved straight to `app_settings.offer_pct10 | offer_pct20 | offer_biryani`
+by `setOfferEnabled()` (`src/lib/admin/actions.ts`, admin-checked, RLS the
+boundary). **All three are for one restaurant**,
+`app_settings.offers_restaurant_id` — **Bheemasena Restaurant** (by
+decision; changed only in the database). While any is on, the cart sheet
+shows an **Apply discount** bar (`DiscountPicker`,
+`src/components/cart/discount-picker.tsx`): the live offers as a radio
+group, **one per order, never stacked**, each with what it saves; other
+restaurants' carts list them greyed out, "Only at Bheemasena Restaurant"
+(`place_order()` raises `offer_wrong_restaurant` too). 10% / 20% come off
+the paid items, add-ons included (rounded to the rupee). **Full and single
+biryanis are decided by menu section**, not by name (Bheemasena names them
+"Chicken Fry Biryani" / "Single Fry Biryani"): full = a dish in **Veg
+Biryani** or **Non-Veg Biryani**, single = a dish in **Single Biryani**
+(`FULL_BIRYANI_SECTIONS` / `SINGLE_BIRYANI_SECTION` in `src/lib/offers.ts`
+and the same names in `place_order()` — renaming one of those sections
+breaks the offer until both are updated). One free single per 3 paid full
+biryanis in the same order; the student picks which single(s); the cart's
+item total adds the free single at its menu price and the same amount comes
+off, so the student pays exactly the paid lines (never subtract the free
+value from the paid lines alone — College Bites' 4 Oct bug). Too few fulls
+→ "Add 2 more full biryanis to unlock". No per-student limit. `getOffers()`
+(`src/lib/data/offers.ts`, request-cached) sends the cart the switches, the
+restaurant, its full biryani ids and its single biryanis — the cart never
+guesses by name — and feeds Home, menus (via `MenuView` → `CartBar` →
+`CartSheet`) and the dashboard. `placeOrder()` passes `offer` /
+`freeItems`; an `offer_unavailable` / `offer_wrong_restaurant` refusal
+drops the offer (`offerEnded`) and refreshes. Every order view shows the
+offer line and free items ("Free" / "(free)"): the student's ticket, the
+admin card and detail page, WhatsApp text (`offerLine()`), the copy text
+(free items marked "(free)"), and the CSV export (Offer + Discount
+columns). A free biryani is left out of "Your usual" (`usual.ts`) so a
+re-order never adds it as paid.
+
 **Sold out** (`/admin/sold-out`, a "Sold out" pill on the dashboard) lists
 every dish on every menu — including the ones already off sale, since this
 is the only way to put one back — grouped by restaurant and section, with
@@ -860,6 +899,20 @@ migration), `updated_at` (`set_updated_at` trigger). No row = the
 defaults. RLS (`(select auth.uid())` form): a student selects, inserts
 and updates only their own row; no delete policy, no admin access —
 nobody else ever sees it.
+[`supabase/migrations/20261015030000_discount_offers.sql`](supabase/migrations/20261015030000_discount_offers.sql)
+(named `discount_offers` in the database's migration history; applied 15
+Oct 2026 through the connector — `place_order()` stays callable with the
+old four arguments, so the live code kept working) adds the **discount
+offers**: `app_settings.offer_pct10 / offer_pct20 / offer_biryani`
+(booleans, default off) and `offers_restaurant_id` (→ `restaurants`, on
+delete set null; set to Bheemasena by name); `orders.discount_offer`
+(`'pct10' | 'pct20' | 'biryani'` or null) and `orders.discount_amount`
+(≥ 0); `order_items.is_free`; and `place_order()` with two optional
+arguments, `p_offer` and `p_free_items` — see **Offers** under Admin
+access. `total_amount` is what the student pays: `sum(order_items.subtotal)
+- discount_amount`. A free single biryani is its own `order_items` row with
+`is_free = true` at its real menu price (history stays truthful); its value
+is the order's `discount_amount`.
 [`supabase/migrations/20260922010000_seed_sugarcane_juice.sql`](supabase/migrations/20260922010000_seed_sugarcane_juice.sql)
 (data only — a sixth restaurant, **MuteBites Sugarcane Juice**: one
 section, one dish, "1 Litre Sugarcane Juice Bottle" ₹90, photos in
@@ -1049,7 +1102,15 @@ RLS is enabled on every table:
   contact phone format, restaurant `is_active`, and every dish belonging to
   the restaurant and `is_available`; snapshots dish name/price from
   `dishes` (never from the client); leaves `status` at `pending`; and
-  computes `total_amount` itself. It also checks `public.ordering_is_open()`
+  computes `total_amount` itself. Offers: with `p_offer` set it raises
+  `offer_unavailable` if that switch is off, `offer_wrong_restaurant` if
+  the order isn't from `offers_restaurant_id`, and for `'biryani'` checks
+  every `p_free_items` entry is an available dish in this restaurant's
+  "Single Biryani" section with at most one per 3 paid dishes in its "Veg
+  Biryani" / "Non-Veg Biryani" sections (`offer_not_eligible`); it computes
+  the discount itself (10% / 20% of the paid items, `round()`ed, or the free
+  items' value). Free items without the biryani offer are `invalid_items`.
+  It also checks `public.ordering_is_open()`
   before anything else (raising `ordering_paused` while the admin has it
   Closed; `ordering_closed` came from the old schedule's `'auto'` and goes
   with it at launch) — enforced in the function itself, not just hidden in the UI,

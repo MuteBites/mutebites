@@ -31,6 +31,7 @@ import { formatOrderNumber, orderTimeline, type TimelineStepState } from "@/lib/
 import { createClient } from "@/lib/supabase/client";
 import { toast } from "@/lib/toast/store";
 import { cn } from "@/lib/utils";
+import { OFFERS } from "@/lib/offers";
 
 /** Native share sheet when available (mostly mobile); clipboard copy otherwise. */
 async function shareOrderToken(token: string) {
@@ -330,11 +331,21 @@ export function OrderTracking({
                         <span className="block text-muted-foreground">+ {item.extras.join(", ")}</span>
                       )}
                     </span>
-                    <span className="text-sm tabular-nums">{formatRupees(item.subtotal)}</span>
+                    {item.isFree ? (
+                      <span className="rounded-full bg-success-soft px-2.5 py-0.5 text-sm font-semibold text-success">Free</span>
+                    ) : (
+                      <span className="text-sm tabular-nums">{formatRupees(item.subtotal)}</span>
+                    )}
                   </li>
                 );
               })}
             </ul>
+            {initialOrder.discountOffer && (
+              <div className="mt-1 flex items-center justify-between gap-3 border-t pt-3 text-sm font-semibold text-success">
+                <span>{OFFERS[initialOrder.discountOffer].short}</span>
+                <span className="tabular-nums">−{formatRupees(initialOrder.discountAmount)}</span>
+              </div>
+            )}
             {initialOrder.notes && (
               <p className="mt-3 rounded-xl bg-secondary px-4 py-2.5 text-sm text-muted-foreground">
                 “{initialOrder.notes}”

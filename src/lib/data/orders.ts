@@ -4,6 +4,7 @@ import { cache } from "react";
 import { istDayKey } from "@/lib/date";
 import { REVIEW_WINDOW_MS } from "@/lib/reviews/limits";
 import { createClient } from "@/lib/supabase/server";
+import type { OfferKey } from "@/lib/offers";
 import { isUuid } from "@/lib/ids";
 import { ACTIVE_STATUSES } from "@/lib/orders/status";
 import type { OrderStatus } from "./types";
@@ -47,6 +48,8 @@ export type OrderItem = {
   unitPrice: number;
   quantity: number;
   subtotal: number;
+  /** A single biryani given free by the biryani offer (its value is in discountAmount). */
+  isFree: boolean;
 };
 
 type ItemAddonRows = { order_item_addons?: { addon_name: string }[] | null };
@@ -80,6 +83,9 @@ export type OrderDetail = {
   restaurantPhone: string;
   items: OrderItem[];
   dailyNumber: number;
+  /** The discount offer used, if any; totalAmount is already after it. */
+  discountOffer: OfferKey | null;
+  discountAmount: number;
 };
 
 type OrderSummaryRow = {
@@ -193,8 +199,10 @@ type OrderDetailRow = {
   notes: string | null;
   restaurant_id: string;
   restaurants: { name: string; phone: string } | null;
-  order_items: ({ id: string; dish_name: string; unit_price: number; addons_price: number; quantity: number; subtotal: number } & ItemAddonRows)[];
+  order_items: ({ id: string; dish_name: string; unit_price: number; addons_price: number; quantity: number; subtotal: number; is_free: boolean } & ItemAddonRows)[];
   daily_number: number;
+  discount_offer: OfferKey | null;
+  discount_amount: number;
   delivered_at: string | null;
   // One-to-one via order_reviews.order_id; PostgREST may return an object or a one-element array.
   order_reviews: ReviewRow | ReviewRow[] | null;
@@ -349,7 +357,7 @@ export const getOrder = cache(async function getOrder(
   const { data, error } = await supabase
     .from("orders")
     .select(
-      "id, status, total_amount, created_at, updated_at, delivered_at, contact_phone, notes, restaurant_id, restaurants(name, phone), order_items(id, dish_name, unit_price, addons_price, quantity, subtotal, order_item_addons(addon_name)), daily_number, order_reviews(note, created_at, order_item_ratings(order_item_id, rating))",
+      "id, status, total_amount, created_at, updated_at, delivered_at, contact_phone, notes, restaurant_id, restaurants(name, phone), order_items(id, dish_name, unit_price, addons_price, quantity, subtotal, is_free, order_item_addons(addon_name)), daily_number, discount_offer, discount_amount, order_reviews(note, created_at, order_item_ratings(order_item_id, rating))",
     )
     .eq("id", id)
     .eq("user_id", userId)
@@ -378,7 +386,10 @@ export const getOrder = cache(async function getOrder(
       unitPrice: Number(i.unit_price) + Number(i.addons_price ?? 0),
       quantity: i.quantity,
       subtotal: i.subtotal,
+      isFree: i.is_free,
     })),
     dailyNumber: data.daily_number,
+    discountOffer: data.discount_offer,
+    discountAmount: Number(data.discount_amount),
   };
 });

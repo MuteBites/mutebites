@@ -107,6 +107,31 @@ The order ticket promises a time based on **when the order was placed**:
 
 To change these times, ask the developer.
 
+### Offers (discounts)
+
+Tap **Offers** on the admin page (next to **Sold out**; it shows "2 on"
+while offers are running). **Every offer is for Bheemasena Restaurant
+orders only**: other restaurants' carts show them greyed out. The Offers
+page has three switches:
+
+- **10% off**: 10% off the whole Bheemasena order.
+- **20% off**: 20% off the whole Bheemasena order.
+- **Buy 3 full biryanis, get 1 single free**: for every 3 biryanis from
+  the **Veg Biryani** or **Non-Veg Biryani** sections in one order, the
+  student picks one biryani from the **Single Biryani** section free. They
+  pay the full price of the full biryanis; the single costs nothing.
+
+Turn on any you like; they take effect straight away. Students see an
+**Apply discount** bar in their cart and pick **one offer per order**.
+Turn a switch off to end that offer. Orders already placed keep their
+discount.
+
+Order cards show the offer and its saving (e.g. "10% off −₹42") and mark
+free biryanis "Free", and the WhatsApp and copy text say "(free)", so the
+restaurant knows not to charge for them. The total shown is what the
+student pays. If Bheemasena renames one of those three sections, ask the
+developer: the offer matches them by name.
+
 ## When something changes
 
 | You want to… | Do this |

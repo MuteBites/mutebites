@@ -7,6 +7,7 @@ import { cartTotals, useCart, lineKey } from "@/lib/cart/store";
 import { getDishPhoto } from "@/lib/data/dish-photos";
 import { formatRupees } from "@/lib/format";
 import { cn } from "@/lib/utils";
+import type { OffersState } from "@/lib/offers";
 import { CartSheet } from "./cart-sheet";
 
 /**
@@ -19,6 +20,7 @@ export function CartBar({
   orderingEnabled,
   closedNote,
   spiceLevel = null,
+  offers,
   hasTabBar = false,
 }: {
   profilePhone: string;
@@ -30,6 +32,8 @@ export function CartBar({
   closedNote?: string;
   /** The taste profile's spice answer — offers a one-tap spice note in the cart. */
   spiceLevel?: number | null;
+  /** Discount offers the admin has on (getOffers()) — the cart's "Apply discount" bar. */
+  offers?: OffersState;
   /** True on pages where the floating <TabBar/> shows (Home) — stacks the bar above it. */
   hasTabBar?: boolean;
 }) {
@@ -99,6 +103,7 @@ export function CartBar({
         orderingEnabled={orderingEnabled}
         closedNote={closedNote}
         spiceLevel={spiceLevel}
+        offers={offers}
       />
     </>
   );
