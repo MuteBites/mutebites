@@ -370,6 +370,10 @@ there are real — avoided):
     Tandoori Half / Full each show as one menu card with every size's
     price; "+" opens a "Choose a size" sheet. Each size stays its own dish,
     cart line and order item; the cart shows a size chip.
+15. **Team guide:** `docs/CLIENT-GUIDE.md`, a plain-English guide for the
+    MuteBites team (admin access, the admin app, Open / Closed, alerts,
+    handling orders, delivery slots, sold out, bans, rewards), written
+    for the app after this update and checked against the admin's labels.
 
 ---
 
@@ -575,8 +579,9 @@ never shows the previous student's cart.
 
 ### 6.5 Folder map
 - `src/app` — routes; `src/components/{admin,cart,home,menu,orders,profile,notifications,splash,theme,toast,ui,nav}`
-- `src/lib/{admin,cart,data,notifications,orders,reviews,sound,supabase,theme,toast}` plus `date.ts`, `ordering.ts`, `phone.ts`, `search.ts`, `site.ts`, `support.ts`, `format.ts`, `ids.ts`
+- `src/lib/{admin,cart,data,menu,notifications,orders,reviews,sound,supabase,theme,toast}` plus `date.ts`, `ordering.ts`, `phone.ts`, `search.ts`, `site.ts`, `support.ts`, `format.ts`, `ids.ts`
 - `supabase/migrations/` — the database, in order
+- `docs/MUTEBITES-BLUEPRINT.md` (this file), `docs/CLIENT-GUIDE.md` (the team's how-to)
 - `scripts/contrast-audit.mjs`, `scripts/build-brand-assets.mjs`
 - `public/MuteBites/<restaurant>/` photos, `public/MuteBites/covers/`, `public/brand/`, `public/sw.js`
 

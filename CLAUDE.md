@@ -476,6 +476,12 @@ silently re-enables the button.
   session, commit and migration), setup steps outside the code, lessons
   learned, and a porting checklist for rebuilding at another university.
   Update it alongside this file when something significant changes.
+- `docs/CLIENT-GUIDE.md` — the plain-English guide for the MuteBites team
+  (getting into admin, installing MuteBites Admin, Open / Closed, alerts,
+  handling an order, delivery slots, sold out, bans, rewards, support
+  details). It quotes the admin's button labels — keep it in step when an
+  admin flow or label changes. It names no admin email addresses (the repo
+  is public).
 - `src/app` — routes (App Router)
 - `src/app/robots.ts` — generates `/robots.txt` (everything but `/admin`
   crawlable). Excluded from the `src/proxy.ts` matcher like `favicon.ico`,
@@ -843,7 +849,9 @@ on `orders`).
   `pending → confirmed` and `confirmed → delivered` (`preparing` /
   `out_for_delivery` stay valid enum values but nothing in the app sets
   them; delivery timing runs on fixed ETA slots, not admin clicks) — plus
-  a side-path to `cancelled` from any non-terminal status, each one
+  a side-path to `cancelled` from any non-terminal status (the order card
+  only offers **Cancel order** while it's `pending` — once confirmed with
+  the restaurant, the way forward is Mark delivered), each one
   compare-and-swapped on the status the admin's screen showed, so a stale
   screen or two admins clicking at once can't skip a step or act on a
   status that's already changed. Also `daily_number` (`not null int`) —
