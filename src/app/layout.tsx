@@ -1,5 +1,5 @@
 import type { Metadata, Viewport } from "next";
-import { Fraunces, Plus_Jakarta_Sans } from "next/font/google";
+import { Fraunces, Inter, Plus_Jakarta_Sans, Poppins } from "next/font/google";
 import { AppSplash } from "@/components/splash/app-splash";
 import { SPLASH_DISABLED } from "@/components/splash/config";
 import { SPLASH_INIT_SCRIPT } from "@/components/splash/init-script";
@@ -22,6 +22,21 @@ const fraunces = Fraunces({
   variable: "--font-fraunces",
   subsets: ["latin"],
   axes: ["SOFT"],
+});
+
+// Desi Kaapi's faces (College Bites' Poppins + Inter). Not preloaded: a
+// browser only downloads them once Kaapi's tokens (--app-sans / -heading in
+// globals.css) actually use them, so MuteBites Plum never pays for them.
+const inter = Inter({
+  variable: "--font-inter",
+  subsets: ["latin"],
+  preload: false,
+});
+const poppins = Poppins({
+  variable: "--font-poppins",
+  subsets: ["latin"],
+  weight: ["500", "600", "700"],
+  preload: false,
 });
 
 export const metadata: Metadata = {
@@ -84,7 +99,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
       // "dark" class / colorScheme style, and the splash-init script
       // data-splash, before React hydrates — expected, not a real mismatch.
       suppressHydrationWarning
-      className={`${jakarta.variable} ${fraunces.variable} h-full antialiased`}
+      className={`${jakarta.variable} ${fraunces.variable} ${inter.variable} ${poppins.variable} h-full antialiased`}
     >
       <body className="min-h-full flex flex-col">
         {/* Raw inline <script>, not next/script: beforeInteractive inline

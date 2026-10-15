@@ -91,12 +91,28 @@ Food delivery site for VIT-AP University students.
   tokens for what used to be fixed plum: `--brand-1/2/3` (food ring,
   progress bars, milestone rings), `--scrim` (dialog / sheet backdrops,
   `bg-scrim/40–50`), `--knob-ink` (switch knob icon), `--promo-light`,
-  `--confetti-1…5`. Kaapi's own touch is `KaapiMotif`
-  (`src/components/theme/kaapi-motif.tsx`): a filter-coffee tumbler in its
-  davara with rising steam (`motif-steam`) on the promo, campus pass,
-  admin Today card and the picker — always in the markup, shown only under
-  Kaapi by `only-kaapi` (`display: var(--show-kaapi)`, which follows the
-  nearest data-palette). Adding a palette = a light and a dark block in
+  `--confetti-1…5`. **Desi Kaapi looks exactly like College Bites' Kaapi**
+  (by the user's request, 15 Oct 2026), so it also switches, per palette:
+  the **fonts** (`--app-sans` / `--app-heading`: Plum is Plus Jakarta +
+  Fraunces, Kaapi is Inter + Poppins — both loaded in `layout.tsx`, Kaapi's
+  with `preload: false` so Plum never downloads them); the **action
+  surface** (`--surface-primary`: Plum's lit amber, Kaapi's coffee →
+  cinnamon `--primary` → `--primary-2` with a top highlight); the **hero
+  surface** (`--hero-surface`: Plum's amber corner + rose bloom, Kaapi's
+  coffee wash with crema light); and Home's **headline gradient**
+  (`text-heading`, `--heading-a/b/c` — solid ink for Plum). Kaapi-only
+  pieces, all from College Bites: `KaapiMotif` (the tumbler in its davara
+  with rising steam — campus pass corner, admin Today card, celebration
+  overlay, picker), `PassArt` (`src/components/theme/pass-art.tsx`, the
+  small steaming tumbler by the "Campus pass" label), the **promo card's
+  campus scene and 9 s delivery run** (`PromoCard` renders a Plum and a
+  Kaapi version; `public/photos/promo/kaapi-scene.webp` + `kaapi-rider.webp`,
+  College Bites' art; `promo-*` CSS in `globals.css`) and the **sign-in
+  scene** (`src/app/login/kaapi-login-scene.tsx` + `login.css`: a tumbler
+  on a wooden table, beans drifting, three dishes floating as prints — Plum
+  keeps the photo mosaic). Shown by `only-kaapi` / `only-plum`
+  (`display: var(--show-kaapi|--show-plum)`, which follow the nearest
+  data-palette). Icons stay lucide in both (College Bites uses Phosphor). Adding a palette = a light and a dark block in
   `globals.css`, an entry in `palettes.ts`, and its blocks in the audit.
   Never hard-code a brand colour in a component — use a token.
 - **Home header mood field**: `HomeHeader` bleeds to the screen edges over

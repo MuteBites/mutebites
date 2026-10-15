@@ -105,8 +105,10 @@
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --font-sans: var(--font-jakarta);
-  --font-heading: var(--font-fraunces), var(--font-jakarta);
+  /* Per palette: Plum is Plus Jakarta + Fraunces; Desi Kaapi is College
+     Bites' Inter + Poppins (--app-sans / --app-heading in the palette blocks). */
+  --font-sans: var(--app-sans);
+  --font-heading: var(--app-heading);
   --color-ink: var(--ink);
   --color-ink-foreground: var(--ink-foreground);
   --color-ink-accent: var(--ink-accent);
@@ -313,6 +315,26 @@
   --confetti-4: #2f6b4f;
   --confetti-5: #552c4a;
   --show-kaapi: none;
+  --show-plum: block;
+  --app-sans: var(--font-jakarta);
+  --app-heading: var(--font-fraunces), var(--font-jakarta);
+  /* The second stop of the action gradient — Plum's surface-primary is a
+     lit single amber, so it's the same colour; Kaapi's runs coffee → cinnamon. */
+  --primary-2: #99581b;
+  /* Plum's surfaces (surface-primary / surface-hero read these). */
+  --surface-primary: linear-gradient(
+    165deg,
+    color-mix(in srgb, var(--primary) 100%, white 14%) 0%,
+    var(--primary) 55%,
+    color-mix(in srgb, var(--primary) 100%, black 8%) 100%
+  );
+  --hero-surface: radial-gradient(90% 80% at 100% 0%, var(--hero-glow), transparent 65%),
+    radial-gradient(70% 60% at 0% 100%, var(--hero-bloom), transparent 70%),
+    linear-gradient(150deg, var(--hero-a) 0%, var(--hero-b) 55%, var(--hero-c) 100%);
+  /* Home's headline gradient (text-heading) — solid ink for Plum. */
+  --heading-a: #3f2037;
+  --heading-b: #3f2037;
+  --heading-c: #3f2037;
 
   --mood-morning-a: #f0c38fcc;
   --mood-morning-b: #f8dedc;
@@ -396,6 +418,11 @@
   --elevation-card: inset 0 1px 0 rgb(255 255 255 / 6%), 0 1px 2px rgb(0 0 0 / 35%), 0 10px 26px -12px rgb(0 0 0 / 55%);
   --elevation-raised: inset 0 1px 0 rgb(255 255 255 / 7%), 0 2px 4px rgb(0 0 0 / 30%), 0 16px 32px -12px rgb(0 0 0 / 60%);
   --elevation-overlay: 0 4px 8px rgb(0 0 0 / 35%), 0 24px 48px -12px rgb(0 0 0 / 60%);
+
+  --primary-2: #d9974f;
+  --heading-a: #f5eae1;
+  --heading-b: #f5eae1;
+  --heading-c: #f5eae1;
 
   --mood-morning-a: #c07a3566;
   --mood-morning-b: #91495555;
@@ -522,6 +549,21 @@
   --confetti-4: #6f3b1f;
   --confetti-5: #2e6b62;
   --show-kaapi: block;
+  --show-plum: none;
+  --app-sans: var(--font-inter);
+  --app-heading: var(--font-poppins), var(--font-inter);
+  --primary-2: #9a4f2a;
+  /* College Bites' action gradient: a soft top highlight over coffee → cinnamon. */
+  --surface-primary: linear-gradient(180deg, rgb(255 255 255 / 16%), transparent 48%),
+    linear-gradient(115deg, var(--primary) 0%, var(--primary-2) 100%);
+  /* College Bites' Kaapi hero: a warm coffee wash, top to bottom, with a
+     little crema light. */
+  --hero-surface: radial-gradient(70% 60% at 88% 6%, rgb(255 255 255 / 28%), transparent 60%),
+    radial-gradient(60% 55% at 6% 100%, rgb(255 255 255 / 14%), transparent 70%),
+    linear-gradient(170deg, var(--hero-a) 0%, var(--hero-b) 55%, var(--hero-c) 100%);
+  --heading-a: #6f3b1f;
+  --heading-b: #874020;
+  --heading-c: #8f3350;
 }
 
 .dark[data-palette="kaapi"],
@@ -626,6 +668,10 @@
   --confetti-4: #8fd3c6;
   --confetti-5: #fff1d6;
   --show-kaapi: block;
+  --primary-2: #e98fa6;
+  --heading-a: #f2c14e;
+  --heading-b: #efa877;
+  --heading-c: #f0a3b6;
 }
 
 /*
@@ -690,12 +736,7 @@
  * clean flat look holds everywhere this ISN'T applied.
  */
 @utility surface-primary {
-  background-image: linear-gradient(
-    165deg,
-    color-mix(in srgb, var(--primary) 100%, white 14%) 0%,
-    var(--primary) 55%,
-    color-mix(in srgb, var(--primary) 100%, black 8%) 100%
-  );
+  background-image: var(--surface-primary);
 }
 
 @utility surface-ink {
@@ -710,10 +751,48 @@
 /* The lit plum hero (tokens --hero-* above). Layered over bg-hero, which
    stays as the flat fallback. */
 @utility surface-hero {
-  background-image:
-    radial-gradient(90% 80% at 100% 0%, var(--hero-glow), transparent 65%),
-    radial-gradient(70% 60% at 0% 100%, var(--hero-bloom), transparent 70%),
-    linear-gradient(150deg, var(--hero-a) 0%, var(--hero-b) 55%, var(--hero-c) 100%);
+  background-image: var(--hero-surface);
+}
+
+/* Home's headline: a gradient for Desi Kaapi (College Bites' text-sunset),
+   solid ink for Plum (all three stops the same). The audit checks every
+   stop on the ground and under the page sky. */
+@utility text-heading {
+  background-image: linear-gradient(100deg, var(--heading-a) 0%, var(--heading-b) 50%, var(--heading-c) 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  @media (forced-colors: active) {
+    background-image: none;
+    color: CanvasText;
+  }
+}
+
+/* Desi Kaapi's promo (PromoCard): College Bites' delivery run. The resting
+   state — what reduced motion shows: the rider parked at the foot of the
+   road (scene percentages), sitting on the road by its wheels; speed lines,
+   dust and the arrival burst hidden. The 9 s run is under no-preference. */
+.promo-route {
+  translate: 33% 93%;
+  pointer-events: none;
+}
+.promo-rider {
+  translate: -50% -100%;
+  transform-origin: 50% 100%;
+}
+.promo-trail,
+.promo-dust,
+.promo-burst {
+  opacity: 0;
+}
+.promo-streak {
+  stroke: currentColor;
+  stroke-width: 2.4;
+  stroke-linecap: round;
+}
+.promo-burst {
+  transform-box: fill-box;
+  transform-origin: center;
 }
 
 /*
@@ -759,6 +838,9 @@
    data-palette, so it's right inside the picker's preview cards too). */
 @utility only-kaapi {
   display: var(--show-kaapi);
+}
+@utility only-plum {
+  display: var(--show-plum);
 }
 
 @utility rim-light {
@@ -844,6 +926,45 @@
   /* Desi Kaapi's tumbler: three wisps of steam rising, a beat apart. */
   .motif-steam {
     animation: motif-steam 3.2s ease-in-out infinite;
+  }
+  /* Desi Kaapi's promo: one 9 s loop shared by every part — pull in
+     (0–9%), idle (9–18%), ride the S-bend to the gate (18–70%), ride in
+     (70–74%), the pin pops / rings / bursts (72–88%), rest, repeat. */
+  .promo-route {
+    animation: promo-route 9s linear 0.3s infinite both;
+  }
+  .promo-rider {
+    animation: promo-rider 9s linear 0.3s infinite both;
+  }
+  .promo-trail {
+    animation: promo-trail 9s linear 0.3s infinite both;
+  }
+  .promo-dust {
+    animation: promo-dust 9s ease-out 0.3s infinite both;
+  }
+  .promo-dust-2 {
+    animation-name: promo-dust-2;
+  }
+  .promo-pin {
+    animation: promo-pin 9s ease-in-out 0.3s infinite both;
+    transform-origin: 50% 85%;
+  }
+  .promo-pin-ring {
+    animation: promo-ring 9s ease-out 0.3s infinite both;
+  }
+  .promo-burst {
+    animation: promo-burst 9s ease-out 0.3s infinite both;
+  }
+  /* Engine buzz, always on (even idling). */
+  .promo-bob {
+    animation: promo-bob 0.32s ease-in-out infinite alternate;
+  }
+  .promo-streak {
+    animation: promo-streak 0.6s linear infinite;
+    transform-box: fill-box;
+  }
+  html:is([data-splash="play"], [data-splash="run"]) :is(.promo-scene, .promo-scene *) {
+    animation-play-state: paused;
   }
   .animate-ring-spin {
     animation: ring-spin 5s linear infinite;
@@ -1075,6 +1196,265 @@
   }
   100% {
     translate: 110% 0;
+  }
+}
+
+/* The route: the road's lane dashes, measured on the four scenes (scene
+   percentages, the rider's wheels on the lane). Segment times follow the
+   on-screen distance, slowing a little with distance (perspective). */
+@keyframes promo-route {
+  0% {
+    translate: 22% 110%;
+    animation-timing-function: cubic-bezier(0.16, 1, 0.3, 1);
+  }
+  9% {
+    translate: 33% 93%;
+  }
+  18% {
+    translate: 33% 93%;
+    animation-timing-function: cubic-bezier(0.55, 0.085, 0.68, 0.53);
+  }
+  24% {
+    translate: 45% 90%;
+  }
+  29.7% {
+    translate: 56% 87%;
+  }
+  35.1% {
+    translate: 66% 84%;
+  }
+  40.3% {
+    translate: 75% 79.5%;
+  }
+  45.5% {
+    translate: 83% 73.5%;
+  }
+  48.8% {
+    translate: 85.5% 66.5%;
+  }
+  52.7% {
+    translate: 81.5% 61.3%;
+  }
+  58.2% {
+    translate: 75.3% 58.5%;
+  }
+  64.7% {
+    translate: 68.5% 56.5%;
+  }
+  70% {
+    translate: 63.5% 54%;
+    animation-timing-function: ease-out;
+  }
+  74%,
+  100% {
+    translate: 65% 51%;
+  }
+}
+
+/* Size with distance — linear in the road's depth (it narrows to a
+   horizon at ~45% of the scene) — and the turn at the bend (x flips
+   through 0, which reads as the scooter swinging round). */
+@keyframes promo-rider {
+  0% {
+    opacity: 0;
+    scale: 1.06;
+    animation-timing-function: cubic-bezier(0.16, 1, 0.3, 1);
+  }
+  4% {
+    opacity: 1;
+  }
+  9%,
+  18% {
+    scale: 1;
+  }
+  24% {
+    scale: 0.94;
+  }
+  29.7% {
+    scale: 0.875;
+  }
+  35.1% {
+    scale: 0.81;
+  }
+  40.3% {
+    scale: 0.72;
+  }
+  45.5% {
+    scale: 0.59;
+  }
+  48.8% {
+    scale: 0.45;
+  }
+  52.7% {
+    scale: -0.34 0.34;
+  }
+  58.2% {
+    scale: -0.28 0.28;
+  }
+  64.7% {
+    scale: -0.24 0.24;
+  }
+  70% {
+    opacity: 1;
+    scale: -0.19 0.19;
+    animation-timing-function: ease-in;
+  }
+  74%,
+  100% {
+    opacity: 0;
+    scale: -0.07 0.07;
+  }
+}
+
+/* Speed lines only while moving. */
+@keyframes promo-trail {
+  0% {
+    opacity: 0;
+  }
+  2%,
+  7% {
+    opacity: 0.85;
+  }
+  10%,
+  18% {
+    opacity: 0;
+  }
+  21%,
+  68% {
+    opacity: 0.85;
+  }
+  71%,
+  100% {
+    opacity: 0;
+  }
+}
+
+/* A puff of dust as it pulls away from idle. */
+@keyframes promo-dust {
+  0%,
+  17% {
+    opacity: 0;
+    scale: 0.4;
+    translate: 0 0;
+  }
+  19% {
+    opacity: 0.8;
+    scale: 1;
+  }
+  26%,
+  100% {
+    opacity: 0;
+    scale: 1.9;
+    translate: -60% -30%;
+  }
+}
+
+@keyframes promo-dust-2 {
+  0%,
+  18% {
+    opacity: 0;
+    scale: 0.4;
+    translate: 0 0;
+  }
+  20.5% {
+    opacity: 0.7;
+    scale: 1;
+  }
+  28%,
+  100% {
+    opacity: 0;
+    scale: 2;
+    translate: -80% -50%;
+  }
+}
+
+@keyframes promo-pin {
+  0%,
+  70% {
+    scale: 1;
+    translate: 0 0;
+  }
+  72.5% {
+    scale: 1.32;
+    translate: 0 -14%;
+  }
+  76% {
+    scale: 0.94;
+    translate: 0 0;
+  }
+  79% {
+    scale: 1.04;
+  }
+  82%,
+  100% {
+    scale: 1;
+    translate: 0 0;
+  }
+}
+
+@keyframes promo-ring {
+  0%,
+  70% {
+    opacity: 0.6;
+    scale: 1;
+  }
+  72% {
+    opacity: 1;
+    scale: 0.8;
+  }
+  88% {
+    opacity: 0;
+    scale: 2.6;
+  }
+  94% {
+    opacity: 0;
+    scale: 1;
+  }
+  100% {
+    opacity: 0.6;
+    scale: 1;
+  }
+}
+
+@keyframes promo-burst {
+  0%,
+  71% {
+    opacity: 0;
+    scale: 0.5;
+    translate: 0 0;
+  }
+  73% {
+    opacity: 1;
+    scale: 1.2;
+  }
+  86%,
+  100% {
+    opacity: 0;
+    scale: 0.6;
+    translate: var(--dx) var(--dy);
+  }
+}
+
+@keyframes promo-bob {
+  from {
+    transform: translateY(0) rotate(-0.6deg);
+  }
+  to {
+    transform: translateY(-1.8%) rotate(0.6deg);
+  }
+}
+
+@keyframes promo-streak {
+  0% {
+    opacity: 0;
+    translate: 35% 0;
+  }
+  30% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+    translate: -45% 0;
   }
 }
 

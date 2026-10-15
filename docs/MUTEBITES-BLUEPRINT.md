@@ -352,8 +352,12 @@ there are real — avoided):
 11. **Final pass:** 404 / error / rating buttons as pills, a Home skeleton
     matching the new layout, this blueprint brought up to date.
 12. **Desi Kaapi theme:** a second palette (light + dark), a picker in
-    Profile and on the welcome form, the Kaapi tumbler motif; every fixed
-    plum colour in components became a per-palette token.
+    Profile and on the welcome form; every fixed plum colour in components
+    became a per-palette token. Then, at the user's request, made to look
+    exactly like College Bites' Kaapi: Poppins + Inter, the coffee →
+    cinnamon buttons, CB's hero wash, the gradient headline, CB's promo
+    campus scene with the delivery run, the campus-pass tumbler detail, the
+    Kaapi sign-in scene and the celebration motif (icons stay lucide).
 
 ---
 

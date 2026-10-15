@@ -60,6 +60,12 @@ const checks = [
   ['amber text (prices/links) on ground', 'primary', 1, [T('background')], 4.5],
   ['amber text on card', 'primary', 1, [T('card')], 4.5],
   ['button text on amber', 'primary-foreground', 1, [T('primary')], 4.5],
+  ['button text on the action gradient end (primary-2)', 'primary-foreground', 1, [T('primary-2')], 4.5],
+  // Home's headline gradient (text-heading): every stop on the ground and under the sky.
+  ...['heading-a', 'heading-b', 'heading-c'].flatMap((h) => [
+    [`headline ${h} on ground`, h, 1, [T('background')], 4.5],
+    [`headline ${h} under the page sky`, h, 1, [T('background'), T('page-glow-a'), T('page-glow-b')], 4.5],
+  ]),
   ['rose cuisines on card', 'rose', 1, [T('card')], 4.5],
   ['rose cuisines on ground (menu sheet)', 'rose', 1, [T('background')], 4.5],
   ['blush chip text', 'brand-soft-foreground', 1, [T('brand-soft')], 4.5],

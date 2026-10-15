@@ -1,0 +1,147 @@
+/*
+ * Desi Kaapi's sign-in scene (KaapiLoginScene) — College Bites' Kaapi
+ * scene: a cream-to-caramel morning with a hint of rose (espresso with a
+ * caramel horizon at night), a tumbler of filter coffee in its davara on a
+ * wooden table, steam rising, beans in the air, and real dishes floating in
+ * the sky like photo prints. Shown only under Kaapi (only-kaapi in the
+ * markup); MuteBites Plum keeps its photo mosaic. Purely decorative.
+ *
+ * Every colour is a variable on .login-sky, set per mode. The horizon (the
+ * table's top edge) sits at --horizon from the bottom. Motion only under
+ * `prefers-reduced-motion: no-preference`; it holds while the startup
+ * splash still covers the page.
+ */
+.login-sky {
+  --horizon: 30%;
+  --sky-a: #fbf4ea;
+  --sky-b: #f6dfc2;
+  --sky-c: #efc39a;
+  --sky-d: #e8a8b4;
+  --glow: rgb(242 193 78 / 55%);
+  --art: #4a2a1c;
+  --art-light: rgb(255 230 168 / 55%);
+  --steam: rgb(255 255 255 / 85%);
+  --bean: #6f3b1f;
+  --bean-line: rgb(255 230 168 / 60%);
+  --table-a: #a06a46;
+  --table-b: #5a3322;
+  --table-edge: #c48a5c;
+  --grain: rgb(0 0 0 / 9%);
+  --card-shadow: rgb(43 26 18 / 55%);
+  background: linear-gradient(
+    to bottom,
+    var(--sky-a) 0%,
+    var(--sky-b) 32%,
+    var(--sky-c) 56%,
+    var(--sky-d) calc(100% - var(--horizon))
+  );
+}
+.dark .login-sky {
+  --sky-a: #1c120d;
+  --sky-b: #2a1a12;
+  --sky-c: #4e2d1e;
+  --sky-d: #b0703f;
+  --glow: rgb(242 193 78 / 50%);
+  --art: #0e0806;
+  --art-light: rgb(242 193 78 / 45%);
+  --steam: rgb(245 233 220 / 50%);
+  --bean: #c98a5a;
+  --bean-line: rgb(28 18 13 / 60%);
+  --table-a: #3a2419;
+  --table-b: #1c120d;
+  --table-edge: #6f4a33;
+  --grain: rgb(255 255 255 / 5%);
+  --card-shadow: rgb(0 0 0 / 55%);
+}
+
+/* Warm glow sitting on the horizon behind the tumbler. */
+.login-glow {
+  bottom: var(--horizon);
+  translate: -50% 50%;
+  background: radial-gradient(closest-side, var(--glow), transparent);
+}
+
+/* The tumbler sits on the table's edge (sized by the sky's height, like the
+   dishes, so a short phone doesn't push it into them). */
+.login-tumbler {
+  bottom: calc(var(--horizon) - 3%);
+  height: 40%;
+  width: auto;
+  aspect-ratio: 1;
+  translate: -50% 0;
+}
+.login-table {
+  height: var(--horizon);
+  background:
+    linear-gradient(to bottom, var(--table-edge) 0 3px, transparent 3px),
+    repeating-linear-gradient(to bottom, transparent 0 9px, var(--grain) 9px 10px),
+    linear-gradient(to bottom, var(--table-a), var(--table-b));
+}
+
+/* Real dishes floating in the sky: framed like photo prints. */
+.login-card {
+  box-shadow:
+    0 0 0 3px rgb(255 255 255 / 92%),
+    0 18px 36px -14px var(--card-shadow);
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .login-glow {
+    animation: login-fade-in 1.6s var(--ease-out-expo) 0.2s both;
+  }
+  .login-tumbler {
+    animation: login-art-rise 1.2s var(--ease-out-expo) 0.2s both;
+  }
+  .login-bean {
+    animation: login-drift 5.5s ease-in-out infinite alternate;
+  }
+  .login-card {
+    animation:
+      login-card-in 0.9s var(--ease-spring) var(--card-delay, 0.4s) both,
+      login-drift var(--drift, 7s) ease-in-out calc(var(--card-delay, 0.4s) + 0.9s) infinite alternate;
+  }
+  /* Hold everything while the splash still covers the page. */
+  html:is([data-splash="play"], [data-splash="run"]) .login-sky * {
+    animation-play-state: paused;
+  }
+}
+
+@keyframes login-art-rise {
+  from {
+    opacity: 0;
+    translate: -50% 30%;
+  }
+  to {
+    opacity: 1;
+    translate: -50% 0;
+  }
+}
+
+@keyframes login-fade-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes login-card-in {
+  from {
+    opacity: 0;
+    scale: 0.7;
+  }
+  to {
+    opacity: 1;
+    scale: 1;
+  }
+}
+
+@keyframes login-drift {
+  from {
+    translate: 0 0;
+  }
+  to {
+    translate: 0 -10px;
+  }
+}

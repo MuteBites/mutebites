@@ -56,7 +56,7 @@ export function HomeHeader({ fullName, timeOfDay }: { fullName: string; timeOfDa
           {greeting}, {firstName}
         </span>
       </p>
-      <h1 className="relative mt-1 font-heading text-display font-bold">{heading}</h1>
+      <h1 className="text-heading relative mt-1 font-heading text-display font-bold">{heading}</h1>
     </header>
   );
 }
