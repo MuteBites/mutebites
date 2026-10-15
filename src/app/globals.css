@@ -966,6 +966,37 @@
   html:is([data-splash="play"], [data-splash="run"]) :is(.promo-scene, .promo-scene *) {
     animation-play-state: paused;
   }
+  /* WhatsApp group card (ChannelPopover, ported from College Bites): it
+     grows out of the header button's corner (Base UI sets
+     --transform-origin) with a spring, its rows rise in one after another
+     (--i), and it shrinks back fast. Until it's been opened once, the
+     button gives two wiggles after the splash. */
+  .channel-pop {
+    transition:
+      transform var(--dur-slow) var(--ease-spring),
+      opacity var(--dur-base) var(--ease-out-expo);
+  }
+  .channel-pop[data-starting-style] {
+    opacity: 0;
+    transform: scale(0.35);
+  }
+  .channel-pop[data-ending-style] {
+    opacity: 0;
+    transform: scale(0.6);
+    transition:
+      transform var(--dur-quick) var(--ease-in-quad),
+      opacity var(--dur-quick) var(--ease-in-quad);
+  }
+  .channel-pop .channel-rise {
+    animation: channel-rise var(--dur-slow) var(--ease-out-expo) both;
+    animation-delay: calc(90ms + var(--i, 0) * 45ms);
+  }
+  .channel-wiggle {
+    animation: channel-wiggle 0.9s var(--ease-out-expo) 1.2s 2 both;
+  }
+  html:is([data-splash="play"], [data-splash="run"]) .channel-wiggle {
+    animation-play-state: paused;
+  }
   .animate-ring-spin {
     animation: ring-spin 5s linear infinite;
   }
@@ -1083,6 +1114,36 @@
     transform: scale(0.97);
   }
 
+}
+
+@keyframes channel-rise {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@keyframes channel-wiggle {
+  0%,
+  100% {
+    transform: none;
+  }
+  15% {
+    transform: rotate(-14deg) scale(1.08);
+  }
+  30% {
+    transform: rotate(11deg) scale(1.08);
+  }
+  45% {
+    transform: rotate(-7deg);
+  }
+  60% {
+    transform: rotate(4deg);
+  }
 }
 
 @keyframes logo-hint {

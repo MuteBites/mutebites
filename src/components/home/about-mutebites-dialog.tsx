@@ -2,7 +2,9 @@
 
 import type { ReactNode } from "react";
 import { BrandLogo } from "@/components/brand-logo";
+import { MessageCircle } from "lucide-react";
 import { KaapiMotif } from "@/components/theme/kaapi-motif";
+import { WHATSAPP_GROUP_URL } from "@/lib/support";
 import { AboutCredits } from "./about-credits";
 import { Dialog, DialogContent, DialogDescription, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 
@@ -41,6 +43,15 @@ export function AboutMuteBitesDialog({ children }: { children: ReactNode }) {
         <p className="mt-4 text-label text-primary">
           Fast · Reliable · Affordable
         </p>
+        <a
+          href={WHATSAPP_GROUP_URL}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="mt-4 flex h-10 items-center gap-2 rounded-full border bg-card px-4 text-sm font-semibold shadow-card outline-none hover:border-ring/50 focus-visible:ring-3 focus-visible:ring-ring/80"
+        >
+          <MessageCircle className="size-5 text-success" aria-hidden="true" />
+          Join our WhatsApp group
+        </a>
         <AboutCredits />
       </DialogContent>
     </Dialog>

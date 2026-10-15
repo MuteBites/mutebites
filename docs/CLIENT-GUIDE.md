@@ -135,6 +135,14 @@ itself never takes payments.
 
 - Call / WhatsApp: **+91 82470 75652** (Profile → "Need help?", the order
   ticket's "Contact MuteBites", and the free-biryani claim message)
+- **WhatsApp group** (offers, open / closed, new dishes):
+  https://chat.whatsapp.com/D6gh4obvcvg9EffPxchpmj — students find it
+  from the WhatsApp button at the top of Home (it has a dot until they
+  open it), a card on Profile and the About popup (tap the logo). The site
+  tells students that group members can see their number. Post offers and
+  "we're open" there. A group holds at most 1,024 members; if you reset
+  the invite link, or switch to a WhatsApp channel, ask the developer to
+  update the site.
 - Email (privacy page): **mutebites5@gmail.com** — new-order push alerts
   also go to this account's devices.
 

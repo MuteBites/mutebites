@@ -288,6 +288,26 @@ Food delivery site for VIT-AP University students.
   card's cover loads at high priority). **Campus Closed turns every
   restaurant off**, so while none is on, tiles / filters / favourites
   browse every menu (`includeClosed`) instead of coming up empty.
+- **WhatsApp group** (`WHATSAPP_GROUP_URL` in `src/lib/support.ts`, added
+  15 Oct 2026; `src/components/channel/`, ported from College Bites'
+  channel): a **group** invite by the client's choice, not a channel —
+  members can see each other's numbers and post, and a group caps at
+  1,024 members — so the card never promises privacy; it says "Group
+  members can see your number". `ChannelPopover`: a round WhatsApp button
+  left of the Home header avatar; tapping it opens a Base UI popover card
+  (`z-50`) that grows out of the button's corner with a spring
+  (`.channel-pop`, transitions on `data-starting-style` /
+  `data-ending-style`, origin `--transform-origin`) and its rows rise in
+  one by one (`.channel-rise`, `--i` stagger): a hero strip (Kaapi's
+  tumbler under Kaapi), three perks, a lit "Join on WhatsApp" pill
+  (`target="_blank"`) and the number note. Until it's opened once on the
+  device (`mutebites.wa-group-seen`, a `useSyncExternalStore` store in
+  `channel-seen.ts`; server snapshot = seen, so nothing flashes) the
+  button carries a pulsing dot and wiggles twice after the splash
+  (`.channel-wiggle`, paused under the splash). Also on Profile
+  (`ChannelCard`, under "Need help?", a blush "Join" pill) and in the
+  About popup ("Join our WhatsApp group"). If the invite link is reset in
+  WhatsApp, update `WHATSAPP_GROUP_URL`.
 - **Dish deep links**: `/restaurants/<id>?dish=<dishId>` opens the menu
   scrolled to that dish with a brief rose outline (`focusDishId` in
   `MenuView`). Used by Home's dish grid (search / filters), the "Campus

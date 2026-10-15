@@ -1,6 +1,7 @@
 import { Moon, Sun, Sunrise, Sunset, type LucideIcon } from "lucide-react";
 import { AboutMuteBitesDialog } from "@/components/home/about-mutebites-dialog";
 import { BrandLogo } from "@/components/brand-logo";
+import { ChannelPopover } from "@/components/channel/channel-popover";
 import { Avatar, initialsOf } from "@/components/taste/avatar";
 import { OpenTasteSheetButton } from "@/components/taste/taste-sheet";
 import type { TimeOfDay } from "@/lib/date";
@@ -18,7 +19,8 @@ const MOOD: Record<TimeOfDay, { greeting: string; Icon: LucideIcon; question: st
 /**
  * Home's header, over the time-of-day mood field: the logo (opens About)
  * and the student's avatar — their food icon, or their initials in a lit
- * plum circle until they pick one — which opens the "Your taste" sheet;
+ * plum circle until they pick one — which opens the "Your taste" sheet,
+ * with the WhatsApp group button (ChannelPopover) beside it;
  * then a small time-of-day line, "Hey, <first name>" as the headline and
  * the question of the hour under it. Trending moved out of
  * here into the "Campus favourites" row (popular-rail.tsx).
@@ -49,12 +51,15 @@ export function HomeHeader({
         <AboutMuteBitesDialog>
           <BrandLogo splashTarget className="size-10 rounded-xl" />
         </AboutMuteBitesDialog>
-        <OpenTasteSheetButton
-          aria-label="Your avatar and taste"
-          className="pressable rounded-full outline-none focus-visible:ring-3 focus-visible:ring-ring/80"
-        >
-          <Avatar id={avatar} initials={initialsOf(fullName)} className="glow-hero size-11 text-base ring-2 ring-card" />
-        </OpenTasteSheetButton>
+        <div className="flex items-center gap-2.5">
+          <ChannelPopover />
+          <OpenTasteSheetButton
+            aria-label="Your avatar and taste"
+            className="pressable rounded-full outline-none focus-visible:ring-3 focus-visible:ring-ring/80"
+          >
+            <Avatar id={avatar} initials={initialsOf(fullName)} className="glow-hero size-11 text-base ring-2 ring-card" />
+          </OpenTasteSheetButton>
+        </div>
       </div>
       <p className="relative mt-8 flex items-center gap-1.5 text-sm font-semibold">
         <Icon className="size-4 shrink-0" aria-hidden="true" />

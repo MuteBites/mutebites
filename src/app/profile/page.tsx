@@ -14,6 +14,7 @@ import { MilestoneUnlockWatcher } from "@/components/profile/milestone-unlock-wa
 import { NotificationToggle } from "@/components/notifications/notification-toggle";
 import { SoundToggle } from "@/components/profile/sound-toggle";
 import { SupportCard } from "@/components/profile/support-card";
+import { ChannelCard } from "@/components/channel/channel-card";
 import { WeeklyRankBadge } from "@/components/profile/weekly-rank-badge";
 import { ThemeIconToggle } from "@/components/theme/theme-icon-toggle";
 import { getOrderStats, hasActiveOrder } from "@/lib/data/orders";
@@ -179,6 +180,7 @@ export default async function ProfilePage() {
           </div>
 
           <SupportCard />
+          <ChannelCard />
 
           <div className="mt-6">
             <SignOutButton />

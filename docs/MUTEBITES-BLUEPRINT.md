@@ -385,6 +385,11 @@ there are real — avoided):
     pass and Profile; cravings and hearts reorder Home's food tiles; mild
     or extra-spicy answers offer a one-tap spice note in the cart; a
     "Finish your profile" card on Home after a student's first order.
+18. **WhatsApp group:** a WhatsApp button beside the Home avatar pops a
+    card (offers, open / closed news, new dishes) with "Join on
+    WhatsApp"; also a card on Profile and a link in the About popup. It's
+    a group invite by the client's choice, so the card says members can
+    see each other's numbers instead of promising privacy.
 
 ---
 
