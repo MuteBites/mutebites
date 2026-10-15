@@ -23,10 +23,9 @@ export type OrderingState = {
 };
 
 /**
- * The switch's position. Until the launch migration drops it, the database
- * can still hold the old 'auto' (the live site's admin can set it); that
- * reads as whatever ordering_is_open() says it is right now, so the admin
- * sees an honest Open / Closed and can flip it from there.
+ * The switch's position. The database only allows 'open' / 'closed' since
+ * 20261015000000_ordering_open_closed_only.sql; anything else (it can't
+ * happen now) would read as whatever ordering_is_open() says — a safety net.
  */
 export function toOrderingMode(raw: string, open: boolean): OrderingMode {
   if (raw === "open" || raw === "closed") return raw;

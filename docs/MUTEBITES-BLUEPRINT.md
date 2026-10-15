@@ -78,7 +78,7 @@ produced.
 | Payment | **Cash on delivery only.** UPI is accepted informally at pickup; the app never processes payments. |
 | Sign-in | "Continue with Google" only |
 | Restaurants | 8: Bheemasena Restaurant (59 dishes), A1 Biryani Point (3), Bismillah Fruit Juice (12), Food Corner (24, was "MuteBites Chinese"), MuteBites Fresh Fruits (13), MuteBites Sugarcane Juice (1), Ramana Fast Food (16), Waffle Pops (65, with paid add-ons) |
-| Ordering | An **Open / Closed** switch the admin flips (since the redesign; the database still allows the old `'auto'` schedule until the launch migration). Delivery promises keep the slot times (by 1:30 / 7:30 / 8:15 PM). |
+| Ordering | An **Open / Closed** switch the admin flips (since the redesign; the old `'auto'` schedule was removed from the database on 15 Oct 2026, migration #41). Delivery promises keep the slot times (by 1:30 / 7:30 / 8:15 PM). |
 | Stack | Next.js 16.3.8 (App Router, customised build), React 19.2.8, TypeScript, Tailwind CSS v4, shadcn/ui on `@base-ui/react`, lucide-react icons, Supabase (Postgres, Auth, RLS, Realtime), `web-push`, Vercel (Hobby plan) |
 | Regions | Supabase `ap-south-1` (Mumbai), Vercel functions pinned to `bom1` (Mumbai) |
 | Admin alerts go to | mutebites5@gmail.com |
@@ -909,9 +909,11 @@ restaurant off. Delivery promises keep the old slot cut-offs (by decision):
 | after 7:00 PM | "to be confirmed" |
 
 `deliveryWindow()` / `slotEndTime()` (`src/lib/date.ts`). All times are IST
-(fixed +5:30). The database still allows `'auto'` and keeps
-`ordering_schedule_open()` until the launch migration (the live code still
-uses them); the redesign reads a stored `'auto'` as Open or Closed.
+(fixed +5:30). The old `'auto'` mode and `ordering_schedule_open()` were
+removed from the database on 15 Oct 2026 (migration #41,
+`20261015000000_ordering_open_closed_only.sql`), ahead of the redesign's
+deploy — until it's pushed, the old live admin's "Auto" button is refused
+(Open / Closed work).
 
 ### Tokens
 `#1, #2, …` per IST day, across all restaurants, from the database
@@ -1169,12 +1171,11 @@ entries in `dish-photos.ts`. Run it once.
 
 - ~~Switch the content policy to enforced~~ — done 14 Oct 2026 (redesign
   branch, ships with the redesign launch).
-- **At the redesign launch — drop Auto from the database** (SQL shown
-  first): set any stored `'auto'` to Open or Closed, restrict
-  `ordering_mode` to `'open' | 'closed'` (default `'open'`), simplify
-  `ordering_is_open()` to read it, drop `ordering_schedule_open()`, and
-  re-create `place_order()` without the `ordering_closed` branch. Not
-  before: the live site's code still sends `'auto'`.
+- ~~Drop Auto from the database~~ — done 15 Oct 2026 (migration #41, at
+  the user's request before the deploy; the mode was already Closed).
+  `place_order()` was left as it is — its `ordering_closed` branch can no
+  longer be reached.
+- **Push the redesign** (11 local commits) on the launch date.
 - **Raise Supabase's sign-in limit to ~100** (campus Wi-Fi).
 - **Fully automated WhatsApp confirmation** (WhatsApp Business Cloud API +
   webhook that confirms on "yes"): waiting on the client for cost (~₹0.115
@@ -1435,7 +1436,7 @@ in order, without the MuteBites menu data.
 
 ---
 
-## Appendix B: all 40 migrations
+## Appendix B: all 41 migrations
 
 "New project" says whether to run it when rebuilding elsewhere:
 **Run** (structure), **Skip** (MuteBites data or a one-off fix), or
@@ -1486,5 +1487,8 @@ in order, without the MuteBites menu data.
 
 Run them in this order; each one assumes the ones before it. After #40,
 `place_order()` is in its final form, so the earlier versions (#6, #9, #12,
-#21, #34) only matter as steps along the way. A **41st**, written for the
-redesign launch, removes the old `'auto'` ordering mode (see Still open).
+#21, #34) only matter as steps along the way.
+
+| # | File | What | New project |
+|---|---|---|---|
+| 41 | `20261015000000_ordering_open_closed_only.sql` | ordering is Open / Closed only; drops `ordering_schedule_open()` | Run |

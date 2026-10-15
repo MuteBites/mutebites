@@ -826,12 +826,13 @@ on `orders`).
   — the campus-wide **Open / Closed** switch the admin dashboard's Today
   card sets (since 14 Oct 2026 — no daily schedule in the app).
   Public-read (the student app needs to know whether it can order),
-  admin-only update. **Not yet migrated (do it at launch, SQL shown
-  first):** the database still allows `'auto' | 'open' | 'closed'`
-  (default `'auto'`) and `public.ordering_schedule_open()` still exists,
-  because the live site's code reads and sends `'auto'` until the redesign
-  ships. Until then the app reads a stored `'auto'` as Open or Closed by
-  what `ordering_is_open()` says (`toOrderingMode()`, `src/lib/ordering.ts`).
+  admin-only update. `'open' | 'closed'` only (default `'open'`) since
+  [`20261015000000_ordering_open_closed_only.sql`](supabase/migrations/20261015000000_ordering_open_closed_only.sql)
+  (applied 15 Oct 2026, ahead of the redesign's deploy — the old live
+  admin's "Auto" button is refused until the redesign is pushed), which
+  also dropped `public.ordering_schedule_open()`. `toOrderingMode()`
+  (`src/lib/ordering.ts`) still maps anything unexpected to Open / Closed
+  by what `ordering_is_open()` says — a harmless safety net.
   `public.ordering_is_open()` (security definer, callable by anon +
   authenticated) is the single source of truth — `place_order()` checks
   it, and the app reads it via `getOrderingState()`
