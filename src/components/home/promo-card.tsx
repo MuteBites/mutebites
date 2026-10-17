@@ -1,7 +1,6 @@
 import type { CSSProperties } from "react";
 import Image from "next/image";
-import { Banknote, ChefHat, Clock, MapPin, Motorbike } from "lucide-react";
-import { BrandLogo } from "@/components/brand-logo";
+import { Clock, MapPin } from "lucide-react";
 
 /**
  * Home's promo card, shown while ordering is open (when it's closed, the
@@ -10,14 +9,21 @@ import { BrandLogo } from "@/components/brand-logo";
  * only-kaapi), so it's right before hydration, and the hidden one's images
  * are never fetched (lazy + display: none).
  *
- *   MuteBites Plum  the pitch, the real delivery time an order placed now
- *                   gets (deliveryWindow(), passed in from the server so it
- *                   can't disagree with the ticket), two chips, a little
- *                   delivery run (kitchen → Main Gate on a dashed road,
- *                   the rider looping every 6 s and the pin popping as it
- *                   arrives — `plum-ride*`; reduced motion parks it at the
- *                   kitchen), and the mascot's ivory tile floating on the
- *                   right.
+ *   MuteBites Plum  the pitch and the real delivery time an order placed
+ *                   now gets (deliveryWindow(), passed in from the server so
+ *                   it can't disagree with the ticket) over Plum's own
+ *                   scene (17 Oct 2026, generated art cleaned of its edge
+ *                   fringe): a campus at sunset, the mascot on its scooter.
+ *                   The 9 s run: it pulls in facing you on the stretch of
+ *                   road right of the text (the left of the road would sit
+ *                   under the delivery time), pauses, turns side on and
+ *                   rides the S-curve (round the bend facing left,
+ *                   then right up to the tower), shrinking with distance;
+ *                   the pin pops at the tower door; the sun breathes and
+ *                   the doorway flickers warm (`plum-scene-*` in
+ *                   globals.css, sharing Kaapi's trail / dust / bob / pin /
+ *                   burst timings). Reduced motion parks it where it pulls
+ *                   in, facing you.
  *   Desi Kaapi      College Bites' promo exactly: the line and one sentence
  *                   on the left, and on the right the Kaapi campus scene
  *                   with a delivery run looping every 9 s — the rider pulls
@@ -33,43 +39,19 @@ export function PromoCard({ slot }: { slot: { lead: string; time: string } }) {
     <>
       <section
         aria-label="Hot food, at Main Gate"
-        className="only-plum surface-hero glow-hero relative mt-6 overflow-hidden rounded-[1.75rem] bg-hero p-5 pr-28 text-hero-foreground"
+        className="only-plum surface-hero glow-hero @container relative mt-6 min-h-[13.5rem] overflow-hidden rounded-[1.75rem] bg-hero p-5 text-hero-foreground"
       >
-        {/* Warm light behind the mascot. */}
-        <span
-          aria-hidden="true"
-          className="absolute top-1/2 -right-6 size-40 -translate-y-1/2 rounded-full bg-[radial-gradient(closest-side,var(--promo-light),transparent)]"
-        />
-        <h2 className="relative font-heading text-title font-bold">Hot food, at Main Gate</h2>
-        <p className="relative mt-1 text-sm text-hero-foreground/85">Order here, pay when you collect.</p>
-        <p className="relative mt-3 flex items-center gap-1.5 text-sm font-semibold">
-          <Clock className="size-4 shrink-0 text-hero-accent" aria-hidden="true" />
-          <span>
-            Order now · {slot.lead.toLowerCase()} <span className="text-hero-accent">{slot.time}</span>
-          </span>
-        </p>
-        <ul className="relative mt-3 flex flex-wrap gap-1.5 text-xs font-semibold">
-          <li className="inline-flex items-center gap-1 rounded-full bg-hero-foreground/10 px-2.5 py-1">
-            <MapPin className="size-3.5 shrink-0" aria-hidden="true" />
-            Free delivery
-          </li>
-          <li className="inline-flex items-center gap-1 rounded-full bg-hero-foreground/10 px-2.5 py-1">
-            <Banknote className="size-3.5 shrink-0" aria-hidden="true" />
-            Cash or UPI
-          </li>
-        </ul>
-        <div aria-hidden="true" className="relative mt-4 h-7 max-w-56">
-          <span className="absolute inset-x-6 top-1/2 border-t-2 border-dashed border-hero-foreground/30" />
-          <ChefHat className="absolute top-1/2 left-0 size-5 -translate-y-1/2 text-hero-foreground/85" />
-          <MapPin className="plum-ride-pin absolute top-1/2 right-0 -mt-2.5 size-5 text-hero-accent" />
-          <span className="plum-ride absolute top-1/2 left-5 -translate-y-[60%]">
-            <Motorbike className="size-5 text-hero-foreground" />
-          </span>
-        </div>
-        <div aria-hidden="true" className="absolute top-1/2 right-4 -translate-y-1/2">
-          <div className="animate-float">
-            <BrandLogo className="size-20 rotate-6 rounded-3xl shadow-raised ring-2 ring-hero-foreground/15" />
-          </div>
+        <PlumScene />
+        <div className="relative z-10 max-w-[52%] [text-shadow:0_1px_10px_rgb(58_27_49/0.55)] @[20rem]:max-w-[56%]">
+          <h2 className="font-heading text-title leading-tight font-bold">Hot food, at Main&nbsp;Gate</h2>
+          <p className="mt-1 text-sm text-hero-foreground/85">Order here, pay when you collect.</p>
+          <p className="mt-2.5 flex items-start gap-1.5 text-sm font-semibold">
+            <Clock className="mt-0.5 size-4 shrink-0 text-hero-accent" aria-hidden="true" />
+            {/* Short on purpose: the rider rides the road just right of this. */}
+            <span>
+              {slot.lead} <span className="text-hero-accent">{slot.time}</span>
+            </span>
+          </p>
         </div>
       </section>
 
@@ -164,6 +146,84 @@ function KaapiScene() {
               <path d="M8 20c-2-3 2-5 0-8s2-5 0-8" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" className="motif-steam" />
               <path d="M15 20c-2-3 2-5 0-8s2-5 0-8" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" className="motif-steam" style={{ animationDelay: "1.2s" }} />
             </svg>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+/* Plum's arrival burst, round the pin on the tower door (viewBox 100 × 61). */
+const PLUM_PIN = { cx: 74.9, cy: 30.5 };
+
+/** Plum's campus scene and delivery run (public/photos/promo/plum-*.webp). */
+function PlumScene() {
+  return (
+    <div aria-hidden="true" className="promo-scene absolute inset-x-0 bottom-0 aspect-[1200/736] w-full">
+      {/* The sun breathing, and the tower's lit doorway. */}
+      <span className="plum-scene-sun absolute top-[43.8%] left-[89%] aspect-square w-[34%] -translate-x-1/2 -translate-y-1/2 rounded-full bg-[radial-gradient(closest-side,rgb(246_210_164/0.55),transparent)]" />
+      <Image
+        src="/photos/promo/plum-scene.webp"
+        alt=""
+        fill
+        sizes="(max-width: 448px) 100vw, 400px"
+        className="object-contain"
+      />
+      <span className="plum-scene-door absolute top-[57%] left-[75.5%] aspect-square w-[9%] -translate-x-1/2 -translate-y-1/2 rounded-full bg-[radial-gradient(closest-side,rgb(255_214_150/0.8),transparent)]" />
+
+      <span className="promo-pin absolute top-[45%] left-[70.4%] flex w-[9%] flex-col items-center">
+        <MapPin
+          fill="currentColor"
+          stroke="white"
+          strokeWidth={1.5}
+          className="size-full text-hero-accent [filter:drop-shadow(0_2px_2px_rgb(0_0_0/0.3))]"
+        />
+        <span className="promo-pin-ring -mt-[18%] h-[14%] w-[70%] rounded-[50%] bg-hero-foreground/30" />
+      </span>
+      <svg viewBox="0 0 100 61" className="absolute inset-0 size-full overflow-visible text-white">
+        {BURST.map(([dx, dy], i) => (
+          <circle
+            key={i}
+            cx={PLUM_PIN.cx}
+            cy={PLUM_PIN.cy}
+            r="0.9"
+            fill="currentColor"
+            className="promo-burst"
+            style={{ "--dx": `${dx}px`, "--dy": `${dy}px` } as CSSProperties}
+          />
+        ))}
+      </svg>
+
+      {/* The run: .plum-scene-route moves along the road (scene percentages);
+          the rider sits on it by its wheels, scales with distance and flips
+          to face the way it rides. The front view shows while it pulls in. */}
+      <div className="plum-scene-route absolute inset-0">
+        <div className="plum-scene-rider absolute top-0 left-0 w-[20%]">
+          <div className="promo-bob relative">
+            <span className="absolute -bottom-[3%] left-[14%] h-[8%] w-[74%] rounded-[50%] bg-black/30 blur-[2px]" />
+            <svg viewBox="0 0 40 30" className="promo-trail absolute top-[40%] -left-[42%] w-[52%] overflow-visible text-hero-foreground">
+              <line x1="6" y1="6" x2="34" y2="6" className="promo-streak" style={{ animationDelay: "0s" }} />
+              <line x1="0" y1="14" x2="30" y2="14" className="promo-streak" style={{ animationDelay: "0.3s" }} />
+              <line x1="10" y1="22" x2="36" y2="22" className="promo-streak" style={{ animationDelay: "0.6s" }} />
+            </svg>
+            <span className="promo-dust absolute bottom-[2%] left-[4%] size-[16%] rounded-full bg-white/70" />
+            <span className="promo-dust promo-dust-2 absolute bottom-[8%] -left-[6%] size-[11%] rounded-full bg-white/60" />
+            <Image
+              src="/photos/promo/plum-rider.webp"
+              alt=""
+              width={360}
+              height={366}
+              sizes="(max-width: 448px) 20vw, 90px"
+              className="plum-scene-side relative h-auto w-full"
+            />
+            <Image
+              src="/photos/promo/plum-rider-front.webp"
+              alt=""
+              width={360}
+              height={466}
+              sizes="(max-width: 448px) 18vw, 80px"
+              className="plum-scene-front absolute bottom-0 left-[8%] h-auto w-[84%]"
+            />
           </div>
         </div>
       </div>

@@ -127,10 +127,25 @@ Food delivery site for VIT-AP University students.
   (`src/components/theme/pass-art.tsx`) by the "Campus pass" label: Plum's
   cloche whose lid lifts on its hinge now and then to let a puff of steam
   out (`pass-lid` / `pass-steam`, steam hidden at rest), Kaapi's small
-  steaming tumbler. Plum's promo card has a little **delivery run** under
-  its chips (chef's hat → dashed road → pin, `Motorbike` looping every 6 s,
-  the pin popping on arrival: `plum-ride` / `plum-ride-pin`; parked at the
-  kitchen under reduced motion). Plum's hero itself was lit up the same
+  steaming tumbler. Plum's promo card has **its own illustrated scene**
+  (`PlumScene` in `promo-card.tsx`, 17 Oct 2026; ChatGPT art the client
+  generated — sources and a rebuild note in `docs/art/plum-promo/`, edge
+  fringe removed with `scripts/clean-art-fringe.mjs`; shipped as
+  `public/photos/promo/plum-scene.webp`, `plum-rider.webp`,
+  `plum-rider-front.webp`): a campus at sunset filling the card, and the
+  mascot on its plum scooter running a 9 s loop — it pulls in **facing
+  you** on the stretch of road right of the text, pauses, turns side-on
+  (front → side cross-fade) and rides the S-curve, flipping at each bend
+  and shrinking with distance, to the tower door, where Kaapi's pin, ring
+  and burst play; the sun breathes and the doorway flickers
+  (`plum-route` / `plum-rider` / `plum-front` / `plum-side` / `plum-sun` /
+  `plum-door`; trail, dust, bob, pin and burst reuse Kaapi's `promo-*`).
+  The route is in scene percentages measured on this art's road. The text
+  column is 52% of the card below a 20rem card width and 56% above
+  (container query) with a soft plum text shadow, and the copy is short
+  ("Delivery by 7:30 PM"), so the rider never crosses the text at any
+  width from 320 to 448 px — re-check that if the copy or route changes.
+  Reduced motion parks it at the pull-in point, facing you. Plum's hero itself was lit up the same
   day (`--hero-a #69324f`, `--hero-glow` amber 22%, `--hero-bloom` rose
   52%, plus a soft white highlight top-left in `--hero-surface`;
   `--hero-danger` lightened to `#ffe9e4` to keep 4.5:1 on the chips).
@@ -314,8 +329,8 @@ Food delivery site for VIT-AP University students.
   (two-column photo cards → `?dish=`, 12 at a time) and the restaurants
   serving something in it. Browsing: `PromoCard` (only while ordering is
   open — the lit plum "Hot food, at Main Gate" with the real
-  `deliveryWindow()` for an order placed now, Free delivery / Cash or UPI
-  chips and the mascot tile floating), then `PopularRail` "Campus
+  `deliveryWindow()` for an order placed now over each palette's animated
+  scene — see Themes), then `PopularRail` "Campus
   favourites" (`buildRail()`: the week's trending dishes ranked #1, #2…,
   then signature dishes, `getSignatureDishes()`, to fill 8) — it replaced
   the flame-button Trending popup — then the restaurant cards (cuisine

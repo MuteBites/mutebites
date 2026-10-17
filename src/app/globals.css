@@ -775,6 +775,23 @@
   }
 }
 
+/* MuteBites Plum's promo (PlumScene): the resting state — what reduced
+   motion shows — is the rider parked where it pulls in (the stretch of
+   road right of the text column), facing you.
+   The run is under no-preference (plum-route / plum-rider below). */
+.plum-scene-route {
+  translate: 66.2% 83.7%;
+  pointer-events: none;
+}
+.plum-scene-rider {
+  translate: -50% -100%;
+  transform-origin: 50% 100%;
+  scale: 0.78;
+}
+.plum-scene-side {
+  opacity: 0;
+}
+
 /* Desi Kaapi's promo (PromoCard): College Bites' delivery run. The resting
    state — what reduced motion shows: the rider parked at the foot of the
    road (scene percentages), sitting on the road by its wheels; speed lines,
@@ -976,12 +993,26 @@
   .pass-steam {
     animation: pass-steam 4.5s ease-out 1.2s infinite;
   }
-  /* Plum's promo: the rider runs kitchen → Main Gate every 6 s. */
-  .plum-ride {
-    animation: plum-ride 6s var(--ease-in-quad) 0.6s infinite both;
+  /* Plum's promo scene (PlumScene): the 9 s run on its own road, the
+     front / side swap, the sun breathing and the doorway's warm flicker.
+     Trail, dust, bob, pin and burst reuse Kaapi's promo-* timings. */
+  .plum-scene-route {
+    animation: plum-route 9s linear 0.3s infinite both;
   }
-  .plum-ride-pin {
-    animation: plum-ride-pin 6s var(--ease-spring) 0.6s infinite both;
+  .plum-scene-rider {
+    animation: plum-rider 9s linear 0.3s infinite both;
+  }
+  .plum-scene-side {
+    animation: plum-side 9s linear 0.3s infinite both;
+  }
+  .plum-scene-front {
+    animation: plum-front 9s linear 0.3s infinite both;
+  }
+  .plum-scene-sun {
+    animation: plum-sun 6s ease-in-out infinite alternate;
+  }
+  .plum-scene-door {
+    animation: plum-door 3.4s ease-in-out infinite alternate;
   }
   /* Desi Kaapi's promo: one 9 s loop shared by every part — pull in
      (0–9%), idle (9–18%), ride the S-bend to the gate (18–70%), ride in
@@ -1583,6 +1614,142 @@
   }
 }
 
+@keyframes plum-route {
+  0% {
+    translate: 63% 112%;
+    animation-timing-function: cubic-bezier(0.16, 1, 0.3, 1);
+  }
+  9%,
+  18% {
+    translate: 66.2% 83.7%;
+    animation-timing-function: cubic-bezier(0.55, 0.085, 0.68, 0.53);
+  }
+  26% {
+    translate: 74.6% 78.9%;
+  }
+  32% {
+    translate: 77.7% 74.8%;
+  }
+  37% {
+    translate: 74.3% 71%;
+  }
+  44% {
+    translate: 67.6% 68.9%;
+  }
+  50% {
+    translate: 62.6% 67.5%;
+  }
+  55% {
+    translate: 57% 65.4%;
+  }
+  59% {
+    translate: 61% 64%;
+  }
+  64% {
+    translate: 67.5% 62.5%;
+  }
+  70% {
+    translate: 72% 61.4%;
+    animation-timing-function: ease-out;
+  }
+  74%,
+  100% {
+    translate: 74.5% 60.6%;
+  }
+}
+@keyframes plum-rider {
+  0% {
+    opacity: 0;
+    scale: 0.86;
+    animation-timing-function: cubic-bezier(0.16, 1, 0.3, 1);
+  }
+  4% {
+    opacity: 1;
+  }
+  9%,
+  18% {
+    scale: 0.78;
+  }
+  26% {
+    scale: 0.66;
+  }
+  32% {
+    scale: 0.56;
+  }
+  37% {
+    scale: -0.48 0.48;
+  }
+  44% {
+    scale: -0.42 0.42;
+  }
+  50% {
+    scale: -0.37 0.37;
+  }
+  55% {
+    scale: -0.33 0.33;
+  }
+  59% {
+    scale: 0.3;
+  }
+  64% {
+    scale: 0.26;
+  }
+  70% {
+    opacity: 1;
+    scale: 0.22;
+    animation-timing-function: ease-in;
+  }
+  74%,
+  100% {
+    opacity: 0;
+    scale: 0.08;
+  }
+}
+/* Front view while it pulls in and pauses, side view once it rides off. */
+@keyframes plum-front {
+  0%,
+  14% {
+    opacity: 1;
+  }
+  18%,
+  100% {
+    opacity: 0;
+  }
+}
+@keyframes plum-side {
+  0%,
+  14% {
+    opacity: 0;
+  }
+  18%,
+  100% {
+    opacity: 1;
+  }
+}
+@keyframes plum-sun {
+  from {
+    opacity: 0.55;
+    scale: 0.94;
+  }
+  to {
+    opacity: 1;
+    scale: 1.06;
+  }
+}
+@keyframes plum-door {
+  0% {
+    opacity: 0.5;
+  }
+  40% {
+    opacity: 0.9;
+  }
+  55% {
+    opacity: 0.65;
+  }
+  100% {
+    opacity: 1;
+  }
+}
 @keyframes motif-twinkle {
   0%,
   100% {
@@ -1619,38 +1786,6 @@
   100% {
     opacity: 0;
     translate: 0 -5px;
-  }
-}
-@keyframes plum-ride {
-  0% {
-    left: 1.25rem;
-    opacity: 0;
-  }
-  8% {
-    opacity: 1;
-  }
-  72%,
-  84% {
-    left: calc(100% - 2.75rem);
-    opacity: 1;
-  }
-  94%,
-  100% {
-    left: calc(100% - 2.75rem);
-    opacity: 0;
-  }
-}
-@keyframes plum-ride-pin {
-  0%,
-  70%,
-  100% {
-    scale: 1;
-  }
-  76% {
-    scale: 1.35;
-  }
-  82% {
-    scale: 1;
   }
 }
 @keyframes motif-steam {

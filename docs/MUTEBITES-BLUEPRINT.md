@@ -450,6 +450,15 @@ there are real — avoided):
 27. **Plum sign-in motion** (17 Oct 2026, Step B): the photo mosaic's
     columns drift, sparkles twinkle, a rose + amber glow where the sheet
     meets the food, and a lit plum cloche bubble on the sheet's edge.
+28. **Plum promo scene** (17 Oct 2026, Step C): the client generated the
+    art with ChatGPT from our prompts (campus at sunset, the mascot on a
+    plum scooter, side and front views). Background removal had left
+    red / yellow speckled fringes, cleaned with
+    `scripts/clean-art-fringe.mjs`; sources live in `docs/art/plum-promo/`
+    (not `public/`, so they don't ship). The rider pulls in facing you,
+    then rides the S-curve to the tower on a 9 s loop measured on this
+    road; positions were checked so it never crosses the text at any
+    phone width.
 
 ---
 
