@@ -405,6 +405,14 @@ there are real — avoided):
     so a new restaurant joins automatically). The biryani offer stays
     Bheemasena-only. `place_order()` re-created with only its restaurant
     check changed.
+21. **Admin menu editing** (17 Oct 2026, no migration — RLS already let
+    admins write `restaurants` / `dish_categories` / `dishes`): a "Menus"
+    pill on the dashboard → `/admin/menus` (every restaurant, "Add
+    restaurant") → `/admin/menus/[id]` (edit details; add / rename /
+    delete-when-empty sections; add / edit / delete dishes; reorder with
+    arrows). New restaurants start switched off, and Home hides any
+    restaurant with no dishes. Photos and add-ons still go through the
+    developer.
 
 ---
 

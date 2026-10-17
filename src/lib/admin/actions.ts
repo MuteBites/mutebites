@@ -2,6 +2,7 @@
 
 import { revalidatePath } from "next/cache";
 import { after } from "next/server";
+import { assertAdmin } from "@/lib/admin/assert";
 import { isPastDeliverySlot } from "@/lib/date";
 import { notifyUser, type PushPayload } from "@/lib/notifications/send";
 import type { OrderStatus } from "@/lib/data/types";
@@ -14,16 +15,6 @@ import { createClient } from "@/lib/supabase/server";
 
 export type AdminActionResult = { ok: true } | { ok: false; error: string };
 
-/**
- * Both actions below are only ever reachable from /admin, itself gated by
- * requireAdmin(). This is a friendly early exit for a direct call — the
- * real boundary is RLS: every write here also checks public.is_admin().
- */
-async function assertAdmin(): Promise<{ ok: false; error: string } | null> {
-  const { profile } = await getSessionProfile();
-  if (!profile || profile.role !== "admin") return { ok: false, error: "Admins only." };
-  return null;
-}
 
 /**
  * Turns one discount offer on or off (app_settings.offer_*). Students see

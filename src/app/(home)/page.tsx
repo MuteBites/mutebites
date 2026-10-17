@@ -85,7 +85,8 @@ export default async function Home({ searchParams }: PageProps<"/">) {
           {thursdaySpecial && <ThursdayNudge special={thursdaySpecial} />}
           {!orderingEnabled && <OrderingPausedBanner ordering={ordering} />}
           <RestaurantList
-            restaurants={restaurants}
+            // A restaurant the admin just added (no dishes yet) stays hidden.
+            restaurants={restaurants.filter((r) => dishes.some((d) => d.restaurantId === r.id))}
             orderingEnabled={orderingEnabled}
             closedChip={ordering.short}
             closedLine={ordering.headline}

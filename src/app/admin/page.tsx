@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { BadgePercent, History, PackageX, Star, Users } from "lucide-react";
+import { BadgePercent, BookOpen, History, PackageX, Star, Users } from "lucide-react";
 import { MarkAllDeliveredButton } from "@/components/admin/mark-all-delivered-button";
 import { NewOrderAlerts } from "@/components/admin/new-order-alerts";
 import { OrderingKillSwitch } from "@/components/admin/ordering-kill-switch";
@@ -62,6 +62,10 @@ export default async function AdminPage() {
         <Link href="/admin/reviews" className={adminPill}>
           <Star className="size-4" aria-hidden="true" />
           Reviews
+        </Link>
+        <Link href="/admin/menus" className={adminPill}>
+          <BookOpen className="size-4" aria-hidden="true" />
+          Menus
         </Link>
         <Link href="/admin/sold-out" className={adminPill}>
           <PackageX className="size-4" aria-hidden="true" />

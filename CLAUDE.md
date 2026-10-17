@@ -538,6 +538,32 @@ admin card and detail page, WhatsApp text (`offerLine()`), the copy text
 columns). A free biryani is left out of "Your usual" (`usual.ts`) so a
 re-order never adds it as paid.
 
+**Menus** (`/admin/menus`, a "Menus" pill on the dashboard, 17 Oct 2026):
+the admin keeps the menus — no migration needed for a new restaurant,
+section or dish. The list shows every restaurant (cover, dish / section
+counts, an "Empty" chip) and **Add restaurant** (`RestaurantFormDialog`:
+name, description, comma-separated cuisine tags, optional phone — empty =
+`SUPPORT_PHONE`); a new one is created `is_active = false` and opens in
+its editor. `/admin/menus/[id]` (`getAdminMenu()`,
+`src/lib/data/admin-menus.ts`; `MenuEditor` and dialogs in
+`src/components/admin/menus/`): Edit details, **Add section**, a pencil per
+section (`SectionDialog`: rename; delete only when empty), **Add dish to
+…** per section and tap a dish to edit (`DishFormDialog`: name, whole-rupee
+price, Veg / Non-veg, section, note, On sale / Sold out, Delete dish with
+an inline confirm — past orders keep it as snapshots), and **Reorder**,
+which swaps prices for up / down arrows (`reorderMenu()` renumbers
+`sort_order` 1…n). Actions live in `src/lib/admin/menu-actions.ts`
+(admin-checked through the shared `assertAdmin()`, `src/lib/admin/assert.ts`;
+RLS's `is_admin()` policies are the boundary; limits in `menu-limits.ts`):
+names unique per restaurant / menu (case-insensitive), a dish's section
+must belong to its restaurant, a moved dish goes to the end of its new
+section. The biryani offer's sections (`FULL_BIRYANI_SECTIONS` /
+`SINGLE_BIRYANI_SECTION` at `offers_restaurant_id`) can't be renamed or
+deleted there. Photos stay name-matched files (`dish-photos.ts`), so the
+dialogs warn that renaming a dish / restaurant that has one hides it.
+Add-ons (`addons` / `category_addons`) aren't editable there yet. Home
+hides any restaurant with no dishes at all (a just-added one).
+
 **Sold out** (`/admin/sold-out`, a "Sold out" pill on the dashboard) lists
 every dish on every menu — including the ones already off sale, since this
 is the only way to put one back — grouped by restaurant and section, with

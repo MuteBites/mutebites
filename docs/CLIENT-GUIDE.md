@@ -146,7 +146,11 @@ developer: the offer matches them by name.
 | See every past order | **Order history** — grouped by day, with search, restaurant and status filters, and **Export to Excel** (downloads what's on screen) |
 | Read ratings | **Reviews** — dish averages (lowest first) and notes, with "Needs attention" and "With notes" filters; only admins ever see these |
 | Hand over a free biryani | A student who unlocks all 6 milestones messages you on WhatsApp. After handing it over: **Users** → filter **Free biryani earned** → **Mark claimed** (there's an **Undo**) |
-| Change prices, add or rename dishes, extras or restaurants | Ask the developer — menu changes are made in the database |
+| Add a restaurant | **Menus** → **Add restaurant** (name, description, cuisine tags; the phone is optional). It starts switched off and hidden from students; add its menu, then **Restaurants** → **Turn on** |
+| Add, edit or delete a dish | **Menus** → the restaurant → **Add dish to …** under a section, or tap a dish to change its name, price, veg / non-veg, section, note or sold out, or **Delete dish** |
+| Add or rename a menu section | **Menus** → the restaurant → **Add section**, or the pencil next to a section (a section can be deleted once it's empty) |
+| Change the order of sections or dishes | **Menus** → the restaurant → **Reorder**, then the up / down arrows, then **Done** |
+| Photos, extras (add-ons), or the biryani offer's sections | Ask the developer. Photos are matched by name, so renaming a dish or restaurant that has a photo hides it until the developer updates it |
 
 ## Payments
 
