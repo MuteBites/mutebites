@@ -984,7 +984,9 @@ restaurant.
 [`supabase/migrations/20261017010000_menu_photos.sql`](supabase/migrations/20261017010000_menu_photos.sql)
 (applied 17 Oct 2026) adds **`dishes.photo_path`** and
 **`restaurants.cover_path`** (nullable text, checked against
-`dishes|covers/<uuid>-<ms>.webp`; null = the name-matched file) and the
+`dishes|covers/<uuid>-<ms>.webp`, widened to `.webp|.jpg` by
+[`20261017020000_menu_photos_allow_jpg.sql`](supabase/migrations/20261017020000_menu_photos_allow_jpg.sql)
+for Safari's JPEG fallback; null = the name-matched file) and the
 **`menu-photos`** Storage bucket (public, 2 MB, WebP / JPEG / PNG) with
 `storage.objects` policies letting only admins (`is_admin()`) insert,
 update and delete in it; viewing needs none (public bucket). The existing

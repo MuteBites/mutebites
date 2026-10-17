@@ -1605,3 +1605,4 @@ Run them in this order; each one assumes the ones before it. After #40,
 | 44 | `20261015030000_discount_offers.sql` | discount offers + final `place_order()` (add-ons, rate limits, offers) | Run (**edit the restaurant name and the biryani section names**) |
 | 45 | `20261017000000_offers_all_restaurants.sql` | 10% / 20% at every restaurant with per-restaurant switches (`offer_restaurant_exclusions`); `place_order()` again | Run (**edit the biryani section names** like #44) |
 | 46 | `20261017010000_menu_photos.sql` | admin photo uploads: `photo_path` / `cover_path` + the `menu-photos` bucket and its policies | Run |
+| 47 | `20261017020000_menu_photos_allow_jpg.sql` | photo paths may end `.jpg` too (Safari can't encode WebP) | Run |
