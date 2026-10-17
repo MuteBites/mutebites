@@ -4,7 +4,7 @@ import { useState } from "react";
 import Image from "next/image";
 import { ArrowRight } from "lucide-react";
 import { cartTotals, useCart, lineKey } from "@/lib/cart/store";
-import { getDishPhoto } from "@/lib/data/dish-photos";
+import { getDishPhoto, isUploadedPhoto } from "@/lib/data/dish-photos";
 import { formatRupees } from "@/lib/format";
 import { cn } from "@/lib/utils";
 import type { OffersState } from "@/lib/offers";
@@ -67,7 +67,7 @@ export function CartBar({
                       className="animate-pop-in relative flex size-11 items-center justify-center overflow-hidden rounded-full bg-hero-foreground/15 font-heading text-lg font-bold ring-2 ring-hero"
                     >
                       {photo ? (
-                        <Image src={photo} alt="" fill sizes="44px" className="object-cover" />
+                        <Image src={photo} alt="" fill sizes="44px" unoptimized={isUploadedPhoto(photo)} className="object-cover" />
                       ) : (
                         line.name.trim().charAt(0)
                       )}

@@ -1,6 +1,6 @@
 "use server";
 
-import { revalidatePath } from "next/cache";
+import { revalidatePath, updateTag } from "next/cache";
 import { assertAdmin } from "@/lib/admin/assert";
 import { isUuid } from "@/lib/ids";
 import { FULL_BIRYANI_SECTIONS, SINGLE_BIRYANI_SECTION } from "@/lib/offers";
@@ -8,6 +8,7 @@ import { normalizeIndianMobile } from "@/lib/phone";
 import { createClient } from "@/lib/supabase/server";
 import { SUPPORT_PHONE } from "@/lib/support";
 import { MENU_LIMITS } from "@/lib/admin/menu-limits";
+import { MENU_PHOTOS_TAG } from "@/lib/data/uploaded-photos";
 
 // The admin's own menu editing (/admin/menus): add restaurants, sections
 // and dishes, edit and reorder them. RLS already lets admins write
@@ -19,8 +20,11 @@ export type MenuActionResult = { ok: true; id?: string } | { ok: false; error: s
 const OFFER_SECTIONS = [...FULL_BIRYANI_SECTIONS, SINGLE_BIRYANI_SECTION];
 
 function refresh() {
+  updateTag(MENU_PHOTOS_TAG); // uploaded photos are keyed by name, so renames count too
   revalidatePath("/", "layout"); // Home, menus, search, admin pages
 }
+
+const PHOTO_BUCKET = "menu-photos";
 
 function cleanText(value: unknown, max: number): string | null {
   if (typeof value !== "string") return null;
@@ -341,9 +345,52 @@ export async function deleteDish(dishId: string): Promise<MenuActionResult> {
   if (!isUuid(dishId)) return { ok: false, error: "Unknown dish." };
 
   const supabase = await createClient();
+  const { data: dish } = await supabase.from("dishes").select("photo_path").eq("id", dishId).maybeSingle();
   const { error } = await supabase.from("dishes").delete().eq("id", dishId);
   if (error) return { ok: false, error: "Couldn't delete the dish. Please try again." };
+  if (dish?.photo_path) await supabase.storage.from(PHOTO_BUCKET).remove([dish.photo_path]);
 
   refresh();
   return { ok: true };
+}
+
+// Photos --------------------------------------------------------------------
+// The browser shrinks the photo and uploads it straight to the menu-photos
+// bucket with the admin's own session (Storage policies: admins only), at
+// a new name each time ("dishes/<id>-<ms>.webp"), then calls one of these
+// to point the row at it. The previous file is deleted. Passing null
+// removes the uploaded photo (the name-matched file, if any, shows again).
+
+async function setPhoto(
+  table: "dishes" | "restaurants",
+  column: "photo_path" | "cover_path",
+  folder: "dishes" | "covers",
+  id: string,
+  path: string | null,
+): Promise<MenuActionResult> {
+  const denied = await assertAdmin();
+  if (denied) return denied;
+  if (!isUuid(id)) return { ok: false, error: "Unknown item." };
+  if (path !== null && (typeof path !== "string" || !new RegExp(String.raw`^${folder}/${id}-[0-9]{10,13}\.(webp|jpg)$`).test(path))) {
+    return { ok: false, error: "That upload didn't work. Please try again." };
+  }
+
+  const supabase = await createClient();
+  const { data: row } = await supabase.from(table).select(column).eq("id", id).maybeSingle<Record<string, string | null>>();
+  if (!row) return { ok: false, error: "Unknown item." };
+  const { error } = await supabase.from(table).update({ [column]: path }).eq("id", id);
+  if (error) return { ok: false, error: "Couldn't save the photo. Please try again." };
+  const old = row[column];
+  if (old && old !== path) await supabase.storage.from(PHOTO_BUCKET).remove([old]);
+
+  refresh();
+  return { ok: true };
+}
+
+export async function setDishPhoto(dishId: string, path: string | null): Promise<MenuActionResult> {
+  return setPhoto("dishes", "photo_path", "dishes", dishId, path);
+}
+
+export async function setRestaurantCover(restaurantId: string, path: string | null): Promise<MenuActionResult> {
+  return setPhoto("restaurants", "cover_path", "covers", restaurantId, path);
 }

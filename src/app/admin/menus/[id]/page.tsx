@@ -6,7 +6,7 @@ import { MenuEditor } from "@/components/admin/menus/menu-editor";
 import { RestaurantFormDialog } from "@/components/admin/menus/restaurant-form-dialog";
 import { adminPill } from "@/components/admin/styles";
 import { getAdminMenu } from "@/lib/data/admin-menus";
-import { DISH_PHOTOS, getRestaurantCoverPhoto } from "@/lib/data/dish-photos";
+import { DISH_PHOTOS, RESTAURANT_COVER_PHOTOS } from "@/lib/data/dish-photos";
 import { getOffers } from "@/lib/data/offers";
 import { FULL_BIRYANI_SECTIONS, SINGLE_BIRYANI_SECTION } from "@/lib/offers";
 import { cn } from "@/lib/utils";
@@ -22,7 +22,8 @@ export default async function AdminMenuPage({ params }: PageProps<"/admin/menus/
   const { restaurant, sections } = menu;
   const dishCount = sections.reduce((n, s) => n + s.dishes.length, 0) + menu.loose.length;
   const photoDishNames = Object.keys(DISH_PHOTOS[restaurant.name] ?? {});
-  const hasPhotos = !!getRestaurantCoverPhoto(restaurant.name) || photoDishNames.length > 0;
+  // The developer's files are matched by name (uploaded photos follow the row).
+  const hasPhotos = !!RESTAURANT_COVER_PHOTOS[restaurant.name] || photoDishNames.length > 0;
   const offerSections = [...FULL_BIRYANI_SECTIONS, SINGLE_BIRYANI_SECTION];
   const lockedSectionIds =
     offers.restaurantId === restaurant.id

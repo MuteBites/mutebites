@@ -11,9 +11,18 @@ import { MENU_LIMITS } from "@/lib/admin/menu-limits";
 import { formatStoredMobile } from "@/lib/phone";
 import { SUPPORT_PHONE } from "@/lib/support";
 import { toast } from "@/lib/toast/store";
+import { getRestaurantCoverPhoto, menuPhotoUrl } from "@/lib/data/dish-photos";
 import { Field, fieldInput } from "./fields";
+import { PhotoPicker } from "./photo-picker";
 
-type Restaurant = { id: string; name: string; description: string | null; cuisineTags: string[]; phone: string };
+type Restaurant = {
+  id: string;
+  name: string;
+  description: string | null;
+  cuisineTags: string[];
+  phone: string;
+  coverPath: string | null;
+};
 
 /**
  * Add a restaurant (no `restaurant`) or edit one's details. A new one
@@ -26,7 +35,7 @@ export function RestaurantFormDialog({
   trigger,
 }: {
   restaurant?: Restaurant;
-  /** Its photos are matched by name, so renaming hides them. */
+  /** It has developer-added photos, matched by name, so renaming hides them. */
   hasPhotos?: boolean;
   trigger: ReactElement;
 }) {
@@ -90,12 +99,21 @@ export function RestaurantFormDialog({
         </DialogDescription>
 
         <form onSubmit={submit} className="mt-5 flex flex-col gap-4">
+          {restaurant && (
+            <PhotoPicker
+              kind="cover"
+              id={restaurant.id}
+              label="Cover photo"
+              src={restaurant.coverPath ? menuPhotoUrl(restaurant.coverPath) : getRestaurantCoverPhoto(restaurant.name)}
+              uploaded={!!restaurant.coverPath}
+            />
+          )}
           <Field
             id="r-name"
             label="Name"
             hint={
               renaming && hasPhotos
-                ? "Its photos are matched by name, so renaming hides them until the developer updates the photo list."
+                ? "Its developer-added photos are matched by name, so renaming hides them (uploaded ones stay). Re-upload them here, or ask the developer."
                 : undefined
             }
           >

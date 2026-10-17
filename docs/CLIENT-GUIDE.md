@@ -150,7 +150,9 @@ developer: the offer matches them by name.
 | Add, edit or delete a dish | **Menus** → the restaurant → **Add dish to …** under a section, or tap a dish to change its name, price, veg / non-veg, section, note or sold out, or **Delete dish** |
 | Add or rename a menu section | **Menus** → the restaurant → **Add section**, or the pencil next to a section (a section can be deleted once it's empty) |
 | Change the order of sections or dishes | **Menus** → the restaurant → **Reorder**, then the up / down arrows, then **Done** |
-| Photos, extras (add-ons), or the biryani offer's sections | Ask the developer. Photos are matched by name, so renaming a dish or restaurant that has a photo hides it until the developer updates it |
+| Add or change a dish photo | **Menus** → the restaurant → tap the dish → **Add photo** (or **Change photo**) and pick one from your phone. It saves straight away; **Remove photo** takes it off. Add a new dish first, then tap it to add its photo |
+| Add or change a restaurant's cover photo | **Menus** → the restaurant → **Edit details** → **Add photo** / **Change photo** |
+| Extras (add-ons), or the biryani offer's sections | Ask the developer. A few older photos were added by the developer and are matched by name: renaming that dish or restaurant hides its photo, so upload a new one |
 
 ## Payments
 

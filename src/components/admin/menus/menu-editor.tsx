@@ -184,6 +184,7 @@ export function MenuEditor({
         state={dishDialog}
         onClose={() => setDishDialog(null)}
         restaurantId={restaurant.id}
+        restaurantName={restaurant.name}
         sections={sectionOptions}
         photoDishNames={photoDishNames}
       />

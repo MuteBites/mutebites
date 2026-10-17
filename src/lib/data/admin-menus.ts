@@ -46,6 +46,8 @@ export type AdminMenuDish = {
   isAvailable: boolean;
   note: string | null;
   categoryId: string | null;
+  /** Uploaded photo in the menu-photos bucket, or null. */
+  photoPath: string | null;
 };
 
 export type AdminMenuSection = { id: string; name: string; dishes: AdminMenuDish[] };
@@ -58,6 +60,8 @@ export type AdminMenu = {
     description: string | null;
     cuisineTags: string[];
     isActive: boolean;
+    /** Uploaded cover in the menu-photos bucket, or null. */
+    coverPath: string | null;
   };
   sections: AdminMenuSection[];
   /** Dishes with no section (none today, but category_id is nullable). */
@@ -75,13 +79,13 @@ export async function getAdminMenu(id: string): Promise<AdminMenu | null> {
   const [restaurant, sections, dishes] = await Promise.all([
     supabase
       .from("restaurants")
-      .select("id, name, phone, description, cuisine_tags, is_active")
+      .select("id, name, phone, description, cuisine_tags, is_active, cover_path")
       .eq("id", id)
       .maybeSingle(),
     supabase.from("dish_categories").select("id, name").eq("restaurant_id", id).order("sort_order").order("name"),
     supabase
       .from("dishes")
-      .select("id, name, price, is_veg, is_available, note, category_id")
+      .select("id, name, price, is_veg, is_available, note, category_id, photo_path")
       .eq("restaurant_id", id)
       .order("sort_order")
       .order("name"),
@@ -100,6 +104,7 @@ export async function getAdminMenu(id: string): Promise<AdminMenu | null> {
     isAvailable: d.is_available,
     note: d.note,
     categoryId: d.category_id,
+    photoPath: d.photo_path,
   }));
   const sectionIds = new Set(sections.data.map((s) => s.id));
   const r = restaurant.data;
@@ -112,6 +117,7 @@ export async function getAdminMenu(id: string): Promise<AdminMenu | null> {
       description: r.description,
       cuisineTags: r.cuisine_tags ?? [],
       isActive: r.is_active,
+      coverPath: r.cover_path,
     },
     sections: sections.data.map((s) => ({ id: s.id, name: s.name, dishes: all.filter((d) => d.categoryId === s.id) })),
     loose: all.filter((d) => !d.categoryId || !sectionIds.has(d.categoryId)),

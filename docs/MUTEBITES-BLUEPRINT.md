@@ -411,8 +411,15 @@ there are real — avoided):
     restaurant") → `/admin/menus/[id]` (edit details; add / rename /
     delete-when-empty sections; add / edit / delete dishes; reorder with
     arrows). New restaurants start switched off, and Home hides any
-    restaurant with no dishes. Photos and add-ons still go through the
-    developer.
+    restaurant with no dishes. Add-ons still go through the developer.
+22. **Admin photo uploads** (17 Oct 2026, migration `menu_photos`): a
+    photo box in Edit dish / Edit details. The browser shrinks the photo
+    (WebP, or JPEG on Safari) and uploads it to the public `menu-photos`
+    bucket (admins-only writes); `dishes.photo_path` / `restaurants.cover_path`
+    point at it and win over the name-matched files. A by-name index is
+    loaded once per request in the root layout (cached, tagged fetch) and
+    registered for the existing `getDishPhoto()` lookups, so no display
+    component changed.
 
 ---
 
@@ -698,6 +705,10 @@ student pays (subtotal of all lines − discount).
 **`offer_restaurant_exclusions`** — `(offer, restaurant_id)` primary key,
 `offer` `'pct10' | 'pct20'`, restaurant cascade: the restaurants an admin
 switched off for 10% / 20%. Public-read; admins insert / delete.
+
+**Menu photos** — `dishes.photo_path`, `restaurants.cover_path` (null = the
+name-matched file in `public/MuteBites/`); Storage bucket `menu-photos`
+(public read, 2 MB, admins-only insert / update / delete).
 
 **`taste_profiles`** — one row per student (`user_id` PK, cascade):
 `avatar` (null = their initials), `spice_level` 1–5, `diet` veg / egg /
@@ -1593,3 +1604,4 @@ Run them in this order; each one assumes the ones before it. After #40,
 | 43 | `20261015020000_taste_profiles.sql` | taste profile and avatars (`taste_profiles`) | Run (**edit the cravings list** to the new Home food types) |
 | 44 | `20261015030000_discount_offers.sql` | discount offers + final `place_order()` (add-ons, rate limits, offers) | Run (**edit the restaurant name and the biryani section names**) |
 | 45 | `20261017000000_offers_all_restaurants.sql` | 10% / 20% at every restaurant with per-restaurant switches (`offer_restaurant_exclusions`); `place_order()` again | Run (**edit the biryani section names** like #44) |
+| 46 | `20261017010000_menu_photos.sql` | admin photo uploads: `photo_path` / `cover_path` + the `menu-photos` bucket and its policies | Run |

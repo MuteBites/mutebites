@@ -7,6 +7,7 @@ import { adminPill } from "@/components/admin/styles";
 import { BlurImage } from "@/components/blur-image";
 import { getAdminMenuRestaurants } from "@/lib/data/admin-menus";
 import { getRestaurantCoverPhoto } from "@/lib/data/dish-photos";
+import { getUploadedPhotos } from "@/lib/data/uploaded-photos";
 import { cn } from "@/lib/utils";
 
 export const metadata: Metadata = { title: "Menus · MuteBites Admin" };
@@ -17,7 +18,7 @@ export const metadata: Metadata = { title: "Menus · MuteBites Admin" };
  * restaurant, section or dish (photos still go through the developer).
  */
 export default async function AdminMenusPage() {
-  const restaurants = await getAdminMenuRestaurants();
+  const [restaurants] = await Promise.all([getAdminMenuRestaurants(), getUploadedPhotos()]);
 
   return (
     <>

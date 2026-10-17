@@ -1,6 +1,10 @@
-// Static photo lookup for restaurant covers and dish thumbnails. Deliberately
-// NOT a database column — these are just files under public/MuteBites/, and
-// matching them by (restaurant name, dish name) needs no schema change. Only
+// Photo lookup for restaurant covers and dish thumbnails. Two sources:
+// photos the admin uploaded (dishes.photo_path / restaurants.cover_path in
+// the `menu-photos` Storage bucket, 17 Oct 2026), which win, and the static
+// files under public/MuteBites/ below, matched by (restaurant name, dish
+// name). The uploaded ones are loaded once per request by the root layout
+// (getUploadedPhotos()) and registered here, so every caller keeps the same
+// synchronous getDishPhoto() / getRestaurantCoverPhoto(). Only
 // dishes with an unambiguous, correctly-matched photo are listed here — a
 // dish missing from a restaurant's map falls back to the plain placeholder
 // rather than showing a mismatched photo. A few "Single X Biryani" /
@@ -196,14 +200,38 @@ export const DISH_PHOTOS: Record<string, Record<string, string>> = {
 // has the exact same name at Food Corner, so it borrows those photos.
 DISH_PHOTOS["Ramana Fast Food"] = DISH_PHOTOS["Food Corner"];
 
+/** Uploaded photos as public URLs: covers by restaurant name, dishes by uploadedDishKey(). */
+export type UploadedPhotos = { covers: Record<string, string>; dishes: Record<string, string> };
+
+let uploaded: UploadedPhotos = { covers: {}, dishes: {} };
+
+/** Called by the root layout's <UploadedPhotos> (and the server loader) with the current set. */
+export function setUploadedPhotos(photos: UploadedPhotos) {
+  uploaded = photos;
+}
+
+export function uploadedDishKey(restaurantName: string, dishName: string) {
+  return `${restaurantName} :: ${dishName}`;
+}
+
+/** Public URL of a file in the menu-photos bucket. */
+export function menuPhotoUrl(path: string) {
+  return `${process.env.NEXT_PUBLIC_SUPABASE_URL}/storage/v1/object/public/menu-photos/${path}`;
+}
+
+/** An uploaded photo (already sized in the browser) — served as-is, not through next/image's optimiser. */
+export function isUploadedPhoto(src: string | undefined) {
+  return !!src && /^https?:/.test(src);
+}
+
 /** Cover photo for a restaurant's hero banner, or undefined for the placeholder. */
 export function getRestaurantCoverPhoto(restaurantName: string): string | undefined {
-  return RESTAURANT_COVER_PHOTOS[restaurantName];
+  return uploaded.covers[restaurantName] ?? RESTAURANT_COVER_PHOTOS[restaurantName];
 }
 
 /** Thumbnail photo for a dish, or undefined for the placeholder. */
 export function getDishPhoto(restaurantName: string, dishName: string): string | undefined {
-  return DISH_PHOTOS[restaurantName]?.[dishName];
+  return uploaded.dishes[uploadedDishKey(restaurantName, dishName)] ?? DISH_PHOTOS[restaurantName]?.[dishName];
 }
 
 /**
@@ -247,7 +275,6 @@ export function getRestaurantCardSlides(
   dishes: { id: string; name: string; price: number; isVeg: boolean; isAvailable: boolean }[],
   orderCounts: Record<string, number> = {},
 ): CardSlide[] {
-  const photos = DISH_PHOTOS[restaurantName] ?? {};
   const signature = SIGNATURE_DISHES[restaurantName] ?? [];
   const rank = (name: string) => {
     const i = signature.indexOf(name);
@@ -263,7 +290,7 @@ export function getRestaurantCardSlides(
     .filter((d) => d.isAvailable)
     .sort((a, b) => count(b.id) - count(a.id) || rank(a.name) - rank(b.name));
   for (const d of ordered) {
-    const src = photos[d.name];
+    const src = getDishPhoto(restaurantName, d.name);
     if (!src || seen.has(src)) continue;
     seen.add(src);
     dishSlides.push({ src, dish: { id: d.id, name: d.name, price: d.price, isVeg: d.isVeg } });

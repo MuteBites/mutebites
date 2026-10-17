@@ -7,6 +7,7 @@ import { BlurImage } from "@/components/blur-image";
 import { MenuProgress } from "@/components/menu/menu-progress";
 import { MenuView } from "@/components/menu/menu-view";
 import { getRestaurantCoverPhoto } from "@/lib/data/dish-photos";
+import { getUploadedPhotos } from "@/lib/data/uploaded-photos";
 import { getLikedDishes } from "@/lib/data/favorites";
 import { getTasteProfile } from "@/lib/data/taste";
 import { getOffers } from "@/lib/data/offers";
@@ -56,6 +57,7 @@ export default async function RestaurantPage({ params, searchParams }: PageProps
     getLikedDishes(profile.id),
     getTasteProfile(profile.id),
     getOffers(),
+    getUploadedPhotos(), // registered before getRestaurantCoverPhoto() below
   ]);
   if (!menu) notFound();
 

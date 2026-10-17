@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import Image, { type ImageProps } from "next/image";
+import { isUploadedPhoto } from "@/lib/data/dish-photos";
 import { cn } from "@/lib/utils";
 
 /**
@@ -28,6 +29,8 @@ export function BlurImage({
         {...props}
         alt={alt}
         fill
+        // Admin uploads are already sized in the browser; skip the optimiser.
+        unoptimized={props.unoptimized ?? isUploadedPhoto(typeof props.src === "string" ? props.src : undefined)}
         onLoad={(e) => {
           setLoaded(true);
           onLoad?.(e);

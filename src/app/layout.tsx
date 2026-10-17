@@ -5,6 +5,8 @@ import { SPLASH_DISABLED } from "@/components/splash/config";
 import { SPLASH_INIT_SCRIPT } from "@/components/splash/init-script";
 import { TabBar } from "@/components/nav/tab-bar";
 import { Toaster } from "@/components/toast/toaster";
+import { UploadedPhotos } from "@/components/uploaded-photos";
+import { getUploadedPhotos } from "@/lib/data/uploaded-photos";
 import { SITE_DESCRIPTION, SITE_NAME, SITE_TITLE, SITE_URL } from "@/lib/site";
 import { THEME_INIT_SCRIPT } from "@/lib/theme/init-script";
 import "./globals.css";
@@ -91,7 +93,9 @@ export const viewport: Viewport = {
   ],
 };
 
-export default function RootLayout({ children }: LayoutProps<"/">) {
+export default async function RootLayout({ children }: LayoutProps<"/">) {
+  // Admin-uploaded menu photos (a cached, tagged fetch — static pages stay static).
+  const photos = await getUploadedPhotos();
   return (
     <html
       lang="en"
@@ -119,6 +123,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
             <AppSplash />
           </>
         )}
+        <UploadedPhotos photos={photos} />
         {children}
         {/* The student bottom bar: here rather than in each page so it stays
             mounted and its pill can slide between tabs. It decides for

@@ -5,6 +5,7 @@ import { ArrowRight, ChevronRight, RotateCcw, Star } from "lucide-react";
 import { BlurImage } from "@/components/blur-image";
 import { EmptyState } from "@/components/empty-state";
 import { getDishPhoto } from "@/lib/data/dish-photos";
+import { getUploadedPhotos } from "@/lib/data/uploaded-photos";
 import { getOrderHistory, type OrderSummary } from "@/lib/data/orders";
 import { formatDayHeading, formatTime, istDayKey } from "@/lib/date";
 import { formatRupees } from "@/lib/format";
@@ -25,7 +26,8 @@ export const metadata: Metadata = { title: "Your orders · MuteBites", robots: {
  */
 export default async function OrdersPage() {
   const profile = await requireProfile();
-  const orders = await getOrderHistory(profile.id);
+  // Uploaded photos registered before getDishPhoto() runs below.
+  const [orders] = await Promise.all([getOrderHistory(profile.id), getUploadedPhotos()]);
 
   const inProgress = orders.filter((o) => isActiveStatus(o.status));
   const past = orders.filter((o) => !isActiveStatus(o.status));

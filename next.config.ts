@@ -16,7 +16,8 @@ const csp = [
   "default-src 'self'",
   `script-src 'self' 'unsafe-inline'${isDev ? " 'unsafe-eval'" : ""}`,
   "style-src 'self' 'unsafe-inline'",
-  "img-src 'self' data: blob:",
+  // Supabase for admin-uploaded menu photos (Storage, public bucket).
+  `img-src 'self' data: blob: ${supabaseUrl}`.trim(),
   "font-src 'self' data:",
   `connect-src 'self' ${supabaseUrl} ${supabaseWs}`.trim(),
   "worker-src 'self'",

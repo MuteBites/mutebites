@@ -559,9 +559,17 @@ names unique per restaurant / menu (case-insensitive), a dish's section
 must belong to its restaurant, a moved dish goes to the end of its new
 section. The biryani offer's sections (`FULL_BIRYANI_SECTIONS` /
 `SINGLE_BIRYANI_SECTION` at `offers_restaurant_id`) can't be renamed or
-deleted there. Photos stay name-matched files (`dish-photos.ts`), so the
-dialogs warn that renaming a dish / restaurant that has one hides it.
-Add-ons (`addons` / `category_addons`) aren't editable there yet. Home
+deleted there. **Photos**: the Edit dish dialog and Edit details carry a
+`PhotoPicker` (`photo-picker.tsx`): Add / Change photo and, for an upload,
+Remove. The browser shrinks the photo on a canvas (dish 900 px, cover 1600
+px longest side) to WebP — JPEG where it can't encode WebP (Safari) — and
+uploads it straight to the public `menu-photos` Storage bucket with the
+admin's own session at a new name each time (`dishes|covers/<id>-<ms>.webp|jpg`,
+so no cache serves an old one), then `setDishPhoto()` / `setRestaurantCover()`
+saves the path (`dishes.photo_path` / `restaurants.cover_path`) and deletes
+the previous file (deleting a dish deletes its photo). A new dish gets its
+photo after it's added. Renaming only warns when the photo is a developer's
+name-matched file — an upload follows the row. Add-ons (`addons` / `category_addons`) aren't editable there yet. Home
 hides any restaurant with no dishes at all (a just-added one).
 
 **Sold out** (`/admin/sold-out`, a "Sold out" pill on the dashboard) lists
@@ -685,6 +693,23 @@ silently re-enables the button.
   `middleware()` to `proxy.ts`/`proxy()`; same route-matcher config,
   different filename and export name.
 - `supabase/migrations/` — hand-written SQL migrations (see rule below)
+- **Admin-uploaded photos win** over the files below (17 Oct 2026, see
+  **Menus**): `getUploadedPhotos()` (`src/lib/data/uploaded-photos.ts`) reads
+  every `photo_path` / `cover_path` with a plain cached `fetch` to
+  PostgREST (anon key, no cookies, `revalidate: 300`, tag `menu-photos` —
+  so the root layout can call it without making `/privacy` / `/terms`
+  dynamic; they're ISR at 5 min now) and builds a by-name map of public
+  URLs. The root layout renders `<UploadedPhotos>` (a client registrar)
+  before the page, and `setUploadedPhotos()` in `dish-photos.ts` makes
+  `getDishPhoto()` / `getRestaurantCoverPhoto()` / `getRestaurantCardSlides()`
+  check it first — so all 21 call sites stayed as they were. Server
+  components that call them (`orders/page.tsx`, `restaurants/[id]/page.tsx`,
+  `admin/menus/page.tsx`) `await getUploadedPhotos()` first, since layout
+  and page render in parallel. Every menu action calls
+  `updateTag("menu-photos")` (names are the keys, so renames count).
+  Uploaded files are served as-is (`unoptimized` via `isUploadedPhoto()` in
+  `BlurImage` and the cart bar — already sized, and it keeps clear of the
+  Hobby image quota); the CSP's `img-src` allows the Supabase origin.
 - `public/MuteBites/` — restaurant/dish photos, one subfolder per restaurant
   (plus `covers/` for the hero banners) — matched to database rows by name
   in `src/lib/data/dish-photos.ts`, deliberately **not** a database column
@@ -956,6 +981,14 @@ delete (`is_admin()`); no update. It also re-creates `place_order()` (same
 signature) with one change: `offer_wrong_restaurant` for `'biryani'` away
 from `offers_restaurant_id`, and for `'pct10'` / `'pct20'` at an excluded
 restaurant.
+[`supabase/migrations/20261017010000_menu_photos.sql`](supabase/migrations/20261017010000_menu_photos.sql)
+(applied 17 Oct 2026) adds **`dishes.photo_path`** and
+**`restaurants.cover_path`** (nullable text, checked against
+`dishes|covers/<uuid>-<ms>.webp`; null = the name-matched file) and the
+**`menu-photos`** Storage bucket (public, 2 MB, WebP / JPEG / PNG) with
+`storage.objects` policies letting only admins (`is_admin()`) insert,
+update and delete in it; viewing needs none (public bucket). The existing
+admin update policies cover the columns.
 [`supabase/migrations/20260922010000_seed_sugarcane_juice.sql`](supabase/migrations/20260922010000_seed_sugarcane_juice.sql)
 (data only — a sixth restaurant, **MuteBites Sugarcane Juice**: one
 section, one dish, "1 Litre Sugarcane Juice Bottle" ₹90, photos in
@@ -1171,7 +1204,8 @@ RLS is enabled on every table:
   `Permissions-Policy` (no camera/mic/location); HSTS comes from Vercel.
   CSP is a moderate policy (`'unsafe-inline'` scripts because the
   theme/splash init scripts and JSON-LD are inline on purpose; connections
-  only to self + Supabase REST/Realtime), **enforced** (since the redesign
+  only to self + Supabase REST/Realtime; images also from Supabase
+  Storage for admin uploads), **enforced** (since the redesign
   branch, 14 Oct 2026 — the same policy College Bites enforces) —
   violations POST to `/api/csp-report` (excluded from the proxy matcher)
   and land in Vercel logs as `[csp] …`. Add any new external origin to it,

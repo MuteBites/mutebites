@@ -7,9 +7,11 @@ import { Dialog, DialogContent, DialogDescription, DialogTitle } from "@/compone
 import { createDish, deleteDish, updateDish } from "@/lib/admin/menu-actions";
 import { MENU_LIMITS } from "@/lib/admin/menu-limits";
 import type { AdminMenuDish } from "@/lib/data/admin-menus";
+import { getDishPhoto, menuPhotoUrl } from "@/lib/data/dish-photos";
 import { toast } from "@/lib/toast/store";
 import { cn } from "@/lib/utils";
 import { Choice, Field, fieldInput } from "./fields";
+import { PhotoPicker } from "./photo-picker";
 
 export type DishDialogState = { mode: "add"; sectionId: string } | { mode: "edit"; dish: AdminMenuDish } | null;
 
@@ -21,12 +23,14 @@ export function DishFormDialog({
   state,
   onClose,
   restaurantId,
+  restaurantName,
   sections,
   photoDishNames,
 }: {
   state: DishDialogState;
   onClose: () => void;
   restaurantId: string;
+  restaurantName: string;
   sections: { id: string; name: string }[];
   /** Dishes that have a photo — matched by name, so renaming hides it. */
   photoDishNames: string[];
@@ -42,6 +46,7 @@ export function DishFormDialog({
             state={state}
             onClose={onClose}
             restaurantId={restaurantId}
+            restaurantName={restaurantName}
             sections={sections}
             photoDishNames={photoDishNames}
           />
@@ -55,12 +60,14 @@ function DishForm({
   state,
   onClose,
   restaurantId,
+  restaurantName,
   sections,
   photoDishNames,
 }: {
   state: NonNullable<DishDialogState>;
   onClose: () => void;
   restaurantId: string;
+  restaurantName: string;
   sections: { id: string; name: string }[];
   photoDishNames: string[];
 }) {
@@ -74,7 +81,8 @@ function DishForm({
   const [error, setError] = useState<string | null>(null);
   const [confirmDelete, setConfirmDelete] = useState(false);
   const [saving, startSaving] = useTransition();
-  const renaming = !!dish && name.trim() !== dish.name && photoDishNames.includes(dish.name);
+  // An uploaded photo follows the dish; a developer's file is matched by name.
+  const renaming = !!dish && !dish.photoPath && name.trim() !== dish.name && photoDishNames.includes(dish.name);
 
   function submit(e: React.FormEvent) {
     e.preventDefault();
@@ -117,10 +125,23 @@ function DishForm({
       <DialogDescription className="mt-1">Changes show on the student menu straight away.</DialogDescription>
 
       <form onSubmit={submit} className="mt-5 flex flex-col gap-4">
+        {dish ? (
+          <PhotoPicker
+            kind="dish"
+            id={dish.id}
+            label="Photo"
+            src={dish.photoPath ? menuPhotoUrl(dish.photoPath) : getDishPhoto(restaurantName, dish.name)}
+            uploaded={!!dish.photoPath}
+          />
+        ) : (
+          <p className="rounded-2xl bg-secondary px-4 py-3 text-sm text-secondary-foreground">
+            Add the dish first, then tap it to add a photo.
+          </p>
+        )}
         <Field
           id="d-name"
           label="Name"
-          hint={renaming ? "Its photo is matched by name, so renaming hides it until the developer updates it." : undefined}
+          hint={renaming ? "Its photo was added by the developer and is matched by name, so renaming hides it. Upload one above to keep a photo." : undefined}
         >
           <input
             id="d-name"
