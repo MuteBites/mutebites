@@ -459,6 +459,17 @@ there are real — avoided):
     then rides the S-curve to the tower on a 9 s loop measured on this
     road; positions were checked so it never crosses the text at any
     phone width.
+29. **Plum promo ride, rebuilt** (18 Oct 2026): an animatic first (a
+    private review page with scrub / slow-motion), then the real thing — the
+    delivery now **arrives to you**: tower → far lane behind the bushes →
+    hairpin → bend → brakes right of the text → waves. Route generated from a
+    curve fitted to the road (`scripts/build-plum-promo-route.mjs` →
+    `plum-promo-route.css`); rider = four frame strips from Veo 3.1 Fast
+    green-screen loops made in Google Flow (80 credits), keyed and packed by
+    `scripts/build-rider-strips.mjs` (474 KB, loaded only when the card is
+    seen). Lessons: Claude can't drive its own window, so Flow uploads need
+    the user to drop files in; Flow downloads take ~1.5 min to prepare —
+    don't leave the page.
 
 ---
 

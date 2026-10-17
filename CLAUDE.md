@@ -127,25 +127,35 @@ Food delivery site for VIT-AP University students.
   (`src/components/theme/pass-art.tsx`) by the "Campus pass" label: Plum's
   cloche whose lid lifts on its hinge now and then to let a puff of steam
   out (`pass-lid` / `pass-steam`, steam hidden at rest), Kaapi's small
-  steaming tumbler. Plum's promo card has **its own illustrated scene**
-  (`PlumScene` in `promo-card.tsx`, 17 Oct 2026; ChatGPT art the client
-  generated — sources and a rebuild note in `docs/art/plum-promo/`, edge
-  fringe removed with `scripts/clean-art-fringe.mjs`; shipped as
-  `public/photos/promo/plum-scene.webp`, `plum-rider.webp`,
-  `plum-rider-front.webp`): a campus at sunset filling the card, and the
-  mascot on its plum scooter running a 9 s loop — it pulls in **facing
-  you** on the stretch of road right of the text, pauses, turns side-on
-  (front → side cross-fade) and rides the S-curve, flipping at each bend
-  and shrinking with distance, to the tower door, where Kaapi's pin, ring
-  and burst play; the sun breathes and the doorway flickers
-  (`plum-route` / `plum-rider` / `plum-front` / `plum-side` / `plum-sun` /
-  `plum-door`; trail, dust, bob, pin and burst reuse Kaapi's `promo-*`).
-  The route is in scene percentages measured on this art's road. The text
-  column is 52% of the card below a 20rem card width and 56% above
-  (container query) with a soft plum text shadow, and the copy is short
-  ("Delivery by 7:30 PM"), so the rider never crosses the text at any
-  width from 320 to 448 px — re-check that if the copy or route changes.
-  Reduced motion parks it at the pull-in point, facing you. Plum's hero itself was lit up the same
+  steaming tumbler. Plum's promo card has **its own animated scene** (`PlumScene` in
+  `promo-card.tsx`, rebuilt 18 Oct 2026 from the 17 Oct version; sources,
+  prompts' results and rebuild notes in `docs/art/plum-promo/`): a campus at
+  sunset filling the card and **the delivery arriving to you** on an 11 s
+  loop — the mascot leaves the clock tower, rides the far lane facing left
+  **behind the middle bushes** (a cut-out `plum-front-bushes.webp` layer; the
+  rider's z-index steps in front of it after the hairpin), takes the
+  hairpin and the bend (hard pose swaps hidden by a squash, slight lean,
+  dust), comes towards you and **brakes** right of the text, then waves.
+  The route is GENERATED: `scripts/build-plum-promo-route.mjs` fits a
+  Catmull-Rom curve through lane-centre points measured on the source art,
+  gives it real speed (slow into bends, brake at the end), size from depth
+  and the pose per direction, and writes plain keyframes in scene % to
+  `src/components/home/plum-promo-route.css` (never edit that file —
+  change the script and rerun). The rider is **four 12 fps frame strips**
+  (`plum-rider-left|right|approach|arrive.webp`, 474 KB together) cut from
+  Veo 3.1 Fast loops made in Google Flow on a green screen
+  (`docs/art/plum-promo/new/loop-*.mp4`) by `scripts/build-rider-strips.mjs`
+  (most seamless window, green key with despill, one shared crop per pose);
+  CSS flip-books (`steps(n, jump-none)`). Around it: the scene's two clouds
+  lifted out and drifting, window lights coming on, birds, fireflies, the sun
+  breathing (`plum-promo.css`). `PlumSceneLive` (an IntersectionObserver)
+  sets `data-seen` (only then do the strips load) and `data-on` (every
+  animation pauses off screen and under the splash). The text column is 52%
+  of the card below a 20rem card width and 56% above (container query) with
+  a soft plum text shadow, and the copy is short ("Delivery by 7:30 PM"),
+  so the rider never crosses the text at any width from 320 to 448 px —
+  re-check that if the copy or route changes. Reduced motion: still, the
+  mascot waving at the braking spot. Plum's hero itself was lit up the same
   day (`--hero-a #69324f`, `--hero-glow` amber 22%, `--hero-bloom` rose
   52%, plus a soft white highlight top-left in `--hero-surface`;
   `--hero-danger` lightened to `#ffe9e4` to keep 4.5:1 on the chips).

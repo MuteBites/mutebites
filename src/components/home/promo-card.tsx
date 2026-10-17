@@ -1,6 +1,9 @@
 import type { CSSProperties } from "react";
 import Image from "next/image";
 import { Clock, MapPin } from "lucide-react";
+import { PlumSceneLive } from "./plum-scene-live";
+import "./plum-promo.css";
+import "./plum-promo-route.css";
 
 /**
  * Home's promo card, shown while ordering is open (when it's closed, the
@@ -12,18 +15,13 @@ import { Clock, MapPin } from "lucide-react";
  *   MuteBites Plum  the pitch and the real delivery time an order placed
  *                   now gets (deliveryWindow(), passed in from the server so
  *                   it can't disagree with the ticket) over Plum's own
- *                   scene (17 Oct 2026, generated art cleaned of its edge
- *                   fringe): a campus at sunset, the mascot on its scooter.
- *                   The 9 s run: it pulls in facing you on the stretch of
- *                   road right of the text (the left of the road would sit
- *                   under the delivery time), pauses, turns side on and
- *                   rides the S-curve (round the bend facing left,
- *                   then right up to the tower), shrinking with distance;
- *                   the pin pops at the tower door; the sun breathes and
- *                   the doorway flickers warm (`plum-scene-*` in
- *                   globals.css, sharing Kaapi's trail / dust / bob / pin /
- *                   burst timings). Reduced motion parks it where it pulls
- *                   in, facing you.
+ *                   scene (PlumScene, 18 Oct 2026): a campus at sunset and
+ *                   the mascot's delivery from the clock tower to you — it
+ *                   rides the far lane behind the bushes, takes the hairpin
+ *                   and the bend, comes towards you and brakes right of the
+ *                   text, then waves; birds, fireflies, drifting clouds,
+ *                   window lights and the sun glow around it. Details in
+ *                   plum-promo.css; reduced motion shows it waving.
  *   Desi Kaapi      College Bites' promo exactly: the line and one sentence
  *                   on the left, and on the right the Kaapi campus scene
  *                   with a delivery run looping every 9 s — the rider pulls
@@ -153,77 +151,110 @@ function KaapiScene() {
   );
 }
 
-/* Plum's arrival burst, round the pin on the tower door (viewBox 100 × 61). */
-const PLUM_PIN = { cx: 74.9, cy: 30.5 };
+/* Plum's frame strips (scripts/build-rider-strips.mjs): frames per strip and
+   each frame's width at the strips' 160 px height. */
+const PLUM_STRIPS = {
+  left: { n: 15, w: 168 },
+  right: { n: 18, w: 151 },
+  approach: { n: 17, w: 123 },
+  arrive: { n: 15, w: 125 },
+} as const;
 
-/** Plum's campus scene and delivery run (public/photos/promo/plum-*.webp). */
+const strip = (pose: keyof typeof PLUM_STRIPS): CSSProperties =>
+  ({
+    "--n": PLUM_STRIPS[pose].n,
+    "--strip": `url(/photos/promo/plum-rider-${pose}.webp)`,
+    aspectRatio: `${PLUM_STRIPS[pose].w} / 160`,
+  }) as CSSProperties;
+
+/* Window lights (scene %: left, top, width). */
+const PLUM_GLOWS = [
+  [75.5, 57, 8],
+  [75.5, 39.7, 5],
+  [60, 53, 16],
+  [90, 58, 14],
+] as const;
+/* Fireflies over the bushes (scene %). */
+const PLUM_FLIES = [
+  [46, 72],
+  [56, 63],
+  [82, 63],
+  [92, 71],
+  [63, 59],
+  [69, 66],
+] as const;
+
+/**
+ * Plum's campus scene and delivery (plum-promo.css, plum-promo-route.css,
+ * public/photos/promo/plum-*.webp; built from docs/art/plum-promo/).
+ */
 function PlumScene() {
   return (
-    <div aria-hidden="true" className="promo-scene absolute inset-x-0 bottom-0 aspect-[1200/736] w-full">
-      {/* The sun breathing, and the tower's lit doorway. */}
-      <span className="plum-scene-sun absolute top-[43.8%] left-[89%] aspect-square w-[34%] -translate-x-1/2 -translate-y-1/2 rounded-full bg-[radial-gradient(closest-side,rgb(246_210_164/0.55),transparent)]" />
+    <div aria-hidden="true" className="promo-scene plum-scene absolute inset-x-0 bottom-0 aspect-[1200/736] w-full">
+      <PlumSceneLive />
+      <span className="plum-sun" />
       <Image
-        src="/photos/promo/plum-scene.webp"
+        src="/photos/promo/plum-scene-v2.webp"
         alt=""
         fill
         sizes="(max-width: 448px) 100vw, 400px"
+        unoptimized
         className="object-contain"
       />
-      <span className="plum-scene-door absolute top-[57%] left-[75.5%] aspect-square w-[9%] -translate-x-1/2 -translate-y-1/2 rounded-full bg-[radial-gradient(closest-side,rgb(255_214_150/0.8),transparent)]" />
-
-      <span className="promo-pin absolute top-[45%] left-[70.4%] flex w-[9%] flex-col items-center">
-        <MapPin
-          fill="currentColor"
-          stroke="white"
-          strokeWidth={1.5}
-          className="size-full text-hero-accent [filter:drop-shadow(0_2px_2px_rgb(0_0_0/0.3))]"
-        />
-        <span className="promo-pin-ring -mt-[18%] h-[14%] w-[70%] rounded-[50%] bg-hero-foreground/30" />
-      </span>
-      <svg viewBox="0 0 100 61" className="absolute inset-0 size-full overflow-visible text-white">
-        {BURST.map(([dx, dy], i) => (
-          <circle
-            key={i}
-            cx={PLUM_PIN.cx}
-            cy={PLUM_PIN.cy}
-            r="0.9"
-            fill="currentColor"
-            className="promo-burst"
-            style={{ "--dx": `${dx}px`, "--dy": `${dy}px` } as CSSProperties}
-          />
-        ))}
+      {/* eslint-disable-next-line @next/next/no-img-element -- tiny, decorative, positioned in scene % */}
+      <img src="/photos/promo/plum-cloud-a.webp" alt="" className="plum-cloud-a" />
+      {/* eslint-disable-next-line @next/next/no-img-element -- tiny, decorative, positioned in scene % */}
+      <img src="/photos/promo/plum-cloud-b.webp" alt="" className="plum-cloud-b" />
+      {PLUM_GLOWS.map(([left, top, width]) => (
+        <span key={`${left}-${top}`} className="plum-glow" style={{ left: `${left}%`, top: `${top}%`, width: `${width}%` }} />
+      ))}
+      <svg viewBox="0 0 44 20" className="plum-birds">
+        <g className="flock" fill="none" stroke="rgb(255 248 242 / 75%)" strokeWidth="0.5" strokeLinecap="round">
+          <path className="wing" d="M10 6q1.5-1.6 3 0q1.5-1.6 3 0" />
+          <path className="wing" d="M17 9q1.2-1.3 2.4 0q1.2-1.3 2.4 0" />
+          <path className="wing" d="M6 10q1-1.1 2 0q1-1.1 2 0" />
+        </g>
       </svg>
-
-      {/* The run: .plum-scene-route moves along the road (scene percentages);
-          the rider sits on it by its wheels, scales with distance and flips
-          to face the way it rides. The front view shows while it pulls in. */}
-      <div className="plum-scene-route absolute inset-0">
-        <div className="plum-scene-rider absolute top-0 left-0 w-[20%]">
-          <div className="promo-bob relative">
-            <span className="absolute -bottom-[3%] left-[14%] h-[8%] w-[74%] rounded-[50%] bg-black/30 blur-[2px]" />
-            <svg viewBox="0 0 40 30" className="promo-trail absolute top-[40%] -left-[42%] w-[52%] overflow-visible text-hero-foreground">
-              <line x1="6" y1="6" x2="34" y2="6" className="promo-streak" style={{ animationDelay: "0s" }} />
-              <line x1="0" y1="14" x2="30" y2="14" className="promo-streak" style={{ animationDelay: "0.3s" }} />
-              <line x1="10" y1="22" x2="36" y2="22" className="promo-streak" style={{ animationDelay: "0.6s" }} />
-            </svg>
-            <span className="promo-dust absolute bottom-[2%] left-[4%] size-[16%] rounded-full bg-white/70" />
-            <span className="promo-dust promo-dust-2 absolute bottom-[8%] -left-[6%] size-[11%] rounded-full bg-white/60" />
-            <Image
-              src="/photos/promo/plum-rider.webp"
-              alt=""
-              width={360}
-              height={366}
-              sizes="(max-width: 448px) 20vw, 90px"
-              className="plum-scene-side relative h-auto w-full"
-            />
-            <Image
-              src="/photos/promo/plum-rider-front.webp"
-              alt=""
-              width={360}
-              height={466}
-              sizes="(max-width: 448px) 18vw, 80px"
-              className="plum-scene-front absolute bottom-0 left-[8%] h-auto w-[84%]"
-            />
+      <div className="plum-full">
+        {PLUM_FLIES.map(([left, top]) => (
+          <span key={`${left}-${top}`} className="plum-fly absolute" style={{ left: `${left}%`, top: `${top}%` }} />
+        ))}
+      </div>
+      {/* The bushes in front of the far lane: the rider passes behind them. */}
+      <Image
+        src="/photos/promo/plum-front-bushes.webp"
+        alt=""
+        fill
+        sizes="(max-width: 448px) 100vw, 400px"
+        unoptimized
+        className="plum-bushes object-contain"
+      />
+      <span className="plum-dust hairpin" />
+      <span className="plum-dust bend" />
+      <div className="plum-track">
+        <div className="plum-pos">
+          <div className="plum-anchor">
+            <div className="plum-size">
+              <div className="plum-fade">
+                <div className="plum-brake">
+                  <div className="plum-turn">
+                    <div className="plum-box">
+                      <span className="plum-shadow" />
+                      <div className="plum-pose left">
+                        <span className="plum-sprite" style={strip("left")} />
+                      </div>
+                      <div className="plum-pose right">
+                        <span className="plum-sprite" style={strip("right")} />
+                      </div>
+                      <div className="plum-pose front">
+                        <span className="plum-sprite approach" style={strip("approach")} />
+                        <span className="plum-sprite arrive" style={strip("arrive")} />
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
           </div>
         </div>
       </div>
