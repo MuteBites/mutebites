@@ -202,9 +202,9 @@
 [data-palette="plum"] {
   --background: #faf3ec;
   --foreground: #3f2037;
-  --card: #ffffff;
+  --card: #fffbf7;
   --card-foreground: #3f2037;
-  --popover: #ffffff;
+  --popover: #fffdfa;
   --popover-foreground: #3f2037;
   --primary: #99581b;
   --primary-foreground: #ffffff;
@@ -219,9 +219,13 @@
   --border: #e5d3c8;
   /* 3.5:1 against card — WCAG 1.4.11 wants 3:1 for a control's boundary. */
   --input: #9d8478;
-  --ring: #99581b;
+  --ring: #914955;
   --ink: #552c4a;
   --ink-foreground: #fff8f2;
+  /* Selected chips (surface-ink): lit plum, a soft shine over plum → berry. */
+  --ink-2: #763556;
+  --ink-surface: linear-gradient(180deg, rgb(255 255 255 / 14%), transparent 55%),
+    linear-gradient(115deg, var(--ink) 0%, var(--ink-2) 100%);
   /* Accents that sit ON the ink surface (token card, cart bar, banners).
      The normal amber/forest/brick are ~2:1 on plum, so ink surfaces get
      their own tints — checked >=4.8:1 against the lighter top of the
@@ -255,7 +259,7 @@
   --glow-rose: rgb(145 73 85 / 34%);
   --glow-hero: rgb(85 44 74 / 42%);
   --page-glow-a: rgb(240 200 150 / 18%);
-  --page-glow-b: rgb(236 196 208 / 18%);
+  --page-glow-b: rgb(236 196 208 / 20%);
 
   /* Status chips (statusBadge): Placed amber, Confirmed lavender, Out for
      delivery blush (brand-soft), Delivered green, Cancelled red. */
@@ -358,9 +362,9 @@
 .dark [data-palette="plum"] {
   --background: #170f14;
   --foreground: #f5eae1;
-  --card: #21161c;
+  --card: #291b24;
   --card-foreground: #f5eae1;
-  --popover: #2a1d24;
+  --popover: #33232d;
   --popover-foreground: #f5eae1;
   --primary: #d9974f;
   --primary-foreground: #2a140c;
@@ -374,9 +378,10 @@
   --destructive-foreground: #2a0e09;
   --border: rgb(245 234 225 / 11%);
   --input: rgb(245 234 225 / 40%);
-  --ring: #d9974f;
-  --ink: #ebd9e2;
+  --ring: #d7a8b8;
+  --ink: #f2cdd8;
   --ink-foreground: #3f2037;
+  --ink-2: #e7b0c0;
   --ink-accent: #7a4511;
   --ink-success: #22503a;
   --ink-danger: #8e2416;
@@ -470,6 +475,9 @@
   --ring: #2e6b62;
   --ink: #e98fa6;
   --ink-foreground: #2b1a12;
+  /* Kaapi's selected chips stay flat rose-milk. */
+  --ink-2: #e98fa6;
+  --ink-surface: none;
   --ink-accent: #5a1f10;
   --ink-success: #0f3a1c;
   --ink-danger: #4a0c08;
@@ -589,6 +597,7 @@
   --ring: #8fd3c6;
   --ink: #e98fa6;
   --ink-foreground: #1c120d;
+  --ink-2: #e98fa6;
   --ink-accent: #4d1a0c;
   --ink-success: #0c3018;
   --ink-danger: #420b07;
@@ -739,13 +748,11 @@
   background-image: var(--surface-primary);
 }
 
+/* Selected chips: pair with bg-ink (the flat fallback). Plum lights them
+   like its hero (a shine over plum → berry, rose at night); Kaapi keeps
+   them flat (--ink-surface: none). */
 @utility surface-ink {
-  background-image: linear-gradient(
-    165deg,
-    color-mix(in srgb, var(--ink) 100%, white 10%) 0%,
-    var(--ink) 55%,
-    color-mix(in srgb, var(--ink) 100%, black 12%) 100%
-  );
+  background-image: var(--ink-surface);
 }
 
 /* The lit plum hero (tokens --hero-* above). Layered over bg-hero, which

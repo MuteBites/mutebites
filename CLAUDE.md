@@ -31,8 +31,16 @@ Food delivery site for VIT-AP University students.
   both themes**. On it use `text-hero-accent` / `-hero-success` /
   `-hero-danger`, and secondary lines no fainter than
   `text-hero-foreground/85` (the audit checks every stop). `bg-ink` stays
-  for **selected chips** (it flips to lavender at night so a selected chip
-  still stands out) — don't use it for new hero surfaces.
+  for **selected chips**, always with `surface-ink` (since 17 Oct 2026:
+  Plum lights them like its hero — a soft shine over plum → berry
+  `--ink` → `--ink-2`, rose `#f2cdd8` → `#e7b0c0` at night; Kaapi sets
+  `--ink-surface: none`, so its chips stay flat rose-milk) — don't use it
+  for new hero surfaces. Same day, Plum's cards went warm ivory-white
+  (`--card #fffbf7`, `--popover #fffdfa`; dark `#291b24` / `#33232d`, a
+  clear step off the page), its focus ring went rose (`--ring #914955`,
+  `#d7a8b8` at night) so focus and selection read apart from amber
+  actions, and its page sky's rose glow rose to 20% (amber prices under
+  the sky are the limit — 4.5:1 just holds).
   **Lighting kit:** `glow-amber` (the main action's bloom), `glow-hero`,
   `glow-rose`, `rim-light`; one bloom per screen region. Every page sits
   under a soft amber + rose sky (`body`, `--page-glow-a/-b`). Light cards

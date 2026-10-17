@@ -441,6 +441,12 @@ there are real — avoided):
     gets a dark-mode edge glow and a bigger mascot. Plum's action surface
     (tab bar pill, main buttons) got Kaapi's structure: a top shine over
     amber → rose-amber.
+26. **Plum colour pass** (17 Oct 2026, Step A of the Plum review): warm
+    ivory-white cards (were pure white), lighter dark-mode cards, lit
+    plum selected chips (`surface-ink`, rose at night), a rose focus ring
+    and a slightly stronger page glow. The audit gained the chip's far
+    end and shine (and literal `#rrggbb` stack entries). Next: sign-in
+    motion (Step B) and a Plum promo illustration (Step C).
 
 ---
 

@@ -58,7 +58,7 @@ export function Choice<T extends string>({
               onClick={() => onChange(o.value)}
               className={cn(
                 "h-11 rounded-full border text-sm font-semibold outline-none focus-visible:ring-3 focus-visible:ring-ring/80",
-                checked ? "border-transparent bg-ink text-ink-foreground" : "bg-card shadow-card hover:bg-secondary",
+                checked ? "border-transparent surface-ink bg-ink text-ink-foreground" : "bg-card shadow-card hover:bg-secondary",
               )}
             >
               {o.label}

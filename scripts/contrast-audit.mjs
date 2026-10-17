@@ -78,6 +78,9 @@ const checks = [
   ['text on destructive fill', 'destructive-foreground', 1, [T('destructive')], 4.5],
   // bg-ink is now only the selected-chip / count-badge colour (hero surfaces moved to --hero-*).
   ['selected chip text on ink', 'ink-foreground', 1, [T('ink')], 4.5],
+  // Selected chips are lit (surface-ink): check the far end and the top shine too.
+  ['selected chip text on the chip gradient end (ink-2)', 'ink-foreground', 1, [T('ink-2')], 4.5],
+  ['selected chip text under the chip shine (ink + white/14)', 'ink-foreground', 1, [T('ink'), T('#ffffff', 0.14)], 4.5],
   ['ink-accent on ink', 'ink-accent', 1, [T('ink')], 4.5],
   ['ink-success on ink', 'ink-success', 1, [T('ink')], 4.5],
   ['ink-danger on ink', 'ink-danger', 1, [T('ink')], 4.5],
@@ -123,7 +126,8 @@ for (const [name, t] of Object.entries(themes)) {
   console.log(`\n== ${name}`);
   for (const [label, fg, fa, stack, min] of checks) {
     let bg = [255, 255, 255, 1];
-    for (const [tok, a] of stack) bg = over(alpha(parse(t[tok]), a), bg);
+    // A stack entry is a token name, or a literal '#rrggbb' (e.g. a white shine).
+    for (const [tok, a] of stack) bg = over(alpha(parse(tok.startsWith('#') ? tok : t[tok]), a), bg);
     const fgc = over(alpha(parse(t[fg]), fa), bg);
     const r = ratio(fgc, bg);
     const ok = r >= min;

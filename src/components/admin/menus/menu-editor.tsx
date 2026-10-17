@@ -56,7 +56,7 @@ export function MenuEditor({
         {sections.length > 0 && (
           <button
             type="button"
-            className={cn(adminPill, reordering && "border-transparent bg-ink text-ink-foreground hover:bg-ink")}
+            className={cn(adminPill, reordering && "border-transparent surface-ink bg-ink text-ink-foreground hover:bg-ink")}
             aria-pressed={reordering}
             onClick={() => setReordering((v) => !v)}
           >

@@ -9,7 +9,7 @@ import { cn } from "@/lib/utils";
 const TONE: Record<AvatarTone | "pass", string> = {
   hero: "surface-hero bg-hero text-hero-accent",
   primary: "surface-primary bg-primary text-primary-foreground",
-  ink: "bg-ink text-ink-foreground",
+  ink: "surface-ink bg-ink text-ink-foreground",
   blush: "bg-brand-soft text-brand-soft-foreground",
   plum: "bg-plum-soft text-plum-soft-foreground",
   amber: "bg-amber-soft text-amber-soft-foreground",

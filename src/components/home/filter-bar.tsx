@@ -120,7 +120,7 @@ function Chip({
       className={cn(
         "flex h-9 items-center gap-1.5 rounded-full border px-3.5 text-sm font-semibold whitespace-nowrap outline-none transition-[background-color,color,border-color,box-shadow] duration-(--dur-base) focus-visible:ring-3 focus-visible:ring-ring/80",
         !on && "bg-card text-foreground shadow-card hover:border-ring/50",
-        on && !danger && "border-transparent bg-ink text-ink-foreground shadow-raised",
+        on && !danger && "border-transparent surface-ink bg-ink text-ink-foreground shadow-raised",
         on && danger && "border-destructive/40 bg-destructive/10 text-destructive",
       )}
     >

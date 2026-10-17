@@ -243,7 +243,7 @@ function Option({
       <span
         className={cn(
           "flex h-10 items-center gap-1.5 rounded-full border px-4 text-sm font-semibold transition-[background-color,color,border-color,box-shadow] duration-(--dur-base) peer-focus-visible:ring-3 peer-focus-visible:ring-ring/80",
-          checked ? "border-transparent bg-ink text-ink-foreground shadow-raised" : "bg-card shadow-card",
+          checked ? "border-transparent surface-ink bg-ink text-ink-foreground shadow-raised" : "bg-card shadow-card",
         )}
       >
         {checked && <Check className="animate-pop-in size-3.5" aria-hidden="true" />}

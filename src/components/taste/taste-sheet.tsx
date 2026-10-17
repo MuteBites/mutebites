@@ -183,7 +183,7 @@ function TasteForm({ taste, initials, fromHearts }: { taste: TasteProfile; initi
                 onClick={() => setDraft((x) => ({ ...x, diet: d.id }))}
                 className={cn(
                   "h-11 rounded-full px-5 font-semibold outline-none focus-visible:ring-3 focus-visible:ring-ring/80",
-                  selected ? "bg-ink text-ink-foreground shadow-raised" : "border bg-card shadow-card",
+                  selected ? "surface-ink bg-ink text-ink-foreground shadow-raised" : "border bg-card shadow-card",
                 )}
               >
                 {d.label}
@@ -258,7 +258,7 @@ function TasteForm({ taste, initials, fromHearts }: { taste: TasteProfile; initi
 
 function SelectedTick() {
   return (
-    <span className="absolute -right-1 -bottom-1 flex size-5 items-center justify-center rounded-full bg-ink text-ink-foreground ring-2 ring-background">
+    <span className="absolute -right-1 -bottom-1 flex size-5 items-center justify-center rounded-full surface-ink bg-ink text-ink-foreground ring-2 ring-background">
       <Check className="size-3" strokeWidth={3} aria-hidden="true" />
     </span>
   );

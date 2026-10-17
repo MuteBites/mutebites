@@ -232,7 +232,7 @@ export function MenuView({
                           className={cn(
                             "flex h-10 items-center gap-1.5 rounded-full border px-4 text-sm font-semibold whitespace-nowrap outline-none transition-[background-color,color,border-color,box-shadow] duration-(--dur-base) focus-visible:ring-3 focus-visible:ring-ring/80",
                             filter === chip.key
-                              ? "border-transparent bg-ink text-ink-foreground shadow-raised"
+                              ? "border-transparent surface-ink bg-ink text-ink-foreground shadow-raised"
                               : "bg-card text-foreground shadow-card hover:border-ring/50",
                           )}
                         >
