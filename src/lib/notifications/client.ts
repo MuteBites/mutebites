@@ -11,6 +11,9 @@ import { removeSubscription, saveSubscription } from "./actions";
  * UI can show, never an exception.
  */
 
+/** Fired on window after this device turns push on or off, so other switches can follow. */
+export const PUSH_CHANGED_EVENT = "mutebites:push-changed";
+
 export type PushState =
   | "granted" // on, for this browser
   | "default" // never asked

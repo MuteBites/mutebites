@@ -24,7 +24,7 @@ export type PushPayload = {
   urgent?: boolean;
 };
 
-type SubscriptionRow = { id: string; endpoint: string; p256dh: string; auth: string };
+export type SubscriptionRow = { id: string; endpoint: string; p256dh: string; auth: string };
 
 function configured(): boolean {
   const publicKey = process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY;
@@ -40,7 +40,7 @@ function configured(): boolean {
  * revoked, app deleted). Never throws: a notification failing must not
  * fail the order or status change that triggered it.
  */
-async function deliver(
+export async function deliver(
   supabase: SupabaseClient,
   rows: SubscriptionRow[],
   payload: PushPayload,

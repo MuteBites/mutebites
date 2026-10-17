@@ -4,6 +4,7 @@ import { revalidatePath } from "next/cache";
 import { after } from "next/server";
 import { assertAdmin } from "@/lib/admin/assert";
 import { isPastDeliverySlot } from "@/lib/date";
+import { notifyOrderingOpen, type OpenPushResult } from "@/lib/notifications/ordering-open";
 import { notifyUser, type PushPayload } from "@/lib/notifications/send";
 import type { OrderStatus } from "@/lib/data/types";
 import { isUuid } from "@/lib/ids";
@@ -14,6 +15,9 @@ import { getSessionProfile } from "@/lib/profile";
 import { createClient } from "@/lib/supabase/server";
 
 export type AdminActionResult = { ok: true } | { ok: false; error: string };
+
+/** Opening ordering / turning a restaurant on may also send the "we're open" push. */
+export type OpenActionResult = { ok: true; push?: OpenPushResult } | { ok: false; error: string };
 
 
 /**
@@ -71,7 +75,7 @@ export async function setOfferRestaurant(
  * switching back to Open leaves them off, and the admin turns on whichever
  * restaurants should reopen.
  */
-export async function setOrderingMode(mode: OrderingMode): Promise<AdminActionResult> {
+export async function setOrderingMode(mode: OrderingMode): Promise<OpenActionResult> {
   const denied = await assertAdmin();
   if (denied) return denied;
   if (mode !== "open" && mode !== "closed") {
@@ -98,6 +102,8 @@ export async function setOrderingMode(mode: OrderingMode): Promise<AdminActionRe
   }
 
   revalidatePath("/admin");
+  // Fires only once a restaurant is on too (see notifyOrderingOpen).
+  if (mode === "open") return { ok: true, push: await notifyOrderingOpen(supabase) };
   return { ok: true };
 }
 
@@ -105,7 +111,7 @@ export async function setOrderingMode(mode: OrderingMode): Promise<AdminActionRe
 export async function setRestaurantActive(
   restaurantId: string,
   active: boolean,
-): Promise<AdminActionResult> {
+): Promise<OpenActionResult> {
   const denied = await assertAdmin();
   if (denied) return denied;
 
@@ -118,6 +124,8 @@ export async function setRestaurantActive(
 
   revalidatePath("/admin");
   revalidatePath("/", "layout"); // student home + menu pages also read is_active
+  // The first restaurant on while ordering is open sends the "we're open" push.
+  if (active) return { ok: true, push: await notifyOrderingOpen(supabase) };
   return { ok: true };
 }
 

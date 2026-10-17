@@ -60,3 +60,36 @@ export async function removeSubscription(endpoint: string): Promise<PushActionRe
 
   return { ok: true };
 }
+
+/** Whether this device gets the "ordering is open" pushes (push_subscriptions.notify_open). */
+export async function getOpenAlerts(endpoint: string): Promise<boolean | null> {
+  const { user } = await getSessionProfile();
+  if (!user || typeof endpoint !== "string") return null;
+
+  const supabase = await createClient();
+  const { data } = await supabase
+    .from("push_subscriptions")
+    .select("notify_open")
+    .eq("endpoint", endpoint)
+    .eq("user_id", user.id)
+    .maybeSingle();
+  return data ? data.notify_open : null;
+}
+
+/** Mutes or unmutes the "ordering is open" pushes on this device only. */
+export async function setOpenAlerts(endpoint: string, on: boolean): Promise<PushActionResult> {
+  const { user } = await getSessionProfile();
+  if (!user) return { ok: false, error: "Sign in again to change notifications." };
+  if (typeof endpoint !== "string" || typeof on !== "boolean") return { ok: false, error: "Something went wrong." };
+
+  const supabase = await createClient();
+  const { data, error } = await supabase
+    .from("push_subscriptions")
+    .update({ notify_open: on })
+    .eq("endpoint", endpoint)
+    .eq("user_id", user.id)
+    .select("id");
+  if (error || !data?.length) return { ok: false, error: "Couldn't change that. Please try again." };
+
+  return { ok: true };
+}

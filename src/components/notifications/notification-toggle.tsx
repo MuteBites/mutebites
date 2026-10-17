@@ -2,7 +2,7 @@
 
 import { useEffect, useState, useTransition } from "react";
 import { Bell, BellOff, Loader2 } from "lucide-react";
-import { disablePush, enablePush, hasPushSubscription, pushState } from "@/lib/notifications/client";
+import { disablePush, enablePush, hasPushSubscription, PUSH_CHANGED_EVENT, pushState } from "@/lib/notifications/client";
 import { toast } from "@/lib/toast/store";
 import { cn } from "@/lib/utils";
 
@@ -38,6 +38,7 @@ export function NotificationToggle() {
       const result = on ? await disablePush() : await enablePush();
       if (result.ok) {
         setOn(!on);
+        window.dispatchEvent(new Event(PUSH_CHANGED_EVENT));
         toast.success(on ? "Order notifications off." : "Order notifications on.");
       } else {
         toast.error(result.error);

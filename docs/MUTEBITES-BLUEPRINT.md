@@ -420,6 +420,13 @@ there are real — avoided):
     loaded once per request in the root layout (cached, tagged fetch) and
     registered for the existing `getDishPhoto()` lookups, so no display
     component changed.
+23. **"Ordering is open" pushes** (17 Oct 2026, migration
+    `open_push_notifications`, for Tuesday 20 Oct): when the admin opens
+    ordering and a restaurant is on, every student with notifications on
+    gets one rotating Gen Z message (48, by time of day, fruit / juice
+    ones while a fruit stall is on, offer ones while 10% / 20% is on, no
+    repeats of the last 10), at most once per 3 hours. Profile switch
+    "When ordering opens" mutes just these.
 
 ---
 
@@ -1606,3 +1613,4 @@ Run them in this order; each one assumes the ones before it. After #40,
 | 45 | `20261017000000_offers_all_restaurants.sql` | 10% / 20% at every restaurant with per-restaurant switches (`offer_restaurant_exclusions`); `place_order()` again | Run (**edit the biryani section names** like #44) |
 | 46 | `20261017010000_menu_photos.sql` | admin photo uploads: `photo_path` / `cover_path` + the `menu-photos` bucket and its policies | Run |
 | 47 | `20261017020000_menu_photos_allow_jpg.sql` | photo paths may end `.jpg` too (Safari can't encode WebP) | Run |
+| 48 | `20261017030000_open_push_notifications.sql` | "ordering is open" pushes: 3-hour rule, recent messages, per-device mute | Run |

@@ -17,6 +17,7 @@ import { BlurImage } from "@/components/blur-image";
 import { getRestaurantCoverPhoto } from "@/lib/data/dish-photos";
 import type { AdminRestaurant } from "@/lib/data/admin";
 import { setOrderingMode, setRestaurantActive } from "@/lib/admin/actions";
+import { openPushNote } from "@/lib/notifications/open-note";
 import { toast } from "@/lib/toast/store";
 import { cn } from "@/lib/utils";
 
@@ -62,7 +63,7 @@ function RestaurantToggleCard({
       const result = await setRestaurantActive(restaurant.id, next);
       if (result.ok) {
         setActive(next);
-        toast.success(`${restaurant.name} is now ${next ? "open" : "closed"}.`);
+        toast.success(`${restaurant.name} is now ${next ? "open" : "closed"}.${next ? openPushNote(result.push, true) : ""}`);
       } else {
         toast.error(result.error);
       }
@@ -79,7 +80,7 @@ function RestaurantToggleCard({
       const result = await setRestaurantActive(restaurant.id, true);
       if (result.ok) {
         setActive(true);
-        toast.success(`Ordering is open again, and ${restaurant.name} is on.`);
+        toast.success(`Ordering is open again, and ${restaurant.name} is on.${openPushNote(result.push ?? ordering.push)}`);
       } else {
         toast.error(`Ordering is open again, but ${restaurant.name} couldn't be turned on. Try again.`);
       }

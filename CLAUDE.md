@@ -405,6 +405,29 @@ Food delivery site for VIT-AP University students.
   until a real tap, so the bell both grants permission and arms the sound.
   A push notification's *own* sound is the phone's setting, not ours —
   admin pushes only set `requireInteraction` and a long vibrate.
+  **"Ordering is open" pushes** (17 Oct 2026, `ordering-open.ts`):
+  `notifyOrderingOpen()` runs from `setOrderingMode("open")` AND
+  `setRestaurantActive(true)` and only sends once ordering is open **and**
+  a restaurant is on (Closed turns them all off and reopening leaves them
+  off, so pinging at the switch alone would land students on closed
+  menus). At most one per **3 hours** — claimed with one conditional
+  update of `app_settings.last_open_push_at`, so two taps can't both send.
+  The message rotates (`open-messages.ts`: 48 short Gen Z lines in
+  morning / lunch / evening / late / any-time / fruit pools, fixed ids,
+  no emoji, nothing about bodies or appetite by decision; fruit and juice
+  lines only while a restaurant whose cuisine tags say fruit / juice /
+  sugarcane is on with something on sale, doubled noon–6 PM, none late;
+  5 offer lines instead while 10% / 20% is on), skipping the last 10 ids
+  (`app_settings.recent_open_messages`). Recipients: subscriptions with
+  `notify_open`, minus admins, banned accounts and banned phones; tag
+  `ordering-open` (a new one replaces an unread one), opens `/`. Delivery
+  in `after()`. The admin toast says "Notified N students" / already
+  notified in the last 3 hours / "Students get a ping once you turn a
+  restaurant on" (`openPushNote()`). Profile's **When ordering opens**
+  switch (`OpenAlertsToggle`) mutes just these on that device
+  (`setOpenAlerts()`); it follows the Order notifications switch through
+  the `PUSH_CHANGED_EVENT` window event. To add a message: one line with
+  the next id.
 - **Motion**: CSS only (no Framer Motion). Easing tokens `--ease-out-expo`
   / `--ease-spring` / `--ease-in-quad` (also Tailwind `ease-*` utilities) and
   durations `--dur-press|quick|base|slow` in `globals.css` — use them rather
@@ -925,6 +948,11 @@ notifications on (`user_id`, unique `endpoint`, `p256dh`, `auth`,
 phone) and `delete` stale ones. The *new order* send can't use any
 student's session, so it goes through the service-role client — see
 **Notifications** above.
+[`supabase/migrations/20261017030000_open_push_notifications.sql`](supabase/migrations/20261017030000_open_push_notifications.sql)
+(applied 17 Oct 2026) adds `app_settings.last_open_push_at` (timestamptz,
+the 3-hour rule) and `recent_open_messages` (int[], default `{}`) and
+`push_subscriptions.notify_open` (boolean, default true — the "When
+ordering opens" switch). Existing policies cover all three.
 [`supabase/migrations/20260921010000_milestone_rewards.sql`](supabase/migrations/20260921010000_milestone_rewards.sql)
 adds **`milestone_rewards`** — one row per student whose all-milestones
 free biryani was handed over (`user_id` primary key = once per student,

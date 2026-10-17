@@ -51,6 +51,12 @@ has the **Open / Closed** switch at its foot.
   on the same page. Tapping **Turn on** while ordering is closed asks
   whether to open ordering now — **Open ordering** opens it and turns that
   restaurant on too.
+- **Students get a notification when you open.** Once ordering is open
+  **and** at least one restaurant is on, every student who turned
+  notifications on gets a short, fun "we're open" message (a different one
+  each time). The toast tells you how many were notified. It goes out at
+  most once every 3 hours, so closing and reopening by mistake won't ping
+  them twice. Students can mute these in Profile ("When ordering opens").
 - **Close ordering at night.** If it's left open, an order placed after
   midnight is promised for the next lunch slot (by 1:30 PM).
 

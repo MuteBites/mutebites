@@ -15,6 +15,7 @@ import {
 } from "@/components/ui/alert-dialog";
 import { setOrderingMode } from "@/lib/admin/actions";
 import type { OrderingMode, OrderingState } from "@/lib/ordering";
+import { openPushNote } from "@/lib/notifications/open-note";
 import { toast } from "@/lib/toast/store";
 import { cn } from "@/lib/utils";
 
@@ -54,7 +55,7 @@ export function OrderingKillSwitch({ ordering }: { ordering: OrderingState }) {
       const result = await setOrderingMode(target);
       if (result.ok) {
         toast.success(
-          target === "open" ? "Ordering is open." : "Ordering is closed.",
+          target === "open" ? `Ordering is open.${openPushNote(result.push)}` : "Ordering is closed.",
         );
         setTarget(null);
         router.refresh();

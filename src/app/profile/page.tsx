@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import { ViewTransition } from "react";
-import { Bell, Flame, Lock, Mail, MapPin, Palette, SunMoon, Volume2 } from "lucide-react";
+import { Bell, Flame, Lock, Mail, MapPin, Palette, Store, SunMoon, Volume2 } from "lucide-react";
 import { PalettePicker } from "@/components/theme/palette-picker";
 import { IconTile } from "@/components/icon-tile";
 import { MemberCard } from "@/components/profile/member-card";
@@ -12,6 +12,7 @@ import { heartCravings, tasteSummary } from "@/lib/taste/options";
 import { getUnlockedMilestones, MilestoneBadges } from "@/components/profile/milestone-badges";
 import { MilestoneUnlockWatcher } from "@/components/profile/milestone-unlock-watcher";
 import { NotificationToggle } from "@/components/notifications/notification-toggle";
+import { OpenAlertsToggle } from "@/components/notifications/open-alerts-toggle";
 import { SoundToggle } from "@/components/profile/sound-toggle";
 import { SupportCard } from "@/components/profile/support-card";
 import { ChannelCard } from "@/components/channel/channel-card";
@@ -169,6 +170,12 @@ export default async function ProfilePage() {
                 <p className="text-sm text-muted-foreground">Confirmed, delivered and cancelled.</p>
               </div>
               <NotificationToggle />
+            </div>
+            <div className="flex items-center gap-3 px-5 py-3.5">
+              <IconTile>
+                <Store className="size-5" aria-hidden="true" />
+              </IconTile>
+              <OpenAlertsToggle />
             </div>
             <div className="flex items-center gap-3 px-5 py-3.5">
               <IconTile>
