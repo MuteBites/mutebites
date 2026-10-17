@@ -398,6 +398,13 @@ there are real — avoided):
     the offer and free items show on the ticket, admin cards and detail,
     WhatsApp / copy text and the Excel export. Tested in rolled-back
     transactions on the live database (9 cases) before any app code.
+20. **Offers for every restaurant** (17 Oct 2026, migration
+    `offers_all_restaurants`): 10% / 20% now apply at every restaurant,
+    each with a switch per restaurant on the Offers page (all on by
+    default; switched-off ones are rows in `offer_restaurant_exclusions`,
+    so a new restaurant joins automatically). The biryani offer stays
+    Bheemasena-only. `place_order()` re-created with only its restaurant
+    check changed.
 
 ---
 
@@ -680,6 +687,9 @@ their own hearts; no admin access, no counts anywhere — hearts are private.
 offer_biryani` and `offers_restaurant_id` (Bheemasena); `orders.discount_offer`
 / `discount_amount`; `order_items.is_free`. `total_amount` = what the
 student pays (subtotal of all lines − discount).
+**`offer_restaurant_exclusions`** — `(offer, restaurant_id)` primary key,
+`offer` `'pct10' | 'pct20'`, restaurant cascade: the restaurants an admin
+switched off for 10% / 20%. Public-read; admins insert / delete.
 
 **`taste_profiles`** — one row per student (`user_id` PK, cascade):
 `avatar` (null = their initials), `spice_level` 1–5, `diet` veg / egg /
@@ -1574,3 +1584,4 @@ Run them in this order; each one assumes the ones before it. After #40,
 | 42 | `20261015010000_favorite_dishes.sql` | hearts (`favorite_dishes`) — Profile's "Liked dishes" | Run |
 | 43 | `20261015020000_taste_profiles.sql` | taste profile and avatars (`taste_profiles`) | Run (**edit the cravings list** to the new Home food types) |
 | 44 | `20261015030000_discount_offers.sql` | discount offers + final `place_order()` (add-ons, rate limits, offers) | Run (**edit the restaurant name and the biryani section names**) |
+| 45 | `20261017000000_offers_all_restaurants.sql` | 10% / 20% at every restaurant with per-restaurant switches (`offer_restaurant_exclusions`); `place_order()` again | Run (**edit the biryani section names** like #44) |

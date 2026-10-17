@@ -499,14 +499,21 @@ instead of straight from the dashboard, and its back-link points to
 **10% off**, **20% off** and **Buy 3 full biryanis, get 1 single free** —
 saved straight to `app_settings.offer_pct10 | offer_pct20 | offer_biryani`
 by `setOfferEnabled()` (`src/lib/admin/actions.ts`, admin-checked, RLS the
-boundary). **All three are for one restaurant**,
+boundary). **10% / 20% apply at every restaurant** (by decision, 17 Oct
+2026), each with a switch per restaurant listed under it on the Offers
+page — all on by default; a switched-off one is a row in
+`offer_restaurant_exclusions` (`setOfferRestaurant()`), so a new restaurant
+joins automatically; its cart greys the offer out, "Not at this
+restaurant". **The biryani offer is for one restaurant**,
 `app_settings.offers_restaurant_id` — **Bheemasena Restaurant** (by
-decision; changed only in the database). While any is on, the cart sheet
+decision; changed only in the database). `offerAppliesTo()`
+(`src/lib/offers.ts`) is the cart's copy of the rule. While any is on, the cart sheet
 shows an **Apply discount** bar (`DiscountPicker`,
 `src/components/cart/discount-picker.tsx`): the live offers as a radio
 group, **one per order, never stacked**, each with what it saves; other
-restaurants' carts list them greyed out, "Only at Bheemasena Restaurant"
-(`place_order()` raises `offer_wrong_restaurant` too). 10% / 20% come off
+restaurants' carts list the biryani offer greyed out, "Only at Bheemasena
+Restaurant" (`place_order()` raises `offer_wrong_restaurant` for that and
+for 10% / 20% at a switched-off restaurant). 10% / 20% come off
 the paid items, add-ons included (rounded to the rupee). **Full and single
 biryanis are decided by menu section**, not by name (Bheemasena names them
 "Chicken Fry Biryani" / "Single Fry Biryani"): full = a dish in **Veg
@@ -520,7 +527,7 @@ off, so the student pays exactly the paid lines (never subtract the free
 value from the paid lines alone — College Bites' 4 Oct bug). Too few fulls
 → "Add 2 more full biryanis to unlock". No per-student limit. `getOffers()`
 (`src/lib/data/offers.ts`, request-cached) sends the cart the switches, the
-restaurant, its full biryani ids and its single biryanis — the cart never
+switched-off restaurants (`excluded`), the biryani restaurant, its full biryani ids and its single biryanis — the cart never
 guesses by name — and feeds Home, menus (via `MenuView` → `CartBar` →
 `CartSheet`) and the dashboard. `placeOrder()` passes `offer` /
 `freeItems`; an `offer_unavailable` / `offer_wrong_restaurant` refusal
@@ -913,6 +920,16 @@ access. `total_amount` is what the student pays: `sum(order_items.subtotal)
 - discount_amount`. A free single biryani is its own `order_items` row with
 `is_free = true` at its real menu price (history stays truthful); its value
 is the order's `discount_amount`.
+[`supabase/migrations/20261017000000_offers_all_restaurants.sql`](supabase/migrations/20261017000000_offers_all_restaurants.sql)
+(applied 17 Oct 2026 through the connector) adds
+**`offer_restaurant_exclusions`** — the restaurants an admin switched off
+for 10% / 20%: `offer` (`'pct10' | 'pct20'`), `restaurant_id` (→
+`restaurants`, cascade), `created_at`, primary key `(offer,
+restaurant_id)`. RLS: public-read (the cart needs it); admins insert and
+delete (`is_admin()`); no update. It also re-creates `place_order()` (same
+signature) with one change: `offer_wrong_restaurant` for `'biryani'` away
+from `offers_restaurant_id`, and for `'pct10'` / `'pct20'` at an excluded
+restaurant.
 [`supabase/migrations/20260922010000_seed_sugarcane_juice.sql`](supabase/migrations/20260922010000_seed_sugarcane_juice.sql)
 (data only — a sixth restaurant, **MuteBites Sugarcane Juice**: one
 section, one dish, "1 Litre Sugarcane Juice Bottle" ₹90, photos in
@@ -1104,7 +1121,8 @@ RLS is enabled on every table:
   `dishes` (never from the client); leaves `status` at `pending`; and
   computes `total_amount` itself. Offers: with `p_offer` set it raises
   `offer_unavailable` if that switch is off, `offer_wrong_restaurant` if
-  the order isn't from `offers_restaurant_id`, and for `'biryani'` checks
+  a biryani-offer order isn't from `offers_restaurant_id` or a 10% / 20%
+  order is from a restaurant in `offer_restaurant_exclusions`, and for `'biryani'` checks
   every `p_free_items` entry is an available dish in this restaurant's
   "Single Biryani" section with at most one per 3 paid dishes in its "Veg
   Biryani" / "Non-Veg Biryani" sections (`offer_not_eligible`); it computes

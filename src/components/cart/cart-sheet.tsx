@@ -12,7 +12,16 @@ import { Textarea } from "@/components/ui/textarea";
 import { MAX_NOTES } from "@/lib/cart/limits";
 import { spiceNote } from "@/lib/taste/options";
 import { DiscountPicker, type OfferOption } from "@/components/cart/discount-picker";
-import { discountAmount, freeAllowance, fullsToNextFree, NO_OFFERS, OFFERS, type OfferKey, type OffersState } from "@/lib/offers";
+import {
+  discountAmount,
+  freeAllowance,
+  fullsToNextFree,
+  NO_OFFERS,
+  OFFERS,
+  offerAppliesTo,
+  type OfferKey,
+  type OffersState,
+} from "@/lib/offers";
 import { cartTotals, clearCart, reconcileCart, useCart, type Cart, lineKey } from "@/lib/cart/store";
 import { formatRupees } from "@/lib/format";
 import { placeOrder } from "@/lib/orders/actions";
@@ -141,7 +150,9 @@ function CartContents({
   // Offers (ported from College Bites). Everything below is derived from the
   // cart, so changing the cart can never leave a discount it no longer earns
   // (place_order() re-checks it all anyway).
-  const offerHere = offers.restaurantId !== null && cart.restaurantId === offers.restaurantId;
+  // The biryani offer is one restaurant's; 10% / 20% every restaurant the
+  // admin hasn't switched off for them.
+  const offerHere = offerAppliesTo(offers, "biryani", cart.restaurantId);
   const freeChoices = offerHere ? offers.freeChoices.filter((c) => c.isAvailable) : [];
   const allowance = offerHere ? freeAllowance(cart.lines, offers.fullDishIds) : 0;
   const picks: Record<string, number> = {};
@@ -155,8 +166,12 @@ function CartContents({
   }
   const freeItems = freeChoices.filter((c) => picks[c.id]).map((c) => ({ ...c, quantity: picks[c.id] }));
   const offerOptions: OfferOption[] = offers.active.map((key) => {
+    if (key !== "biryani") {
+      return offerAppliesTo(offers, key, cart.restaurantId)
+        ? { key, saving: discountAmount(key, amount), blocked: null }
+        : { key, saving: 0, blocked: "Not at this restaurant" };
+    }
     if (!offerHere) return { key, saving: 0, blocked: `Only at ${offers.restaurantName}` };
-    if (key !== "biryani") return { key, saving: discountAmount(key, amount), blocked: null };
     if (freeChoices.length === 0) return { key, saving: 0, blocked: "No single biryanis on sale right now" };
     if (allowance === 0) {
       const more = fullsToNextFree(cart.lines, offers.fullDishIds);

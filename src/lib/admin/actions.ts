@@ -5,7 +5,8 @@ import { after } from "next/server";
 import { isPastDeliverySlot } from "@/lib/date";
 import { notifyUser, type PushPayload } from "@/lib/notifications/send";
 import type { OrderStatus } from "@/lib/data/types";
-import { isOfferKey, type OfferKey } from "@/lib/offers";
+import { isUuid } from "@/lib/ids";
+import { isOfferKey, isPercentOfferKey, type OfferKey, type PercentOfferKey } from "@/lib/offers";
 import type { OrderingMode } from "@/lib/ordering";
 import { formatOrderNumber, nextStatus } from "@/lib/orders/status";
 import { getSessionProfile } from "@/lib/profile";
@@ -39,6 +40,34 @@ export async function setOfferEnabled(offer: OfferKey, enabled: boolean): Promis
     .from("app_settings")
     .update({ [`offer_${offer}`]: enabled, updated_at: new Date().toISOString() })
     .eq("id", true);
+  if (error) return { ok: false, error: "Couldn't update the offer. Please try again." };
+
+  revalidatePath("/", "layout"); // the cart on Home and every menu
+  return { ok: true };
+}
+
+/**
+ * Switches 10% / 20% off on or off for one restaurant. Off = a row in
+ * offer_restaurant_exclusions (so a new restaurant gets every offer);
+ * place_order() refuses an offer at a restaurant switched off for it.
+ */
+export async function setOfferRestaurant(
+  offer: PercentOfferKey,
+  restaurantId: string,
+  enabled: boolean,
+): Promise<AdminActionResult> {
+  const denied = await assertAdmin();
+  if (denied) return denied;
+  if (!isPercentOfferKey(offer) || !isUuid(restaurantId) || typeof enabled !== "boolean") {
+    return { ok: false, error: "Unknown offer or restaurant." };
+  }
+
+  const supabase = await createClient();
+  const { error } = enabled
+    ? await supabase.from("offer_restaurant_exclusions").delete().eq("offer", offer).eq("restaurant_id", restaurantId)
+    : await supabase
+        .from("offer_restaurant_exclusions")
+        .upsert({ offer, restaurant_id: restaurantId }, { onConflict: "offer,restaurant_id", ignoreDuplicates: true });
   if (error) return { ok: false, error: "Couldn't update the offer. Please try again." };
 
   revalidatePath("/", "layout"); // the cart on Home and every menu

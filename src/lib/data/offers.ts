@@ -5,6 +5,7 @@ import {
   FULL_BIRYANI_SECTIONS,
   NO_OFFERS,
   OFFER_KEYS,
+  PERCENT_OFFER_KEYS,
   SINGLE_BIRYANI_SECTION,
   type OfferKey,
   type OffersState,
@@ -20,8 +21,9 @@ type BiryaniRow = {
 };
 
 /**
- * Which discount offers are on (app_settings, public-read), the restaurant
- * they're for, and that restaurant's full biryani ids and (while the
+ * Which discount offers are on (app_settings, public-read), the
+ * restaurants switched off for 10% / 20% (offer_restaurant_exclusions,
+ * public-read), the biryani offer's restaurant, and that restaurant's full biryani ids and (while the
  * biryani offer is on) its single biryanis to pick free — by menu section,
  * the same rule place_order() uses. Only drives the cart and admin;
  * place_order() re-checks everything. Errors read as "no offers" so no
@@ -29,7 +31,8 @@ type BiryaniRow = {
  */
 export const getOffers = cache(async (): Promise<OffersState> => {
   const supabase = await createClient();
-  const { data, error } = await supabase
+  const [{ data, error }, { data: exclusions }] = await Promise.all([
+    supabase
     .from("app_settings")
     .select("offer_pct10, offer_pct20, offer_biryani, offers_restaurant_id, restaurants(name)")
     .eq("id", true)
@@ -39,8 +42,13 @@ export const getOffers = cache(async (): Promise<OffersState> => {
       offer_biryani: boolean;
       offers_restaurant_id: string | null;
       restaurants: { name: string } | null;
-    }>();
+    }>(),
+    supabase.from("offer_restaurant_exclusions").select("offer, restaurant_id"),
+  ]);
   if (error || !data) return NO_OFFERS;
+  const excluded = Object.fromEntries(
+    PERCENT_OFFER_KEYS.map((k) => [k, (exclusions ?? []).filter((e) => e.offer === k).map((e) => e.restaurant_id)]),
+  ) as OffersState["excluded"];
 
   const flags: Record<OfferKey, boolean> = {
     pct10: data.offer_pct10,
@@ -49,7 +57,8 @@ export const getOffers = cache(async (): Promise<OffersState> => {
   };
   const active = OFFER_KEYS.filter((k) => flags[k]);
   const restaurantId = data.offers_restaurant_id;
-  if (!restaurantId) return { ...NO_OFFERS, active: [] };
+  // No biryani restaurant set: 10% / 20% still work everywhere.
+  if (!restaurantId) return { ...NO_OFFERS, active: active.filter((k) => k !== "biryani"), excluded };
 
   let fullDishIds: string[] = [];
   let freeChoices: OffersState["freeChoices"] = [];
@@ -69,5 +78,5 @@ export const getOffers = cache(async (): Promise<OffersState> => {
       .map((d) => ({ id: d.id, name: d.name, price: Number(d.price), isAvailable: d.is_available }));
   }
 
-  return { active, restaurantId, restaurantName: data.restaurants?.name ?? "", fullDishIds, freeChoices };
+  return { active, excluded, restaurantId, restaurantName: data.restaurants?.name ?? "", fullDishIds, freeChoices };
 });
