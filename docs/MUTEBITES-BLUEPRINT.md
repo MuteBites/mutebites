@@ -447,6 +447,9 @@ there are real — avoided):
     and a slightly stronger page glow. The audit gained the chip's far
     end and shine (and literal `#rrggbb` stack entries). Next: sign-in
     motion (Step B) and a Plum promo illustration (Step C).
+27. **Plum sign-in motion** (17 Oct 2026, Step B): the photo mosaic's
+    columns drift, sparkles twinkle, a rose + amber glow where the sheet
+    meets the food, and a lit plum cloche bubble on the sheet's edge.
 
 ---
 

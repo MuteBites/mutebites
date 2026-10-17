@@ -140,7 +140,12 @@ Food delivery site for VIT-AP University students.
   College Bites' art; `promo-*` CSS in `globals.css`) and the **sign-in
   scene** (`src/app/login/kaapi-login-scene.tsx` + `login.css`: a tumbler
   on a wooden table, beans drifting, three dishes floating as prints — Plum
-  keeps the photo mosaic). Shown by `only-kaapi` / `only-plum`
+  keeps the photo mosaic, which since 17 Oct 2026 moves too: its columns
+  drift slowly (the middle one the other way), sparkles twinkle over the
+  food, a rose + amber glow lights where the sheet meets it, and a lit plum
+  bubble with the lifting cloche (`PassArt`) floats on the sheet's edge
+  opposite the logo — `plum-login-*` in `login.css`, only transforms, so
+  LCP is unaffected; paused under the splash, still under reduced motion). Shown by `only-kaapi` / `only-plum`
   (`display: var(--show-kaapi|--show-plum)`, which follow the nearest
   data-palette). Icons stay lucide in both (College Bites uses Phosphor). Adding a palette = a light and a dark block in
   `globals.css`, an entry in `palettes.ts`, and its blocks in the audit.

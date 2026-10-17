@@ -3,9 +3,11 @@ import Image from "next/image";
 import Link from "next/link";
 import { Banknote, MapPin } from "lucide-react";
 import { BrandLogo } from "@/components/brand-logo";
+import { PassArt } from "@/components/theme/pass-art";
 import { SITE_DESCRIPTION, SITE_NAME, SITE_TITLE, SITE_URL } from "@/lib/site";
 import { GoogleSignInButton } from "./google-sign-in-button";
 import { KaapiLoginScene } from "./kaapi-login-scene";
+import "./login.css";
 
 // The page search engines land on (everything else needs sign-in), so it
 // carries the full search title and a canonical address.
@@ -39,6 +41,12 @@ const STRUCTURED_DATA = JSON.stringify({
  * rather than a grid. The mosaic takes whatever height the text block
  * doesn't need (flex-1), so a tall phone gets more food, not a gap above
  * the button. Purely decorative — aria-hidden, empty alts.
+ *
+ * Plum's motion (17 Oct 2026, its answer to Kaapi's animated scene): the
+ * columns drift slowly, the middle one the other way; sparkles twinkle
+ * over the food; a rose + amber glow lights where the sheet meets the
+ * photos; and a lit plum bubble with the cloche (its lid lifting) floats
+ * on the sheet's edge opposite the logo. `plum-login-*` in login.css.
  */
 const MOSAIC: string[][] = [
   [
@@ -61,6 +69,14 @@ const MOSAIC: string[][] = [
   ],
 ];
 
+/** Sparkles over the mosaic: left, top, size, animation delay. */
+const SPARKLES: [string, string, number, string][] = [
+  ["14%", "22%", 18, "0s"],
+  ["58%", "12%", 14, "-0.9s"],
+  ["80%", "48%", 20, "-1.7s"],
+  ["36%", "62%", 12, "-2.3s"],
+];
+
 export default async function LoginPage({ searchParams }: PageProps<"/login">) {
   const { error } = await searchParams;
 
@@ -72,10 +88,14 @@ export default async function LoginPage({ searchParams }: PageProps<"/login">) {
         <div className="only-kaapi absolute inset-0">
           <KaapiLoginScene />
         </div>
-        <div className="only-plum absolute inset-0">
+        <div className="plum-login only-plum absolute inset-0">
           <div className="absolute -inset-x-12 -top-16 grid -rotate-6 grid-cols-3 gap-3">
             {MOSAIC.map((column, c) => (
-              <div key={c} className={c === 1 ? "flex flex-col gap-3 pt-16" : "flex flex-col gap-3"}>
+              <div
+                key={c}
+                className={`plum-login-col flex flex-col gap-3${c === 1 ? " plum-login-col-down pt-16" : ""}`}
+                style={{ animationDelay: `${c * -4}s` }}
+              >
                 {column.map((src, row) => (
                   <div
                     key={src}
@@ -98,6 +118,22 @@ export default async function LoginPage({ searchParams }: PageProps<"/login">) {
             ))}
           </div>
           <div className="absolute inset-0 bg-linear-to-b from-transparent via-transparent to-hero/25" />
+          <div className="plum-login-glow absolute inset-x-0 bottom-0 h-3/5" />
+          {SPARKLES.map(([left, top, size, delay]) => (
+            <svg
+              key={`${left}-${top}`}
+              viewBox="0 0 20 20"
+              className="absolute text-white/85 drop-shadow"
+              style={{ left, top, width: size, height: size }}
+            >
+              <path
+                className="motif-twinkle"
+                style={{ animationDelay: delay }}
+                d="M10 0l2.6 7.4L20 10l-7.4 2.6L10 20l-2.6-7.4L0 10l7.4-2.6z"
+                fill="currentColor"
+              />
+            </svg>
+          ))}
         </div>
       </div>
 
@@ -112,6 +148,15 @@ export default async function LoginPage({ searchParams }: PageProps<"/login">) {
           splashTarget
           className="animate-pop-in -mt-10 size-20 rounded-3xl shadow-raised ring-4 ring-card"
         />
+        {/* Plum: a lit bubble with the cloche, floating on the sheet's edge. */}
+        <span
+          aria-hidden="true"
+          className="only-plum surface-hero glow-hero absolute -top-8 right-6 size-16 rounded-full bg-hero ring-4 ring-card"
+        >
+          <span className="plum-login-bubble absolute inset-0">
+            <PassArt className="top-2 left-2" />
+          </span>
+        </span>
 
         <h1 className="animate-settle mt-5 font-heading text-display font-bold">
           Good food.

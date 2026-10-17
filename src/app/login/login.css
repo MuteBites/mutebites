@@ -1,4 +1,7 @@
 /*
+ * Both palettes' sign-in motion lives here: MuteBites Plum's mosaic
+ * (plum-login-*, at the end) and Desi Kaapi's scene below.
+ *
  * Desi Kaapi's sign-in scene (KaapiLoginScene) — College Bites' Kaapi
  * scene: a cream-to-caramel morning with a hint of rose (espresso with a
  * caramel horizon at night), a tumbler of filter coffee in its davara on a
@@ -143,5 +146,64 @@
   }
   to {
     translate: 0 -10px;
+  }
+}
+
+/*
+ * MuteBites Plum's sign-in (17 Oct 2026): the photo columns drift, a warm
+ * rose + amber light where the sheet meets the food, sparkles (the shared
+ * motif-twinkle) and the cloche bubble floating on the sheet's edge.
+ * Images are on screen from the first paint (only transforms move), so
+ * Largest Contentful Paint is unaffected.
+ */
+.plum-login-glow {
+  background:
+    radial-gradient(55% 70% at 22% 100%, var(--glow-rose), transparent 70%),
+    radial-gradient(50% 60% at 82% 100%, var(--glow-amber), transparent 70%);
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .plum-login-col {
+    animation: plum-col-drift 14s ease-in-out infinite alternate;
+  }
+  .plum-login-col-down {
+    animation-name: plum-col-drift-down;
+  }
+  .plum-login-glow {
+    animation: login-fade-in 1.6s var(--ease-out-expo) 0.2s both;
+  }
+  .plum-login-bubble {
+    animation: plum-bubble-float 4s ease-in-out 0.6s infinite alternate;
+  }
+  /* Hold everything while the splash still covers the page. */
+  html:is([data-splash="play"], [data-splash="run"]) :is(.plum-login *, .plum-login-bubble, .plum-login-bubble *) {
+    animation-play-state: paused;
+  }
+}
+
+@keyframes plum-col-drift {
+  from {
+    translate: 0 0;
+  }
+  to {
+    translate: 0 -28px;
+  }
+}
+@keyframes plum-col-drift-down {
+  from {
+    translate: 0 0;
+  }
+  to {
+    translate: 0 28px;
+  }
+}
+@keyframes plum-bubble-float {
+  from {
+    translate: 0 0;
+    rotate: -4deg;
+  }
+  to {
+    translate: 0 -4px;
+    rotate: 4deg;
   }
 }
