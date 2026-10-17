@@ -12,6 +12,11 @@ export function GoogleSignInButton() {
   async function signIn() {
     setPending(true);
     setError(null);
+    // /login?dev (the way back in while /dev has the site down): the
+    // callback reads this and lands on /dev instead of the blocked Home.
+    if (new URLSearchParams(window.location.search).has("dev")) {
+      document.cookie = "mutebites.next=dev; path=/auth; max-age=600; samesite=lax; secure";
+    }
     const supabase = createClient();
     const { error } = await supabase.auth.signInWithOAuth({
       provider: "google",

@@ -5,6 +5,7 @@ import { SPLASH_DISABLED } from "@/components/splash/config";
 import { SPLASH_INIT_SCRIPT } from "@/components/splash/init-script";
 import { TabBar } from "@/components/nav/tab-bar";
 import { Toaster } from "@/components/toast/toaster";
+import { SiteStatusWatch } from "@/components/site-status/site-status-watch";
 import { UploadedPhotos } from "@/components/uploaded-photos";
 import { getUploadedPhotos } from "@/lib/data/uploaded-photos";
 import { SITE_DESCRIPTION, SITE_NAME, SITE_TITLE, SITE_URL } from "@/lib/site";
@@ -124,6 +125,7 @@ export default async function RootLayout({ children }: LayoutProps<"/">) {
           </>
         )}
         <UploadedPhotos photos={photos} />
+        <SiteStatusWatch />
         {children}
         {/* The student bottom bar: here rather than in each page so it stays
             mounted and its pill can slide between tabs. It decides for

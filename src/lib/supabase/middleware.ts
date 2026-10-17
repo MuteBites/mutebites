@@ -13,12 +13,13 @@ function isPublicPath(pathname: string) {
   );
 }
 
-// Reachable while the site is killed / in maintenance, so a developer can
-// still sign in and switch it back.
-const SITE_GATE_EXEMPT = ["/dev", "/login", "/auth"];
-
-function isSiteGateExempt(pathname: string) {
-  return SITE_GATE_EXEMPT.some((p) => pathname === p || pathname.startsWith(`${p}/`));
+// Reachable while the site is killed / in maintenance — only what a
+// developer needs to get back in and switch it off: /dev itself, the OAuth
+// callback, and /login with ?dev (plain /login is blocked like the rest).
+function isSiteGateExempt(request: NextRequest) {
+  const { pathname, searchParams } = request.nextUrl;
+  if (pathname === "/dev" || pathname.startsWith("/auth/")) return true;
+  return pathname === "/login" && searchParams.has("dev");
 }
 
 export async function updateSession(request: NextRequest) {
@@ -54,26 +55,26 @@ export async function updateSession(request: NextRequest) {
   const { pathname } = request.nextUrl;
 
   // Developer kill switch / maintenance (/dev, public.site_status). While
-  // it's on, every page and server action gets the offline screen, except
-  // for developers (public.is_developer()) and the paths they need to get
-  // back in. A failed read (e.g. before the table existed) counts as live.
-  if (!isSiteGateExempt(pathname)) {
+  // it's on, every page, server action and RSC request gets the offline
+  // screen — for everyone, students, admins and developers alike — except
+  // the way back in above. A failed read (e.g. before the table existed)
+  // counts as live.
+  if (!isSiteGateExempt(request)) {
     const { data: site } = await supabase
       .from("site_status")
       .select("mode, message")
       .maybeSingle<{ mode: SiteMode; message: string | null }>();
-    if (site && site.mode !== "live") {
-      const isDeveloper = user ? (await supabase.rpc("is_developer")).data === true : false;
-      if (!isDeveloper) return offlineResponse(site.mode, site.message);
-    }
+    if (site && site.mode !== "live") return offlineResponse(site.mode, site.message);
   }
 
   // Optimistic redirects only — pages still verify the user themselves.
   if (!user && !isPublicPath(pathname)) {
+    if (pathname === "/dev") return redirectWithCookies(request, supabaseResponse, "/login", "dev");
     return redirectWithCookies(request, supabaseResponse, "/login");
   }
   if (user && pathname === "/login") {
-    return redirectWithCookies(request, supabaseResponse, "/");
+    const dev = request.nextUrl.searchParams.has("dev");
+    return redirectWithCookies(request, supabaseResponse, dev ? "/dev" : "/");
   }
 
   return supabaseResponse;
@@ -85,10 +86,11 @@ function redirectWithCookies(
   request: NextRequest,
   from: NextResponse,
   pathname: string,
+  search = "",
 ) {
   const url = request.nextUrl.clone();
   url.pathname = pathname;
-  url.search = "";
+  url.search = search;
   const redirect = NextResponse.redirect(url);
   from.cookies.getAll().forEach((cookie) => redirect.cookies.set(cookie));
   return redirect;

@@ -476,8 +476,11 @@ there are real — avoided):
     maintenance — written only by `set_site_mode()`; the proxy serves a
     self-contained 503 page (a bare "This site can't be reached" error, or
     the plum "We're cooking up something new" screen with an optional note)
-    to every non-developer request except `/dev`, `/login`, `/auth`, and
-    `place_order()` refuses with `site_offline`.
+    to every request — developers included, after the first version let
+    them through and the switches looked broken — except `/dev`,
+    `/auth/*` and `/login?dev` (the way back in); open pages reload into it
+    within 30 s (`SiteStatusWatch`), and `place_order()` refuses with
+    `site_offline`.
 
 ---
 

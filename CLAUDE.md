@@ -676,15 +676,21 @@ Both switches are one `site_status.mode` (`live` | `killed` |
 `maintenance`, plus an optional ≤ 300-char `message`), written only by
 `public.set_site_mode()`, which checks `is_developer()` (the JWT email).
 `updateSession()` (`src/lib/supabase/middleware.ts`) reads it on every
-request and, when it isn't live and the caller isn't a developer, answers
-with `offlineResponse()` (`src/lib/site-status/offline-page.ts`): a
+request and, when it isn't live, answers **everyone** — students, admins
+and developers alike, by the user's call (18 Oct 2026; developers used to
+be let through, which made the switches look broken) — with
+`offlineResponse()` (`src/lib/site-status/offline-page.ts`): a
 self-contained 503 HTML page — killed = a bare "This site can't be
 reached" error, maintenance = the plum "We're cooking up something new"
 card with the note — that re-checks every 30 s. Plain HTML (colours written
-out, mirroring Plum) because the root layout must not run. `/dev`, `/login`
-and `/auth` stay reachable so a developer can always sign in and switch it
-back; developers see the site normally. `place_order()` also raises
-`site_offline`. A failed read counts as live.
+out, mirroring Plum) because the root layout must not run. Only the way
+back in stays up: `/dev`, `/auth/*` and `/login?dev` (plain `/login` is
+blocked too). Signing in from `/login?dev` sets a short `mutebites.next`
+cookie (path `/auth`) so the OAuth callback lands on `/dev`; a signed-out
+`/dev` redirects to `/login?dev`. Pages already open notice within 30 s:
+`SiteStatusWatch` (root layout) polls `site_status` while the tab is
+visible and reloads once it isn't live (not on `/dev` / `/login`).
+`place_order()` also raises `site_offline`. A failed read counts as live.
 
 Visually, admin shares the student app's system: the dashboard's plum
 "Today" card (`StatCards`) carries today's counts with the campus ordering

@@ -27,12 +27,12 @@ const MAX_MESSAGE = 300;
 const CONFIRM: Record<SiteMode, { title: string; body: string; action: string }> = {
   killed: {
     title: "Kill the whole site?",
-    body: "Every page and every action stops for everyone but developers — students and admins get a bare “This site can’t be reached” error until you switch it off. Nothing is deleted.",
+    body: "Every page and every action stops for everyone — students, admins and you all get a bare “This site can’t be reached” error until you switch it off. Nothing is deleted.",
     action: "Kill site",
   },
   maintenance: {
     title: "Turn on maintenance mode?",
-    body: "Everyone but developers sees the “We’re cooking up something new” screen, with your message, until you switch it off. No one can order meanwhile.",
+    body: "Everyone, you included, sees the “We’re cooking up something new” screen, with your message, until you switch it off. No one can order meanwhile.",
     action: "Start maintenance",
   },
   live: {
@@ -99,7 +99,7 @@ export function SiteSwitches({
         id="kill"
         icon={Skull}
         title="Kill switch"
-        body="Stops the entire website for everyone but developers, with a plain server-error screen."
+        body="Stops the entire website for everyone — students, admins and you — with a plain server-error screen."
         checked={mode === "killed"}
         disabled={pending}
         onToggle={() => setTarget(mode === "killed" ? "live" : "killed")}
@@ -140,7 +140,7 @@ export function SiteSwitches({
       </SwitchCard>
 
       <p className="text-sm text-muted-foreground">
-        /dev, /login and /auth stay reachable while the site is down, so you can always sign in and switch it back.
+        Only this page stays up while the site is down. Signed out? Sign in at mutebites.in/login?dev and you land back here. Open pages switch over within 30 seconds.
       </p>
 
       <AlertDialog open={target !== null} onOpenChange={(next) => !next && !pending && setTarget(null)}>
