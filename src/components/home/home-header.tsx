@@ -49,7 +49,7 @@ export function HomeHeader({
       />
       <div className="relative flex items-center justify-between">
         <AboutMuteBitesDialog>
-          <BrandLogo splashTarget className="size-10 rounded-xl" />
+          <BrandLogo splashTarget className="size-12 rounded-2xl" />
         </AboutMuteBitesDialog>
         <div className="flex items-center gap-2.5">
           <ChannelPopover />

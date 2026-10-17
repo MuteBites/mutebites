@@ -38,7 +38,12 @@ Food delivery site for VIT-AP University students.
   under a soft amber + rose sky (`body`, `--page-glow-a/-b`). Light cards
   cast warm amber-tinted shadows; dark cards carry a 1px rim light inside
   `--elevation-card`. Buttons (`components/ui/button.tsx`) are pills; the
-  default one is `surface-primary` (lit amber). **For a red or green button
+  default one is `surface-primary` — since 17 Oct 2026 built like Kaapi's:
+  a soft white shine over the top half and a 115° sweep from `--primary`
+  amber to `--primary-2` rose-amber (`#a2493f`; light amber → `#e3a0a0` at
+  night) — so the tab bar's pill, Place order, the dish "+" and lit
+  switches are two-tone instead of flat (`--primary-2` used to equal
+  `--primary`; the audit checks button text on both ends). **For a red or green button
   use `variant="danger"` / `variant="success"`** (dialog confirms: Cancel
   order, Close ordering, Ban, Sign out, Mark all delivered) — never
   `className="bg-destructive"` on the default variant: its amber gradient is
@@ -716,10 +721,15 @@ silently re-enables the button.
   `alert-dialog.tsx` (confirmations — "Cancel this order?", "Pause
   ordering campus-wide?", "Mark 3 orders delivered?") and `dialog.tsx`
   (plain popups with no confirm/cancel semantics — the "About MuteBites"
-  card from the Home logo — the logo sits on a frosted plate with a thin
-  ring, and `.logo-hint` ripples a rose
-  outline twice after load so it reads as tappable; the card opens on a
-  strip of the lit hero (`KaapiMotif` under Kaapi) with the logo tile
+  card from the Home logo — since 17 Oct 2026 the logo tile itself is the
+  button, as on College Bites: 48 px, `ring-2 ring-primary/40` (70% on
+  hover), and `.logo-beacon` — a slow glow in the action colour (a
+  `drop-shadow` filter, so the ring and shadow stay put) plus two rings
+  rippling out once, held under the splash so they play as it hands over;
+  `BrandLogo` gets a lit edge and a soft amber glow in dark mode and its
+  mascot fills 92% of the tile (was 84%; the splash measures the image
+  live). The card opens on a
+  strip of the lit hero (`HeroMotif`) with the logo tile
   rising out of it, and its close button takes `text-hero-foreground` —
   (footer: `AboutCredits` — "Owned by Harsha & Rishi",
   "~ Developed & Maintained by Naga Adithya"; the name has a dotted

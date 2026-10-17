@@ -318,16 +318,14 @@
   --show-plum: block;
   --app-sans: var(--font-jakarta);
   --app-heading: var(--font-fraunces), var(--font-jakarta);
-  /* The second stop of the action gradient — Plum's surface-primary is a
-     lit single amber, so it's the same colour; Kaapi's runs coffee → cinnamon. */
-  --primary-2: #99581b;
-  /* Plum's surfaces (surface-primary / surface-hero read these). */
-  --surface-primary: linear-gradient(
-    165deg,
-    color-mix(in srgb, var(--primary) 100%, white 14%) 0%,
-    var(--primary) 55%,
-    color-mix(in srgb, var(--primary) 100%, black 8%) 100%
-  );
+  /* The second stop of the action gradient: Plum runs amber → a warm
+     rose-amber (Kaapi runs coffee → cinnamon). It was the same amber until
+     17 Oct 2026, which left the tab bar's pill and every action button flat. */
+  --primary-2: #a2493f;
+  /* Plum's surfaces (surface-primary / surface-hero read these). The action
+     surface is built like Kaapi's: a soft top shine over a two-tone sweep. */
+  --surface-primary: linear-gradient(180deg, rgb(255 255 255 / 18%), transparent 50%),
+    linear-gradient(115deg, var(--primary) 0%, var(--primary-2) 100%);
   --hero-surface: radial-gradient(60% 45% at 18% 0%, rgb(255 255 255 / 9%), transparent 70%),
     radial-gradient(90% 80% at 100% 0%, var(--hero-glow), transparent 65%),
     radial-gradient(70% 60% at 0% 100%, var(--hero-bloom), transparent 70%),
@@ -421,7 +419,7 @@
   --elevation-raised: inset 0 1px 0 rgb(255 255 255 / 7%), 0 2px 4px rgb(0 0 0 / 30%), 0 16px 32px -12px rgb(0 0 0 / 60%);
   --elevation-overlay: 0 4px 8px rgb(0 0 0 / 35%), 0 24px 48px -12px rgb(0 0 0 / 60%);
 
-  --primary-2: #d9974f;
+  --primary-2: #e3a0a0;
   --heading-a: #f5eae1;
   --heading-b: #e7b7c4;
   --heading-c: #e9b27a;
@@ -886,10 +884,32 @@
  * transform/opacity animation at all, never just a faster one.
  */
 @media (prefers-reduced-motion: no-preference) {
-  /* Home logo: a soft rose ring ripples out twice, after the splash has
-     handed over, so students notice it opens the About card. */
-  .logo-hint {
-    animation: logo-hint 1.6s var(--ease-out-expo) 3.2s 2;
+  /* Home logo (as on College Bites): a slow glow in the action colour
+     breathes around the tile, and two rings ripple out once when the page
+     appears — paused under the splash, so they play as it hands over. The
+     glow is a drop-shadow filter, not box-shadow, so the tile's ring and
+     shadow stay put. */
+  .logo-beacon {
+    animation: logo-glow 3.2s ease-in-out infinite;
+  }
+  .logo-beacon::before,
+  .logo-beacon::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+    border: 2px solid var(--primary);
+    opacity: 0;
+    pointer-events: none;
+    animation: logo-ripple 1.6s var(--ease-out-expo) 0.4s 1 both;
+  }
+  .logo-beacon::after {
+    animation-delay: 0.85s;
+  }
+  html:is([data-splash="play"], [data-splash="run"]) .logo-beacon,
+  html:is([data-splash="play"], [data-splash="run"]) .logo-beacon::before,
+  html:is([data-splash="play"], [data-splash="run"]) .logo-beacon::after {
+    animation-play-state: paused;
   }
   .animate-pop-in {
     animation: pop-in var(--dur-quick) var(--ease-spring) both;
@@ -1175,15 +1195,23 @@
   }
 }
 
-@keyframes logo-hint {
-  /* outline, not box-shadow: the plate's ring and shadow are box-shadows */
+@keyframes logo-glow {
+  0%,
+  100% {
+    filter: drop-shadow(0 0 0 color-mix(in srgb, var(--primary) 0%, transparent));
+  }
+  50% {
+    filter: drop-shadow(0 0 10px color-mix(in srgb, var(--primary) 55%, transparent));
+  }
+}
+@keyframes logo-ripple {
   0% {
-    outline: 2px solid color-mix(in oklab, var(--rose) 55%, transparent);
-    outline-offset: 0;
+    opacity: 0.7;
+    transform: scale(1);
   }
   100% {
-    outline: 2px solid color-mix(in oklab, var(--rose) 0%, transparent);
-    outline-offset: 9px;
+    opacity: 0;
+    transform: scale(1.6);
   }
 }
 

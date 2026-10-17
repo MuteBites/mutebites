@@ -9,7 +9,9 @@ import { cn } from "@/lib/utils";
  * and round it; the full logo (wordmark + tagline) only appears on the
  * splash, where it's big enough to read. The mark image is the splash's
  * mascot group exactly (scripts/build-brand-assets.mjs), which is what
- * lets the splash land on it seamlessly.
+ * lets the splash land on it seamlessly. On a dark ground the ivory tile
+ * gets a lit edge and a soft amber glow (as College Bites does), so it
+ * sits on the page instead of looking pasted on.
  */
 export function BrandLogo({
   className,
@@ -29,7 +31,7 @@ export function BrandLogo({
     <div
       data-splash-target={splashTarget ? "" : undefined}
       className={cn(
-        "flex size-36 items-center justify-center overflow-hidden rounded-[2rem] bg-[#f5eae1]",
+        "flex size-36 items-center justify-center overflow-hidden rounded-[2rem] bg-[#f5eae1] dark:shadow-[0_0_0_1px_rgb(255_255_255/0.16),0_10px_28px_-10px_var(--glow-amber)]",
         className,
       )}
     >
@@ -40,7 +42,7 @@ export function BrandLogo({
         height={409}
         sizes="144px"
         preload={preload}
-        className="h-auto w-[84%] object-contain"
+        className="h-auto w-[92%] object-contain"
       />
     </div>
   );

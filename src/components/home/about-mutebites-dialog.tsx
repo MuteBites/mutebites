@@ -14,9 +14,10 @@ export function AboutMuteBitesDialog({ children }: { children: ReactNode }) {
     <Dialog>
       <DialogTrigger
         aria-label="About MuteBites"
-        // Same frosted plate as the Trending button next to it, plus a thin
-        // ring, so the logo reads as tappable; .logo-hint ripples twice on load.
-        className="logo-hint pressable flex size-12 shrink-0 items-center justify-center rounded-2xl bg-card/80 shadow-card ring-1 ring-foreground/10 outline-none hover:ring-primary/40 focus-visible:ring-3 focus-visible:ring-ring/80"
+        // The logo tile is the button (as on College Bites): a ring in the
+        // action colour, a slow glow and two ripples after the splash
+        // (.logo-beacon), so it reads as tappable.
+        className="logo-beacon pressable relative shrink-0 rounded-2xl shadow-card ring-2 ring-primary/40 outline-none hover:ring-primary/70 focus-visible:ring-3 focus-visible:ring-ring/80"
       >
         {children}
       </DialogTrigger>

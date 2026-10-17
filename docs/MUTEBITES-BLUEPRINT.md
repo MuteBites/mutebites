@@ -435,6 +435,12 @@ there are real — avoided):
     light, rose bloom, top highlight). All audited in both themes.
     Lesson: Python on Windows writes CRLF; the contrast audit's parser
     needs LF in `globals.css` (`newline=''` when editing with Python).
+25. **Home logo and action pill like College Bites** (17 Oct 2026): the
+    header logo tile is the button with an action-colour ring, a slow
+    glow and two ripples after the splash (`.logo-beacon`); `BrandLogo`
+    gets a dark-mode edge glow and a bigger mascot. Plum's action surface
+    (tab bar pill, main buttons) got Kaapi's structure: a top shine over
+    amber → rose-amber.
 
 ---
 
