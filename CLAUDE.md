@@ -666,6 +666,26 @@ dish still shows on the student menu — greyed, struck through and
 unorderable (`DishCard`'s `soldOut`) — and `place_order()` refuses it
 anyway, so the flag is never only a UI state.
 
+**Dev controls** (`/dev`, 18 Oct 2026 — developers only, separate from
+admin): a **Kill switch** and **Maintenance mode** (`SiteSwitches`,
+`src/components/dev/site-switches.tsx`; `setSiteMode()` in
+`src/lib/dev/actions.ts`). Access = your Google email is a row in
+`public.developers` (added by hand, never in a migration — the emails are
+deliberately not in the repo); anyone else, admins included, gets a 404.
+Both switches are one `site_status.mode` (`live` | `killed` |
+`maintenance`, plus an optional ≤ 300-char `message`), written only by
+`public.set_site_mode()`, which checks `is_developer()` (the JWT email).
+`updateSession()` (`src/lib/supabase/middleware.ts`) reads it on every
+request and, when it isn't live and the caller isn't a developer, answers
+with `offlineResponse()` (`src/lib/site-status/offline-page.ts`): a
+self-contained 503 HTML page — killed = a bare "This site can't be
+reached" error, maintenance = the plum "We're cooking up something new"
+card with the note — that re-checks every 30 s. Plain HTML (colours written
+out, mirroring Plum) because the root layout must not run. `/dev`, `/login`
+and `/auth` stay reachable so a developer can always sign in and switch it
+back; developers see the site normally. `place_order()` also raises
+`site_offline`. A failed read counts as live.
+
 Visually, admin shares the student app's system: the dashboard's plum
 "Today" card (`StatCards`) carries today's counts with the campus ordering
 control (`OrderingKillSwitch` — a two-way Open / Closed switch for
@@ -1018,6 +1038,14 @@ student's session, so it goes through the service-role client — see
 the 3-hour rule) and `recent_open_messages` (int[], default `{}`) and
 `push_subscriptions.notify_open` (boolean, default true — the "When
 ordering opens" switch). Existing policies cover all three.
+[`supabase/migrations/20261018000000_site_status.sql`](supabase/migrations/20261018000000_site_status.sql)
+adds **`developers`** (`email` primary key, lowercase; RLS on, no
+policies — rows only by hand) and **`site_status`** (single row: `mode`
+`'live' | 'killed' | 'maintenance'`, `message` ≤ 300, `updated_at`;
+public-read, no write policies), `is_developer()` and
+`set_site_mode(mode, message)` (security definer, authenticated only,
+`not_developer` otherwise), and re-creates `place_order()` with a
+`site_offline` check after the profile one — see **Dev controls**.
 [`supabase/migrations/20260921010000_milestone_rewards.sql`](supabase/migrations/20260921010000_milestone_rewards.sql)
 adds **`milestone_rewards`** — one row per student whose all-milestones
 free biryani was handed over (`user_id` primary key = once per student,

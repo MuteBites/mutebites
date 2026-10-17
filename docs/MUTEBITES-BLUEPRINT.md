@@ -470,6 +470,14 @@ there are real — avoided):
     seen). Lessons: Claude can't drive its own window, so Flow uploads need
     the user to drop files in; Flow downloads take ~1.5 min to prepare —
     don't leave the page.
+30. **Developer kill switch and maintenance mode** (18 Oct 2026): `/dev`,
+    only for the emails in `public.developers` (a 404 for everyone else,
+    admins included). One three-way `site_status.mode` — live / killed /
+    maintenance — written only by `set_site_mode()`; the proxy serves a
+    self-contained 503 page (a bare "This site can't be reached" error, or
+    the plum "We're cooking up something new" screen with an optional note)
+    to every non-developer request except `/dev`, `/login`, `/auth`, and
+    `place_order()` refuses with `site_offline`.
 
 ---
 
@@ -1042,6 +1050,9 @@ action buttons.
   restaurant, "Needs attention" (any dish ≤ 2★), "With notes".
 - **Sold out:** every dish grouped by restaurant and section, restaurant
   tabs, search, "Sold out only"; each row flips `is_available` in place.
+- **Dev (`/dev`, developers only — not part of admin):** a kill switch and
+  maintenance mode with an optional message; see timeline #30 and
+  `site_status` in CLAUDE.md.
 
 ---
 
@@ -1657,3 +1668,4 @@ Run them in this order; each one assumes the ones before it. After #40,
 | 46 | `20261017010000_menu_photos.sql` | admin photo uploads: `photo_path` / `cover_path` + the `menu-photos` bucket and its policies | Run |
 | 47 | `20261017020000_menu_photos_allow_jpg.sql` | photo paths may end `.jpg` too (Safari can't encode WebP) | Run |
 | 48 | `20261017030000_open_push_notifications.sql` | "ordering is open" pushes: 3-hour rule, recent messages, per-device mute | Run |
+| 49 | `20261018000000_site_status.sql` | developer kill switch / maintenance: `developers`, `site_status`, `is_developer()`, `set_site_mode()`; `place_order()` refuses `site_offline` | Run, then insert the developer emails by hand (not in the file) |

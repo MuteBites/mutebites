@@ -187,6 +187,8 @@ const PLACE_ORDER_ERRORS: Record<string, string> = {
   profile_missing: "Looks like you got signed out — sign in again to place your order.",
   banned: "Ordering's blocked for this phone number. If that doesn't sound right, please reach out to support.",
   ordering_paused: "Ordering's closed right now — check back in a bit. Your cart is saved.",
+  // The developer kill switch / maintenance (/dev, public.site_status).
+  site_offline: "MuteBites is down for maintenance right now — try again in a bit. Your cart is saved.",
   // Only the old daily schedule raised this; unreachable since 'auto' was removed (15 Oct 2026).
   ordering_closed: "Ordering's closed right now — check back in a bit. Your cart is saved.",
   invalid_contact_phone: "Enter a valid 10-digit mobile number.",
