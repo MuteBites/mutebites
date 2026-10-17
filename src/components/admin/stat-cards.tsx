@@ -1,5 +1,5 @@
 import type { ReactNode } from "react";
-import { KaapiMotif } from "@/components/theme/kaapi-motif";
+import { HeroMotif } from "@/components/theme/hero-motif";
 import { cn } from "@/lib/utils";
 
 /*
@@ -30,7 +30,7 @@ export function StatCards({
 }) {
   return (
     <section className="surface-hero glow-hero relative overflow-hidden rounded-3xl bg-hero text-hero-foreground">
-      <KaapiMotif className="-top-3 right-2 size-28" />
+      <HeroMotif className="-top-3 right-2 size-28" />
       <div className="relative px-5 pt-5 sm:px-6">
         <h2 className="font-heading text-title font-bold">Today</h2>
         <p className="text-sm text-hero-foreground/85">{todayLabel} · VIT-AP Main Gate</p>

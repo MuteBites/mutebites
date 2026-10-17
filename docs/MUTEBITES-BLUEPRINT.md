@@ -427,6 +427,14 @@ there are real — avoided):
     ones while a fruit stall is on, offer ones while 10% / 20% is on, no
     repeats of the last 10), at most once per 3 hours. Profile switch
     "When ordering opens" mutes just these.
+24. **Plum caught up with Kaapi** (17 Oct 2026, no migration): Plum got
+    its own illustrated motif on every hero card (the mascot's cloche with
+    steam and twinkling sparkles, where Kaapi has its tumbler), a cloche
+    whose lid lifts by "Campus pass", a delivery run on the promo card, a
+    plum → rose → amber headline, and a brighter hero (stronger amber
+    light, rose bloom, top highlight). All audited in both themes.
+    Lesson: Python on Windows writes CRLF; the contrast audit's parser
+    needs LF in `globals.css` (`newline=''` when editing with Python).
 
 ---
 

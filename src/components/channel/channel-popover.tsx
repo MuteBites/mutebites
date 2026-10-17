@@ -3,7 +3,7 @@
 import { Popover } from "@base-ui/react/popover";
 import { useSyncExternalStore, type CSSProperties } from "react";
 import { ArrowRight, BadgePercent, BellRing, CookingPot, Info, MessageCircle, X, type LucideIcon } from "lucide-react";
-import { KaapiMotif } from "@/components/theme/kaapi-motif";
+import { HeroMotif } from "@/components/theme/hero-motif";
 import { WHATSAPP_GROUP_URL } from "@/lib/support";
 import { cn } from "@/lib/utils";
 import { getChannelSeen, getServerChannelSeen, markChannelSeen, subscribeChannelSeen } from "./channel-seen";
@@ -50,7 +50,7 @@ export function ChannelPopover() {
         <Popover.Positioner side="bottom" align="end" sideOffset={10} collisionPadding={16} className="z-50">
           <Popover.Popup className="channel-pop w-[min(20rem,calc(100vw-2rem))] origin-(--transform-origin) overflow-hidden rounded-[1.75rem] border bg-popover text-popover-foreground shadow-overlay outline-none">
             <div className="surface-hero relative h-28 overflow-hidden bg-hero">
-              <KaapiMotif className="-right-10 -bottom-16 size-40" />
+              <HeroMotif className="-right-10 -bottom-16 size-40" />
               <div className="channel-rise absolute bottom-4 left-5 flex items-center gap-3" style={rise(0)}>
                 <span className="flex size-13 items-center justify-center rounded-2xl bg-card text-success shadow-raised">
                   <MessageCircle className="size-7" strokeWidth={2.25} aria-hidden="true" />

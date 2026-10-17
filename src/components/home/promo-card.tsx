@@ -1,6 +1,6 @@
 import type { CSSProperties } from "react";
 import Image from "next/image";
-import { Banknote, Clock, MapPin } from "lucide-react";
+import { Banknote, ChefHat, Clock, MapPin, Motorbike } from "lucide-react";
 import { BrandLogo } from "@/components/brand-logo";
 
 /**
@@ -12,8 +12,12 @@ import { BrandLogo } from "@/components/brand-logo";
  *
  *   MuteBites Plum  the pitch, the real delivery time an order placed now
  *                   gets (deliveryWindow(), passed in from the server so it
- *                   can't disagree with the ticket), two chips, and the
- *                   mascot's ivory tile floating on the right.
+ *                   can't disagree with the ticket), two chips, a little
+ *                   delivery run (kitchen → Main Gate on a dashed road,
+ *                   the rider looping every 6 s and the pin popping as it
+ *                   arrives — `plum-ride*`; reduced motion parks it at the
+ *                   kitchen), and the mascot's ivory tile floating on the
+ *                   right.
  *   Desi Kaapi      College Bites' promo exactly: the line and one sentence
  *                   on the left, and on the right the Kaapi campus scene
  *                   with a delivery run looping every 9 s — the rider pulls
@@ -54,6 +58,14 @@ export function PromoCard({ slot }: { slot: { lead: string; time: string } }) {
             Cash or UPI
           </li>
         </ul>
+        <div aria-hidden="true" className="relative mt-4 h-7 max-w-56">
+          <span className="absolute inset-x-6 top-1/2 border-t-2 border-dashed border-hero-foreground/30" />
+          <ChefHat className="absolute top-1/2 left-0 size-5 -translate-y-1/2 text-hero-foreground/85" />
+          <MapPin className="plum-ride-pin absolute top-1/2 right-0 -mt-2.5 size-5 text-hero-accent" />
+          <span className="plum-ride absolute top-1/2 left-5 -translate-y-[60%]">
+            <Motorbike className="size-5 text-hero-foreground" />
+          </span>
+        </div>
         <div aria-hidden="true" className="absolute top-1/2 right-4 -translate-y-1/2">
           <div className="animate-float">
             <BrandLogo className="size-20 rotate-6 rounded-3xl shadow-raised ring-2 ring-hero-foreground/15" />

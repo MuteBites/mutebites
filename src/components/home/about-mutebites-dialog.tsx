@@ -3,7 +3,7 @@
 import type { ReactNode } from "react";
 import { BrandLogo } from "@/components/brand-logo";
 import { MessageCircle } from "lucide-react";
-import { KaapiMotif } from "@/components/theme/kaapi-motif";
+import { HeroMotif } from "@/components/theme/hero-motif";
 import { WHATSAPP_GROUP_URL } from "@/lib/support";
 import { AboutCredits } from "./about-credits";
 import { Dialog, DialogContent, DialogDescription, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
@@ -24,9 +24,9 @@ export function AboutMuteBitesDialog({ children }: { children: ReactNode }) {
         // The close button sits on the hero strip, so it takes the hero's ink.
         className="flex flex-col items-center overflow-hidden text-center [&_[data-slot=dialog-close-button]]:text-hero-foreground [&_[data-slot=dialog-close-button]]:hover:bg-hero-foreground/15"
       >
-        {/* A strip of the lit hero (Kaapi adds its tumbler), the logo rising out of it. */}
+        {/* A strip of the lit hero with the palette's motif, the logo rising out of it. */}
         <div aria-hidden="true" className="surface-hero relative -mx-6 -mt-6 h-24 self-stretch overflow-hidden bg-hero">
-          <KaapiMotif className="-bottom-16 left-1/2 size-40 -translate-x-1/2" />
+          <HeroMotif className="-bottom-16 left-1/2 size-40 -translate-x-1/2" />
         </div>
         <BrandLogo className="relative -mt-10 size-18 rounded-[1.4rem] shadow-raised ring-4 ring-card" />
         <DialogTitle className="mt-3 text-title">MuteBites</DialogTitle>

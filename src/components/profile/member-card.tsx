@@ -1,5 +1,5 @@
 import type { ReactNode } from "react";
-import { KaapiMotif } from "@/components/theme/kaapi-motif";
+import { HeroMotif } from "@/components/theme/hero-motif";
 import { PassArt } from "@/components/theme/pass-art";
 import { Avatar } from "@/components/taste/avatar";
 import { OpenTasteSheetButton } from "@/components/taste/taste-sheet";
@@ -38,9 +38,9 @@ export function MemberCard({
 }) {
   return (
     <section className="surface-hero glow-hero relative overflow-hidden rounded-[1.75rem] bg-hero p-5 text-hero-foreground">
-      {/* Desi Kaapi (as on College Bites): the tumbler motif in the corner,
-          and a small steaming tumbler detail by the label. Hidden for Plum. */}
-      <KaapiMotif className="-top-16 -right-16 size-36" />
+      {/* The palette's motif in the corner (Plum's cloche, Kaapi's tumbler)
+          and its small detail by the label. */}
+      <HeroMotif className="-top-16 -right-16 size-36" />
       <PassArt className="top-3.5 right-4" />
       <p className="relative text-label text-hero-accent">Campus pass</p>
       <div className="relative mt-3 flex items-center gap-4">

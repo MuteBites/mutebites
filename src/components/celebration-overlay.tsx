@@ -2,7 +2,7 @@
 
 import { useEffect, useRef, useState, type ReactNode } from "react";
 import { ConfettiBurst } from "@/components/orders/confetti-burst";
-import { KaapiMotif } from "@/components/theme/kaapi-motif";
+import { HeroMotif } from "@/components/theme/hero-motif";
 import { playOrderPlacedSound } from "@/lib/sound/play";
 import { cn } from "@/lib/utils";
 
@@ -88,8 +88,8 @@ export function CelebrationOverlay({
         phase === "out" ? "animate-overlay-out" : "animate-overlay-in",
       )}
     >
-      {/* Desi Kaapi's tumbler rising from the bottom (hidden for Plum). */}
-      <KaapiMotif className="-bottom-24 size-80" />
+      {/* The palette's motif rising from the bottom (cloche / tumbler). */}
+      <HeroMotif className="-bottom-24 size-80" />
       <span
         aria-hidden="true"
         className="animate-ping-slow pointer-events-none absolute size-56 rounded-full bg-hero-accent/25 blur-3xl"

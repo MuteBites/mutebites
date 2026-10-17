@@ -100,11 +100,28 @@ Food delivery site for VIT-AP University students.
   cinnamon `--primary` → `--primary-2` with a top highlight); the **hero
   surface** (`--hero-surface`: Plum's amber corner + rose bloom, Kaapi's
   coffee wash with crema light); and Home's **headline gradient**
-  (`text-heading`, `--heading-a/b/c` — solid ink for Plum). Kaapi-only
-  pieces, all from College Bites: `KaapiMotif` (the tumbler in its davara
-  with rising steam — campus pass corner, admin Today card, celebration
-  overlay, picker), `PassArt` (`src/components/theme/pass-art.tsx`, the
-  small steaming tumbler by the "Campus pass" label), the **promo card's
+  (`text-heading`, `--heading-a/b/c` — Plum: ink → deep rose → deep amber
+  `#3f2037 → #5e2a40 → #663410`, cream → rose → amber at night; kept
+  ≥ 4.8:1 over every mood stop, which the audit doesn't check, so re-check
+  by hand if you change them). Each palette has its own **hero motif**
+  (`HeroMotif`, `src/components/theme/hero-motif.tsx`, renders both; the
+  nearest data-palette shows one) on the campus pass corner, admin Today
+  card, celebration overlay, WhatsApp card, About strip and picker: Plum's
+  `PlumMotif` (17 Oct 2026, so Plum stopped looking unfinished next to
+  Kaapi — the mascot's **cloche** on its tray with steam and two twinkling
+  sparkles, `motif-twinkle`) and Kaapi's `KaapiMotif` (the tumbler in its
+  davara with rising steam, from College Bites). `PassArt`
+  (`src/components/theme/pass-art.tsx`) by the "Campus pass" label: Plum's
+  cloche whose lid lifts on its hinge now and then to let a puff of steam
+  out (`pass-lid` / `pass-steam`, steam hidden at rest), Kaapi's small
+  steaming tumbler. Plum's promo card has a little **delivery run** under
+  its chips (chef's hat → dashed road → pin, `Motorbike` looping every 6 s,
+  the pin popping on arrival: `plum-ride` / `plum-ride-pin`; parked at the
+  kitchen under reduced motion). Plum's hero itself was lit up the same
+  day (`--hero-a #69324f`, `--hero-glow` amber 22%, `--hero-bloom` rose
+  52%, plus a soft white highlight top-left in `--hero-surface`;
+  `--hero-danger` lightened to `#ffe9e4` to keep 4.5:1 on the chips).
+  Kaapi-only pieces, all from College Bites: the **promo card's
   campus scene and 9 s delivery run** (`PromoCard` renders a Plum and a
   Kaapi version; `public/photos/promo/kaapi-scene.webp` + `kaapi-rider.webp`,
   College Bites' art; `promo-*` CSS in `globals.css`) and the **sign-in

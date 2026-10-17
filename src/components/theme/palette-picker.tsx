@@ -1,7 +1,7 @@
 "use client";
 
 import { Check } from "lucide-react";
-import { KaapiMotif } from "@/components/theme/kaapi-motif";
+import { HeroMotif } from "@/components/theme/hero-motif";
 import { PALETTES } from "@/lib/theme/palettes";
 import { setPalette, usePalette } from "@/lib/theme/store";
 import { cn } from "@/lib/utils";
@@ -39,7 +39,7 @@ export function PalettePicker({ className }: { className?: string }) {
               className="flex h-full flex-col rounded-[1.1rem] border bg-background p-2.5 text-foreground shadow-card"
             >
               <span aria-hidden="true" className="surface-hero relative block h-11 overflow-hidden rounded-xl bg-hero">
-                <KaapiMotif className="-right-1 -bottom-3 size-14" />
+                <HeroMotif className="-right-1 -bottom-3 size-14" />
               </span>
               <span aria-hidden="true" className="mt-2 flex items-center gap-1.5">
                 <span className="surface-primary h-5 flex-1 rounded-full bg-primary" />

@@ -239,15 +239,15 @@
      The audit checks text over every stop, including amber light over the
      lightest plum. */
   --hero: #552c4a;
-  --hero-a: #633250;
-  --hero-b: #552c4a;
+  --hero-a: #69324f;
+  --hero-b: #5a2d4d;
   --hero-c: #3a1b31;
-  --hero-glow: rgb(224 150 86 / 18%);
-  --hero-bloom: rgb(145 73 85 / 45%);
+  --hero-glow: rgb(232 156 88 / 22%);
+  --hero-bloom: rgb(176 88 112 / 52%);
   --hero-foreground: #fff8f2;
   --hero-accent: #f6d2a4;
   --hero-success: #bfe8d1;
-  --hero-danger: #ffdad3;
+  --hero-danger: #ffe9e4;
 
   /* Light: soft glows (glow-amber / -rose / -hero) and the sky over the top
      of every page (body, --page-glow-*) so no screen sits on a flat ground. */
@@ -328,13 +328,15 @@
     var(--primary) 55%,
     color-mix(in srgb, var(--primary) 100%, black 8%) 100%
   );
-  --hero-surface: radial-gradient(90% 80% at 100% 0%, var(--hero-glow), transparent 65%),
+  --hero-surface: radial-gradient(60% 45% at 18% 0%, rgb(255 255 255 / 9%), transparent 70%),
+    radial-gradient(90% 80% at 100% 0%, var(--hero-glow), transparent 65%),
     radial-gradient(70% 60% at 0% 100%, var(--hero-bloom), transparent 70%),
     linear-gradient(150deg, var(--hero-a) 0%, var(--hero-b) 55%, var(--hero-c) 100%);
-  /* Home's headline gradient (text-heading) — solid ink for Plum. */
+  /* Home's headline gradient (text-heading): plum → rose → amber, the
+     brand's three colours (17 Oct 2026, it was solid ink). */
   --heading-a: #3f2037;
-  --heading-b: #3f2037;
-  --heading-c: #3f2037;
+  --heading-b: #5e2a40;
+  --heading-c: #663410;
 
   --mood-morning-a: #f0c38fcc;
   --mood-morning-b: #f8dedc;
@@ -421,8 +423,8 @@
 
   --primary-2: #d9974f;
   --heading-a: #f5eae1;
-  --heading-b: #f5eae1;
-  --heading-c: #f5eae1;
+  --heading-b: #e7b7c4;
+  --heading-c: #e9b27a;
 
   --mood-morning-a: #c07a3566;
   --mood-morning-b: #91495555;
@@ -842,6 +844,10 @@
 @utility only-plum {
   display: var(--show-plum);
 }
+/* Plum's pass steam only shows while the lid is up (its animation). */
+.pass-steam {
+  opacity: 0;
+}
 
 @utility rim-light {
   box-shadow: inset 0 1px 0 rgb(255 255 255 / 9%);
@@ -926,6 +932,29 @@
   /* Desi Kaapi's tumbler: three wisps of steam rising, a beat apart. */
   .motif-steam {
     animation: motif-steam 3.2s ease-in-out infinite;
+  }
+  /* MuteBites Plum's motif: the sparkles beside the cloche twinkle. */
+  .motif-twinkle {
+    transform-box: fill-box;
+    transform-origin: center;
+    animation: motif-twinkle 2.8s ease-in-out infinite;
+  }
+  /* Plum's campus pass detail: the cloche lid lifts on its right edge now
+     and then and a puff of steam escapes. */
+  .pass-lid {
+    transform-box: view-box;
+    transform-origin: 38px 34px;
+    animation: pass-lid 4.5s var(--ease-spring) 1.2s infinite;
+  }
+  .pass-steam {
+    animation: pass-steam 4.5s ease-out 1.2s infinite;
+  }
+  /* Plum's promo: the rider runs kitchen → Main Gate every 6 s. */
+  .plum-ride {
+    animation: plum-ride 6s var(--ease-in-quad) 0.6s infinite both;
+  }
+  .plum-ride-pin {
+    animation: plum-ride-pin 6s var(--ease-spring) 0.6s infinite both;
   }
   /* Desi Kaapi's promo: one 9 s loop shared by every part — pull in
      (0–9%), idle (9–18%), ride the S-bend to the gate (18–70%), ride in
@@ -1519,6 +1548,76 @@
   }
 }
 
+@keyframes motif-twinkle {
+  0%,
+  100% {
+    opacity: 0.35;
+    scale: 0.6;
+  }
+  50% {
+    opacity: 1;
+    scale: 1;
+  }
+}
+@keyframes pass-lid {
+  0%,
+  52%,
+  90%,
+  100% {
+    transform: none;
+  }
+  62%,
+  78% {
+    transform: translate(-1px, -4px) rotate(14deg);
+  }
+}
+@keyframes pass-steam {
+  0%,
+  58% {
+    opacity: 0;
+    translate: 0 3px;
+  }
+  70% {
+    opacity: 1;
+  }
+  90%,
+  100% {
+    opacity: 0;
+    translate: 0 -5px;
+  }
+}
+@keyframes plum-ride {
+  0% {
+    left: 1.25rem;
+    opacity: 0;
+  }
+  8% {
+    opacity: 1;
+  }
+  72%,
+  84% {
+    left: calc(100% - 2.75rem);
+    opacity: 1;
+  }
+  94%,
+  100% {
+    left: calc(100% - 2.75rem);
+    opacity: 0;
+  }
+}
+@keyframes plum-ride-pin {
+  0%,
+  70%,
+  100% {
+    scale: 1;
+  }
+  76% {
+    scale: 1.35;
+  }
+  82% {
+    scale: 1;
+  }
+}
 @keyframes motif-steam {
   0% {
     opacity: 0;
