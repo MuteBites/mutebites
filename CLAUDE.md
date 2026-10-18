@@ -89,7 +89,11 @@ Food delivery site for VIT-AP University students.
   "Your orders"; the student's **full name** (Home's "Hey, <full name>"
   and the campus pass) is `ScriptName` (`src/components/theme/script-name.tsx`),
   **drawn letter by letter** like a whiteboard animation in **Love Light →
-  Grey Qo → Sirivennela**: each word is an inline SVG laid over
+  Grey Qo → Sirivennela**, and the Sirivennela turn writes it **in Telugu**:
+  `toTelugu()` (`src/lib/telugu.ts`) — a dictionary of common Telugu name
+  words (add one when a name comes out wrong) then phonetic rules — drawn
+  one akshara at a time (`aksharas()`, so conjuncts keep their shape);
+  Desi Kaapi never cycles (plain English name). How it draws: each word is an inline SVG laid over
   an invisible copy of itself (wrapping and size come from normal text);
   per letter the pen traces the glyph outline (`stroke-dashoffset`,
   `script-trace`) and the ink floods in (`script-ink`), 170 ms apart;

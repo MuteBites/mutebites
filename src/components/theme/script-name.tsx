@@ -2,10 +2,14 @@
 
 import { useEffect, useId, useLayoutEffect, useRef, useState, type CSSProperties } from "react";
 import { afterSplash } from "@/components/splash/after-splash";
+import { aksharas, toTelugu } from "@/lib/telugu";
+import { usePalette } from "@/lib/theme/store";
 import { cn } from "@/lib/utils";
 
 // The three handwriting faces (layout.tsx), in turn.
 const FACES = ["var(--font-love-light)", "var(--font-grey-qo)", "var(--font-sirivennela)"];
+// Sirivennela writes the name in Telugu (toTelugu), one akshara at a time.
+const TELUGU_FACE = 2;
 // Per letter: the pen traces its outline, then the ink fills in.
 const LETTER_MS = 170;
 const STROKE_MS = 520;
@@ -36,25 +40,38 @@ export function ScriptName({
   tone?: "heading" | "hero";
   className?: string;
 }) {
+  const palette = usePalette();
   const [face, setFace] = useState(0);
   const [phase, setPhase] = useState<Phase>("rest");
-  const words = text.trim().split(/\s+/);
-  const letters = words.join("").length;
-  const writeMs = (letters - 1) * LETTER_MS + STROKE_MS + FILL_MS;
+  // Per face, the words to draw, each split into the units drawn one at a
+  // time: letters in English, aksharas in Telugu (TELUGU_FACE).
+  const english = text.trim().split(/\s+/);
+  const telugu = toTelugu(text).split(/\s+/);
+  const wordsFor = (f: number) =>
+    f === TELUGU_FACE ? telugu.map((w) => aksharas(w)) : english.map((w) => [...w]);
+  const units = wordsFor(face);
+  const unitCount = (f: number) => wordsFor(f).flat().length;
+  const countKey = FACES.map((_, f) => unitCount(f)).join(",");
 
   useEffect(() => {
+    // Desi Kaapi shows the plain name in its heading font: nothing to draw.
+    if (palette === "kaapi") return;
     if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+    const counts = countKey.split(",").map(Number);
     let timer = 0;
     let stopped = false;
+    let current = 0;
     const wait = (ms: number, next: () => void) => {
       timer = window.setTimeout(() => !stopped && next(), ms);
     };
     function write() {
       setPhase("write");
+      const writeMs = (counts[current] - 1) * LETTER_MS + STROKE_MS + FILL_MS;
       wait(writeMs + HOLD_MS, () => {
         setPhase("erase");
         wait(ERASE_MS, () => {
-          setFace((f) => (f + 1) % FACES.length);
+          current = (current + 1) % FACES.length;
+          setFace(current);
           write();
         });
       });
@@ -67,23 +84,26 @@ export function ScriptName({
       stopped = true;
       cancelSplash();
       window.clearTimeout(timer);
+      setFace(0);
+      setPhase("rest");
     };
-  }, [writeMs]);
+  }, [countKey, palette]);
 
-  // Each word's first letter index, so the letter delays run on across words.
-  const starts = words.map((_, w) => words.slice(0, w).join("").length);
+  // Each word's first unit index, so the delays run on across words.
+  const starts = units.map((_, w) => units.slice(0, w).flat().length);
   return (
     <span
       className={cn("script-name", className)}
       data-phase={phase}
       data-tone={tone}
       style={{ fontFamily: FACES[face] }}
+      lang={face === TELUGU_FACE ? "te" : undefined}
     >
       <span className="sr-only">{text}</span>
-      {words.map((word, w) => (
+      {units.map((parts, w) => (
         <span key={w}>
           {w > 0 && " "}
-          <ScriptWord key={`${face}-${w}`} word={word} start={starts[w]} />
+          <ScriptWord key={`${face}-${w}`} parts={parts} start={starts[w]} />
         </span>
       ))}
     </span>
@@ -91,7 +111,8 @@ export function ScriptName({
 }
 
 /** One word: an invisible text copy for layout, the drawn SVG on top. */
-function ScriptWord({ word, start }: { word: string; start: number }) {
+function ScriptWord({ parts, start }: { parts: string[]; start: number }) {
+  const word = parts.join("");
   const gradient = useId();
   const sizer = useRef<HTMLSpanElement>(null);
   const [box, setBox] = useState<{ w: number; h: number; base: number } | null>(null);
@@ -134,7 +155,7 @@ function ScriptWord({ word, start }: { word: string; start: number }) {
             </linearGradient>
           </defs>
           <text x="0" y={box.base} className="script-text" style={{ "--script-ink": `url(#${gradient})` } as CSSProperties}>
-            {[...word].map((ch, i) => (
+            {parts.map((ch, i) => (
               <tspan key={i} className="script-letter" style={{ "--i": start + i } as CSSProperties}>
                 {ch}
               </tspan>
