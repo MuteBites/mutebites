@@ -86,13 +86,18 @@ Food delivery site for VIT-AP University students.
   Rosething / Del Rose are personal-use / all-rights-reserved, so not on
   the web): `font-display` (`--app-display`) is **Cormorant Garamond** for
   Home's section headings, Profile's "Your details" / "Settings" and
-  "Your orders"; the student's **name** (Home's "Hey, <name>" and the
-  campus pass) is `ScriptName` (`src/components/theme/script-name.tsx`),
-  written in a handwriting face — **Love Light → Grey Qo → Sirivennela**,
-  round and round: it holds ~3.6 s, lifts off, then is written left to right
-  (a `clip-path` wipe with a glowing amber nib, `script-write` /
-  `script-nib` in globals.css) in the next face. Starts after the splash;
-  reduced motion = still, first face. All four load with `preload: false`.
+  "Your orders"; the student's **full name** (Home's "Hey, <full name>"
+  and the campus pass) is `ScriptName` (`src/components/theme/script-name.tsx`),
+  **drawn letter by letter** like a whiteboard animation in **Love Light ⇄
+  Grey Qo** (Sirivennela was dropped): each word is an inline SVG laid over
+  an invisible copy of itself (wrapping and size come from normal text);
+  per letter the pen traces the glyph outline (`stroke-dashoffset`,
+  `script-trace`) and the ink floods in (`script-ink`), 170 ms apart;
+  it holds ~3 s, lifts off (`script-erase`) and is drawn again in the other
+  face. Colour per `tone`: "heading" = the ink → rose → amber headline
+  gradient, "hero" = light text on the pass. Starts after the splash and
+  `document.fonts.ready`; reduced motion = the plain name. Fonts load with
+  `preload: false`.
   Desi Kaapi keeps Poppins for both (`--app-display`, and `.script-name`
   falls back to its heading font).
   Small captions above fields/sections use `text-label`: sentence case,

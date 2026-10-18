@@ -55,7 +55,7 @@ export function MemberCard({
         </OpenTasteSheetButton>
         <div className="min-w-0">
           <h1 className="font-heading text-title font-bold">
-            <ScriptName text={name} />
+            <ScriptName text={name} tone="hero" />
           </h1>
           <p className="text-sm text-hero-foreground/85">Member since {memberSince}</p>
         </div>

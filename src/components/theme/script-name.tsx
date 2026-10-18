@@ -1,30 +1,46 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useId, useLayoutEffect, useRef, useState, type CSSProperties } from "react";
 import { afterSplash } from "@/components/splash/after-splash";
 import { cn } from "@/lib/utils";
 
-// The three handwriting faces (layout.tsx), written one after another.
-const FACES = ["var(--font-love-light)", "var(--font-grey-qo)", "var(--font-sirivennela)"];
-const HOLD_MS = 3600;
-const ERASE_MS = 450;
+// The two handwriting faces (layout.tsx), alternating.
+const FACES = ["var(--font-love-light)", "var(--font-grey-qo)"];
+// Per letter: the pen traces its outline, then the ink fills in.
+const LETTER_MS = 170;
+const STROKE_MS = 520;
+const FILL_MS = 260;
+const HOLD_MS = 3200;
+const ERASE_MS = 500;
 
-/** How long the pen takes to write `text` — longer names write slower. */
-function writeMs(text: string) {
-  return Math.min(2400, 500 + text.length * 110);
-}
+type Phase = "rest" | "write" | "erase";
 
 /**
- * The student's name, handwritten (MuteBites Plum, 18 Oct 2026): it holds,
- * fades off the page, then is written again left to right in the next face
- * — Love Light → Grey Qo → Sirivennela → … — with a glowing nib running
- * ahead of the ink. Starts after the splash; under reduced motion it stays
- * in the first face. In Desi Kaapi it's plain text in the heading font
+ * The student's name, handwritten (MuteBites Plum): letter by letter the
+ * pen traces each glyph's outline and the ink floods in behind it, like a
+ * whiteboard drawing; it holds, lifts off, and is written again in the
+ * other face — Love Light ⇄ Grey Qo. Each word is an inline SVG laid over an
+ * invisible copy of itself (so wrapping and size come from normal text);
+ * strokes animate stroke-dashoffset on the SVG text's own outlines.
+ * `tone`: "heading" = Home's ink → rose → amber gradient, "hero" = the light
+ * text on the lit plum pass. Starts after the splash; reduced motion = the
+ * plain name in the first face. Desi Kaapi shows it in its heading font
  * (`.script-name` rules in globals.css).
  */
-export function ScriptName({ text, className }: { text: string; className?: string }) {
+export function ScriptName({
+  text,
+  tone = "heading",
+  className,
+}: {
+  text: string;
+  tone?: "heading" | "hero";
+  className?: string;
+}) {
   const [face, setFace] = useState(0);
-  const [phase, setPhase] = useState<"rest" | "erase" | "write">("rest");
+  const [phase, setPhase] = useState<Phase>("rest");
+  const words = text.trim().split(/\s+/);
+  const letters = words.join("").length;
+  const writeMs = (letters - 1) * LETTER_MS + STROKE_MS + FILL_MS;
 
   useEffect(() => {
     if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
@@ -33,36 +49,99 @@ export function ScriptName({ text, className }: { text: string; className?: stri
     const wait = (ms: number, next: () => void) => {
       timer = window.setTimeout(() => !stopped && next(), ms);
     };
-
-    function cycle() {
-      setPhase("erase");
-      wait(ERASE_MS, () => {
-        setFace((f) => (f + 1) % FACES.length);
-        setPhase("write");
-        wait(writeMs(text) + HOLD_MS, cycle);
+    function write() {
+      setPhase("write");
+      wait(writeMs + HOLD_MS, () => {
+        setPhase("erase");
+        wait(ERASE_MS, () => {
+          setFace((f) => (f + 1) % FACES.length);
+          write();
+        });
       });
     }
-
-    const cancelSplash = afterSplash(() => wait(HOLD_MS, cycle));
+    // Fonts first, so the outlines are measured in the right face.
+    const cancelSplash = afterSplash(() => {
+      document.fonts.ready.then(() => !stopped && wait(400, write));
+    });
     return () => {
       stopped = true;
       cancelSplash();
       window.clearTimeout(timer);
     };
-  }, [text]);
+  }, [writeMs]);
 
+  // Each word's first letter index, so the letter delays run on across words.
+  const starts = words.map((_, w) => words.slice(0, w).join("").length);
   return (
     <span
       className={cn("script-name", className)}
       data-phase={phase}
-      style={{ "--write-ms": `${writeMs(text)}ms` } as React.CSSProperties}
+      data-tone={tone}
+      style={{ fontFamily: FACES[face] }}
     >
       <span className="sr-only">{text}</span>
-      {/* Re-keyed per face so the write animation runs from the start. */}
-      <span key={face} aria-hidden="true" className="script-ink" style={{ fontFamily: FACES[face] }}>
-        {text}
+      {words.map((word, w) => (
+        <span key={w}>
+          {w > 0 && " "}
+          <ScriptWord key={`${face}-${w}`} word={word} start={starts[w]} />
+        </span>
+      ))}
+    </span>
+  );
+}
+
+/** One word: an invisible text copy for layout, the drawn SVG on top. */
+function ScriptWord({ word, start }: { word: string; start: number }) {
+  const gradient = useId();
+  const sizer = useRef<HTMLSpanElement>(null);
+  const [box, setBox] = useState<{ w: number; h: number; base: number } | null>(null);
+
+  // Measure the word and its baseline; again whenever it reflows (a font
+  // finishing loading, a resize).
+  useLayoutEffect(() => {
+    const el = sizer.current;
+    if (!el) return;
+    const measure = () => {
+      const mark = el.lastElementChild as HTMLElement | null;
+      setBox({ w: el.offsetWidth, h: el.offsetHeight, base: mark ? mark.offsetTop : el.offsetHeight * 0.8 });
+    };
+    measure();
+    const observer = new ResizeObserver(measure);
+    observer.observe(el);
+    return () => observer.disconnect();
+  }, []);
+
+  return (
+    <span className="script-word">
+      <span ref={sizer} aria-hidden="true" className="script-sizer">
+        {word}
+        {/* Zero-size marker sitting on the baseline. */}
+        <span className="script-baseline" />
       </span>
-      {phase === "write" && <span key={`nib-${face}`} aria-hidden="true" className="script-nib" />}
+      {box && (
+        <svg
+          aria-hidden="true"
+          className="script-svg"
+          width={box.w}
+          height={box.h}
+          viewBox={`0 0 ${box.w} ${box.h}`}
+        >
+          <defs>
+            <linearGradient id={gradient} x1="0" x2="1" y1="0" y2="0">
+              <stop offset="0%" className="script-stop-a" />
+              <stop offset="50%" className="script-stop-b" />
+              <stop offset="100%" className="script-stop-c" />
+            </linearGradient>
+          </defs>
+          <text x="0" y={box.base} className="script-text" style={{ "--script-ink": `url(#${gradient})` } as CSSProperties}>
+            {[...word].map((ch, i) => (
+              <tspan key={i} className="script-letter" style={{ "--i": start + i } as CSSProperties}>
+                {ch}
+              </tspan>
+            ))}
+          </text>
+        </svg>
+      )}
     </span>
   );
 }

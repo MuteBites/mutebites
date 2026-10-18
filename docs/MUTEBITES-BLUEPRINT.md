@@ -483,8 +483,9 @@ there are real — avoided):
     `site_offline`.
 31. **Fonts, sliders, one notifications switch, promo polish** (18 Oct
     2026): Plum's headings in Cormorant Garamond and the student's name
-    handwritten (`ScriptName`, cycling Love Light → Grey Qo → Sirivennela
-    with a pen-wipe write-on) — free lookalikes, since the client's
+    handwritten (`ScriptName`: first a pen wipe through three faces, then by
+    request the full name drawn letter by letter, outline then ink, in Love
+    Light ⇄ Grey Qo) — free lookalikes, since the client's
     Rosething (demo, personal use only) and Del Rose can't go on the web;
     Plum's switches and tab pill lit plum → rose (`--slider*` tokens) so
     they stop looking like Kaapi's; Profile's two notification switches

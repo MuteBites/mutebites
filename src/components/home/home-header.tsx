@@ -37,7 +37,6 @@ export function HomeHeader({
   avatar: string | null;
 }) {
   const { greeting, Icon, question } = MOOD[timeOfDay];
-  const firstName = fullName.trim().split(/\s+/)[0];
 
   return (
     // Bleeds out of main's px-6/pt-6 so the field reaches the screen edges
@@ -67,7 +66,7 @@ export function HomeHeader({
         {greeting}
       </p>
       <h1 className="text-heading relative mt-1 font-heading text-display font-bold break-words">
-        Hey, <ScriptName text={firstName} />
+        Hey, <ScriptName text={fullName} />
       </h1>
       <p className="relative mt-1.5 text-lg leading-snug">{question}</p>
     </header>

@@ -811,34 +811,67 @@
 }
 
 /* ScriptName (src/components/theme/script-name.tsx): the student's name
-   in a handwriting face. Script faces sit small on their em, so it runs a
-   size up from the text around it, with room for swashes. Desi Kaapi keeps
-   its heading font, no handwriting. */
+   in a handwriting face, drawn letter by letter. Script faces sit small on
+   their em, so it runs a size up from the text around it. At rest (and
+   under reduced motion, and in Desi Kaapi) the plain text copy shows; while
+   writing, that copy holds the layout invisibly and the SVG draws on top. */
 .script-name {
+  font-size: 1.15em;
+  font-weight: 400;
+  line-height: 1.15;
+}
+.script-word {
   position: relative;
   display: inline-block;
-  max-width: 100%;
-  padding: 0.05em 0.12em 0.1em 0.04em;
-  font-size: 1.25em;
-  font-weight: 400;
-  line-height: 1.1;
+  padding-inline: 0.04em 0.12em;
+}
+.script-sizer {
+  display: inline-block;
+}
+.script-baseline {
+  display: inline-block;
+  width: 0;
+  height: 0;
   vertical-align: baseline;
 }
-.script-ink {
-  display: inline-block;
-  max-width: 100%;
-  overflow-wrap: anywhere;
+.script-svg {
+  position: absolute;
+  top: 0;
+  left: 0.04em;
+  overflow: visible;
+  visibility: hidden;
+  pointer-events: none;
 }
-.script-nib {
-  display: none;
+.script-text {
+  font: inherit;
+  fill: var(--script-ink);
+  stroke: var(--script-ink);
+  stroke-width: 0.6px;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+.script-stop-a { stop-color: var(--heading-a); }
+.script-stop-b { stop-color: var(--heading-b); }
+.script-stop-c { stop-color: var(--heading-c); }
+.script-name[data-tone="hero"] :is(.script-stop-a, .script-stop-b, .script-stop-c) {
+  stop-color: var(--hero-foreground);
+}
+.script-name:is([data-phase="write"], [data-phase="erase"]) .script-sizer {
+  visibility: hidden;
+}
+.script-name:is([data-phase="write"], [data-phase="erase"]) .script-svg {
+  visibility: visible;
 }
 [data-palette="kaapi"] .script-name {
-  font-size: 1em;
-  padding: 0;
-}
-[data-palette="kaapi"] .script-ink {
   font-family: var(--app-heading) !important;
+  font-size: 1em;
   font-weight: 700;
+}
+[data-palette="kaapi"] .script-name .script-sizer {
+  visibility: visible !important;
+}
+[data-palette="kaapi"] .script-name .script-svg {
+  display: none;
 }
 
 /* Desi Kaapi's promo (PromoCard): College Bites' delivery run. The resting
@@ -962,42 +995,27 @@
  * transform/opacity animation at all, never just a faster one.
  */
 @media (prefers-reduced-motion: no-preference) {
-  /* ScriptName: wipe the ink on left to right like a pen, a glowing nib
-     just ahead of it; erasing lifts and blurs it off the page. */
-  :root:not([data-palette="kaapi"]) .script-name[data-phase="write"] .script-ink {
-    animation: script-write var(--write-ms, 1.6s) cubic-bezier(0.45, 0.05, 0.55, 0.95) both;
+  /* ScriptName: per letter (--i), the pen traces the glyph's outline
+     (stroke-dashoffset), then the ink floods in; erasing lifts it off. */
+  .script-name[data-phase="write"] .script-letter {
+    stroke-dasharray: 420;
+    stroke-dashoffset: 420;
+    fill-opacity: 0;
+    animation:
+      script-trace 520ms cubic-bezier(0.4, 0, 0.3, 1) calc(var(--i) * 170ms) forwards,
+      script-ink 260ms ease-out calc(var(--i) * 170ms + 420ms) forwards;
   }
-  :root:not([data-palette="kaapi"]) .script-name[data-phase="erase"] .script-ink {
-    animation: script-erase 450ms var(--ease-in-quad) both;
+  .script-name[data-phase="erase"] .script-svg {
+    animation: script-erase 500ms var(--ease-in-quad) both;
   }
-  :root:not([data-palette="kaapi"]) .script-nib {
-    display: block;
-    position: absolute;
-    top: 30%;
-    left: 0;
-    width: 0.32em;
-    height: 0.32em;
-    border-radius: 999px;
-    background: var(--primary);
-    box-shadow: 0 0 0.5em 0.15em color-mix(in oklab, var(--primary) 55%, transparent);
-    pointer-events: none;
-    animation: script-nib var(--write-ms, 1.6s) cubic-bezier(0.45, 0.05, 0.55, 0.95) both;
+  @keyframes script-trace {
+    to { stroke-dashoffset: 0; }
   }
-  @keyframes script-write {
-    from { clip-path: inset(-25% 100% -35% -10%); }
-    to { clip-path: inset(-25% -10% -35% -10%); }
+  @keyframes script-ink {
+    to { fill-opacity: 1; }
   }
   @keyframes script-erase {
     to { opacity: 0; filter: blur(3px); translate: 0 -0.12em; }
-  }
-  @keyframes script-nib {
-    0% { left: 0; top: 55%; opacity: 0; }
-    8% { opacity: 1; }
-    25% { top: 30%; }
-    50% { top: 60%; }
-    75% { top: 28%; }
-    92% { opacity: 1; }
-    100% { left: 100%; top: 50%; opacity: 0; }
   }
   /* Home logo (as on College Bites): a slow glow in the action colour
      breathes around the tile, and two rings ripple out once when the page
