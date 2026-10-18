@@ -3,7 +3,7 @@ import { PlumSceneLive } from "./plum-scene-live";
 import "./plum-ride.css";
 
 /*
- * PROTOTYPE (18 Oct 2026), shown only with ?promo=new — see PlumPromoChooser.
+ * MuteBites Plum's promo scene (18 Oct 2026; replaced the campus-run PlumScene).
  * "On the way to you": the camera rides alongside the mascot. It sits big on
  * the right, riding in place (plum-ride-rider.webp: 16 frames at 12 fps, cut
  * from the side-on Veo loop by scripts/build-rider-strips.mjs), while three

@@ -6,7 +6,7 @@ import { useEffect, useRef } from "react";
  * Wakes Plum's promo scene: sets `data-seen` on its parent the first time it
  * comes near the screen (so the rider's frame strips, ~470 KB, only load
  * for someone who actually sees the card) and `data-on` while it's on
- * screen (plum-promo.css pauses every animation otherwise). Renders an
+ * screen (plum-ride.css pauses every animation otherwise). Renders an
  * empty span; the scene is its parent.
  */
 export function PlumSceneLive() {

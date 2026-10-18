@@ -495,6 +495,16 @@ there are real — avoided):
     contrast audit's block parser then silently finds nothing — write with
     `newline=''`.
 
+32. **Promo rebuilt as "On the way to you"** (18 Oct 2026): the campus-run
+    scene's rider was too small to read on a phone, so the camera now rides
+    alongside a big mascot (a new side-on Veo loop cut into a 16-frame strip)
+    while generated sky / skyline / roadside layers scroll past in parallax
+    and a "Main Gate <time>" sign rides by. Built as a `?promo=new`
+    prototype with drawn stand-ins first, judged on the user's phone, then
+    made the default; the old scene, its route generator and its strips
+    were deleted. Lessons: a container query on a padded card measures the
+    content box; children of an absolutely positioned wrapper need their
+    own `position: absolute`.
 ---
 
 ## 4. How we worked (the rules)

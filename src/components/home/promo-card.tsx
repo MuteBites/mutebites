@@ -1,11 +1,7 @@
 import type { CSSProperties } from "react";
 import Image from "next/image";
 import { Clock, MapPin } from "lucide-react";
-import { PlumPromoChooser } from "./plum-promo-chooser";
 import { PlumRide } from "./plum-ride";
-import { PlumSceneLive } from "./plum-scene-live";
-import "./plum-promo.css";
-import "./plum-promo-route.css";
 
 /**
  * Home's promo card, shown while ordering is open (when it's closed, the
@@ -16,14 +12,12 @@ import "./plum-promo-route.css";
  *
  *   MuteBites Plum  the pitch and the real delivery time an order placed
  *                   now gets (deliveryWindow(), passed in from the server so
- *                   it can't disagree with the ticket) over Plum's own
- *                   scene (PlumScene, 18 Oct 2026): a campus at sunset and
- *                   the mascot's delivery from the clock tower to you — it
- *                   rides the far lane behind the bushes, takes the hairpin
- *                   and the bend, comes towards you and brakes right of the
- *                   text, then waves; birds, fireflies, drifting clouds,
- *                   window lights and the sun glow around it. Details in
- *                   plum-promo.css; reduced motion shows it waving.
+ *                   it can't disagree with the ticket) over "On the way to
+ *                   you" (PlumRide, 18 Oct 2026): the camera rides
+ *                   alongside the big mascot while the sunset sky, campus
+ *                   skyline and roadside scroll past and a Main Gate sign
+ *                   with the time rides by. Details in plum-ride.css;
+ *                   reduced motion shows it still.
  *   Desi Kaapi      College Bites' promo exactly: the line and one sentence
  *                   on the left, and on the right the Kaapi campus scene
  *                   with a delivery run looping every 9 s — the rider pulls
@@ -41,7 +35,7 @@ export function PromoCard({ slot }: { slot: { lead: string; time: string } }) {
         aria-label="Hot food, at Main Gate"
         className="only-plum surface-hero glow-hero @container relative mt-6 min-h-[13.5rem] overflow-hidden rounded-[1.75rem] bg-hero p-5 text-hero-foreground"
       >
-        <PlumPromoChooser classic={<PlumScene />} ride={<PlumRide time={slot.time} />} />
+        <PlumRide time={slot.time} />
         <div className="relative z-10 max-w-[52%] [text-shadow:0_1px_10px_rgb(58_27_49/0.55)] @[20rem]:max-w-[56%]">
           <h2 className="font-heading text-title leading-tight font-bold">Hot food, at Main&nbsp;Gate</h2>
           <p className="mt-1 text-sm text-hero-foreground/85">Order here, pay when you collect.</p>
@@ -146,137 +140,6 @@ function KaapiScene() {
               <path d="M8 20c-2-3 2-5 0-8s2-5 0-8" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" className="motif-steam" />
               <path d="M15 20c-2-3 2-5 0-8s2-5 0-8" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" className="motif-steam" style={{ animationDelay: "1.2s" }} />
             </svg>
-          </div>
-        </div>
-      </div>
-    </div>
-  );
-}
-
-/* Plum's frame strips (scripts/build-rider-strips.mjs): frames per strip and
-   each frame's width at the strips' 160 px height. */
-const PLUM_STRIPS = {
-  left: { n: 15, w: 168 },
-  right: { n: 18, w: 151 },
-  approach: { n: 17, w: 123 },
-  arrive: { n: 15, w: 125 },
-} as const;
-
-const strip = (pose: keyof typeof PLUM_STRIPS): CSSProperties =>
-  ({
-    "--n": PLUM_STRIPS[pose].n,
-    "--strip": `url(/photos/promo/plum-rider-${pose}.webp)`,
-    aspectRatio: `${PLUM_STRIPS[pose].w} / 160`,
-  }) as CSSProperties;
-
-/* Window lights (scene %: left, top, width). */
-const PLUM_GLOWS = [
-  [75.5, 57, 8],
-  [75.5, 39.7, 5],
-  [60, 53, 16],
-  [90, 58, 14],
-] as const;
-/* Arrival sparkles round the rider (box %: left, top, width). */
-const PLUM_SPARKLES = [
-  [12, 8, 12],
-  [78, 2, 14],
-  [86, 30, 9],
-  [6, 34, 8],
-] as const;
-/* Fireflies over the bushes (scene %). */
-const PLUM_FLIES = [
-  [46, 72],
-  [56, 63],
-  [82, 63],
-  [92, 71],
-  [63, 59],
-  [69, 66],
-] as const;
-
-/**
- * Plum's campus scene and delivery (plum-promo.css, plum-promo-route.css,
- * public/photos/promo/plum-*.webp; built from docs/art/plum-promo/).
- */
-function PlumScene() {
-  return (
-    <div aria-hidden="true" className="promo-scene plum-scene absolute inset-x-0 bottom-0 aspect-[1200/736] w-full">
-      <PlumSceneLive />
-      <span className="plum-sun" />
-      <Image
-        src="/photos/promo/plum-scene-v2.webp"
-        alt=""
-        fill
-        sizes="(max-width: 448px) 100vw, 400px"
-        unoptimized
-        className="object-contain"
-      />
-      {/* eslint-disable-next-line @next/next/no-img-element -- tiny, decorative, positioned in scene % */}
-      <img src="/photos/promo/plum-cloud-a.webp" alt="" className="plum-cloud-a" />
-      {/* eslint-disable-next-line @next/next/no-img-element -- tiny, decorative, positioned in scene % */}
-      <img src="/photos/promo/plum-cloud-b.webp" alt="" className="plum-cloud-b" />
-      {PLUM_GLOWS.map(([left, top, width]) => (
-        <span key={`${left}-${top}`} className="plum-glow" style={{ left: `${left}%`, top: `${top}%`, width: `${width}%` }} />
-      ))}
-      <svg viewBox="0 0 44 20" className="plum-birds">
-        <g className="flock" fill="none" stroke="rgb(255 248 242 / 75%)" strokeWidth="0.5" strokeLinecap="round">
-          <path className="wing" d="M10 6q1.5-1.6 3 0q1.5-1.6 3 0" />
-          <path className="wing" d="M17 9q1.2-1.3 2.4 0q1.2-1.3 2.4 0" />
-          <path className="wing" d="M6 10q1-1.1 2 0q1-1.1 2 0" />
-        </g>
-      </svg>
-      <div className="plum-full">
-        {PLUM_FLIES.map(([left, top]) => (
-          <span key={`${left}-${top}`} className="plum-fly absolute" style={{ left: `${left}%`, top: `${top}%` }} />
-        ))}
-      </div>
-      {/* The bushes in front of the far lane: the rider passes behind them. */}
-      <Image
-        src="/photos/promo/plum-front-bushes.webp"
-        alt=""
-        fill
-        sizes="(max-width: 448px) 100vw, 400px"
-        unoptimized
-        className="plum-bushes object-contain"
-      />
-      <span className="plum-dust hairpin" />
-      <span className="plum-dust bend" />
-      <div className="plum-track">
-        <div className="plum-pos">
-          <div className="plum-anchor">
-            <div className="plum-size">
-              <div className="plum-fade">
-                <div className="plum-brake">
-                  <div className="plum-turn">
-                    <div className="plum-box">
-                      <span className="plum-shadow" />
-                      <div className="plum-pose left">
-                        <span className="plum-sprite" style={strip("left")} />
-                      </div>
-                      <div className="plum-pose right">
-                        <span className="plum-sprite" style={strip("right")} />
-                      </div>
-                      <div className="plum-pose front">
-                        <span className="plum-sprite approach" style={strip("approach")} />
-                        <span className="plum-sprite arrive" style={strip("arrive")} />
-                        {/* The headlight, lit while it comes towards you. */}
-                        <span className="plum-headlight" />
-                      </div>
-                      {/* Arrival: a ding of sparkles round the mascot's head. */}
-                      {PLUM_SPARKLES.map(([left, top, size], i) => (
-                        <svg
-                          key={i}
-                          viewBox="0 0 10 10"
-                          className="plum-sparkle"
-                          style={{ left: `${left}%`, top: `${top}%`, width: `${size}%`, animationDelay: `${i * 0.12}s` }}
-                        >
-                          <path d="M5 0q.6 4.4 5 5q-4.4.6-5 5q-.6-4.4-5-5q4.4-.6 5-5z" fill="#ffe4b0" />
-                        </svg>
-                      ))}
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
           </div>
         </div>
       </div>

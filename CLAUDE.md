@@ -156,58 +156,25 @@ Food delivery site for VIT-AP University students.
   (`src/components/theme/pass-art.tsx`) by the "Campus pass" label: Plum's
   cloche whose lid lifts on its hinge now and then to let a puff of steam
   out (`pass-lid` / `pass-steam`, steam hidden at rest), Kaapi's small
-  steaming tumbler. Plum's promo card has **its own animated scene** (`PlumScene` in
-  `promo-card.tsx`, rebuilt 18 Oct 2026 from the 17 Oct version; sources,
-  prompts' results and rebuild notes in `docs/art/plum-promo/`): a campus at
-  sunset filling the card and **the delivery arriving to you** on an 11 s
-  loop — the mascot leaves the clock tower, rides the far lane facing left
-  **behind the middle bushes** (a cut-out `plum-front-bushes.webp` layer; the
-  rider's z-index steps in front of it after the hairpin), takes the
-  hairpin and the bend (hard pose swaps hidden by a squash, slight lean,
-  dust), comes towards you and **brakes** right of the text, then waves.
-  The route is GENERATED: `scripts/build-plum-promo-route.mjs` fits a
-  Catmull-Rom curve through lane-centre points measured on the source art,
-  gives it real speed (slow into bends, brake at the end), size from depth
-  and the pose per direction, and writes plain keyframes in scene % to
-  `src/components/home/plum-promo-route.css` (never edit that file —
-  change the script and rerun). The rider is **four 12 fps frame strips**
-  (`plum-rider-left|right|approach|arrive.webp`, 474 KB together) cut from
-  Veo 3.1 Fast loops made in Google Flow on a green screen
-  (`docs/art/plum-promo/new/loop-*.mp4`) by `scripts/build-rider-strips.mjs`
-  (most seamless window, green key with despill, one shared crop per pose);
-  CSS flip-books (`steps(n, jump-none)`). Around it: the scene's two clouds
-  lifted out and drifting, window lights coming on, birds, fireflies, the sun
-  breathing (`plum-promo.css`). `PlumSceneLive` (an IntersectionObserver)
-  sets `data-seen` (only then do the strips load) and `data-on` (every
-  animation pauses off screen and under the splash). The text column is 52%
-  of the card below a 20rem card width and 56% above (container query) with
-  a soft plum text shadow, and the copy is short ("Delivery by 7:30 PM"),
-  so the rider never crosses the text at any width from 320 to 448 px —
-  re-check that if the copy or route changes. Reduced motion: still, the
-  mascot waving at the braking spot. Polish (18 Oct 2026, hand-written in
-  `plum-promo.css`, timed to the generated route): a suspension bob while
-  it rides (`plum-bob` on the side poses), a headlight that warms up as it
-  comes towards you and flares on the brake (`.plum-headlight` in the front
-  pose), and a ding of four sparkles round its head on arrival
-  (`.plum-sparkle`, `PLUM_SPARKLES`). If the route's timing changes, re-time
-  `plum-headlight` / `plum-sparkle`.
-  **Prototype "On the way to you"** (18 Oct 2026, `?promo=new` only —
-  `PlumPromoChooser` swaps it in after hydration and remembers it per device
-  in localStorage `mutebites.promo`; `?promo=old` turns it off; everyone
-  else keeps the scene above): `PlumRide` (`plum-ride.tsx` / `plum-ride.css`)
-  — the camera rides alongside a big mascot (`plum-ride-rider.webp`, 16
-  frames at 12 fps, 305 KB, cut from the user's side-on Veo loop by
-  `scripts/build-rider-strips.mjs <frames> <out> ride 260` after trimming
-  the "Veo" corner mark; 68% of the card's height, 54% below a 17rem
-  container — the query sees the card's padded content box) while three
-  painted layers (`plum-ride-sky|skyline|roadside.webp`, 1187 × 420 tiles
-  that join at the edges; sources in `docs/art/plum-promo/new/ride/`) loop
-  past at different speeds — sky 70 s, skyline with the clock tower 32 s,
-  roadside lamps and trees 7 s — over CSS road dashes, with a CSS sun,
-  headlight beam, speed streaks and a "Main Gate <time>" sign every 8 s; a
-  left scrim keeps the copy readable. Each layer is two tiles wide
-  (`aspect-ratio`) and slides one tile. ~390 KB in all, loaded only once
-  the card is seen. Plum's hero itself was lit up the same
+  steaming tumbler. Plum's promo card has **its own animated scene**, **"On the way to
+  you"** (`PlumRide`, `src/components/home/plum-ride.tsx` / `plum-ride.css`,
+  the default since 18 Oct 2026 — it replaced the campus-run `PlumScene`,
+  whose code, route generator and strips were deleted; its source art stays
+  in `docs/art/plum-promo/`): the camera rides alongside a big mascot
+  (`plum-ride-rider.webp`, 16 frames at 12 fps, 305 KB, cut from the user's
+  side-on Veo loop by `scripts/build-rider-strips.mjs <frames> <out> ride
+  260` after trimming the "Veo" corner mark; 68% of the card's height, 54%
+  below a 17rem container — the query sees the card's padded content box)
+  while three painted layers (`plum-ride-sky|skyline|roadside.webp`, 1187 ×
+  420 tiles that join at the edges; sources in
+  `docs/art/plum-promo/new/ride/`) loop past at different speeds — sky 70 s,
+  skyline with the clock tower 32 s, roadside lamps and trees 7 s — over CSS
+  road dashes, with a CSS sun, headlight beam, speed streaks and a "Main
+  Gate <time>" sign every 8 s; a left scrim keeps the copy readable. Each
+  layer is two tiles wide (`aspect-ratio`) and slides one tile. ~390 KB in
+  all: `PlumSceneLive` (an IntersectionObserver) sets `data-seen` (only then
+  do the images load) and `data-on` (every animation pauses off screen and
+  under the splash). Reduced motion: still, the sign parked mid-road. Plum's hero itself was lit up the same
   day (`--hero-a #69324f`, `--hero-glow` amber 22%, `--hero-bloom` rose
   52%, plus a soft white highlight top-left in `--hero-surface`;
   `--hero-danger` lightened to `#ffe9e4` to keep 4.5:1 on the chips).
