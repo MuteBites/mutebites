@@ -195,14 +195,19 @@ Food delivery site for VIT-AP University students.
   `PlumPromoChooser` swaps it in after hydration and remembers it per device
   in localStorage `mutebites.promo`; `?promo=old` turns it off; everyone
   else keeps the scene above): `PlumRide` (`plum-ride.tsx` / `plum-ride.css`)
-  — the camera rides alongside a big mascot (the existing "riding right"
-  strip, 64% of the card's height, bobbing, headlight beam, speed streaks, a
-  steam puff off the box every 5 s) while 200%-wide layers loop past at
-  different speeds: sky + sun, skyline with the clock tower (26 s), roadside
-  lamps and trees (5.5 s), road dashes, plus a "Main Gate <time>" sign every
-  7 s; a left scrim keeps the copy readable. Skyline and roadside are drawn
-  SVG stand-ins until the user's generated layers and side-on Flow loop
-  arrive. Plum's hero itself was lit up the same
+  — the camera rides alongside a big mascot (`plum-ride-rider.webp`, 16
+  frames at 12 fps, 305 KB, cut from the user's side-on Veo loop by
+  `scripts/build-rider-strips.mjs <frames> <out> ride 260` after trimming
+  the "Veo" corner mark; 68% of the card's height, 54% below a 17rem
+  container — the query sees the card's padded content box) while three
+  painted layers (`plum-ride-sky|skyline|roadside.webp`, 1187 × 420 tiles
+  that join at the edges; sources in `docs/art/plum-promo/new/ride/`) loop
+  past at different speeds — sky 70 s, skyline with the clock tower 32 s,
+  roadside lamps and trees 7 s — over CSS road dashes, with a CSS sun,
+  headlight beam, speed streaks and a "Main Gate <time>" sign every 8 s; a
+  left scrim keeps the copy readable. Each layer is two tiles wide
+  (`aspect-ratio`) and slides one tile. ~390 KB in all, loaded only once
+  the card is seen. Plum's hero itself was lit up the same
   day (`--hero-a #69324f`, `--hero-glow` amber 22%, `--hero-bloom` rose
   52%, plus a soft white highlight top-left in `--hero-surface`;
   `--hero-danger` lightened to `#ffe9e4` to keep 4.5:1 on the chips).

@@ -3,15 +3,18 @@
 // strips for the Plum promo rider. Per pose: finds the most seamless loop
 // window, samples it at 12 fps, keys out the green with despill, crops every
 // frame to one shared box (so nothing jitters), and writes a horizontal strip.
-// Run: node scripts/build-rider-strips.mjs <framesDir> <outDir>
+// Run: node scripts/build-rider-strips.mjs <framesDir> <outDir> [poses] [frameHeight]
+//   e.g. the close-up ride (?promo=new): ... <framesDir> <outDir> ride 300
 import fs from "node:fs";
 import sharp from "sharp";
 
-const [, , FRAMES, OUT] = process.argv;
-const POSES = ["left", "right", "approach", "arrive"];
+const [, , FRAMES, OUT, POSE_ARG, HEIGHT_ARG] = process.argv;
+const POSES = POSE_ARG ? POSE_ARG.split(",") : ["left", "right", "approach", "arrive"];
 const STEP = 2;                         // every 2nd frame: 24 fps in -> 12 fps strip
 const MIN_L = 30, MAX_L = 40;           // loop length 1.25–1.7 s at 24 fps (the motion is cyclic)
-const FRAME_H = 160;                    // strip frame height (px): the rider shows at most ~60 px wide
+// Strip frame height (px): 160 for the scene's small rider (~60 px wide on
+// screen); the close-up ride shows it ~140 px tall, so it's built at 300.
+const FRAME_H = Number(HEIGHT_ARG) || 160;
 
 const thumb = async (f) => (await sharp(f).resize(64, 36).greyscale().raw().toBuffer());
 const diff = (a, b) => { let s = 0; for (let i = 0; i < a.length; i++) s += Math.abs(a[i] - b[i]); return s / a.length; };
