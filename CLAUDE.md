@@ -41,6 +41,13 @@ Food delivery site for VIT-AP University students.
   `#d7a8b8` at night) so focus and selection read apart from amber
   actions, and its page sky's rose glow rose to 20% (amber prices under
   the sky are the limit — 4.5:1 just holds).
+  **Sliders** (18 Oct 2026): lit switches and the tab bar's sliding pill
+  are `surface-slider glow-slider bg-slider` with `text-slider-foreground`
+  (`--slider`, `--slider-2`, `--slider-surface`, `--glow-slider`) — Plum
+  lights them plum → rose (`#552c4a → #914955`; blush `#f2cdd8 →
+  #d7a8b8` at night) so they no longer read like Kaapi's coffee; Kaapi's
+  just point at its action tokens. The audit checks the pill's label on
+  both ends and the lit switch against the card.
   **Lighting kit:** `glow-amber` (the main action's bloom), `glow-hero`,
   `glow-rose`, `rim-light`; one bloom per screen region. Every page sits
   under a soft amber + rose sky (`body`, `--page-glow-a/-b`). Light cards
@@ -75,6 +82,19 @@ Food delivery site for VIT-AP University students.
   `font-heading`. Sizes above body come from the named scale in
   `globals.css` — `text-display` (hero), `text-headline` (page titles),
   `text-title` (card/section titles) — not one-off `text-[2.5rem]`s.
+  **Plum's display faces** (18 Oct 2026, free lookalikes — the client's
+  Rosething / Del Rose are personal-use / all-rights-reserved, so not on
+  the web): `font-display` (`--app-display`) is **Cormorant Garamond** for
+  Home's section headings, Profile's "Your details" / "Settings" and
+  "Your orders"; the student's **name** (Home's "Hey, <name>" and the
+  campus pass) is `ScriptName` (`src/components/theme/script-name.tsx`),
+  written in a handwriting face — **Love Light → Grey Qo → Sirivennela**,
+  round and round: it holds ~3.6 s, lifts off, then is written left to right
+  (a `clip-path` wipe with a glowing amber nib, `script-write` /
+  `script-nib` in globals.css) in the next face. Starts after the splash;
+  reduced motion = still, first face. All four load with `preload: false`.
+  Desi Kaapi keeps Poppins for both (`--app-display`, and `.script-name`
+  falls back to its heading font).
   Small captions above fields/sections use `text-label`: sentence case,
   sans, no letter-spacing. No mono font is loaded any more; don't bring
   back the mono-uppercase eyebrow style, and no `uppercase` anywhere.
@@ -155,7 +175,13 @@ Food delivery site for VIT-AP University students.
   a soft plum text shadow, and the copy is short ("Delivery by 7:30 PM"),
   so the rider never crosses the text at any width from 320 to 448 px —
   re-check that if the copy or route changes. Reduced motion: still, the
-  mascot waving at the braking spot. Plum's hero itself was lit up the same
+  mascot waving at the braking spot. Polish (18 Oct 2026, hand-written in
+  `plum-promo.css`, timed to the generated route): a suspension bob while
+  it rides (`plum-bob` on the side poses), a headlight that warms up as it
+  comes towards you and flares on the brake (`.plum-headlight` in the front
+  pose), and a ding of four sparkles round its head on arrival
+  (`.plum-sparkle`, `PLUM_SPARKLES`). If the route's timing changes, re-time
+  `plum-headlight` / `plum-sparkle`. Plum's hero itself was lit up the same
   day (`--hero-a #69324f`, `--hero-glow` amber 22%, `--hero-bloom` rose
   52%, plus a soft white highlight top-left in `--hero-surface`;
   `--hero-danger` lightened to `#ffe9e4` to keep 4.5:1 on the chips).
@@ -227,7 +253,7 @@ Food delivery site for VIT-AP University students.
   unlocked, then the lit hero with a "Claim it on WhatsApp" pill (until
   an admin marks it claimed). Details and settings rows lead with
   `IconTile`; Edit buttons are blush pills, Save is the lit amber pill;
-  switches glow amber when on. **Campus Explorer counts every restaurant
+  switches light up when on (see **Sliders**). **Campus Explorer counts every restaurant
   row** (`getRestaurantCount()`), not just `is_active` ones — Closed turns
   them all off nightly, which made the target 0 ("-5 more restaurants",
   and the badge re-locked overnight) until 15 Oct 2026. Milestones are data-driven in
@@ -483,10 +509,13 @@ Food delivery site for VIT-AP University students.
   `ordering-open` (a new one replaces an unread one), opens `/`. Delivery
   in `after()`. The admin toast says "Notified N students" / already
   notified in the last 3 hours / "Students get a ping once you turn a
-  restaurant on" (`openPushNote()`). Profile's **When ordering opens**
-  switch (`OpenAlertsToggle`) mutes just these on that device
-  (`setOpenAlerts()`); it follows the Order notifications switch through
-  the `PUSH_CHANGED_EVENT` window event. To add a message: one line with
+  restaurant on" (`openPushNote()`). Since 18 Oct 2026 Profile has **one
+  Notifications switch** (`NotificationToggle`, "Order updates, and when
+  ordering opens"): on = subscribed with `notify_open` true (it also flips
+  a device muted on the old separate switch back on); off asks "Turn off
+  notifications? Are you sure? Your order notifications will stop too…"
+  and removes the subscription, which stops both. `OpenAlertsToggle` is
+  gone; `setOpenAlerts()` / `notify_open` stay for that. To add a message: one line with
   the next id.
 - **Motion**: CSS only (no Framer Motion). Easing tokens `--ease-out-expo`
   / `--ease-spring` / `--ease-in-quad` (also Tailwind `ease-*` utilities) and

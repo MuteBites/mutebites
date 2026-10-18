@@ -174,6 +174,13 @@ const PLUM_GLOWS = [
   [60, 53, 16],
   [90, 58, 14],
 ] as const;
+/* Arrival sparkles round the rider (box %: left, top, width). */
+const PLUM_SPARKLES = [
+  [12, 8, 12],
+  [78, 2, 14],
+  [86, 30, 9],
+  [6, 34, 8],
+] as const;
 /* Fireflies over the bushes (scene %). */
 const PLUM_FLIES = [
   [46, 72],
@@ -249,7 +256,20 @@ function PlumScene() {
                       <div className="plum-pose front">
                         <span className="plum-sprite approach" style={strip("approach")} />
                         <span className="plum-sprite arrive" style={strip("arrive")} />
+                        {/* The headlight, lit while it comes towards you. */}
+                        <span className="plum-headlight" />
                       </div>
+                      {/* Arrival: a ding of sparkles round the mascot's head. */}
+                      {PLUM_SPARKLES.map(([left, top, size], i) => (
+                        <svg
+                          key={i}
+                          viewBox="0 0 10 10"
+                          className="plum-sparkle"
+                          style={{ left: `${left}%`, top: `${top}%`, width: `${size}%`, animationDelay: `${i * 0.12}s` }}
+                        >
+                          <path d="M5 0q.6 4.4 5 5q-4.4.6-5 5q-.6-4.4-5-5q4.4-.6 5-5z" fill="#ffe4b0" />
+                        </svg>
+                      ))}
                     </div>
                   </div>
                 </div>

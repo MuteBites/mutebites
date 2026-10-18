@@ -1,5 +1,5 @@
 import type { Metadata, Viewport } from "next";
-import { Fraunces, Inter, Plus_Jakarta_Sans, Poppins } from "next/font/google";
+import { Cormorant_Garamond, Fraunces, Grey_Qo, Inter, Love_Light, Plus_Jakarta_Sans, Poppins, Sirivennela } from "next/font/google";
 import { AppSplash } from "@/components/splash/app-splash";
 import { SPLASH_DISABLED } from "@/components/splash/config";
 import { SPLASH_INIT_SCRIPT } from "@/components/splash/init-script";
@@ -41,6 +41,21 @@ const poppins = Poppins({
   weight: ["500", "600", "700"],
   preload: false,
 });
+
+// MuteBites Plum's display pieces (18 Oct 2026): Cormorant Garamond for
+// section and page headings (font-display), and three handwriting faces the
+// student's name is written in, one after another (ScriptName). Free
+// lookalikes for Del Rose / Rosething, whose licences don't allow the web.
+// Not preloaded — each has a fallback, and Kaapi never uses them.
+const cormorant = Cormorant_Garamond({
+  variable: "--font-cormorant",
+  subsets: ["latin"],
+  weight: ["500", "600", "700"],
+  preload: false,
+});
+const loveLight = Love_Light({ variable: "--font-love-light", subsets: ["latin"], weight: "400", preload: false });
+const greyQo = Grey_Qo({ variable: "--font-grey-qo", subsets: ["latin"], weight: "400", preload: false });
+const sirivennela = Sirivennela({ variable: "--font-sirivennela", subsets: ["latin"], weight: "400", preload: false });
 
 export const metadata: Metadata = {
   // Makes every relative URL below (and the generated share image) absolute.
@@ -104,7 +119,7 @@ export default async function RootLayout({ children }: LayoutProps<"/">) {
       // "dark" class / colorScheme style, and the splash-init script
       // data-splash, before React hydrates — expected, not a real mismatch.
       suppressHydrationWarning
-      className={`${jakarta.variable} ${fraunces.variable} ${inter.variable} ${poppins.variable} h-full antialiased`}
+      className={`${jakarta.variable} ${fraunces.variable} ${inter.variable} ${poppins.variable} ${cormorant.variable} ${loveLight.variable} ${greyQo.variable} ${sirivennela.variable} h-full antialiased`}
     >
       <body className="min-h-full flex flex-col">
         {/* Raw inline <script>, not next/script: beforeInteractive inline

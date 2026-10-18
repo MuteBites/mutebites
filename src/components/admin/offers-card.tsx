@@ -189,7 +189,7 @@ function Switch({
       className={cn(
         "relative inline-flex shrink-0 items-center rounded-full outline-none transition-colors focus-visible:ring-2 focus-visible:ring-ring/80 disabled:opacity-60",
         small ? "h-6 w-11" : "h-8 w-14",
-        checked ? "surface-primary glow-amber bg-primary" : "bg-secondary",
+        checked ? "surface-slider glow-slider bg-slider" : "bg-secondary",
       )}
     >
       <span

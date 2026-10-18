@@ -1,5 +1,6 @@
 import type { ReactNode } from "react";
 import { HeroMotif } from "@/components/theme/hero-motif";
+import { ScriptName } from "@/components/theme/script-name";
 import { PassArt } from "@/components/theme/pass-art";
 import { Avatar } from "@/components/taste/avatar";
 import { OpenTasteSheetButton } from "@/components/taste/taste-sheet";
@@ -53,7 +54,9 @@ export function MemberCard({
           <Avatar id={avatar} initials={initials} tone="pass" className="relative size-full text-2xl ring-2 ring-hero" />
         </OpenTasteSheetButton>
         <div className="min-w-0">
-          <h1 className="truncate font-heading text-title font-bold">{name}</h1>
+          <h1 className="font-heading text-title font-bold">
+            <ScriptName text={name} />
+          </h1>
           <p className="text-sm text-hero-foreground/85">Member since {memberSince}</p>
         </div>
       </div>

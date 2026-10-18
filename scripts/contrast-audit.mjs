@@ -61,6 +61,11 @@ const checks = [
   ['amber text on card', 'primary', 1, [T('card')], 4.5],
   ['button text on amber', 'primary-foreground', 1, [T('primary')], 4.5],
   ['button text on the action gradient end (primary-2)', 'primary-foreground', 1, [T('primary-2')], 4.5],
+  // Sliders: the tab bar pill's lit icon/label on both ends of its fill, and
+  // a lit switch against the card it sits on.
+  ['tab bar label on the slider', 'slider-foreground', 1, [T('slider')], 4.5],
+  ['tab bar label on the slider end (slider-2)', 'slider-foreground', 1, [T('slider-2')], 4.5],
+  ['lit switch vs card (non-text, 3:1)', 'slider', 1, [T('card')], 3],
   // Home's headline gradient (text-heading): every stop on the ground and under the sky.
   ...['heading-a', 'heading-b', 'heading-c'].flatMap((h) => [
     [`headline ${h} on ground`, h, 1, [T('background')], 4.5],
@@ -127,8 +132,10 @@ for (const [name, t] of Object.entries(themes)) {
   for (const [label, fg, fa, stack, min] of checks) {
     let bg = [255, 255, 255, 1];
     // A stack entry is a token name, or a literal '#rrggbb' (e.g. a white shine).
-    for (const [tok, a] of stack) bg = over(alpha(parse(tok.startsWith('#') ? tok : t[tok]), a), bg);
-    const fgc = over(alpha(parse(t[fg]), fa), bg);
+    // Follow plain var(--x) references (Kaapi's slider tokens reuse its action ones).
+    const val = (tok) => { let v = t[tok]; for (let m; (m = /^var\(--([a-z0-9-]+)\)$/.exec(v ?? '')); ) v = t[m[1]]; return v; };
+    for (const [tok, a] of stack) bg = over(alpha(parse(tok.startsWith('#') ? tok : val(tok)), a), bg);
+    const fgc = over(alpha(parse(val(fg)), fa), bg);
     const r = ratio(fgc, bg);
     const ok = r >= min;
     if (!ok) fails++;

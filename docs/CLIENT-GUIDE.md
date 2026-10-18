@@ -56,7 +56,7 @@ has the **Open / Closed** switch at its foot.
   notifications on gets a short, fun "we're open" message (a different one
   each time). The toast tells you how many were notified. It goes out at
   most once every 3 hours, so closing and reopening by mistake won't ping
-  them twice. Students can mute these in Profile ("When ordering opens").
+  them twice. Students who turn off Notifications in Profile stop getting these (and their order updates).
 - **Close ordering at night.** If it's left open, an order placed after
   midnight is promised for the next lunch slot (by 1:30 PM).
 

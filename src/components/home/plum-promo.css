@@ -130,6 +130,28 @@
   background-repeat: no-repeat;
   background-size: calc(var(--n) * 100%) 100%;
 }
+/* Headlight and arrival sparkles (18 Oct 2026), inside the rider box so
+   they follow its route, size and depth. */
+.plum-headlight {
+  position: absolute;
+  left: 56%;
+  top: 48%;
+  width: 34%;
+  aspect-ratio: 1;
+  translate: -50% -50%;
+  border-radius: 50%;
+  background: radial-gradient(closest-side, rgb(255 236 190 / 85%), rgb(255 200 120 / 35%) 45%, transparent);
+  mix-blend-mode: screen;
+  opacity: 0;
+  pointer-events: none;
+}
+.plum-sparkle {
+  position: absolute;
+  aspect-ratio: 1;
+  overflow: visible;
+  opacity: 0;
+  filter: drop-shadow(0 0 2px rgb(255 214 140 / 90%));
+}
 .plum-scene[data-seen] .plum-sprite {
   background-image: var(--strip);
 }
@@ -153,11 +175,23 @@
   .plum-turn {
     animation: plum-pr-turn 11s linear infinite;
   }
+  /* Riding: a little suspension bob on top of the pose swaps. */
   .plum-pose.left {
-    animation: plum-pr-left 11s linear infinite;
+    animation:
+      plum-pr-left 11s linear infinite,
+      plum-bob 0.36s ease-in-out infinite alternate;
   }
   .plum-pose.right {
-    animation: plum-pr-right 11s linear infinite;
+    animation:
+      plum-pr-right 11s linear infinite,
+      plum-bob 0.32s ease-in-out -0.1s infinite alternate;
+  }
+  /* The headlight warms up as it comes towards you and flares on the brake. */
+  .plum-headlight {
+    animation: plum-headlight 11s linear infinite;
+  }
+  .plum-sparkle {
+    animation: plum-sparkle 11s linear infinite;
   }
   .plum-pose.front {
     animation: plum-pr-front 11s linear infinite;
@@ -362,5 +396,64 @@
   }
   to {
     scale: 1 0.35;
+  }
+}
+
+@keyframes plum-bob {
+  from {
+    translate: 0 0;
+  }
+  to {
+    translate: 0 -2.5%;
+  }
+}
+/* Timed to the generated route: front pose from ~44%, stop at 62.7%. */
+@keyframes plum-headlight {
+  0%,
+  44% {
+    opacity: 0;
+    scale: 0.6;
+  }
+  52% {
+    opacity: 0.55;
+    scale: 0.9;
+  }
+  62.7% {
+    opacity: 1;
+    scale: 1.25;
+  }
+  68% {
+    opacity: 0.6;
+    scale: 1;
+  }
+  84% {
+    opacity: 0.5;
+  }
+  88%,
+  100% {
+    opacity: 0;
+  }
+}
+@keyframes plum-sparkle {
+  0%,
+  63% {
+    opacity: 0;
+    scale: 0.2;
+    rotate: 0deg;
+  }
+  65.5% {
+    opacity: 1;
+    scale: 1.15;
+  }
+  70% {
+    opacity: 0.85;
+    scale: 0.9;
+    rotate: 45deg;
+  }
+  76%,
+  100% {
+    opacity: 0;
+    scale: 0.4;
+    rotate: 90deg;
   }
 }

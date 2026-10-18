@@ -233,7 +233,7 @@ export function RestaurantList({
       {showResults && (
         <section aria-labelledby="dish-results" className="mt-4">
           <div className="flex items-end justify-between gap-3">
-            <h2 id="dish-results" className="font-heading text-title font-bold">
+            <h2 id="dish-results" className="font-display text-title font-bold">
               {typeLabel ?? (searching ? "Dishes" : "Dishes for you")}
             </h2>
             <p className="shrink-0 pb-0.5 text-sm text-muted-foreground tabular-nums" aria-live="polite">
@@ -256,7 +256,7 @@ export function RestaurantList({
       {visible.length > 0 && (
         <>
           <div className="mt-9 flex items-end justify-between gap-3">
-            <h2 className="font-heading text-title font-bold">
+            <h2 className="font-display text-title font-bold">
               {showResults ? "Restaurants" : "Restaurants near campus"}
             </h2>
             <span className="shrink-0 pb-0.5 text-sm text-muted-foreground tabular-nums">

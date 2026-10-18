@@ -109,7 +109,10 @@
      Bites' Inter + Poppins (--app-sans / --app-heading in the palette blocks). */
   --font-sans: var(--app-sans);
   --font-heading: var(--app-heading);
+  --font-display: var(--app-display);
   --color-ink: var(--ink);
+  --color-slider: var(--slider);
+  --color-slider-foreground: var(--slider-foreground);
   --color-ink-foreground: var(--ink-foreground);
   --color-ink-accent: var(--ink-accent);
   --color-ink-success: var(--ink-success);
@@ -257,6 +260,15 @@
      of every page (body, --page-glow-*) so no screen sits on a flat ground. */
   --glow-amber: rgb(192 122 53 / 42%);
   --glow-rose: rgb(145 73 85 / 34%);
+  /* Sliders — lit switches and the tab bar's pill (since 18 Oct 2026):
+     Plum lights them plum → rose so they stop reading like Kaapi's coffee;
+     Kaapi keeps its action colour. */
+  --slider: #552c4a;
+  --slider-2: #914955;
+  --slider-foreground: #fff8f2;
+  --slider-surface: linear-gradient(180deg, rgb(255 255 255 / 16%), transparent 52%),
+    linear-gradient(115deg, var(--slider) 0%, var(--slider-2) 100%);
+  --glow-slider: rgb(145 73 85 / 45%);
   --glow-hero: rgb(85 44 74 / 42%);
   --page-glow-a: rgb(240 200 150 / 18%);
   --page-glow-b: rgb(236 196 208 / 20%);
@@ -322,6 +334,9 @@
   --show-plum: block;
   --app-sans: var(--font-jakarta);
   --app-heading: var(--font-fraunces), var(--font-jakarta);
+  /* Section / page headings (font-display): Cormorant Garamond, the free
+     stand-in for Del Rose, since 18 Oct 2026. */
+  --app-display: var(--font-cormorant), var(--font-fraunces), serif;
   /* The second stop of the action gradient: Plum runs amber → a warm
      rose-amber (Kaapi runs coffee → cinnamon). It was the same amber until
      17 Oct 2026, which left the tab bar's pill and every action button flat. */
@@ -387,6 +402,10 @@
   --ink-danger: #8e2416;
   --glow-amber: rgb(217 151 79 / 34%);
   --glow-rose: rgb(215 168 184 / 22%);
+  --slider: #f2cdd8;
+  --slider-2: #d7a8b8;
+  --slider-foreground: #3f2037;
+  --glow-slider: rgb(215 168 184 / 34%);
   --glow-hero: rgb(145 73 85 / 40%);
   --page-glow-a: rgb(217 151 79 / 11%);
   --page-glow-b: rgb(145 73 85 / 20%);
@@ -495,6 +514,11 @@
 
   --glow-amber: rgb(111 59 31 / 35%);
   --glow-rose: rgb(233 143 166 / 45%);
+  --slider: var(--primary);
+  --slider-2: var(--primary-2);
+  --slider-foreground: var(--primary-foreground);
+  --slider-surface: var(--surface-primary);
+  --glow-slider: var(--glow-amber);
   --glow-hero: rgb(235 165 102 / 45%);
   --page-glow-a: rgb(235 165 102 / 16%);
   --page-glow-b: rgb(242 193 78 / 22%);
@@ -560,6 +584,7 @@
   --show-plum: none;
   --app-sans: var(--font-inter);
   --app-heading: var(--font-poppins), var(--font-inter);
+  --app-display: var(--font-poppins), var(--font-inter);
   --primary-2: #9a4f2a;
   /* College Bites' action gradient: a soft top highlight over coffee → cinnamon. */
   --surface-primary: linear-gradient(180deg, rgb(255 255 255 / 16%), transparent 48%),
@@ -615,6 +640,11 @@
 
   --glow-amber: rgb(242 193 78 / 42%);
   --glow-rose: rgb(233 143 166 / 40%);
+  --slider: var(--primary);
+  --slider-2: var(--primary-2);
+  --slider-foreground: var(--primary-foreground);
+  --slider-surface: var(--surface-primary);
+  --glow-slider: var(--glow-amber);
   --glow-hero: rgb(235 165 102 / 45%);
   --page-glow-a: rgb(242 193 78 / 10%);
   --page-glow-b: rgb(233 143 166 / 9%);
@@ -751,6 +781,11 @@
 /* Selected chips: pair with bg-ink (the flat fallback). Plum lights them
    like its hero (a shine over plum → berry, rose at night); Kaapi keeps
    them flat (--ink-surface: none). */
+/* Sliders (lit switches, the tab bar pill): pair with bg-slider. */
+@utility surface-slider {
+  background-image: var(--slider-surface);
+}
+
 @utility surface-ink {
   background-image: var(--ink-surface);
 }
@@ -773,6 +808,37 @@
     background-image: none;
     color: CanvasText;
   }
+}
+
+/* ScriptName (src/components/theme/script-name.tsx): the student's name
+   in a handwriting face. Script faces sit small on their em, so it runs a
+   size up from the text around it, with room for swashes. Desi Kaapi keeps
+   its heading font, no handwriting. */
+.script-name {
+  position: relative;
+  display: inline-block;
+  max-width: 100%;
+  padding: 0.05em 0.12em 0.1em 0.04em;
+  font-size: 1.25em;
+  font-weight: 400;
+  line-height: 1.1;
+  vertical-align: baseline;
+}
+.script-ink {
+  display: inline-block;
+  max-width: 100%;
+  overflow-wrap: anywhere;
+}
+.script-nib {
+  display: none;
+}
+[data-palette="kaapi"] .script-name {
+  font-size: 1em;
+  padding: 0;
+}
+[data-palette="kaapi"] .script-ink {
+  font-family: var(--app-heading) !important;
+  font-weight: 700;
 }
 
 /* Desi Kaapi's promo (PromoCard): College Bites' delivery run. The resting
@@ -814,6 +880,11 @@
   box-shadow:
     0 2px 6px -2px rgb(0 0 0 / 22%),
     0 14px 30px -12px var(--glow-amber);
+}
+@utility glow-slider {
+  box-shadow:
+    0 2px 6px -2px rgb(0 0 0 / 22%),
+    0 14px 30px -12px var(--glow-slider);
 }
 @utility glow-rose {
   box-shadow:
@@ -891,6 +962,43 @@
  * transform/opacity animation at all, never just a faster one.
  */
 @media (prefers-reduced-motion: no-preference) {
+  /* ScriptName: wipe the ink on left to right like a pen, a glowing nib
+     just ahead of it; erasing lifts and blurs it off the page. */
+  :root:not([data-palette="kaapi"]) .script-name[data-phase="write"] .script-ink {
+    animation: script-write var(--write-ms, 1.6s) cubic-bezier(0.45, 0.05, 0.55, 0.95) both;
+  }
+  :root:not([data-palette="kaapi"]) .script-name[data-phase="erase"] .script-ink {
+    animation: script-erase 450ms var(--ease-in-quad) both;
+  }
+  :root:not([data-palette="kaapi"]) .script-nib {
+    display: block;
+    position: absolute;
+    top: 30%;
+    left: 0;
+    width: 0.32em;
+    height: 0.32em;
+    border-radius: 999px;
+    background: var(--primary);
+    box-shadow: 0 0 0.5em 0.15em color-mix(in oklab, var(--primary) 55%, transparent);
+    pointer-events: none;
+    animation: script-nib var(--write-ms, 1.6s) cubic-bezier(0.45, 0.05, 0.55, 0.95) both;
+  }
+  @keyframes script-write {
+    from { clip-path: inset(-25% 100% -35% -10%); }
+    to { clip-path: inset(-25% -10% -35% -10%); }
+  }
+  @keyframes script-erase {
+    to { opacity: 0; filter: blur(3px); translate: 0 -0.12em; }
+  }
+  @keyframes script-nib {
+    0% { left: 0; top: 55%; opacity: 0; }
+    8% { opacity: 1; }
+    25% { top: 30%; }
+    50% { top: 60%; }
+    75% { top: 28%; }
+    92% { opacity: 1; }
+    100% { left: 100%; top: 50%; opacity: 0; }
+  }
   /* Home logo (as on College Bites): a slow glow in the action colour
      breathes around the tile, and two rings ripple out once when the page
      appears — paused under the splash, so they play as it hands over. The

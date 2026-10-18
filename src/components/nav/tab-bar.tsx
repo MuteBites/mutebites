@@ -162,7 +162,7 @@ export function TabBar() {
           <span
             key={pill}
             className={cn(
-              "animate-tab-stretch surface-primary glow-amber block size-full rounded-full bg-primary transition-transform duration-(--dur-quick)",
+              "animate-tab-stretch surface-slider glow-slider block size-full rounded-full bg-slider transition-transform duration-(--dur-quick)",
               dragging && "scale-x-105 scale-y-110",
             )}
           />
@@ -180,7 +180,7 @@ export function TabBar() {
               onClick={(event) => onLinkClick(event, isActive)}
               className={cn(
                 "pressable relative z-10 flex h-12 items-center justify-center gap-1.5 rounded-full text-sm font-semibold outline-none transition-colors duration-(--dur-base) focus-visible:ring-3 focus-visible:ring-ring/80",
-                isLit ? "text-primary-foreground" : "text-muted-foreground hover:text-foreground",
+                isLit ? "text-slider-foreground" : "text-muted-foreground hover:text-foreground",
               )}
             >
               <Icon

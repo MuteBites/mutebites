@@ -23,7 +23,7 @@ export function FoodTypeRail({
 
   return (
     <section aria-labelledby="food-types-heading" className="mt-7">
-      <h2 id="food-types-heading" className="font-heading text-title font-bold">
+      <h2 id="food-types-heading" className="font-display text-title font-bold">
         What&apos;s on your mind?
       </h2>
       <ul className="-mx-6 mt-3 flex snap-x scroll-px-6 gap-3.5 overflow-x-auto px-6 pt-1 pb-2 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">

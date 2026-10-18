@@ -481,6 +481,18 @@ there are real — avoided):
     `/auth/*` and `/login?dev` (the way back in); open pages reload into it
     within 30 s (`SiteStatusWatch`), and `place_order()` refuses with
     `site_offline`.
+31. **Fonts, sliders, one notifications switch, promo polish** (18 Oct
+    2026): Plum's headings in Cormorant Garamond and the student's name
+    handwritten (`ScriptName`, cycling Love Light → Grey Qo → Sirivennela
+    with a pen-wipe write-on) — free lookalikes, since the client's
+    Rosething (demo, personal use only) and Del Rose can't go on the web;
+    Plum's switches and tab pill lit plum → rose (`--slider*` tokens) so
+    they stop looking like Kaapi's; Profile's two notification switches
+    merged into one with an "Are you sure?" before turning off; the promo
+    rider got a suspension bob, a headlight and arrival sparkles. Lesson:
+    on Windows, Python's text-mode writes turn LF files into CRLF, and the
+    contrast audit's block parser then silently finds nothing — write with
+    `newline=''`.
 
 ---
 

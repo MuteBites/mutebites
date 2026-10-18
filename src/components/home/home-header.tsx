@@ -1,5 +1,6 @@
 import { Moon, Sun, Sunrise, Sunset, type LucideIcon } from "lucide-react";
 import { AboutMuteBitesDialog } from "@/components/home/about-mutebites-dialog";
+import { ScriptName } from "@/components/theme/script-name";
 import { BrandLogo } from "@/components/brand-logo";
 import { ChannelPopover } from "@/components/channel/channel-popover";
 import { Avatar, initialsOf } from "@/components/taste/avatar";
@@ -65,7 +66,9 @@ export function HomeHeader({
         <Icon className="size-4 shrink-0" aria-hidden="true" />
         {greeting}
       </p>
-      <h1 className="text-heading relative mt-1 font-heading text-display font-bold break-words">Hey, {firstName}</h1>
+      <h1 className="text-heading relative mt-1 font-heading text-display font-bold break-words">
+        Hey, <ScriptName text={firstName} />
+      </h1>
       <p className="relative mt-1.5 text-lg leading-snug">{question}</p>
     </header>
   );
