@@ -88,12 +88,12 @@ Food delivery site for VIT-AP University students.
   Home's section headings, Profile's "Your details" / "Settings" and
   "Your orders"; the student's **full name** (Home's "Hey, <full name>"
   and the campus pass) is `ScriptName` (`src/components/theme/script-name.tsx`),
-  **drawn letter by letter** like a whiteboard animation in **Love Light ⇄
-  Grey Qo** (Sirivennela was dropped): each word is an inline SVG laid over
+  **drawn letter by letter** like a whiteboard animation in **Love Light →
+  Grey Qo → Sirivennela**: each word is an inline SVG laid over
   an invisible copy of itself (wrapping and size come from normal text);
   per letter the pen traces the glyph outline (`stroke-dashoffset`,
   `script-trace`) and the ink floods in (`script-ink`), 170 ms apart;
-  it holds ~3 s, lifts off (`script-erase`) and is drawn again in the other
+  it holds ~3 s, lifts off (`script-erase`) and is drawn again in the next
   face. Colour per `tone`: "heading" = the ink → rose → amber headline
   gradient, "hero" = light text on the pass. Starts after the splash and
   `document.fonts.ready`; reduced motion = the plain name. Fonts load with
@@ -186,7 +186,19 @@ Food delivery site for VIT-AP University students.
   comes towards you and flares on the brake (`.plum-headlight` in the front
   pose), and a ding of four sparkles round its head on arrival
   (`.plum-sparkle`, `PLUM_SPARKLES`). If the route's timing changes, re-time
-  `plum-headlight` / `plum-sparkle`. Plum's hero itself was lit up the same
+  `plum-headlight` / `plum-sparkle`.
+  **Prototype "On the way to you"** (18 Oct 2026, `?promo=new` only —
+  `PlumPromoChooser` swaps it in after hydration and remembers it per device
+  in localStorage `mutebites.promo`; `?promo=old` turns it off; everyone
+  else keeps the scene above): `PlumRide` (`plum-ride.tsx` / `plum-ride.css`)
+  — the camera rides alongside a big mascot (the existing "riding right"
+  strip, 64% of the card's height, bobbing, headlight beam, speed streaks, a
+  steam puff off the box every 5 s) while 200%-wide layers loop past at
+  different speeds: sky + sun, skyline with the clock tower (26 s), roadside
+  lamps and trees (5.5 s), road dashes, plus a "Main Gate <time>" sign every
+  7 s; a left scrim keeps the copy readable. Skyline and roadside are drawn
+  SVG stand-ins until the user's generated layers and side-on Flow loop
+  arrive. Plum's hero itself was lit up the same
   day (`--hero-a #69324f`, `--hero-glow` amber 22%, `--hero-bloom` rose
   52%, plus a soft white highlight top-left in `--hero-surface`;
   `--hero-danger` lightened to `#ffe9e4` to keep 4.5:1 on the chips).

@@ -1,6 +1,8 @@
 import type { CSSProperties } from "react";
 import Image from "next/image";
 import { Clock, MapPin } from "lucide-react";
+import { PlumPromoChooser } from "./plum-promo-chooser";
+import { PlumRide } from "./plum-ride";
 import { PlumSceneLive } from "./plum-scene-live";
 import "./plum-promo.css";
 import "./plum-promo-route.css";
@@ -39,7 +41,7 @@ export function PromoCard({ slot }: { slot: { lead: string; time: string } }) {
         aria-label="Hot food, at Main Gate"
         className="only-plum surface-hero glow-hero @container relative mt-6 min-h-[13.5rem] overflow-hidden rounded-[1.75rem] bg-hero p-5 text-hero-foreground"
       >
-        <PlumScene />
+        <PlumPromoChooser classic={<PlumScene />} ride={<PlumRide time={slot.time} />} />
         <div className="relative z-10 max-w-[52%] [text-shadow:0_1px_10px_rgb(58_27_49/0.55)] @[20rem]:max-w-[56%]">
           <h2 className="font-heading text-title leading-tight font-bold">Hot food, at Main&nbsp;Gate</h2>
           <p className="mt-1 text-sm text-hero-foreground/85">Order here, pay when you collect.</p>

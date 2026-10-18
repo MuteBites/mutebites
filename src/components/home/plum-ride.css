@@ -1,0 +1,351 @@
+/*
+ * PROTOTYPE "On the way to you" (PlumRide in plum-ride.tsx, ?promo=new).
+ * Back to front: sky, sun, clouds, skyline (slow), roadside (fast), the
+ * Main Gate sign, the road, the rider. Each scrolling layer is 200% wide
+ * and slides by exactly half its width, so the loop never jumps.
+ * Colours are written out here like plum-promo.css: this is a painted
+ * scene, the same in light and dark, under the card's own lit hero.
+ */
+.ride-scene {
+  overflow: hidden;
+  border-radius: inherit;
+}
+.ride-scene > * {
+  position: absolute;
+}
+.ride-sky {
+  inset: 0;
+  background:
+    radial-gradient(60% 55% at 82% 70%, rgb(255 190 120 / 55%), transparent 70%),
+    linear-gradient(180deg, #3f2037 0%, #69324f 38%, #a04c58 66%, #d9894f 86%, #e9a866 100%);
+}
+.ride-sun {
+  left: 74%;
+  top: 46%;
+  width: 34%;
+  aspect-ratio: 1;
+  translate: -50% -50%;
+  border-radius: 50%;
+  background: radial-gradient(closest-side, #ffe2b0, #f6b26e 55%, rgb(246 178 110 / 0%) 72%);
+}
+.ride-cloud {
+  top: 14%;
+  opacity: 0.85;
+}
+.ride-cloud.a {
+  left: 58%;
+  width: 22%;
+}
+.ride-cloud.b {
+  left: 90%;
+  top: 30%;
+  width: 11%;
+}
+.ride-layer {
+  left: 0;
+  width: 200%;
+}
+.ride-skyline {
+  bottom: 22%;
+  height: 40%;
+  fill: #4a2140;
+  opacity: 0.9;
+}
+.ride-clock {
+  fill: #ffd9a0;
+}
+.ride-window {
+  fill: #ffcf8a;
+  opacity: 0.8;
+}
+.ride-roadside {
+  bottom: 17%;
+  height: 24%;
+  fill: #26111f;
+  filter: blur(0.4px);
+}
+.ride-lamp {
+  fill: #ffe2a8;
+  filter: drop-shadow(0 0 3px #ffcf7a);
+}
+.ride-scrim {
+  inset: 0;
+  background: linear-gradient(90deg, rgb(48 20 40 / 62%) 0%, rgb(48 20 40 / 35%) 42%, transparent 62%);
+}
+.ride-road {
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: 18%;
+  background:
+    linear-gradient(180deg, rgb(255 210 160 / 18%), transparent 30%),
+    repeating-linear-gradient(90deg, rgb(255 226 190 / 75%) 0 9%, transparent 9% 20%) 0 58% / 100% 6% no-repeat,
+    #2e1628;
+}
+
+/* The sign: a little plum board on a post, riding past with the roadside. */
+.ride-sign {
+  left: 100%;
+  bottom: 17%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  opacity: 0;
+}
+.ride-sign-board {
+  padding: 0.2rem 0.55rem;
+  border-radius: 0.5rem;
+  background: #fff3e6;
+  color: #552c4a;
+  font-size: 0.68rem;
+  font-weight: 700;
+  line-height: 1.2;
+  white-space: nowrap;
+  box-shadow: 0 2px 6px rgb(0 0 0 / 30%);
+}
+.ride-sign-board b {
+  color: #99581b;
+}
+.ride-sign-post {
+  width: 3px;
+  height: 1.4rem;
+  background: #26111f;
+}
+
+/* The rider: big, on the right, wheels on the road. */
+.ride-rider {
+  right: 2%;
+  bottom: 5%;
+  height: 64%;
+  aspect-ratio: 151 / 160;
+}
+.ride-bob,
+.ride-sprite {
+  position: absolute;
+  inset: 0;
+}
+.ride-sprite {
+  background-repeat: no-repeat;
+  background-size: calc(18 * 100%) 100%;
+}
+.ride-scene[data-seen] .ride-sprite {
+  background-image: url(/photos/promo/plum-rider-right.webp);
+}
+.ride-shadow {
+  left: 12%;
+  bottom: -3%;
+  width: 78%;
+  height: 8%;
+  border-radius: 50%;
+  background: rgb(20 6 16 / 55%);
+  filter: blur(3px);
+}
+.ride-beam {
+  left: 78%;
+  top: 34%;
+  width: 90%;
+  height: 46%;
+  background: radial-gradient(60% 50% at 0% 50%, rgb(255 232 180 / 55%), transparent 75%);
+  clip-path: polygon(0 40%, 100% 0, 100% 100%, 0 60%);
+  mix-blend-mode: screen;
+}
+.ride-streaks {
+  left: -38%;
+  top: 38%;
+  width: 40%;
+  overflow: visible;
+  stroke: rgb(255 240 225 / 70%);
+  stroke-width: 1.4;
+  stroke-linecap: round;
+  opacity: 0;
+}
+.ride-steam {
+  left: 18%;
+  top: 28%;
+  width: 22%;
+  height: 30%;
+}
+.ride-steam i {
+  position: absolute;
+  bottom: 0;
+  width: 34%;
+  aspect-ratio: 1;
+  border-radius: 50%;
+  background: rgb(255 248 240 / 75%);
+  filter: blur(2px);
+  opacity: 0;
+}
+.ride-steam i:nth-child(2) {
+  left: 30%;
+}
+.ride-steam i:nth-child(3) {
+  left: 60%;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .ride-skyline {
+    animation: ride-scroll 26s linear infinite;
+  }
+  .ride-roadside {
+    animation: ride-scroll 5.5s linear infinite;
+  }
+  .ride-scrim {
+  inset: 0;
+  background: linear-gradient(90deg, rgb(48 20 40 / 62%) 0%, rgb(48 20 40 / 35%) 42%, transparent 62%);
+}
+.ride-road {
+    animation: ride-dashes 0.45s linear infinite;
+  }
+  .ride-cloud.a {
+    animation: ride-cloud 40s linear infinite;
+  }
+  .ride-cloud.b {
+    animation: ride-cloud 30s linear -12s infinite;
+  }
+  .ride-sun {
+    animation: ride-breathe 6s ease-in-out infinite alternate;
+  }
+  .ride-sign {
+    animation: ride-sign 7s linear infinite;
+  }
+  .ride-sprite {
+    animation: ride-flipbook 1.5s steps(18, jump-none) infinite;
+  }
+  .ride-bob {
+    animation: ride-bob 0.34s ease-in-out infinite alternate;
+  }
+  .ride-shadow {
+    animation: ride-shadow 0.34s ease-in-out infinite alternate;
+  }
+  .ride-beam {
+    animation: ride-beam 2.2s ease-in-out infinite alternate;
+  }
+  .ride-streaks {
+    opacity: 1;
+  }
+  .ride-streaks line {
+    animation: ride-streak 0.75s linear var(--d) infinite;
+  }
+  .ride-steam i {
+    animation: ride-steam 5s ease-out infinite;
+  }
+  .ride-steam i:nth-child(2) {
+    animation-delay: 0.15s;
+  }
+  .ride-steam i:nth-child(3) {
+    animation-delay: 0.3s;
+  }
+  .ride-scene:not([data-on]) *,
+  html:is([data-splash="play"], [data-splash="run"]) .ride-scene * {
+    animation-play-state: paused;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .ride-sign {
+    left: 64%;
+    opacity: 1;
+    translate: -50% 0;
+  }
+}
+
+@keyframes ride-scroll {
+  to {
+    translate: -50% 0;
+  }
+}
+@keyframes ride-dashes {
+  to {
+    background-position:
+      0 0,
+      -20% 58%,
+      0 0;
+  }
+}
+@keyframes ride-cloud {
+  from {
+    translate: 30% 0;
+  }
+  to {
+    translate: -420% 0;
+  }
+}
+@keyframes ride-breathe {
+  to {
+    scale: 1.08;
+    opacity: 0.9;
+  }
+}
+/* Enters from the right edge at roadside speed, passes behind the mascot,
+   and is gone before it reaches the text. */
+@keyframes ride-sign {
+  0%,
+  40% {
+    left: 104%;
+    opacity: 0;
+  }
+  43% {
+    opacity: 1;
+  }
+  80% {
+    opacity: 1;
+  }
+  86%,
+  100% {
+    left: 46%;
+    opacity: 0;
+  }
+}
+@keyframes ride-flipbook {
+  from {
+    background-position: 0 0;
+  }
+  to {
+    background-position: 100% 0;
+  }
+}
+@keyframes ride-bob {
+  to {
+    translate: 0 -2.5%;
+    rotate: -0.6deg;
+  }
+}
+@keyframes ride-shadow {
+  to {
+    scale: 0.92 1;
+    opacity: 0.8;
+  }
+}
+@keyframes ride-beam {
+  to {
+    opacity: 0.7;
+  }
+}
+@keyframes ride-streak {
+  from {
+    translate: 30% 0;
+    opacity: 0;
+  }
+  30% {
+    opacity: 1;
+  }
+  to {
+    translate: -60% 0;
+    opacity: 0;
+  }
+}
+@keyframes ride-steam {
+  0%,
+  70% {
+    opacity: 0;
+    translate: 0 0;
+    scale: 0.4;
+  }
+  76% {
+    opacity: 0.85;
+  }
+  100% {
+    opacity: 0;
+    translate: -120% -160%;
+    scale: 1.4;
+  }
+}

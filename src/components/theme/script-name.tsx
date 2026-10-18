@@ -4,8 +4,8 @@ import { useEffect, useId, useLayoutEffect, useRef, useState, type CSSProperties
 import { afterSplash } from "@/components/splash/after-splash";
 import { cn } from "@/lib/utils";
 
-// The two handwriting faces (layout.tsx), alternating.
-const FACES = ["var(--font-love-light)", "var(--font-grey-qo)"];
+// The three handwriting faces (layout.tsx), in turn.
+const FACES = ["var(--font-love-light)", "var(--font-grey-qo)", "var(--font-sirivennela)"];
 // Per letter: the pen traces its outline, then the ink fills in.
 const LETTER_MS = 170;
 const STROKE_MS = 520;
