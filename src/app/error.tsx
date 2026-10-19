@@ -4,6 +4,7 @@ import { useEffect } from "react";
 import Link from "next/link";
 import { RotateCw } from "lucide-react";
 import { LostTicket } from "@/components/lost-ticket";
+import { isStaleDeployError, reloadOnce } from "@/lib/stale-deploy";
 
 // Root error boundary for anything below the root layout. Note this
 // Next.js version passes `retry` (not the older `reset`) — see
@@ -13,13 +14,14 @@ import { LostTicket } from "@/components/lost-ticket";
 // to support and it can be matched against the server logs.
 export default function Error({
   error,
-  retry,
 }: {
   error: Error & { digest?: string };
   retry: () => void;
 }) {
   useEffect(() => {
     console.error(error);
+    // A tab from before the latest deploy: a fresh load fixes it, so do that.
+    if (isStaleDeployError(error)) reloadOnce();
   }, [error]);
 
   return (
@@ -39,7 +41,9 @@ export default function Error({
       <div className="mt-8 flex w-full max-w-xs flex-col gap-3">
         <button
           type="button"
-          onClick={() => retry()}
+          // A full reload, not retry(): it also picks up a newer deploy and
+          // re-runs the server data, which is what clears almost every blip.
+          onClick={() => window.location.reload()}
           className="surface-primary flex h-14 items-center justify-center gap-2 glow-amber rounded-full bg-primary text-lg font-bold text-primary-foreground outline-none hover:brightness-95 focus-visible:ring-3 focus-visible:ring-ring/80"
         >
           <RotateCw className="size-5" aria-hidden="true" />

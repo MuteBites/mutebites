@@ -31,6 +31,12 @@ const csp = [
 ].join("; ");
 
 const nextConfig: NextConfig = {
+  // Version-skew protection: each Vercel deploy gets its own id, so a tab
+  // opened before a deploy hard-reloads on its next navigation instead of
+  // asking the new server for chunks / server actions it no longer has
+  // (buttons that silently did nothing until a refresh). See
+  // node_modules/next/dist/docs/.../next-config-js/deploymentId.md.
+  deploymentId: process.env.VERCEL_DEPLOYMENT_ID,
   async headers() {
     return [
       {

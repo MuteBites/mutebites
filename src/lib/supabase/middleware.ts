@@ -22,6 +22,32 @@ function isSiteGateExempt(request: NextRequest) {
   return pathname === "/login" && searchParams.has("dev");
 }
 
+// site_status is read on every request, so it's cached per server instance
+// for a few seconds and never allowed to hold a page up: a read slower than
+// SITE_TIMEOUT_MS (or failing) counts as live. A switch on /dev therefore
+// reaches every instance within SITE_CACHE_MS.
+const SITE_CACHE_MS = 5_000;
+const SITE_TIMEOUT_MS = 1_200;
+type SiteRow = { mode: SiteMode; message: string | null };
+let siteCache: { at: number; row: SiteRow | null } | null = null;
+
+async function readSiteStatus(supabase: ReturnType<typeof createServerClient>): Promise<SiteRow | null> {
+  if (siteCache && Date.now() - siteCache.at < SITE_CACHE_MS) return siteCache.row;
+  try {
+    const { data, error } = await supabase
+      .from("site_status")
+      .select("mode, message")
+      .abortSignal(AbortSignal.timeout(SITE_TIMEOUT_MS))
+      .maybeSingle();
+    if (error) return siteCache?.row ?? null;
+    const row = data as SiteRow | null;
+    siteCache = { at: Date.now(), row };
+    return row;
+  } catch {
+    return siteCache?.row ?? null;
+  }
+}
+
 export async function updateSession(request: NextRequest) {
   let supabaseResponse = NextResponse.next({ request });
 
@@ -46,6 +72,9 @@ export async function updateSession(request: NextRequest) {
     },
   );
 
+  // The site switch is read alongside the session check, not after it.
+  const sitePromise = isSiteGateExempt(request) ? null : readSiteStatus(supabase);
+
   // Refreshes the session cookie if expired. Required for Server Components,
   // which can't write cookies themselves.
   const {
@@ -59,11 +88,8 @@ export async function updateSession(request: NextRequest) {
   // screen — for everyone, students, admins and developers alike — except
   // the way back in above. A failed read (e.g. before the table existed)
   // counts as live.
-  if (!isSiteGateExempt(request)) {
-    const { data: site } = await supabase
-      .from("site_status")
-      .select("mode, message")
-      .maybeSingle<{ mode: SiteMode; message: string | null }>();
+  if (sitePromise) {
+    const site = await sitePromise;
     if (site && site.mode !== "live") return offlineResponse(site.mode, site.message);
   }
 

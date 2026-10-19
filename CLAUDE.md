@@ -561,6 +561,14 @@ Food delivery site for VIT-AP University students.
   "Initializing" with no build logs has, so far, been a Vercel-side
   incident — check https://www.vercel-status.com before redeploying (a
   redeploy just queues behind it).
+  **Version skew** (20 Oct 2026): a tab opened before a deploy used to keep
+  the old build's chunks and server-action ids — buttons silently did
+  nothing and navigations hit the error screen until a manual refresh.
+  `next.config.ts` sets `deploymentId: VERCEL_DEPLOYMENT_ID`, so the client
+  hard-reloads on its next navigation after a deploy; `StaleDeployGuard`
+  (root layout) and `error.tsx` also reload once (at most every 30 s,
+  `src/lib/stale-deploy.ts`) on a chunk-load / missing-server-action error,
+  and the error screen's "Try again" is a full reload.
 
 ## Admin access
 
@@ -712,7 +720,10 @@ cookie (path `/auth`) so the OAuth callback lands on `/dev`; a signed-out
 `/dev` redirects to `/login?dev`. Pages already open notice within 30 s:
 `SiteStatusWatch` (root layout) polls `site_status` while the tab is
 visible and reloads once it isn't live (not on `/dev` / `/login`).
-`place_order()` also raises `site_offline`. A failed read counts as live.
+`place_order()` also raises `site_offline`. A failed read counts as live. The proxy reads
+`site_status` alongside `getUser()` (not after it), caches it per server
+instance for 5 s and gives the read 1.2 s before treating it as live, so
+the switch can never hold a page up.
 
 Visually, admin shares the student app's system: the dashboard's plum
 "Today" card (`StatCards`) carries today's counts with the campus ordering
