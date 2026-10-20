@@ -43,3 +43,6 @@ supabase/.temp
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# Personal documents never go in this public repo.
+docs/TAX-*.pdf
