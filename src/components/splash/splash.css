@@ -1,8 +1,10 @@
 /*
- * Startup splash (./app-splash.tsx). Static layout and resting states only:
- * all motion is Web Animations from ./engine.ts, which also sets
- * data-splash on <html> — the overlay stays hidden unless this load plays
- * it. Warm ivory in both themes; the logo is drawn for it.
+ * Startup splash (./app-splash.tsx), "The Cloche Reveal". Static layout and
+ * resting states only: all motion is Web Animations from ./engine.ts, which
+ * also sets data-splash on <html> — the overlay stays hidden unless this
+ * load plays it. A deep plum stage in both themes (the PWA launch screen,
+ * web-manifest background_color, is the same plum, so it hands straight
+ * over). The resting state is the finished logo — what reduced motion shows.
  */
 .app-splash {
   display: none;
@@ -16,7 +18,8 @@ html[data-splash="out"] .app-splash {
   display: grid;
   place-items: center;
   overflow: hidden;
-  background: #f5eae1;
+  background:
+    radial-gradient(70% 55% at 50% 40%, #5a2a4b 0%, #3f2037 55%, #26111f 100%);
   cursor: pointer;
   user-select: none;
   -webkit-tap-highlight-color: transparent;
@@ -35,58 +38,137 @@ html[data-splash="out"] .app-splash {
   pointer-events: none;
 }
 
+/* A soft spotlight from above onto the cloche. */
+.sp-spot {
+  position: absolute;
+  left: 50%;
+  top: 0;
+  width: min(120vw, 44rem);
+  height: 70dvh;
+  translate: -50% 0;
+  background: radial-gradient(50% 60% at 50% 70%, rgb(255 214 160 / 18%), transparent 70%);
+  clip-path: polygon(38% 0, 62% 0, 100% 100%, 0 100%);
+  opacity: 0;
+  pointer-events: none;
+}
+
 .sp-stage {
   position: relative;
-  container-type: inline-size;
-  /* The morph into the page's logo tile scales from the top-left corner. */
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  /* The close into the page's logo tile scales from the top-left corner. */
   transform-origin: 0 0;
   visibility: hidden;
 }
 html[data-splash-ran] .sp-stage {
   visibility: visible;
 }
-.sp-canvas,
-.sp-fill {
-  position: absolute;
-  inset: 0;
+
+/* The cloche / mascot. Sized so it's never too big on a phone and short
+   enough for landscape. */
+.sp-hero {
+  position: relative;
+  width: min(62vw, 17rem, 34dvh);
 }
-.sp-layer,
-.sp-shoe,
-.sp-tube,
-.sp-glow,
-.sp-wisp {
+.sp-hero > * {
   position: absolute;
 }
-.sp-layer img,
-.sp-shoe {
-  display: block;
-  width: 100%;
-  height: 100%;
-  -webkit-user-drag: none;
-}
-/* The vector leg rig only exists for the run-in; at rest (and under
-   reduced motion) the drawn legs show. The engine unhides it. */
-.sp-rig {
-  visibility: hidden;
-}
-.sp-joint {
-  position: absolute;
-  width: 0;
-  height: 0;
-  transform-origin: 0 0;
-}
-.sp-tube {
-  display: block;
+.sp-shadow {
+  left: 8%;
+  bottom: -4%;
+  width: 84%;
+  height: 9%;
+  border-radius: 50%;
+  background: rgb(10 2 8 / 45%);
+  filter: blur(6px);
 }
 .sp-glow {
+  left: 50%;
+  top: 52%;
+  width: 150%;
+  aspect-ratio: 1;
+  translate: -50% -50%;
   border-radius: 50%;
-  background: radial-gradient(closest-side, rgb(192 122 53 / 0.55), rgb(192 122 53 / 0));
+  background: radial-gradient(closest-side, rgb(255 190 110 / 55%), rgb(255 160 90 / 0%));
   opacity: 0;
 }
-.sp-wisp {
+.sp-pop {
+  inset: 0;
+  background-image: var(--strip);
+  background-repeat: no-repeat;
+  background-size: calc(var(--n) * 100%) 100%;
+  /* The finished pose (reduced motion / tap to skip): the last frame. */
+  background-position: 100% 0;
+}
+.sp-cloche {
+  bottom: 0;
+  transform-origin: 50% 100%;
+  opacity: 0;
+}
+.sp-cloche img {
+  transform-origin: 50% 100%;
+}
+.sp-cloche img,
+.sp-steam {
+  display: block;
+  width: 100%;
+  height: auto;
+  -webkit-user-drag: none;
+}
+.sp-steam {
+  bottom: 30%;
+  width: 30%;
+  opacity: 0;
+}
+.sp-steam.left {
+  left: -6%;
+  scale: -1 1;
+}
+.sp-steam.right {
+  right: -6%;
+}
+.sp-flash {
+  left: 50%;
+  top: 58%;
+  width: 120%;
+  aspect-ratio: 1;
+  translate: -50% -50%;
+  border-radius: 50%;
+  background: radial-gradient(closest-side, #fff6e6, rgb(255 214 150 / 70%) 40%, rgb(255 190 110 / 0%));
+  opacity: 0;
+  pointer-events: none;
+}
+.sp-sparkle {
   overflow: visible;
   opacity: 0;
-  transform-origin: 50% 100%;
+  filter: drop-shadow(0 0 3px rgb(255 214 140 / 90%));
+}
+
+/* "MuteBites" in gold: a gold gradient shown through the wordmark art. */
+.sp-word,
+.sp-tagline {
+  position: relative;
+  display: block;
+  -webkit-mask: var(--mask) center / contain no-repeat;
+  mask: var(--mask) center / contain no-repeat;
+}
+.sp-word {
+  width: min(78vw, 21rem, 42dvh);
+  margin-top: 1.4rem;
+  overflow: hidden;
+  background: linear-gradient(180deg, #ffe7b8 0%, #f2b764 45%, #c9853a 100%);
+}
+.sp-shine {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(105deg, transparent 35%, rgb(255 255 255 / 85%) 50%, transparent 65%);
+  translate: -100% 0;
+}
+.sp-tagline {
+  width: min(66vw, 17.5rem, 36dvh);
+  margin-top: 0.7rem;
+  background: rgb(245 234 225 / 85%);
 }
 
 @keyframes sp-failsafe {

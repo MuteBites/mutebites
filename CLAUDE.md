@@ -943,39 +943,47 @@ silently re-enables the button.
     re-assemble the logo exactly; where a cut runs through solid paint the
     lower layer keeps a few extra pixels (`UNDERLAPS`) so no hairline seam
     shows.
-- **Startup splash** (`src/components/splash/`), ~2.5 s, once per browser
-  session (sessionStorage `mutebites.splash-shown` — every fresh app/PWA
-  open, never on route changes or reloads), never on `/admin`, `/auth`,
-  `/privacy`, `/terms` or a tab opened in the background:
-  - Storyboard (timings in `config.ts`): ivory → the mascot **runs** in
-    from the left — the legs are a jointed rig (`rig.ts`: hip/knee/ankle
-    measured on the source art, vector tubes + the real shoes) cycling
-    through `STRIDE`, 3 strides that slow as it arrives, with body bob,
-    forward lean, stretched trails, the arm/tray and lid bouncing a beat
-    behind and steam streaming back → feet plant, squash, rebound (the rig
-    ends in exactly the drawn pose and hands over to the drawn legs) →
-    swoosh draws, lid lifts with a warm glow, steam rises → wordmark, then
-    tagline → hold → the ivory screen **closes down into the page's own
-    logo tile** while the mascot shrinks onto its mark (clip-path +
-    transform, measured live), so the splash becomes the app's logo instead
-    of fading. The landing spot is whichever `BrandLogo` has
-    `splashTarget` (login page, Home header); while a `loading.tsx`
-    skeleton (`aria-busy`) is up it waits up to 1.2 s for it, and pages
-    without one get a short fade.
+- **Startup splash** (`src/components/splash/`), "The Cloche Reveal"
+  (since 20 Oct 2026; it replaced the running-mascot rig), ~2.7 s, once per
+  browser session (sessionStorage `mutebites.splash-shown` — every fresh
+  app/PWA open, never on route changes or reloads), never on `/admin`,
+  `/auth`, `/privacy`, `/terms`, `/dev` or a tab opened in the background:
+  - Storyboard (timings in `config.ts`): a deep plum stage with a soft
+    spotlight (the student manifest's `background_color` is the same
+    `#3f2037`, so the PWA launch screen hands straight over) → the closed
+    gold cloche rises and settles with a spring → it squashes and shakes
+    once → **burst**: a flash of warm light, two steam curls and four
+    sparkles, and the mascot is there in the open cloche, waving (a
+    12-frame strip played once at 12 fps, holding its last frame) →
+    "MuteBites" wipes in in **gold** (a gold gradient masked by the
+    wordmark art, with a shine sweeping across) and the tagline in ivory →
+    the stage shrinks onto the page's logo tile while the plum screen
+    closes down to it and hands over to the tile's own logo.
+  - Art: `scripts/build-splash.mjs` builds `public/brand/splash/v2/`
+    (`cloche.webp` 22 KB, `pop.webp` 156 KB — frames 14–36 of the user's
+    Veo clip, green keyed, one crop; `steam.webp` 10 KB) from
+    `docs/art/splash/new/` and writes `scene.ts` (sizes, frame count, where
+    the tray sits so the closed cloche lands exactly on the open one). The
+    wordmark / tagline reuse `public/brand/splash/wordmark|tagline.webp`
+    as masks. The old rig layers in `public/brand/splash/` and
+    `layers.ts` are still written by `build-brand-assets.mjs` but unused.
   - `app-splash.tsx` is plain server markup (first in `<body>`, styles in
-    `splash.css`), positioned in source-art pixels via `--u` (a container
-    query unit), so it lines up at any screen size. `engine.ts` is all the
-    motion — Web Animations on transform/opacity of HTML elements (legs
-    included), so it stays smooth while the app hydrates underneath. It's
-    one self-contained function that `init-script.ts` serialises
-    (`runSplash.toString()`) into a raw inline `<script>` in the root
-    layout — **not** `next/script` `beforeInteractive`, which is queued
-    until Next's JS loads and would let the app paint first (the
-    theme-init script, `src/lib/theme/init-script.ts`, is inline for the
-    same reason — no light flash for dark users). Keep `engine.ts` free of
-    imports and module-scope helpers.
-  - Reduced motion: no run — the finished logo fades in, holds ~0.65 s,
-    fades out. Safety valves: tap skips (to the finished logo, then the
+    `splash.css`); its resting state is the finished logo. `engine.ts` is
+    all the motion — Web Animations on transform / opacity (plus the
+    strip's background-position and one clip-path wipe), so it stays
+    smooth while the app hydrates underneath. It's one self-contained
+    function that `init-script.ts` serialises (`runSplash.toString()`)
+    into a raw inline `<script>` in the root layout — **not** `next/script`
+    `beforeInteractive`, which is queued until Next's JS loads and would
+    let the app paint first (the theme-init script,
+    `src/lib/theme/init-script.ts`, is inline for the same reason — no
+    light flash for dark users). Keep `engine.ts` free of imports and
+    module-scope helpers. Gotcha: a second animation on the same element
+    must use `fill: "forwards"`, or its start state applies before its
+    delay and overrides the first (the shake / burst sit on the cloche's
+    inner image, the rise on its wrapper).
+  - Reduced motion: no motion — the finished logo (mascot in the open
+    cloche, wordmark, tagline) fades in, holds ~0.7 s, fades out. Safety valves: tap skips (to the finished logo, then the
     close), slow/failed images (> 2.5 s) just fade out, and CSS hides the
     overlay after 9 s whatever happens.
   - Replay / disable: `?intro` (or `?splash`) forces it, `?nosplash`

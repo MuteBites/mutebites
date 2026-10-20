@@ -9,14 +9,17 @@ import type { MetadataRoute } from "next";
 
 const BASE = {
   display: "standalone",
-  // Android's own launch screen (this colour + the icon) hands straight
-  // over to the in-app splash, which uses the same ivory.
+  // Android's own launch screen (this colour + the icon). Admin keeps the
+  // ivory (it never plays the splash); the student app overrides it below.
   background_color: "#f5eae1",
   theme_color: "#faf3ec",
 } satisfies MetadataRoute.Manifest;
 
 export const STUDENT_MANIFEST: MetadataRoute.Manifest = {
   ...BASE,
+  // The student app's launch screen is the splash's own deep plum, so it
+  // hands straight over to "The Cloche Reveal" (src/components/splash).
+  background_color: "#3f2037",
   id: "/",
   name: "MuteBites",
   short_name: "MuteBites",

@@ -1,34 +1,31 @@
 /**
- * The startup splash's motion, as one self-contained function. It is never
- * imported by client code: ./init-script.ts serialises it with
- * `runSplash.toString()` into a raw inline <script> at the top of <body>,
- * so it runs before first paint and needs no bundle or hydration. That
- * means everything it uses must live inside it — no imports, no helpers
- * from module scope — and it must stay plain modern JS once types are
- * stripped.
+ * The startup splash's motion ("The Cloche Reveal", ./config.ts has the
+ * storyboard), as one self-contained function. It is never imported by
+ * client code: ./init-script.ts serialises it with `runSplash.toString()`
+ * into a raw inline <script> at the top of <body>, so it runs before first
+ * paint and needs no bundle or hydration. Everything it uses must live
+ * inside it — no imports, no helpers from module scope — and it must stay
+ * plain modern JS once types are stripped.
  *
- * All motion is the Web Animations API on transform / opacity of HTML
- * elements (the legs too — they're divs, not SVG), so the browser runs it
- * on the compositor and it stays smooth while the app's own JS boots
- * underneath. It drives `data-splash` on <html>:
+ * All motion is the Web Animations API on transform / opacity (plus the
+ * strip's background-position and one clip-path wipe), so it stays smooth
+ * while the app's own JS boots underneath. It drives `data-splash` on <html>:
  *   play → run → out → done
  * and never traps anyone: tap skips, slow images fade out, the CSS hides
  * the overlay after `failsafeMs` whatever happens.
  */
 
-type Box = { x: number; y: number; w: number; h: number };
-type StrideKey = { at: number; thigh: number; knee: number; foot: number };
-
 export type SplashRuntime = {
   speed: number;
-  runStart: number;
-  runEnd: number;
-  strides: number;
-  runInFromLogoWidths: number;
-  bob: number;
-  lean: number;
-  bounce: number;
-  steamMs: number;
+  riseAt: number;
+  riseMs: number;
+  shakeAt: number;
+  shakeMs: number;
+  burstAt: number;
+  popMs: number;
+  popFrames: number;
+  wordAt: number;
+  taglineAt: number;
   exitAt: number;
   morphMs: number;
   targetWaitMs: number;
@@ -38,10 +35,6 @@ export type SplashRuntime = {
   disableKey: string;
   skipPaths: readonly string[];
   images: string[];
-  stage: Box;
-  mark: Box;
-  stride: StrideKey[];
-  legs: { name: string; phaseAtRest: number }[];
 };
 
 export function runSplash(C: SplashRuntime): void {
@@ -91,8 +84,10 @@ export function runSplash(C: SplashRuntime): void {
     running.push(a);
     return a;
   };
+  const spring = "cubic-bezier(0.34, 1.56, 0.64, 1)";
+  const outExpo = "cubic-bezier(0.16, 1, 0.3, 1)";
 
-  // ---- Wait for the overlay markup and the layer images --------------------
+  // ---- Wait for the overlay markup and the images ----------------------------
   (function find() {
     const el = document.getElementById("app-splash");
     // The HTML streams in; wait for the whole overlay, not just its opening tag.
@@ -115,6 +110,7 @@ export function runSplash(C: SplashRuntime): void {
     html.setAttribute("data-splash-ran", "");
     setState("run");
     if (reduce) {
+      // The resting state is the finished logo: the mascot in the open cloche.
       play(q("stage"), [{ opacity: 0 }, { opacity: 1 }], { duration: 220, easing: "ease-out" });
       setTimeout(() => exit(false), 220 + C.reducedHoldMs);
     } else {
@@ -123,219 +119,152 @@ export function runSplash(C: SplashRuntime): void {
     }
   }
 
-  // ---- The run cycle ---------------------------------------------------------
-  // Catmull-Rom through the stride keys, wrapping around the cycle.
-  function pose(phase: number) {
-    const k = C.stride;
-    const n = k.length;
-    const ph = ((phase % 1) + 1) % 1;
-    let i = n - 1;
-    while (i > 0 && k[i].at > ph) i--;
-    const a = k[i];
-    const b = k[(i + 1) % n];
-    const p0 = k[(i - 1 + n) % n];
-    const p3 = k[(i + 2) % n];
-    const span = (b.at - a.at + 1) % 1 || 1;
-    const t = (((ph - a.at + 1) % 1) / span) || 0;
-    const cr = (v0: number, v1: number, v2: number, v3: number) =>
-      0.5 * (2 * v1 + (-v0 + v2) * t + (2 * v0 - 5 * v1 + 4 * v2 - v3) * t * t + (-v0 + 3 * v1 - 3 * v2 + v3) * t * t * t);
-    return {
-      thigh: cr(p0.thigh, a.thigh, b.thigh, p3.thigh),
-      knee: cr(p0.knee, a.knee, b.knee, p3.knee),
-      foot: cr(p0.foot, a.foot, b.foot, p3.foot),
-    };
-  }
-
   function storyboard() {
-    const stage = q("stage");
-    q("rig").style.visibility = "visible";
-    const unit = stage.getBoundingClientRect().width / C.stage.w; // CSS px per source-art px
-    const runStart = T(C.runStart);
-    const runDur = T(C.runEnd - C.runStart);
-    const runEnd = runStart + runDur;
-    const S = C.strides;
-    const N = S * 16;
-    const sin2 = (x: number) => Math.sin(x) ** 2;
+    const hero = q("hero");
+    const h = hero.getBoundingClientRect().height;
+    const rise = T(C.riseAt);
+    const burst = T(C.burstAt);
 
-    // Strides slow down as the mascot arrives: sample evenly in stride
-    // progress, place each sample at the time that progress is reached.
-    const samples: { offset: number; phase: number; p: number }[] = [];
-    for (let i = 0; i <= N; i++) {
-      const p = i / N;
-      samples.push({ offset: 1 - (1 - p) ** (1 / 1.8), phase: p * S, p });
-    }
-    const runOpts = { duration: runDur, delay: runStart, easing: "linear" };
+    play(q("spot"), [{ opacity: 0 }, { opacity: 1 }], { duration: T(600), delay: T(60), easing: "ease-out" });
 
-    // Travel: from just off the left edge to centre, fast then settling.
-    const from = -(innerWidth / 2 + C.runInFromLogoWidths * C.stage.w * unit);
-    const travel: Keyframe[] = [];
-    for (let i = 0; i <= 24; i++) {
-      const u = i / 24;
-      travel.push({ offset: u, transform: `translateX(${(from * (1 - u) ** 2.3).toFixed(2)}px)` });
-    }
-    play(q("run"), travel, runOpts);
-
-    // Legs: every joint rotates relative to the drawn pose.
-    for (const leg of C.legs) {
-      const rest = pose(leg.phaseAtRest);
-      const joints = { thigh: q(`${leg.name}-hip`), knee: q(`${leg.name}-knee`), foot: q(`${leg.name}-foot`) };
-      for (const j of ["thigh", "knee", "foot"] as const) {
-        play(
-          joints[j],
-          samples.map((s) => ({
-            offset: s.offset,
-            transform: `rotate(${(pose(leg.phaseAtRest + s.phase)[j] - rest[j]).toFixed(2)}deg)`,
-          })),
-          runOpts,
-        );
-      }
-    }
-    const front = C.legs.find((l) => l.name === "front")!;
-    const stepAt = (s: { phase: number }) => 2 * Math.PI * (front.phaseAtRest + s.phase);
-
-    // Body: lowest on each foot-strike, highest mid-flight; the bob eases
-    // off in the last stride. Forward lean fades as it slows.
+    // ---- The closed cloche rises into the light and settles ----
+    const cloche = q("cloche");
     play(
-      q("bob"),
-      samples.map((s) => ({
-        offset: s.offset,
-        transform: `translateY(${(-C.bob * unit * sin2(stepAt(s)) * (1 - 0.4 * s.p)).toFixed(2)}px)`,
-      })),
-      runOpts,
-    );
-    play(
-      q("lean"),
-      samples.map((s) => ({ offset: s.offset, transform: `rotate(${(C.lean * (1 - s.p) ** 0.8).toFixed(2)}deg)` })),
-      runOpts,
-    );
-
-    // Speed trails stretch out behind, pulsing with each stride, then
-    // snap back to their drawn length as it lands.
-    play(
-      q("trails"),
-      samples
-        .map((s) => ({
-          offset: s.offset * (runDur / (runDur + T(300))),
-          transform: `scaleX(${(1.7 + 0.22 * sin2(stepAt(s))).toFixed(3)})`,
-          opacity: String(Math.min(1, s.p * 6)),
-        }))
-        .concat([{ offset: 1, transform: "none", opacity: "1" }]),
-      { duration: runDur + T(300), delay: runStart, easing: "linear" },
-    );
-
-    // The tray and cloche ride a beat behind the body's bounce.
-    play(
-      q("tray"),
-      samples.map((s) => ({
-        offset: s.offset,
-        // Fades to nothing by the landing, so the drawn pose is exact at rest.
-        transform: `rotate(${(2.4 * Math.sin(2 * stepAt(s) - 0.9) * (1 - s.p) ** 0.6).toFixed(2)}deg)`,
-      })),
-      runOpts,
-    );
-    const lid = q("lid");
-    play(
-      lid,
-      samples.map((s) => ({
-        offset: s.offset,
-        transform: `translateY(${(-3 * unit * Math.max(0, Math.sin(2 * stepAt(s) - 1.3)) * (1 - s.p) ** 0.6).toFixed(2)}px) rotate(${(1.8 * Math.sin(2 * stepAt(s) - 1.8) * (1 - s.p) ** 0.6).toFixed(2)}deg)`,
-      })),
-      runOpts,
-    );
-
-    // Steam streams back off the cloche while running, then rises once it's still.
-    qa("wisp-run").forEach((w, i) =>
-      play(
-        w,
-        [
-          { opacity: 0, transform: "translate(0px, 0px) scale(0.7)" },
-          { opacity: 0.75, offset: 0.25 },
-          { opacity: 0, transform: `translate(${-70 * unit}px, ${-78 * unit}px) scale(1.2)` },
-        ],
-        { duration: T(C.steamMs), delay: runStart + T(140 + i * 150), iterations: 2, easing: "cubic-bezier(0.3, 0.6, 0.5, 1)" },
-      ),
-    );
-
-    // ---- Landing ----
-    const b = C.bounce;
-    play(
-      q("land"),
+      cloche,
       [
-        { transform: "none" },
-        { offset: 0.22, transform: `translateY(${7 * unit}px) scale(${1 + b / 3}, ${1 - b})` },
-        { offset: 0.6, transform: `translateY(${-5 * unit}px) scale(${1 - b / 5}, ${1 + (b * 2) / 3})` },
-        { transform: "none" },
+        { opacity: 0, transform: `translateY(${0.55 * h}px) scale(0.84)` },
+        { offset: 0.35, opacity: 1 },
+        { offset: 0.72, transform: `translateY(${-0.05 * h}px) scale(1.02, 0.98)` },
+        { offset: 0.86, transform: `translateY(${0.012 * h}px) scale(0.99, 1.02)` },
+        { opacity: 1, transform: "none" },
       ],
-      { duration: T(260), delay: runEnd - T(10), easing: "cubic-bezier(0.33, 0, 0.2, 1)" },
+      { duration: T(C.riseMs), delay: rise, easing: "cubic-bezier(0.22, 1, 0.36, 1)" },
     );
-    // The vector rig hands over to the drawn legs, now in the same pose.
-    play(q("legs"), [{ opacity: 0 }, { opacity: 1 }], { duration: T(90), delay: runEnd, easing: "linear" });
-    play(q("rig"), [{ opacity: 1 }, { opacity: 0 }], { duration: T(90), delay: runEnd + T(40), easing: "linear" });
     play(
-      q("tray"),
+      q("shadow"),
       [
-        { transform: "rotate(0deg)" },
-        { offset: 0.2, transform: "rotate(3.2deg)" },
-        { offset: 0.45, transform: "rotate(-1.6deg)" },
-        { offset: 0.7, transform: "rotate(0.6deg)" },
-        { transform: "rotate(0deg)" },
+        { opacity: 0, transform: "scale(0.4)" },
+        { opacity: 1, transform: "scale(1)" },
       ],
-      { duration: T(480), delay: runEnd, easing: "ease-out", composite: "add" },
-    );
-    play(
-      q("swoosh"),
-      [{ clipPath: "inset(0 100% 0 0)" }, { clipPath: "inset(0 0% 0 0)" }],
-      { duration: T(360), delay: T(880), easing: "cubic-bezier(0.22, 1, 0.36, 1)" },
-    );
-
-    // ---- Cloche settles: the lid lifts, a little warmth, steam rises ----
-    play(
-      lid,
-      [
-        { transform: "none" },
-        { offset: 0.35, transform: `translateY(${-12 * unit}px) rotate(-8deg)` },
-        { offset: 0.6, transform: `translateY(${-8 * unit}px) rotate(-5deg)` },
-        { offset: 0.82, transform: `translateY(${1 * unit}px) rotate(1deg)` },
-        { transform: "none" },
-      ],
-      { duration: T(380), delay: T(1000), easing: "ease-in-out", composite: "add" },
+      { duration: T(C.riseMs), delay: rise, easing: outExpo },
     );
     play(
       q("glow"),
       [
-        { opacity: 0, transform: "scale(0.6)" },
-        { offset: 0.45, opacity: 0.85, transform: "scale(1)" },
-        { opacity: 0, transform: "scale(1.1)" },
+        { opacity: 0, transform: "scale(0.7)" },
+        { opacity: 0.45, transform: "scale(1)" },
       ],
-      { duration: T(420), delay: T(1000), easing: "ease-out" },
+      { duration: T(700), delay: T(260), easing: "ease-out" },
+    );
+
+    // ---- Something's inside: a squash and a shake (on the image inside
+    // the rising wrapper, so the two motions don't fight) ----
+    const lid = cloche.firstElementChild as HTMLElement;
+    play(
+      lid,
+      [
+        { transform: "none" },
+        { offset: 0.18, transform: "scale(1.05, 0.93)" },
+        { offset: 0.36, transform: "scale(0.98, 1.04) rotate(-4deg)" },
+        { offset: 0.54, transform: "rotate(4deg)" },
+        { offset: 0.72, transform: "rotate(-2.5deg)" },
+        { offset: 0.88, transform: "rotate(1deg)" },
+        { transform: "none" },
+      ],
+      { duration: T(C.shakeMs), delay: T(C.shakeAt), easing: "ease-in-out" },
+    );
+
+    // ---- Burst: the lid gives, light and steam, and there it is ----
+    // "forwards", not "both": a second animation on the same element must
+    // not apply its start state before its delay, over the shake.
+    play(
+      lid,
+      [
+        { opacity: 1, transform: "none" },
+        { opacity: 0, transform: "scale(1.12, 1.08)" },
+      ],
+      { duration: T(150), delay: burst, easing: "ease-in", fill: "forwards" },
     );
     play(
-      q("steam"),
-      [{ opacity: 0, transform: `translateY(${36 * unit}px) scale(0.9, 0.75)` }, { opacity: 1, transform: "none" }],
-      { duration: T(420), delay: T(1060), easing: "ease-out" },
+      q("flash"),
+      [
+        { opacity: 0, transform: "scale(0.3)" },
+        { offset: 0.18, opacity: 1, transform: "scale(0.9)" },
+        { opacity: 0, transform: "scale(1.7)" },
+      ],
+      { duration: T(560), delay: burst - T(40), easing: "cubic-bezier(0.2, 0.7, 0.3, 1)" },
     );
-    qa("wisp-rise").forEach((w, i) =>
+    const pop = q("pop");
+    play(
+      pop,
+      [
+        { opacity: 0, transform: `translateY(${0.05 * h}px) scale(0.86)` },
+        { offset: 0.25, opacity: 1 },
+        { opacity: 1, transform: "none" },
+      ],
+      { duration: T(460), delay: burst - T(20), easing: spring },
+    );
+    // The strip plays once and holds its last frame (the wave's end).
+    play(
+      pop,
+      [{ backgroundPosition: "0% 0" }, { backgroundPosition: "100% 0" }],
+      { duration: T(C.popMs), delay: burst, easing: `steps(${C.popFrames}, jump-none)` },
+    );
+    play(
+      q("glow"),
+      [
+        { opacity: 0.45, transform: "scale(1)" },
+        { offset: 0.25, opacity: 0.95, transform: "scale(1.15)" },
+        { opacity: 0.6, transform: "scale(1)" },
+      ],
+      { duration: T(700), delay: burst, easing: "ease-out", fill: "forwards" },
+    );
+    qa("steam").forEach((s, i) => {
+      const dir = i ? 1 : -1;
       play(
-        w,
+        s,
         [
-          { opacity: 0, transform: "translate(0px, 0px) scale(0.8)" },
-          { opacity: 0.7, offset: 0.3 },
-          { opacity: 0, transform: `translate(${(i ? -12 : 10) * unit}px, ${-95 * unit}px) scale(1.15)` },
+          { opacity: 0, transform: `translate(${-dir * 0.12 * h}px, ${0.1 * h}px) scale(0.45)` },
+          { offset: 0.25, opacity: 0.95 },
+          { opacity: 0, transform: `translate(${dir * 0.1 * h}px, ${-0.32 * h}px) scale(1.15)` },
         ],
-        { duration: T(C.steamMs * 1.5), delay: T(1080 + i * 130), easing: "cubic-bezier(0.25, 0.5, 0.4, 1)" },
+        { duration: T(1100), delay: burst + T(i * 60), easing: "cubic-bezier(0.2, 0.6, 0.35, 1)" },
+      );
+    });
+    qa("sparkle").forEach((s, i) =>
+      play(
+        s,
+        [
+          { opacity: 0, transform: "scale(0.2) rotate(0deg)" },
+          { offset: 0.3, opacity: 1, transform: "scale(1.15) rotate(30deg)" },
+          { opacity: 0, transform: "scale(0.4) rotate(90deg)" },
+        ],
+        { duration: T(620), delay: burst + T(80 + i * 90), easing: "ease-out" },
       ),
     );
 
-    // ---- Wordmark, then tagline ----
+    // ---- "MuteBites" in gold, a shine across it, then the tagline ----
+    const word = q("wordmark");
     play(
-      q("wordmark"),
-      [{ opacity: 0, transform: `translateY(${24 * unit}px) scale(0.96)` }, { opacity: 1, transform: "none" }],
-      { duration: T(450), delay: T(1100), easing: "cubic-bezier(0.16, 1, 0.3, 1)" },
+      word,
+      [
+        { clipPath: "inset(0 100% 0 0)", transform: "translateY(10px)" },
+        { clipPath: "inset(0 0% 0 0)", transform: "none" },
+      ],
+      { duration: T(520), delay: T(C.wordAt), easing: outExpo },
+    );
+    play(
+      q("shine"),
+      [{ translate: "-100% 0" }, { translate: "100% 0" }],
+      { duration: T(620), delay: T(C.wordAt + 360), easing: "cubic-bezier(0.45, 0, 0.25, 1)" },
     );
     play(
       q("tagline"),
-      [{ opacity: 0, transform: `translateY(${16 * unit}px)` }, { opacity: 1, transform: "none" }],
-      { duration: T(350), delay: T(1400), easing: "cubic-bezier(0.22, 1, 0.36, 1)" },
+      [
+        { opacity: 0, transform: "translateY(8px)" },
+        { opacity: 1, transform: "none" },
+      ],
+      { duration: T(340), delay: T(C.taglineAt), easing: outExpo },
     );
   }
 
@@ -346,17 +275,14 @@ export function runSplash(C: SplashRuntime): void {
       return;
     }
     ended = true;
-    // A tap mid-run jumps straight to the finished logo before closing.
+    // A tap mid-way jumps straight to the finished logo before closing.
     for (const a of running) a.finish();
     if (!started || reduce) return fadeOut(fast);
     const deadline = Date.now() + (fast ? 0 : T(C.targetWaitMs));
     (function look() {
       const tile = document.querySelector<HTMLElement>("[data-splash-target]");
-      const mark = tile && tile.querySelector("img");
       const r = tile && tile.getBoundingClientRect();
-      if (tile && mark && r && r.width > 12 && r.bottom > 0 && r.top < innerHeight) {
-        return morph(tile, mark, fast);
-      }
+      if (tile && r && r.width > 12 && r.bottom > 0 && r.top < innerHeight) return morph(tile, fast);
       // Only worth waiting while the page is still on its loading skeleton
       // (every loading.tsx marks itself aria-busy); a page without a logo
       // tile just gets the plain fade.
@@ -365,44 +291,49 @@ export function runSplash(C: SplashRuntime): void {
     })();
   }
 
-  // The whole ivory screen closes down into the page's own logo tile while
-  // the mascot shrinks onto the tile's mark — the splash becomes the logo.
-  function morph(tile: HTMLElement, mark: HTMLElement, fast: boolean) {
+  // The stage shrinks onto the page's logo tile (the cloche and mascot land
+  // on the tile) while the plum screen closes down to it, then hands over
+  // to the tile's own logo.
+  function morph(tile: HTMLElement, fast: boolean) {
     const el = overlay!;
     const stage = q("stage");
+    const hero = q("hero");
     setState("out");
     const dur = T(fast ? 340 : C.morphMs);
     const easing = "cubic-bezier(0.65, 0, 0.25, 1)";
     const S = stage.getBoundingClientRect();
-    const k = S.width / C.stage.w;
-    const Rx = S.left + (C.mark.x - C.stage.x) * k;
-    const Ry = S.top + (C.mark.y - C.stage.y) * k;
-    const M = mark.getBoundingClientRect();
-    const s = M.width / (C.mark.w * k);
-    const tx = M.left - S.left - s * (Rx - S.left);
-    const ty = M.top - S.top - s * (Ry - S.top);
+    const H = hero.getBoundingClientRect();
+    const t = tile.getBoundingClientRect();
+    const s = Math.min(t.width / H.width, t.height / H.height) * 0.92;
+    const tx = t.left + (t.width - H.width * s) / 2 - S.left - (H.left - S.left) * s;
+    const ty = t.top + (t.height - H.height * s) / 2 - S.top - (H.top - S.top) * s;
     stage.animate([{ transform: "none" }, { transform: `translate(${tx}px, ${ty}px) scale(${s})` }], {
       duration: dur,
       easing,
       fill: "forwards",
     });
-    for (const name of ["wordmark", "tagline", "swoosh"]) {
+    for (const name of ["wordmark", "tagline", "spot"]) {
       q(name).animate([{ opacity: 1 }, { opacity: 0 }], { duration: dur * 0.4, easing: "ease-in", fill: "forwards" });
     }
-    const t = tile.getBoundingClientRect();
     const radius = getComputedStyle(tile).borderTopLeftRadius || "0px";
     el.animate(
       [
-        { clipPath: "inset(0px 0px 0px 0px round 0px)" },
+        { clipPath: "inset(0px 0px 0px 0px round 0px)", opacity: 1 },
+        {
+          offset: 0.75,
+          clipPath: `inset(${t.top}px ${innerWidth - t.right}px ${innerHeight - t.bottom}px ${t.left}px round ${radius})`,
+          opacity: 1,
+        },
         {
           clipPath: `inset(${t.top}px ${innerWidth - t.right}px ${innerHeight - t.bottom}px ${t.left}px round ${radius})`,
+          opacity: 0,
         },
       ],
-      { duration: dur, easing, fill: "forwards" },
+      { duration: dur * 1.25, easing, fill: "forwards" },
     );
     const main = document.querySelector("main");
     if (main) main.animate([{ opacity: 0.4 }, { opacity: 1 }], { duration: dur, easing: "ease-out" });
-    setTimeout(() => setState("done"), dur + 30);
+    setTimeout(() => setState("done"), dur * 1.25 + 30);
   }
 
   // No logo tile on this page (or reduced motion): a short, plain fade.
