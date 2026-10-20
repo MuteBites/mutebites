@@ -12,7 +12,15 @@
  *   1280–1780  "MuteBites" sweeps in in gold, a shine runs across it
  *   1560–1900  the tagline follows
  *   1900–2200  hold
- *   2200–2680  the stage closes into the app's own logo tile
+ *   2200–2680  the cloche shrinks towards the app's own logo tile and hands
+ *              over to the splash's logo tile, which lands exactly on it
+ *
+ * The light splash (old phones — ≤ 2 GB memory or ≤ 2 cores — slow
+ * connections — 2G / 3G / Data Saver — or the full images not in by
+ * `liteFallbackMs`), College Bites' "One Bite" pattern, ~1.5 s:
+ *   60–520     the logo tile springs in    440–1000  a sheen runs across it
+ *   320–700    "MuteBites" and the tagline rise under it
+ *   1000–1460  the tile flies onto the page's logo as the plum fades
  */
 export const SPLASH = {
   /** Multiplies every time below. 1.2 = 20% slower, 0.85 = snappier. */
@@ -30,6 +38,10 @@ export const SPLASH = {
   /** Wordmark, then tagline. */
   wordAt: 1280,
   taglineAt: 1560,
+  /** The light splash: when the tile starts flying onto the page's logo (not scaled by `speed`). */
+  liteExitAt: 1000,
+  /** A phone that hasn't got the full splash's images by now gets the light one. */
+  liteFallbackMs: 1200,
   /** When the logo starts closing into the app, and how long that takes. */
   exitAt: 2200,
   morphMs: 480,

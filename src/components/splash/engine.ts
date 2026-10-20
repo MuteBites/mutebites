@@ -35,6 +35,11 @@ export type SplashRuntime = {
   disableKey: string;
   skipPaths: readonly string[];
   images: string[];
+  /** The light splash ("One Bite" pattern, for old phones / slow connections). */
+  liteImages: string[];
+  liteExitAt: number;
+  /** A phone that hasn't got the full splash's images by now gets the light one. */
+  liteFallbackMs: number;
 };
 
 export function runSplash(C: SplashRuntime): void {
@@ -59,7 +64,22 @@ export function runSplash(C: SplashRuntime): void {
   setState("play");
   const reduce = matchMedia("(prefers-reduced-motion: reduce)").matches;
   const T = (ms: number) => ms * C.speed;
-  const loaded = C.images.map((src) => {
+
+  // Old phone or slow connection: the light splash (just the logo tile and
+  // its name, ~8 KB) instead of the full cloche reveal. ?splash=lite /
+  // ?splash=full force either one.
+  const nav = navigator as Navigator & {
+    connection?: { saveData?: boolean; effectiveType?: string };
+    deviceMemory?: number;
+  };
+  const forceMode = (/[?&]splash=(lite|full)/.exec(location.search) || [])[1];
+  let lite =
+    forceMode === "lite" ||
+    (forceMode !== "full" &&
+      (!!(nav.connection && (nav.connection.saveData || /2g|3g/.test(nav.connection.effectiveType || ""))) ||
+        (!!nav.deviceMemory && nav.deviceMemory <= 2) ||
+        (!!navigator.hardwareConcurrency && navigator.hardwareConcurrency <= 2)));
+  const fetchImage = (src: string) => {
     const link = document.createElement("link");
     link.rel = "preload";
     link.as = "image";
@@ -69,7 +89,10 @@ export function runSplash(C: SplashRuntime): void {
     const img = new Image();
     img.src = src;
     return img.decode();
-  });
+  };
+  const liteLoaded = Promise.all(C.liteImages.map(fetchImage));
+  // The full splash's images only download on a phone that will play it.
+  const fullLoaded = lite ? null : Promise.all(C.images.filter((x) => C.liteImages.indexOf(x) < 0).map(fetchImage));
 
   let overlay: HTMLElement | null = null;
   let started = false;
@@ -91,10 +114,24 @@ export function runSplash(C: SplashRuntime): void {
   (function find() {
     const el = document.getElementById("app-splash");
     // The HTML streams in; wait for the whole overlay, not just its opening tag.
-    if (el && el.querySelector('[data-sp="tagline"]')) {
+    if (el && el.querySelector('[data-sp="tile"]')) {
       overlay = el;
       el.addEventListener("click", () => exit(true));
-      Promise.all(loaded).then(start, () => exit(true));
+      if (lite) {
+        liteLoaded.then(start, () => exit(true));
+      } else {
+        Promise.all([fullLoaded, liteLoaded]).then(start, () => exit(true));
+        // Taking too long (a slow connection the browser didn't report):
+        // fall back to the light splash once its one image is in.
+        setTimeout(() => {
+          if (started || ended) return;
+          liteLoaded.then(() => {
+            if (started || ended) return;
+            lite = true;
+            start();
+          });
+        }, C.liteFallbackMs);
+      }
       return;
     }
     if (Date.now() - t0 > C.loadTimeoutMs) return setState("done");
@@ -107,16 +144,50 @@ export function runSplash(C: SplashRuntime): void {
   function start() {
     if (started || ended || !overlay) return;
     started = true;
+    html.setAttribute("data-splash-mode", lite ? "lite" : "full");
     html.setAttribute("data-splash-ran", "");
     setState("run");
     if (reduce) {
-      // The resting state is the finished logo: the mascot in the open cloche.
-      play(q("stage"), [{ opacity: 0 }, { opacity: 1 }], { duration: 220, easing: "ease-out" });
+      // The resting state is the finished logo: the mascot in the open
+      // cloche (full), or the tile and its name (light).
+      const shown = lite ? [q("tile"), q("lite")] : [q("stage")];
+      for (const el of shown) play(el, [{ opacity: 0 }, { opacity: 1 }], { duration: 220, easing: "ease-out" });
       setTimeout(() => exit(false), 220 + C.reducedHoldMs);
+    } else if (lite) {
+      liteStoryboard();
+      setTimeout(() => exit(false), C.liteExitAt);
     } else {
       storyboard();
       setTimeout(() => exit(false), T(C.exitAt));
     }
+  }
+
+  // The light splash (College Bites' "One Bite" pattern): the logo tile
+  // springs in with a sheen, its name rises under it, and it flies onto
+  // the page's logo. Snappy, ~1.4 s, one 8 KB image.
+  function liteStoryboard() {
+    play(
+      q("tile"),
+      [
+        { opacity: 0, transform: "translateY(14px) scale(0.72)" },
+        { offset: 0.6, opacity: 1, transform: "translateY(-2px) scale(1.05)" },
+        { opacity: 1, transform: "none" },
+      ],
+      { duration: 460, delay: 60, easing: "cubic-bezier(0.22, 1, 0.36, 1)" },
+    );
+    play(q("tile-sheen"), [{ translate: "-100% 0" }, { translate: "100% 0" }], {
+      duration: 560,
+      delay: 440,
+      easing: "cubic-bezier(0.45, 0, 0.25, 1)",
+    });
+    play(
+      q("lite"),
+      [
+        { opacity: 0, transform: "translateY(12px)" },
+        { opacity: 1, transform: "none" },
+      ],
+      { duration: 380, delay: 320, easing: outExpo },
+    );
   }
 
   function storyboard() {
@@ -289,43 +360,69 @@ export function runSplash(C: SplashRuntime): void {
     })();
   }
 
-  // The stage shrinks onto the page's logo tile (the cloche and mascot land
-  // on the tile) while the plum screen fades away to the page, handing over
-  // to the tile's own logo.
-  function morph(tile: HTMLElement, fast: boolean) {
-    const el = overlay!;
-    const stage = q("stage");
-    const hero = q("hero");
+  // Both splashes end AS the logo: the splash's own logo tile flies onto
+  // the page's (BrandLogo splashTarget) and lands exactly on it, while the
+  // plum ground fades to the page. In the full splash the cloche shrinks
+  // towards the tile and hands over to it on the way.
+  function morph(target: HTMLElement, fast: boolean) {
+    const tile = q("tile");
     setState("out");
-    const dur = T(fast ? 340 : C.morphMs);
+    const dur = fast ? 340 : lite ? 460 : T(C.morphMs);
     const easing = "cubic-bezier(0.65, 0, 0.25, 1)";
-    const S = stage.getBoundingClientRect();
-    const H = hero.getBoundingClientRect();
-    const t = tile.getBoundingClientRect();
-    const s = Math.min(t.width / H.width, t.height / H.height) * 0.92;
-    const tx = t.left + (t.width - H.width * s) / 2 - S.left - (H.left - S.left) * s;
-    const ty = t.top + (t.height - H.height * s) / 2 - S.top - (H.top - S.top) * s;
-    stage.animate([{ transform: "none" }, { transform: `translate(${tx}px, ${ty}px) scale(${s})` }], {
+    const t = target.getBoundingClientRect();
+    const b = tile.getBoundingClientRect();
+    // A transform that puts the tile over rect r (its centre and width).
+    const over = (r: { left: number; top: number; width: number; height: number }) =>
+      `translate(${r.left + r.width / 2 - (b.left + b.width / 2)}px, ${r.top + r.height / 2 - (b.top + b.height / 2)}px) scale(${r.width / b.width})`;
+    const to = over(t);
+
+    if (lite) {
+      tile.animate([{ transform: "none", opacity: 1 }, { transform: to, opacity: 1 }], {
+        duration: dur,
+        easing,
+        fill: "forwards",
+      });
+      q("lite").animate([{ opacity: 1 }, { opacity: 0 }], { duration: dur * 0.4, easing: "ease-in", fill: "forwards" });
+    } else {
+      const stage = q("stage");
+      const H = q("hero").getBoundingClientRect();
+      const S = stage.getBoundingClientRect();
+      // The cloche shrinks onto the target and fades as the tile takes over.
+      const s = Math.min(t.width / H.width, t.height / H.height) * 0.92;
+      const tx = t.left + (t.width - H.width * s) / 2 - S.left - (H.left - S.left) * s;
+      const ty = t.top + (t.height - H.height * s) / 2 - S.top - (H.top - S.top) * s;
+      stage.animate(
+        [
+          { transform: "none", opacity: 1 },
+          { offset: 0.55, opacity: 1 },
+          { transform: `translate(${tx}px, ${ty}px) scale(${s})`, opacity: 0 },
+        ],
+        { duration: dur, easing, fill: "forwards" },
+      );
+      for (const name of ["wordmark", "tagline", "spot"]) {
+        q(name).animate([{ opacity: 1 }, { opacity: 0 }], { duration: dur * 0.4, easing: "ease-in", fill: "forwards" });
+      }
+      // The tile starts over the cloche and rides along, fading in.
+      const from = over({ left: H.left + H.width * 0.2, top: H.top + H.height * 0.1, width: H.width * 0.6, height: H.width * 0.6 });
+      tile.animate(
+        [
+          { transform: from, opacity: 0 },
+          { offset: 0.35, opacity: 0 },
+          { offset: 0.7, opacity: 1 },
+          { transform: to, opacity: 1 },
+        ],
+        { duration: dur, easing, fill: "forwards" },
+      );
+    }
+    q("bg").animate([{ opacity: 1 }, { offset: 0.45, opacity: 1 }, { opacity: 0 }], {
       duration: dur,
-      easing,
+      easing: "ease-in",
       fill: "forwards",
     });
-    for (const name of ["wordmark", "tagline", "spot"]) {
-      q(name).animate([{ opacity: 1 }, { opacity: 0 }], { duration: dur * 0.4, easing: "ease-in", fill: "forwards" });
-    }
-    // The plum screen fades as the cloche lands on the tile (opacity only —
-    // a clip-path close stuttered while the app hydrated underneath).
-    el.animate(
-      [
-        { opacity: 1 },
-        { offset: 0.55, opacity: 1 },
-        { opacity: 0 },
-      ],
-      { duration: dur, easing: "ease-in", fill: "forwards" },
-    );
     const main = document.querySelector("main");
     if (main) main.animate([{ opacity: 0.4 }, { opacity: 1 }], { duration: dur, easing: "ease-out" });
-    setTimeout(() => setState("done"), dur + 30);
+    // Hold the landed tile a beat on top of the page's own, then hand over.
+    setTimeout(() => setState("done"), dur + 60);
   }
 
   // No logo tile on this page (or reduced motion): a short, plain fade.
@@ -335,7 +432,7 @@ export function runSplash(C: SplashRuntime): void {
     const dur = reduce ? 220 : T(fast ? 200 : 320);
     el.animate([{ opacity: 1 }, { opacity: 0 }], { duration: dur, easing: "ease-in", fill: "forwards" });
     if (!reduce && started) {
-      q("stage").animate([{ transform: "none" }, { transform: "scale(0.96)" }], { duration: dur, easing: "ease-in", fill: "forwards" });
+      q(lite ? "tile" : "stage").animate([{ transform: "none" }, { transform: "scale(0.96)" }], { duration: dur, easing: "ease-in", fill: "forwards" });
     }
     setTimeout(() => setState("done"), dur + 30);
   }

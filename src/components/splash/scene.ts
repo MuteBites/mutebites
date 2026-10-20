@@ -21,5 +21,10 @@ export const SCENE = {
     "src": "/brand/splash/v2/steam.webp",
     "w": 173,
     "h": 260
+  },
+  "mark": {
+    "src": "/brand/splash/v2/mark-sm.webp",
+    "w": 220,
+    "h": 176
   }
 } as const;

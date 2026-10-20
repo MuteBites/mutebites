@@ -513,6 +513,13 @@ there are real — avoided):
     Flow, so the burst hides the cut instead. Built by
     `scripts/build-splash.mjs`; the student PWA's launch colour is now the
     same plum.
+34. **Light splash and the footer credit** (20 Oct 2026): old phones and
+    slow connections get a College-Bites-style light splash (the logo tile,
+    one 8.5 KB image, ~1.5 s); both splashes now end by landing their logo
+    tile exactly on the page's logo. Every page ends with "~ Made with ♥ by
+    Naga Adithya" — the name folds open Call · WhatsApp · Mail. Lesson: a
+    second splash "mode" is cheap when the full one's images are only
+    fetched once the mode is decided.
 ---
 
 ## 4. How we worked (the rules)

@@ -1,4 +1,4 @@
-import { SPLASH_IMAGES } from "./app-splash";
+import { SPLASH_IMAGES, SPLASH_LITE_IMAGES } from "./app-splash";
 import { SPLASH } from "./config";
 import { runSplash, type SplashRuntime } from "./engine";
 import { SCENE } from "./scene";
@@ -23,6 +23,9 @@ const runtime: SplashRuntime = {
   disableKey: SPLASH.disableKey,
   skipPaths: SPLASH.skipPaths,
   images: SPLASH_IMAGES,
+  liteImages: SPLASH_LITE_IMAGES,
+  liteExitAt: SPLASH.liteExitAt,
+  liteFallbackMs: SPLASH.liteFallbackMs,
 };
 
 /**

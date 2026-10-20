@@ -29,10 +29,30 @@ const SPARKLES = [
  * the engine has already preloaded them.
  */
 export function AppSplash() {
-  const { pop, cloche, steam } = SCENE;
+  const { pop, cloche, steam, mark } = SCENE;
   return (
     <div id="app-splash" className="app-splash" aria-hidden="true">
+      {/* The plum ground on its own layer, so it can fade to the page while
+          the logo tile stays solid until it lands. */}
+      <span className="sp-bg" data-sp="bg" />
       <span className="sp-spot" data-sp="spot" />
+      {/* The light splash (old phones / slow connections, College Bites'
+          "One Bite" pattern): only the logo tile and its name. */}
+      <div className="sp-lite" data-sp="lite">
+        <p className="sp-lite-name" data-sp="lite-name">
+          MuteBites
+        </p>
+        <p className="sp-lite-tagline" data-sp="lite-tagline">
+          Good food. Campus mood.
+        </p>
+      </div>
+      {/* The logo tile both splashes end as: it flies onto the page's own
+          logo (BrandLogo splashTarget) so the splash lands as the logo. */}
+      <div className="sp-tile" data-sp="tile">
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img src={mark.src} alt="" loading="lazy" draggable={false} style={{ aspectRatio: `${mark.w} / ${mark.h}` }} />
+        <span className="sp-tile-sheen" data-sp="tile-sheen" />
+      </div>
       <div className="sp-stage" data-sp="stage">
         <div className="sp-hero" data-sp="hero" style={{ aspectRatio: `${pop.w} / ${pop.h}` }}>
           <span className="sp-shadow" data-sp="shadow" />
@@ -122,4 +142,6 @@ export function AppSplash() {
 }
 
 /** Every image the splash needs, for the engine to preload. */
-export const SPLASH_IMAGES = [SCENE.pop.src, SCENE.cloche.src, SCENE.steam.src, WORDMARK.src, TAGLINE.src];
+export const SPLASH_IMAGES = [SCENE.pop.src, SCENE.cloche.src, SCENE.steam.src, WORDMARK.src, TAGLINE.src, SCENE.mark.src];
+/** The light splash needs only the small mark. */
+export const SPLASH_LITE_IMAGES = [SCENE.mark.src];

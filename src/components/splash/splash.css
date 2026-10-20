@@ -18,8 +18,6 @@ html[data-splash="out"] .app-splash {
   display: grid;
   place-items: center;
   overflow: hidden;
-  background:
-    radial-gradient(70% 55% at 50% 40%, #5a2a4b 0%, #3f2037 55%, #26111f 100%);
   cursor: pointer;
   user-select: none;
   -webkit-tap-highlight-color: transparent;
@@ -36,6 +34,13 @@ html[data-splash="run"] {
 }
 html[data-splash="out"] .app-splash {
   pointer-events: none;
+}
+
+.sp-bg {
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(70% 55% at 50% 40%, #5a2a4b 0%, #3f2037 55%, #26111f 100%);
+  will-change: opacity;
 }
 
 /* A soft spotlight from above onto the cloche. */
@@ -186,6 +191,68 @@ html[data-splash-ran] .sp-stage {
   width: min(66vw, 17.5rem, 36dvh);
   margin-top: 0.7rem;
   background: rgb(245 234 225 / 85%);
+}
+
+/* The light splash: the full stage is hidden, the tile and name show. */
+html[data-splash-mode="lite"] .sp-stage,
+html[data-splash-mode="lite"] .sp-spot {
+  display: none;
+}
+.sp-lite {
+  display: none;
+}
+html[data-splash-mode="lite"][data-splash-ran] .sp-lite {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: calc(50% + 4.75rem);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.35rem;
+  text-align: center;
+  will-change: transform, opacity;
+}
+.sp-lite-name {
+  /* No web font this early on a slow connection: a system serif. */
+  font: 700 2rem/1 Georgia, "Times New Roman", serif;
+  letter-spacing: -0.01em;
+  color: #f6c27a;
+}
+.sp-lite-tagline {
+  font: 600 0.8rem/1.2 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  color: rgb(245 234 225 / 85%);
+}
+
+/* The logo tile (BrandLogo's look: the mark on fixed ivory). In the light
+   splash it sits centred; in both it ends flying onto the page's logo. */
+.sp-tile {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 7.5rem;
+  aspect-ratio: 1;
+  margin: -3.75rem 0 0 -3.75rem;
+  display: grid;
+  place-items: center;
+  overflow: hidden;
+  border-radius: 1.75rem;
+  background: #f5eae1;
+  box-shadow: 0 0 0 1px rgb(255 255 255 / 16%), 0 18px 40px -14px rgb(192 122 53 / 55%);
+  opacity: 0;
+  will-change: transform, opacity;
+}
+.sp-tile img {
+  display: block;
+  width: 92%;
+  height: auto;
+}
+.sp-tile-sheen {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(105deg, transparent 35%, rgb(255 255 255 / 70%) 50%, transparent 65%);
+  translate: -100% 0;
+  will-change: transform;
 }
 
 @keyframes sp-failsafe {

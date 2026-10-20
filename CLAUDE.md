@@ -830,7 +830,14 @@ silently re-enables the button.
   rising out of it, and its close button takes `text-hero-foreground` —
   (footer: `AboutCredits` — "Owned by Harsha & Rishi",
   "~ Developed & Maintained by Naga Adithya"; the name has a dotted
-  underline and tapping it quietly folds open Call · WhatsApp · Mail) and the one-time "How was
+  underline and tapping it quietly folds open Call · WhatsApp · Mail —
+  `DeveloperName` / `DeveloperContact` in `src/components/developer-credit.tsx`,
+  shared with **`SiteCredit`**, the "~ Made with ♥ by Naga Adithya" line at
+  the foot of **every page** (root layout, since 20 Oct 2026: a lucide heart
+  that double-beats now and then — not the emoji, per the no-emoji rule —
+  the contact links rising in one by one; on Home / Orders / Profile it
+  tucks into the page's `pb-28` and clears the tab bar, menus leave room
+  for the cart bar)) and the one-time "How was
   it?" rating prompt). The cart and rating sheets use `sheet.tsx`. Both wrap `@base-ui/react`; reach for whichever already matches
   what you're building rather than hand-rolling a third.
 - `src/lib/supabase/client.ts` — browser Supabase client
@@ -957,8 +964,20 @@ silently re-enables the button.
     12-frame strip played once at 12 fps, holding its last frame) →
     "MuteBites" wipes in in **gold** (a gold gradient masked by the
     wordmark art, with a shine sweeping across) and the tagline in ivory →
-    the stage shrinks onto the page's logo tile while the plum screen
-    closes down to it and hands over to the tile's own logo.
+    **both splashes end as the logo**: the splash's own logo tile (`.sp-tile`,
+    BrandLogo's ivory tile with `mark-sm.webp`) flies onto the page's
+    `BrandLogo splashTarget` and lands exactly on it (checked to the pixel)
+    while the plum ground (`.sp-bg`, its own layer) fades to the page; in
+    the full splash the cloche shrinks towards it and hands over on the way.
+  - **The light splash** (since 20 Oct 2026, College Bites' "One Bite"
+    pattern, ~1.5 s, one 8.5 KB image): the logo tile springs in with a
+    sheen, "MuteBites" (system serif, gold) and the tagline rise under it,
+    and the tile flies onto the page's logo. Picked for old phones
+    (`deviceMemory` ≤ 2 or ≤ 2 cores), slow connections (2G / 3G / Data
+    Saver), or when the full splash's images aren't in by
+    `liteFallbackMs` (1.2 s) — the full images only download when the full
+    splash will play. `html[data-splash-mode="lite|full"]`;
+    `?splash=lite` / `?splash=full` force either.
   - Art: `scripts/build-splash.mjs` builds `public/brand/splash/v2/`
     (`cloche.webp` 22 KB, `pop.webp` 156 KB — frames 14–36 of the user's
     Veo clip, green keyed, one crop; `steam.webp` 10 KB) from

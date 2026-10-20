@@ -1102,6 +1102,37 @@
   .pass-steam {
     animation: pass-steam 4.5s ease-out 1.2s infinite;
   }
+  /* SiteCredit (every page's footer): the heart gives a double beat now
+     and then; the developer's contact links rise in one after another. */
+  .credit-heart {
+    transform-origin: center;
+    animation: credit-heartbeat 2.6s var(--ease-out-expo) 1s infinite;
+  }
+  [data-open] > .contents > .dev-contact-item {
+    animation: dev-contact-rise 360ms var(--ease-out-expo) calc(var(--i) * 45ms) both;
+  }
+  @keyframes credit-heartbeat {
+    0%,
+    34%,
+    100% {
+      transform: scale(1);
+    }
+    8% {
+      transform: scale(1.28);
+    }
+    16% {
+      transform: scale(0.96);
+    }
+    24% {
+      transform: scale(1.18);
+    }
+  }
+  @keyframes dev-contact-rise {
+    from {
+      opacity: 0;
+      transform: translateY(6px);
+    }
+  }
   /* These are SVG animations, which phones run on the main thread: hold
      them while the startup splash plays so the app's hydration and the
      splash don't fight for frames. */
