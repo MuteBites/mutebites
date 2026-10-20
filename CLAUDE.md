@@ -969,9 +969,16 @@ silently re-enables the button.
     `layers.ts` are still written by `build-brand-assets.mjs` but unused.
   - `app-splash.tsx` is plain server markup (first in `<body>`, styles in
     `splash.css`); its resting state is the finished logo. `engine.ts` is
-    all the motion — Web Animations on transform / opacity (plus the
-    strip's background-position and one clip-path wipe), so it stays
-    smooth while the app hydrates underneath. It's one self-contained
+    all the motion — Web Animations on **transform and opacity only**, so
+    the GPU runs every piece and it stays smooth while the app hydrates
+    underneath (measured 20 Oct 2026: hydration blocks the main thread for
+    up to ~370 ms at phone speed; the first version animated the strip's
+    `background-position`, a `clip-path` wordmark wipe and a `clip-path`
+    close, and stuttered on phones). The strip is an `<img>` translated in
+    `steps()` inside an `overflow: hidden` window; the wordmark wipe is two
+    opposite translates; the close is the stage's transform plus the
+    overlay's opacity; no filters (the shadow is a gradient). Page SVG
+    animations (`motif-*`, `pass-*`) pause under the splash. It's one self-contained
     function that `init-script.ts` serialises (`runSplash.toString()`)
     into a raw inline `<script>` in the root layout — **not** `next/script`
     `beforeInteractive`, which is queued until Next's JS loads and would

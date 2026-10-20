@@ -57,11 +57,24 @@ export function AppSplash() {
             draggable={false}
             style={{ aspectRatio: `${steam.w} / ${steam.h}` }}
           />
-          <span
-            className="sp-pop"
-            data-sp="pop"
-            style={{ "--strip": `url(${pop.src})`, "--n": pop.frames } as CSSProperties}
-          />
+          {/* The waving strip, moved by transform (GPU) — never by
+              background-position, which repaints every frame. At rest it
+              shows the last frame. */}
+          <span className="sp-pop" data-sp="pop">
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img
+              className="sp-strip"
+              data-sp="strip"
+              src={pop.src}
+              alt=""
+              loading="lazy"
+              draggable={false}
+              style={{
+                width: `${pop.frames * 100}%`,
+                transform: `translateX(${(-((pop.frames - 1) / pop.frames) * 100).toFixed(4)}%)`,
+              }}
+            />
+          </span>
           <div
             className="sp-cloche"
             data-sp="cloche"
@@ -87,12 +100,16 @@ export function AppSplash() {
             </svg>
           ))}
         </div>
-        <span
-          className="sp-word"
-          data-sp="wordmark"
-          style={{ aspectRatio: `${WORDMARK.w} / ${WORDMARK.h}`, "--mask": `url(${WORDMARK.src})` } as CSSProperties}
-        >
-          <span className="sp-shine" data-sp="shine" />
+        {/* The wipe is two opposite translates (the window slides in from
+            the left, the word inside slides back), not a clip-path. */}
+        <span className="sp-wipe" data-sp="wipe">
+          <span
+            className="sp-word"
+            data-sp="wordmark"
+            style={{ aspectRatio: `${WORDMARK.w} / ${WORDMARK.h}`, "--mask": `url(${WORDMARK.src})` } as CSSProperties}
+          >
+            <span className="sp-shine" data-sp="shine" />
+          </span>
         </span>
         <span
           className="sp-tagline"

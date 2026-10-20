@@ -7,9 +7,9 @@
  * inside it — no imports, no helpers from module scope — and it must stay
  * plain modern JS once types are stripped.
  *
- * All motion is the Web Animations API on transform / opacity (plus the
- * strip's background-position and one clip-path wipe), so it stays smooth
- * while the app's own JS boots underneath. It drives `data-splash` on <html>:
+ * All motion is the Web Animations API on transform and opacity only — no
+ * clip-path, background-position or filters — so the GPU runs it and it
+ * stays smooth while the app's own JS boots underneath. It drives `data-splash` on <html>:
  *   play → run → out → done
  * and never traps anyone: tap skips, slow images fade out, the CSS hides
  * the overlay after `failsafeMs` whatever happens.
@@ -204,11 +204,13 @@ export function runSplash(C: SplashRuntime): void {
       ],
       { duration: T(460), delay: burst - T(20), easing: spring },
     );
-    // The strip plays once and holds its last frame (the wave's end).
+    // The strip plays once and holds its last frame (the wave's end). A
+    // transform, so the GPU moves it — no repaint per frame.
+    const n = C.popFrames;
     play(
-      pop,
-      [{ backgroundPosition: "0% 0" }, { backgroundPosition: "100% 0" }],
-      { duration: T(C.popMs), delay: burst, easing: `steps(${C.popFrames}, jump-none)` },
+      q("strip"),
+      [{ transform: "translateX(0%)" }, { transform: `translateX(${(-((n - 1) / n) * 100).toFixed(4)}%)` }],
+      { duration: T(C.popMs), delay: burst, easing: `steps(${n}, jump-none)` },
     );
     play(
       q("glow"),
@@ -244,15 +246,11 @@ export function runSplash(C: SplashRuntime): void {
     );
 
     // ---- "MuteBites" in gold, a shine across it, then the tagline ----
-    const word = q("wordmark");
-    play(
-      word,
-      [
-        { clipPath: "inset(0 100% 0 0)", transform: "translateY(10px)" },
-        { clipPath: "inset(0 0% 0 0)", transform: "none" },
-      ],
-      { duration: T(520), delay: T(C.wordAt), easing: outExpo },
-    );
+    // A left-to-right wipe from two opposite translates (the window slides
+    // in, the word inside slides back), all on the GPU — not a clip-path.
+    const wipeOpts = { duration: T(560), delay: T(C.wordAt), easing: outExpo };
+    play(q("wipe"), [{ transform: "translateX(-101%)" }, { transform: "none" }], wipeOpts);
+    play(q("wordmark"), [{ transform: "translateX(101%)" }, { transform: "none" }], wipeOpts);
     play(
       q("shine"),
       [{ translate: "-100% 0" }, { translate: "100% 0" }],
@@ -292,7 +290,7 @@ export function runSplash(C: SplashRuntime): void {
   }
 
   // The stage shrinks onto the page's logo tile (the cloche and mascot land
-  // on the tile) while the plum screen closes down to it, then hands over
+  // on the tile) while the plum screen fades away to the page, handing over
   // to the tile's own logo.
   function morph(tile: HTMLElement, fast: boolean) {
     const el = overlay!;
@@ -315,25 +313,19 @@ export function runSplash(C: SplashRuntime): void {
     for (const name of ["wordmark", "tagline", "spot"]) {
       q(name).animate([{ opacity: 1 }, { opacity: 0 }], { duration: dur * 0.4, easing: "ease-in", fill: "forwards" });
     }
-    const radius = getComputedStyle(tile).borderTopLeftRadius || "0px";
+    // The plum screen fades as the cloche lands on the tile (opacity only —
+    // a clip-path close stuttered while the app hydrated underneath).
     el.animate(
       [
-        { clipPath: "inset(0px 0px 0px 0px round 0px)", opacity: 1 },
-        {
-          offset: 0.75,
-          clipPath: `inset(${t.top}px ${innerWidth - t.right}px ${innerHeight - t.bottom}px ${t.left}px round ${radius})`,
-          opacity: 1,
-        },
-        {
-          clipPath: `inset(${t.top}px ${innerWidth - t.right}px ${innerHeight - t.bottom}px ${t.left}px round ${radius})`,
-          opacity: 0,
-        },
+        { opacity: 1 },
+        { offset: 0.55, opacity: 1 },
+        { opacity: 0 },
       ],
-      { duration: dur * 1.25, easing, fill: "forwards" },
+      { duration: dur, easing: "ease-in", fill: "forwards" },
     );
     const main = document.querySelector("main");
     if (main) main.animate([{ opacity: 0.4 }, { opacity: 1 }], { duration: dur, easing: "ease-out" });
-    setTimeout(() => setState("done"), dur * 1.25 + 30);
+    setTimeout(() => setState("done"), dur + 30);
   }
 
   // No logo tile on this page (or reduced motion): a short, plain fade.

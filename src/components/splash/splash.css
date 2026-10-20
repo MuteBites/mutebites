@@ -80,8 +80,8 @@ html[data-splash-ran] .sp-stage {
   width: 84%;
   height: 9%;
   border-radius: 50%;
-  background: rgb(10 2 8 / 45%);
-  filter: blur(6px);
+  /* A soft gradient, not filter: blur() — filters repaint as they scale. */
+  background: radial-gradient(closest-side, rgb(10 2 8 / 55%), rgb(10 2 8 / 0%));
 }
 .sp-glow {
   left: 50%;
@@ -95,11 +95,12 @@ html[data-splash-ran] .sp-stage {
 }
 .sp-pop {
   inset: 0;
-  background-image: var(--strip);
-  background-repeat: no-repeat;
-  background-size: calc(var(--n) * 100%) 100%;
-  /* The finished pose (reduced motion / tap to skip): the last frame. */
-  background-position: 100% 0;
+  overflow: hidden;
+}
+.sp-strip {
+  display: block;
+  max-width: none;
+  height: 100%;
 }
 .sp-cloche {
   bottom: 0;
@@ -142,7 +143,19 @@ html[data-splash-ran] .sp-stage {
 .sp-sparkle {
   overflow: visible;
   opacity: 0;
-  filter: drop-shadow(0 0 3px rgb(255 214 140 / 90%));
+}
+/* Everything that moves gets its own GPU layer up front, so nothing is
+   promoted (and repainted) mid-animation while the app loads underneath. */
+.sp-stage,
+.sp-hero > *,
+.sp-cloche img,
+.sp-strip,
+.sp-wipe,
+.sp-word,
+.sp-shine,
+.sp-tagline,
+.sp-spot {
+  will-change: transform, opacity;
 }
 
 /* "MuteBites" in gold: a gold gradient shown through the wordmark art. */
@@ -153,9 +166,13 @@ html[data-splash-ran] .sp-stage {
   -webkit-mask: var(--mask) center / contain no-repeat;
   mask: var(--mask) center / contain no-repeat;
 }
+.sp-wipe {
+  display: block;
+  margin-top: 1.4rem;
+  overflow: hidden;
+}
 .sp-word {
   width: min(78vw, 21rem, 42dvh);
-  margin-top: 1.4rem;
   overflow: hidden;
   background: linear-gradient(180deg, #ffe7b8 0%, #f2b764 45%, #c9853a 100%);
 }
