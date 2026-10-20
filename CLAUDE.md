@@ -92,9 +92,12 @@ Food delivery site for VIT-AP University students.
   Grey Qo → Sirivennela**, and the Sirivennela turn writes it **in Telugu**:
   `toTelugu()` (`src/lib/telugu.ts`) — a dictionary of common Telugu name
   words (add one when a name comes out wrong) then phonetic rules — drawn
-  **one whole word at a time** (Safari shapes each SVG `<tspan>` on its
-  own, so splitting a Telugu word tore the vowel signs off their letters
-  into dotted circles on iPhones — 21 Oct 2026). Sirivennela loads with
+  **as plain HTML text, never SVG** (`TeluguWord`): iPhone Safari lays
+  out Telugu in SVG `<text>` badly — vowel signs torn off into dotted
+  circles even with the font loaded (21 Oct 2026) — so each word wipes in
+  left to right instead (`script-te` window / `script-te-ink`, two
+  opposite translates, 420 ms apart; `inline-flex` so the clipped word
+  keeps its baseline). English keeps the SVG pen trace. Sirivennela loads with
   its **`telugu` subset** too (with "latin" alone phones drew a system
   Telugu font), and the Telugu turn only plays once `document.fonts.load`
   says that font is in (skipped otherwise);

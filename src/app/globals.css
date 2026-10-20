@@ -862,6 +862,26 @@
 .script-name:is([data-phase="write"], [data-phase="erase"]) .script-svg {
   visibility: visible;
 }
+/* A Telugu word: a window that clips its own ink while it wipes in. The
+   padding gives the tall vowel signs and conjuncts room (no clipping),
+   the negative margin keeps the line where it was. */
+.script-te {
+  /* inline-flex, not inline-block: a clipped inline-block takes its
+     baseline from its bottom edge, which lifted the word off the line. */
+  display: inline-flex;
+  overflow: hidden;
+  padding: 0.18em 0.08em 0.28em;
+  margin: -0.18em -0.08em -0.28em;
+  vertical-align: baseline;
+}
+.script-te-ink {
+  display: inline-block;
+  color: var(--heading-b);
+}
+.script-name[data-tone="hero"] .script-te-ink {
+  color: var(--hero-foreground);
+}
+
 [data-palette="kaapi"] .script-name {
   font-family: var(--app-heading) !important;
   font-size: 1em;
@@ -1008,13 +1028,27 @@
   .script-name[data-phase="erase"] .script-svg {
     animation: script-erase 500ms var(--ease-in-quad) both;
   }
-  /* Telugu: one whole word per unit, so a longer pen and a slower stagger. */
-  .script-name[lang="te"][data-phase="write"] .script-letter {
-    stroke-dasharray: 2400;
-    stroke-dashoffset: 2400;
-    animation:
-      script-trace 1100ms cubic-bezier(0.4, 0, 0.3, 1) calc(var(--i) * 560ms) forwards,
-      script-ink 320ms ease-out calc(var(--i) * 560ms + 820ms) forwards;
+  /* Telugu (plain HTML text, see TeluguWord): each word wipes in left to
+     right — the window slides in while the ink inside slides back. */
+  .script-name[data-phase="write"] .script-te {
+    animation: script-te-window 760ms var(--ease-out-expo) calc(var(--i) * 420ms) both;
+  }
+  .script-name[data-phase="write"] .script-te-ink {
+    animation: script-te-ink 760ms var(--ease-out-expo) calc(var(--i) * 420ms) both;
+  }
+  .script-name[data-phase="erase"] .script-te {
+    animation: script-erase 500ms var(--ease-in-quad) both;
+  }
+  @keyframes script-te-window {
+    from {
+      transform: translateX(-101%);
+    }
+  }
+  @keyframes script-te-ink {
+    from {
+      transform: translateX(101%);
+      opacity: 0.2;
+    }
   }
   @keyframes script-trace {
     to { stroke-dashoffset: 0; }

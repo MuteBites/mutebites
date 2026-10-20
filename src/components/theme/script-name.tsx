@@ -13,9 +13,10 @@ const TELUGU_FACE = 2;
 // Per letter: the pen traces its outline, then the ink fills in.
 const LETTER_MS = 170;
 const STROKE_MS = 520;
-// Telugu is traced a whole word at a time (see wordsFor): slower, longer pen.
-const WORD_MS = 560;
-const WORD_STROKE_MS = 1100;
+// Telugu is revealed a whole word at a time, as plain HTML text (see
+// TeluguWord): each word wipes in, WORD_MS after the one before.
+const WORD_MS = 420;
+const WORD_WIPE_MS = 760;
 const FILL_MS = 260;
 const HOLD_MS = 3200;
 const ERASE_MS = 500;
@@ -86,7 +87,7 @@ export function ScriptName({
       setPhase("write");
       const writeMs =
         current === TELUGU_FACE
-          ? (counts[current] - 1) * WORD_MS + WORD_STROKE_MS + FILL_MS
+          ? (counts[current] - 1) * WORD_MS + WORD_WIPE_MS
           : (counts[current] - 1) * LETTER_MS + STROKE_MS + FILL_MS;
       wait(writeMs + HOLD_MS, () => {
         setPhase("erase");
@@ -125,9 +126,28 @@ export function ScriptName({
       {units.map((parts, w) => (
         <span key={w}>
           {w > 0 && " "}
-          <ScriptWord key={`${face}-${w}`} parts={parts} start={starts[w]} />
+          {face === TELUGU_FACE ? (
+            <TeluguWord key={`${face}-${w}`} word={parts.join("")} index={w} />
+          ) : (
+            <ScriptWord key={`${face}-${w}`} parts={parts} start={starts[w]} />
+          )}
         </span>
       ))}
+    </span>
+  );
+}
+
+/**
+ * One Telugu word as plain HTML text — never SVG: iPhone Safari lays out
+ * Telugu in SVG <text> badly (vowel signs torn off into dotted circles even
+ * with the font loaded), while HTML text shapes it perfectly. It wipes in
+ * left to right with two opposite translates (the window slides in, the
+ * ink inside slides back) — GPU only.
+ */
+function TeluguWord({ word, index }: { word: string; index: number }) {
+  return (
+    <span className="script-te" style={{ "--i": index } as CSSProperties}>
+      <span className="script-te-ink">{word}</span>
     </span>
   );
 }
