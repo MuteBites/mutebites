@@ -92,7 +92,12 @@ Food delivery site for VIT-AP University students.
   Grey Qo → Sirivennela**, and the Sirivennela turn writes it **in Telugu**:
   `toTelugu()` (`src/lib/telugu.ts`) — a dictionary of common Telugu name
   words (add one when a name comes out wrong) then phonetic rules — drawn
-  one akshara at a time (`aksharas()`, so conjuncts keep their shape);
+  **one whole word at a time** (Safari shapes each SVG `<tspan>` on its
+  own, so splitting a Telugu word tore the vowel signs off their letters
+  into dotted circles on iPhones — 21 Oct 2026). Sirivennela loads with
+  its **`telugu` subset** too (with "latin" alone phones drew a system
+  Telugu font), and the Telugu turn only plays once `document.fonts.load`
+  says that font is in (skipped otherwise);
   Desi Kaapi never cycles (plain English name). How it draws: each word is an inline SVG laid over
   an invisible copy of itself (wrapping and size come from normal text);
   per letter the pen traces the glyph outline (`stroke-dashoffset`,

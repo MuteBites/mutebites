@@ -2,17 +2,20 @@
 
 import { useEffect, useId, useLayoutEffect, useRef, useState, type CSSProperties } from "react";
 import { afterSplash } from "@/components/splash/after-splash";
-import { aksharas, toTelugu } from "@/lib/telugu";
+import { toTelugu } from "@/lib/telugu";
 import { usePalette } from "@/lib/theme/store";
 import { cn } from "@/lib/utils";
 
 // The three handwriting faces (layout.tsx), in turn.
 const FACES = ["var(--font-love-light)", "var(--font-grey-qo)", "var(--font-sirivennela)"];
-// Sirivennela writes the name in Telugu (toTelugu), one akshara at a time.
+// Sirivennela writes the name in Telugu (toTelugu), one word at a time.
 const TELUGU_FACE = 2;
 // Per letter: the pen traces its outline, then the ink fills in.
 const LETTER_MS = 170;
 const STROKE_MS = 520;
+// Telugu is traced a whole word at a time (see wordsFor): slower, longer pen.
+const WORD_MS = 560;
+const WORD_STROKE_MS = 1100;
 const FILL_MS = 260;
 const HOLD_MS = 3200;
 const ERASE_MS = 500;
@@ -44,11 +47,12 @@ export function ScriptName({
   const [face, setFace] = useState(0);
   const [phase, setPhase] = useState<Phase>("rest");
   // Per face, the words to draw, each split into the units drawn one at a
-  // time: letters in English, aksharas in Telugu (TELUGU_FACE).
+  // time: letters in English; in Telugu (TELUGU_FACE) each WORD is one unit
+  // — Safari shapes every SVG tspan on its own, so splitting a Telugu word
+  // tore its vowel signs off their letters (dotted circles).
   const english = text.trim().split(/\s+/);
   const telugu = toTelugu(text).split(/\s+/);
-  const wordsFor = (f: number) =>
-    f === TELUGU_FACE ? telugu.map((w) => aksharas(w)) : english.map((w) => [...w]);
+  const wordsFor = (f: number) => (f === TELUGU_FACE ? telugu.map((w) => [w]) : english.map((w) => [...w]));
   const units = wordsFor(face);
   const unitCount = (f: number) => wordsFor(f).flat().length;
   const countKey = FACES.map((_, f) => unitCount(f)).join(",");
@@ -61,16 +65,34 @@ export function ScriptName({
     let timer = 0;
     let stopped = false;
     let current = 0;
+    // Only draw the Telugu turn once its font (Telugu glyphs) has loaded —
+    // never in a fallback face. Asked for up front; skipped until it's in.
+    let teluguReady = false;
+    const probe = document.createElement("span");
+    probe.style.fontFamily = FACES[TELUGU_FACE];
+    document.body.appendChild(probe);
+    const family = getComputedStyle(probe).fontFamily;
+    probe.remove();
+    document.fonts
+      .load(`1em ${family}`, "నాగ")
+      .then((faces) => {
+        teluguReady = faces.length > 0;
+      })
+      .catch(() => {});
     const wait = (ms: number, next: () => void) => {
       timer = window.setTimeout(() => !stopped && next(), ms);
     };
     function write() {
       setPhase("write");
-      const writeMs = (counts[current] - 1) * LETTER_MS + STROKE_MS + FILL_MS;
+      const writeMs =
+        current === TELUGU_FACE
+          ? (counts[current] - 1) * WORD_MS + WORD_STROKE_MS + FILL_MS
+          : (counts[current] - 1) * LETTER_MS + STROKE_MS + FILL_MS;
       wait(writeMs + HOLD_MS, () => {
         setPhase("erase");
         wait(ERASE_MS, () => {
           current = (current + 1) % FACES.length;
+          if (current === TELUGU_FACE && !teluguReady) current = (current + 1) % FACES.length;
           setFace(current);
           write();
         });

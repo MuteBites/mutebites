@@ -57,7 +57,14 @@ const cormorant = Cormorant_Garamond({
 });
 const loveLight = Love_Light({ variable: "--font-love-light", subsets: ["latin"], weight: "400", preload: false });
 const greyQo = Grey_Qo({ variable: "--font-grey-qo", subsets: ["latin"], weight: "400", preload: false });
-const sirivennela = Sirivennela({ variable: "--font-sirivennela", subsets: ["latin"], weight: "400", preload: false });
+// Sirivennela draws the name in Telugu, so it needs its Telugu glyphs — with
+// "latin" alone, phones fell back to a system Telugu font (iPhone, 21 Oct).
+const sirivennela = Sirivennela({
+  variable: "--font-sirivennela",
+  subsets: ["latin", "telugu"],
+  weight: "400",
+  preload: false,
+});
 
 export const metadata: Metadata = {
   // Makes every relative URL below (and the generated share image) absolute.

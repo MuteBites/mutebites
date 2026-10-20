@@ -247,12 +247,3 @@ export function toTelugu(name: string): string {
     })
     .join(" ");
 }
-
-/**
- * Splits Telugu into aksharas (one written syllable: consonants joined by
- * the virama, then a vowel sign and any ం / ః), so each can be drawn as a
- * unit without breaking the conjunct shapes.
- */
-export function aksharas(text: string): string[] {
-  return text.match(/(?:[క-హ]్)*[అ-ఔక-హ][ా-ౌౕౖ]?్?[ఁ-ః]?|./gu) ?? [];
-}
