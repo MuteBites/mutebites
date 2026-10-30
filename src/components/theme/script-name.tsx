@@ -59,8 +59,6 @@ export function ScriptName({
   const countKey = FACES.map((_, f) => unitCount(f)).join(",");
 
   useEffect(() => {
-    // Desi Kaapi shows the plain name in its heading font: nothing to draw.
-    if (palette === "kaapi") return;
     if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
     const counts = countKey.split(",").map(Number);
     let timer = 0;

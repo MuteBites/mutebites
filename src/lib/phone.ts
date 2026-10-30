@@ -10,19 +10,19 @@ export function normalizeIndianMobile(input: string): string | null {
   return /^[6-9]\d{9}$/.test(digits) ? `+91${digits}` : null;
 }
 
-/** "9032563455" → "90325 63455" (for display while typing). */
+/** "9876543210" → "98765 43210" (for display while typing). */
 export function formatLocalMobile(digits: string): string {
   const d = digits.replace(/\D/g, "").slice(0, 10);
   return d.length > 5 ? `${d.slice(0, 5)} ${d.slice(5)}` : d;
 }
 
-/** "+919032563455" → "+91 90325 63455". */
+/** "+919876543210" → "+91 98765 43210". */
 export function formatStoredMobile(stored: string): string {
   const local = stored.replace(/^\+91/, "");
   return `+91 ${formatLocalMobile(local)}`;
 }
 
-/** "+919032563455" → "https://wa.me/919032563455" (optionally with a prefilled message). */
+/** "+919876543210" → "https://wa.me/919876543210" (optionally with a prefilled message). */
 export function whatsAppLink(stored: string, message?: string): string {
   const digits = stored.replace(/\D/g, "");
   const base = `https://wa.me/${digits}`;

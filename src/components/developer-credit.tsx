@@ -1,6 +1,6 @@
 "use client";
 
-import { Mail, MessageCircle, Phone } from "lucide-react";
+import { Mail, MessageCircle } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 /** The developer, credited in the About popup and at the foot of every page. */
@@ -40,12 +40,11 @@ const LINK =
   "dev-contact-item flex items-center gap-1 rounded-sm text-primary outline-none hover:underline focus-visible:ring-2 focus-visible:ring-ring/80";
 
 /**
- * "Call · WhatsApp · Mail", folding open under the name: the row grows
- * (grid-rows 0fr → 1fr) and its three links rise in one after another.
+ * "WhatsApp · Mail" (no call link, by the developer's choice), folding open under the name: the row grows
+ * (grid-rows 0fr → 1fr) and its two links rise in one after another.
  */
 export function DeveloperContact({ id, open }: { id: string; open: boolean }) {
   const items = [
-    { href: `tel:${DEVELOPER.phone}`, icon: Phone, label: "Call", external: false },
     { href: `https://wa.me/${DEVELOPER.phone.replace("+", "")}`, icon: MessageCircle, label: "WhatsApp", external: true },
     { href: `mailto:${DEVELOPER.email}`, icon: Mail, label: "Mail", external: false },
   ];

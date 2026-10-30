@@ -101,7 +101,8 @@ Food delivery site for VIT-AP University students.
   its **`telugu` subset** too (with "latin" alone phones drew a system
   Telugu font), and the Telugu turn only plays once `document.fonts.load`
   says that font is in (skipped otherwise);
-  Desi Kaapi never cycles (plain English name). How it draws: each word is an inline SVG laid over
+  Since 31 Oct 2026 it plays in **Desi Kaapi too** (same faces, Kaapi's own
+  heading gradient / hero tokens). How it draws: each word is an inline SVG laid over
   an invisible copy of itself (wrapping and size come from normal text);
   per letter the pen traces the glyph outline (`stroke-dashoffset`,
   `script-trace`) and the ink floods in (`script-ink`), 170 ms apart;
@@ -110,8 +111,7 @@ Food delivery site for VIT-AP University students.
   gradient, "hero" = light text on the pass. Starts after the splash and
   `document.fonts.ready`; reduced motion = the plain name. Fonts load with
   `preload: false`.
-  Desi Kaapi keeps Poppins for both (`--app-display`, and `.script-name`
-  falls back to its heading font).
+  Desi Kaapi keeps Poppins for `--app-display`.
   Small captions above fields/sections use `text-label`: sentence case,
   sans, no letter-spacing. No mono font is loaded any more; don't bring
   back the mono-uppercase eyebrow style, and no `uppercase` anywhere.
@@ -838,7 +838,8 @@ silently re-enables the button.
   rising out of it, and its close button takes `text-hero-foreground` —
   (footer: `AboutCredits` — "Owned by Harsha & Rishi",
   "~ Developed & Maintained by Naga Adithya"; the name has a dotted
-  underline and tapping it quietly folds open Call · WhatsApp · Mail —
+  underline and tapping it quietly folds open WhatsApp · Mail (no call
+  link or visible number, by the developer's choice, 31 Oct 2026) —
   `DeveloperName` / `DeveloperContact` in `src/components/developer-credit.tsx`,
   shared with **`SiteCredit`**, the "~ Made with ♥ by Naga Adithya" line at
   the foot of **every page** (root layout, since 20 Oct 2026: a lucide heart

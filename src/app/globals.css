@@ -882,18 +882,6 @@
   color: var(--hero-foreground);
 }
 
-[data-palette="kaapi"] .script-name {
-  font-family: var(--app-heading) !important;
-  font-size: 1em;
-  font-weight: 700;
-}
-[data-palette="kaapi"] .script-name .script-sizer {
-  visibility: visible !important;
-}
-[data-palette="kaapi"] .script-name .script-svg {
-  display: none;
-}
-
 /* Desi Kaapi's promo (PromoCard): College Bites' delivery run. The resting
    state — what reduced motion shows: the rider parked at the foot of the
    road (scene percentages), sitting on the road by its wheels; speed lines,
