@@ -836,7 +836,7 @@ silently re-enables the button.
   live). The card opens on a
   strip of the lit hero (`HeroMotif`) with the logo tile
   rising out of it, and its close button takes `text-hero-foreground` —
-  (footer: `AboutCredits` — "Owned by Harsha & Rishi",
+  (footer: `AboutCredits` — "Owned by Laxmi Harsha & Rishi",
   "~ Developed & Maintained by Naga Adithya"; the name has a dotted
   underline and tapping it quietly folds open WhatsApp · Mail (no call
   link or visible number, by the developer's choice, 31 Oct 2026) —

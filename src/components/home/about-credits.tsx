@@ -4,7 +4,7 @@ import { useState } from "react";
 import { DeveloperContact, DeveloperName } from "@/components/developer-credit";
 
 /** Who's behind the app — the About dialog's footer. */
-const OWNERS = "Harsha & Rishi";
+const OWNERS = "Laxmi Harsha & Rishi";
 
 /**
  * "Owned by …" and "Developed & maintained by <name>". The name carries a
