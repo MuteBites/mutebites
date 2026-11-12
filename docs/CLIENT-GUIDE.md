@@ -40,9 +40,9 @@ passcode the first time.
 ### Open or close ordering
 
 Admin is built for your phone and is always in dark mode. At the bottom
-there are three tabs: **Orders** (everything about today's orders),
-**Kitchen** (what to tell each restaurant) and **More** (every other admin
-page, and the restaurant switches).
+there are four tabs: **Orders** (everything about today's orders),
+**Kitchen** (what to tell each restaurant), **Handover** (for the Main
+Gate) and **More** (every other admin page, and the restaurant switches).
 
 The big plum **Today** card at the top of **Orders** counts down to the end
 of the current delivery slot ("38:12 left · 1:30 PM slot") with how many
@@ -126,6 +126,15 @@ with every dish and how many ("Chicken Fry Biryani × 3"), plus the token
 numbers. **Copy list** copies it; **WhatsApp** opens WhatsApp with the list
 typed out, and you choose the restaurant's chat. Orders you haven't
 confirmed yet aren't counted — switch on **Include new orders** to add them.
+
+### At the Main Gate (Handover)
+
+The **Handover** tab lists every confirmed order, sorted by token, with the
+student's name and the cash to take. Type the token the student shows you
+into the box at the top to jump to it. Tap the **tick** once they've
+collected it: the card turns green and you get a few seconds to **Undo** a
+wrong tap, then it's saved as delivered and the student is notified. The
+top card shows the cash **collected today** and what's still to hand over.
 
 ### Delivery times the students see
 

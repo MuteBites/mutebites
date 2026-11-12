@@ -2,13 +2,14 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { ChefHat, ClipboardList, LayoutGrid } from "lucide-react";
+import { ChefHat, ClipboardList, LayoutGrid, MapPin } from "lucide-react";
 import { cn } from "@/lib/utils";
 
-// Handover and Analytics join as they're built.
+// Analytics joins once it's built.
 const TABS = [
   { href: "/admin", label: "Orders", Icon: ClipboardList },
   { href: "/admin/kitchen", label: "Kitchen", Icon: ChefHat },
+  { href: "/admin/handover", label: "Handover", Icon: MapPin },
   { href: "/admin/more", label: "More", Icon: LayoutGrid },
 ] as const;
 
@@ -27,11 +28,11 @@ export function AdminTabBar() {
     <div className="pointer-events-none fixed inset-x-0 bottom-0 z-30 px-4 pb-[max(0.75rem,env(safe-area-inset-bottom))]">
       <nav
         aria-label="Admin"
-        className="pointer-events-auto relative mx-auto grid w-full max-w-md grid-cols-3 rounded-full border bg-card/85 p-1.5 shadow-raised backdrop-blur-xl select-none"
+        className="pointer-events-auto relative mx-auto grid w-full max-w-md grid-cols-4 rounded-full border bg-card/85 p-1.5 shadow-raised backdrop-blur-xl select-none"
       >
         <span
           aria-hidden="true"
-          className="absolute inset-y-1.5 left-1.5 w-[calc((100%-0.75rem)/3)] transition-transform duration-(--dur-slow) ease-spring"
+          className="absolute inset-y-1.5 left-1.5 w-[calc((100%-0.75rem)/4)] transition-transform duration-(--dur-slow) ease-spring"
           style={{ transform: `translateX(${active * 100}%)` }}
         >
           <span key={active} className="animate-tab-stretch surface-slider glow-slider block size-full rounded-full bg-slider" />
@@ -47,7 +48,7 @@ export function AdminTabBar() {
                 if (on) window.scrollTo({ top: 0, behavior: "smooth" });
               }}
               className={cn(
-                "pressable relative z-10 flex h-12 items-center justify-center gap-1.5 rounded-full text-sm font-semibold outline-none transition-colors duration-(--dur-base) focus-visible:ring-3 focus-visible:ring-ring/80",
+                "pressable relative z-10 flex h-14 flex-col items-center justify-center gap-0.5 rounded-full text-xs font-semibold outline-none transition-colors duration-(--dur-base) focus-visible:ring-3 focus-visible:ring-ring/80",
                 on ? "text-slider-foreground" : "text-muted-foreground hover:text-foreground",
               )}
             >

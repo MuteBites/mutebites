@@ -601,11 +601,20 @@ the theme-init script; `ThemeRouteSync` in the root layout re-applies it on
 client navigation in and out of `/admin`). `AdminTabBar`
 (`src/components/admin/admin-tab-bar.tsx`, mounted in the admin layout, so
 admin `<main>` is `pb-28`) is a floating bottom bar like the student one —
-**Orders** (`/admin`), **Kitchen** (`/admin/kitchen`, step 2) and **More**
+**Orders** (`/admin`), **Kitchen** (`/admin/kitchen`, step 2), **Handover**
+(`/admin/handover`, step 3) and **More**
 (`/admin/more`: every admin page as one list — history, users, reviews,
 menus, sold out, offers — then the restaurant switches, moved off the
-dashboard); it shows only on those tab pages, and Handover / Analytics
-join it as they're built. **Kitchen** (`KitchenView`,
+dashboard); it shows only on those tab pages (four tabs, icon over a
+small label), and Analytics joins it once built. **Handover**
+(`HandoverView`, `src/components/admin/handover-view.tsx`) is for the Main
+Gate: today's confirmed orders sorted by token — a big token tile, name,
+amount, restaurant and dishes — with a numeric "Token number" search; the
+tick turns the card green with **Undo** for 4 s (`UNDO_MS`), then saves
+it delivered via `advanceOrderStatus(id, "confirmed")` (leaving the page
+mid-undo saves at once, never drops it). Up top: **collected today**
+(`getCollectedToday()` — today's delivered totals by `delivered_at`) and
+what's still to hand over. **Kitchen** (`KitchenView`,
 `src/components/admin/kitchen-view.tsx`; `buildKitchen()` / `kitchenText()`
 in `src/lib/orders/kitchen.ts`): today's confirmed orders grouped by
 delivery slot (`slotEndTime()`; slot chips, "Time to be confirmed" last),

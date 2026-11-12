@@ -95,6 +95,21 @@ export async function getToCollect(): Promise<{ orders: number; amount: number }
   return { orders: rows.length, amount: rows.reduce((n, r) => n + Number(r.total_amount), 0) };
 }
 
+/** Cash already collected today: every order delivered today (by delivered_at, IST). */
+export async function getCollectedToday(): Promise<{ orders: number; amount: number }> {
+  const supabase = await createClient();
+  const rows = await fetchAllRows((from, to) =>
+    supabase
+      .from("orders")
+      .select("total_amount")
+      .eq("status", "delivered")
+      .gte("delivered_at", startOfTodayIST().toISOString())
+      .order("id")
+      .range(from, to),
+  );
+  return { orders: rows.length, amount: rows.reduce((n, r) => n + Number(r.total_amount), 0) };
+}
+
 export type AdminOrder = {
   id: string;
   status: OrderStatus;
