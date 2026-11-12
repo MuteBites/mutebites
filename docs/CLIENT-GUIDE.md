@@ -40,8 +40,9 @@ passcode the first time.
 ### Open or close ordering
 
 Admin is built for your phone and is always in dark mode. At the bottom
-there are two tabs: **Orders** (everything about today's orders) and
-**More** (every other admin page, and the restaurant switches).
+there are three tabs: **Orders** (everything about today's orders),
+**Kitchen** (what to tell each restaurant) and **More** (every other admin
+page, and the restaurant switches).
 
 The big plum **Today** card at the top of **Orders** counts down to the end
 of the current delivery slot ("38:12 left · 1:30 PM slot") with how many
@@ -116,6 +117,15 @@ the next one ends ("Next slot ends 1:30 PM").
 Tap any card for the full details page: timings, phone, email,
 registration number, each dish's price, the total, the note, and the
 student's stars once they've rated it.
+
+### Telling the restaurants (Kitchen)
+
+The **Kitchen** tab adds up today's **confirmed** orders for you: pick a
+delivery slot at the top ("By 1:30 PM"), and each restaurant gets one card
+with every dish and how many ("Chicken Fry Biryani × 3"), plus the token
+numbers. **Copy list** copies it; **WhatsApp** opens WhatsApp with the list
+typed out, and you choose the restaurant's chat. Orders you haven't
+confirmed yet aren't counted — switch on **Include new orders** to add them.
 
 ### Delivery times the students see
 

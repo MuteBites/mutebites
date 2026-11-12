@@ -601,10 +601,20 @@ the theme-init script; `ThemeRouteSync` in the root layout re-applies it on
 client navigation in and out of `/admin`). `AdminTabBar`
 (`src/components/admin/admin-tab-bar.tsx`, mounted in the admin layout, so
 admin `<main>` is `pb-28`) is a floating bottom bar like the student one —
-**Orders** (`/admin`) and **More** (`/admin/more`: every admin page as one
-list — history, users, reviews, menus, sold out, offers — then the
-restaurant switches, moved off the dashboard); it shows only on those two
-tab pages, and Kitchen / Handover / Analytics join it as they're built.
+**Orders** (`/admin`), **Kitchen** (`/admin/kitchen`, step 2) and **More**
+(`/admin/more`: every admin page as one list — history, users, reviews,
+menus, sold out, offers — then the restaurant switches, moved off the
+dashboard); it shows only on those tab pages, and Handover / Analytics
+join it as they're built. **Kitchen** (`KitchenView`,
+`src/components/admin/kitchen-view.tsx`; `buildKitchen()` / `kitchenText()`
+in `src/lib/orders/kitchen.ts`): today's confirmed orders grouped by
+delivery slot (`slotEndTime()`; slot chips, "Time to be confirmed" last),
+then per restaurant with each dish summed ("Chicken Fry Biryani × 3";
+extras part of the name, a free biryani its own "Free" line) and the
+tokens; "Include new orders" adds the unconfirmed ones (off by default).
+Copy list / WhatsApp per restaurant — WhatsApp opens the share picker
+(`wa.me/?text=`, no number) because every restaurant row's `phone` is still
+MuteBites' own number.
 `/admin` is now: the Today card (`StatCards`: `SlotCountdown` — the slot an
 order placed now gets, counting down via `useNowSeconds()`
 (`src/lib/use-now.ts`, a `useSyncExternalStore` clock, null on the server),

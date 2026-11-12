@@ -2,12 +2,13 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { ClipboardList, LayoutGrid } from "lucide-react";
+import { ChefHat, ClipboardList, LayoutGrid } from "lucide-react";
 import { cn } from "@/lib/utils";
 
-// More tabs (Kitchen, Handover, Analytics) join as they're built.
+// Handover and Analytics join as they're built.
 const TABS = [
   { href: "/admin", label: "Orders", Icon: ClipboardList },
+  { href: "/admin/kitchen", label: "Kitchen", Icon: ChefHat },
   { href: "/admin/more", label: "More", Icon: LayoutGrid },
 ] as const;
 
@@ -26,11 +27,11 @@ export function AdminTabBar() {
     <div className="pointer-events-none fixed inset-x-0 bottom-0 z-30 px-4 pb-[max(0.75rem,env(safe-area-inset-bottom))]">
       <nav
         aria-label="Admin"
-        className="pointer-events-auto relative mx-auto grid w-full max-w-sm grid-cols-2 rounded-full border bg-card/85 p-1.5 shadow-raised backdrop-blur-xl select-none"
+        className="pointer-events-auto relative mx-auto grid w-full max-w-md grid-cols-3 rounded-full border bg-card/85 p-1.5 shadow-raised backdrop-blur-xl select-none"
       >
         <span
           aria-hidden="true"
-          className="absolute inset-y-1.5 left-1.5 w-[calc((100%-0.75rem)/2)] transition-transform duration-(--dur-slow) ease-spring"
+          className="absolute inset-y-1.5 left-1.5 w-[calc((100%-0.75rem)/3)] transition-transform duration-(--dur-slow) ease-spring"
           style={{ transform: `translateX(${active * 100}%)` }}
         >
           <span key={active} className="animate-tab-stretch surface-slider glow-slider block size-full rounded-full bg-slider" />
