@@ -85,7 +85,7 @@ export function AddBackRestaurantButton({ id, name }: { id: string; name: string
         startTransition(async () => {
           const result = await setRestaurantRemoved(id, false);
           if (result.ok) {
-            toast.success(`${name} is back. It's switched off: turn it on from More when you're ready.`);
+            toast.success(`${name} is back. It's switched off: turn it on from Kitchen when you're ready.`);
             router.refresh();
           } else {
             toast.error(result.error);

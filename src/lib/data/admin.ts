@@ -276,6 +276,23 @@ function isFinished(status: OrderStatus) {
   return status === "delivered" || status === "cancelled";
 }
 
+/** Every order placed in [from, to), oldest first — the Analytics page's CSV export. */
+export async function getAdminOrdersBetween(from: Date, to: Date): Promise<AdminOrder[]> {
+  const supabase = await createClient();
+  const rows = await fetchAllRows((a, b) =>
+    supabase
+      .from("orders")
+      .select(ADMIN_ORDER_COLUMNS)
+      .gte("created_at", from.toISOString())
+      .lt("created_at", to.toISOString())
+      .order("created_at")
+      .order("id")
+      .range(a, b)
+      .returns<AdminOrderRow[]>(),
+  );
+  return rows.map(toAdminOrder);
+}
+
 // Capped so the history page stays cheap to load as order history grows —
 // a "load more" / date-range picker can come later if needed.
 const HISTORY_ORDERS_LIMIT = 2000;

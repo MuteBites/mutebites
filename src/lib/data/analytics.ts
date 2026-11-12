@@ -69,6 +69,17 @@ function parse(raw: Raw): Analytics {
 
 const DAY_MS = 24 * 60 * 60 * 1000;
 
+/** The range [from, now) and the one just before it of the same length, in epoch ms. */
+export function rangeBounds(range: AnalyticsRange, now: Date = new Date()) {
+  const today = startOfTodayIST(now).getTime();
+  const days = range === "today" ? 1 : Number(range);
+  const from = today - (days - 1) * DAY_MS;
+  const length = range === "today" ? now.getTime() - today : now.getTime() - from;
+  const prevFrom = range === "today" ? today - DAY_MS : from - days * DAY_MS;
+  const prevTo = range === "today" ? today - DAY_MS + length : from;
+  return { from, prevFrom, prevTo };
+}
+
 /**
  * The chosen range and the one just before it, of the same length, so
  * every number can say ▲ / ▼. Today = midnight IST → now (vs yesterday's
@@ -77,12 +88,7 @@ const DAY_MS = 24 * 60 * 60 * 1000;
  * invoker — RLS decides what the caller can count).
  */
 export async function getAnalytics(range: AnalyticsRange, now: Date = new Date()) {
-  const today = startOfTodayIST(now).getTime();
-  const days = range === "today" ? 1 : Number(range);
-  const from = today - (days - 1) * DAY_MS;
-  const length = range === "today" ? now.getTime() - today : now.getTime() - from;
-  const prevFrom = range === "today" ? today - DAY_MS : from - days * DAY_MS;
-  const prevTo = range === "today" ? today - DAY_MS + length : from;
+  const { from, prevFrom, prevTo } = rangeBounds(range, now);
 
   const supabase = await createClient();
   const call = (a: number, b: number) =>

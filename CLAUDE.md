@@ -605,8 +605,8 @@ admin `<main>` is `pb-28`) is a floating bottom bar like the student one —
 (`/admin/handover`, step 3), **Analytics** (`/admin/analytics`, step 4) and
 **More**
 (`/admin/more`: every admin page as one list — history, users, reviews,
-menus, sold out, offers — then the restaurant switches, moved off the
-dashboard); it shows only on those tab pages (five tabs, icon over an
+menus, sold out, offers; the restaurant switches moved to the top of
+**Kitchen**, by the client's call, 12 Nov 2026); it shows only on those tab pages (five tabs, icon over an
 11 px label). **Analytics** (`AnalyticsView`,
 `src/components/admin/analytics-view.tsx`, server-rendered; `getAnalytics()`
 in `src/lib/data/analytics.ts`): `?range=today|7|30` (7 by default, IST
@@ -618,7 +618,12 @@ day (per hour for Today) as single-hue amber bars with the tallest value
 printed, values in `title` and an `sr-only` table; a weekday × hour heatmap
 (every hour between the first and last with orders); restaurants by value
 booked; top 10 dishes with how many students; offers used; average stars
-per restaurant. **Handover**
+per restaurant; and **Export … to Excel (CSV)** (`AnalyticsExport`), which
+fetches the range's orders only on tap (`getRangeOrders()` in
+`src/lib/admin/analytics-actions.ts` → `getAdminOrdersBetween()`, same
+`rangeBounds()` as the numbers) and saves them with Order history's
+columns (`downloadOrdersCsv()` / `ordersToCsv()` in
+`export-orders-button.tsx`). **Handover**
 (`HandoverView`, `src/components/admin/handover-view.tsx`) is for the Main
 Gate: today's confirmed orders sorted by token — a big token tile, name,
 amount, restaurant and dishes — with a numeric "Token number" search; the

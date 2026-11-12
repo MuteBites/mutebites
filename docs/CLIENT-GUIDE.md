@@ -41,9 +41,9 @@ passcode the first time.
 
 Admin is built for your phone and is always in dark mode. At the bottom
 there are five tabs: **Orders** (everything about today's orders),
-**Kitchen** (what to tell each restaurant), **Handover** (for the Main
-Gate), **Analytics** (how the business is doing) and **More** (every other
-admin page, and the restaurant switches).
+**Kitchen** (the restaurant switches, and what to tell each restaurant),
+**Handover** (for the Main Gate), **Analytics** (how the business is doing)
+and **More** (every other admin page).
 
 The big plum **Today** card at the top of **Orders** counts down to the end
 of the current delivery slot ("38:12 left · 1:30 PM slot") with how many
@@ -58,7 +58,7 @@ delivered and cancelled.
 - **Closed** — nobody can place a new order, and **every restaurant is
   turned off**. Orders already placed are not affected.
 - After re-opening, turn on the restaurants you want under **Restaurants**
-  on the **More** tab. Tapping **Turn on** while ordering is closed asks
+  on the **Kitchen** tab. Tapping **Turn on** while ordering is closed asks
   whether to open ordering now — **Open ordering** opens it and turns that
   restaurant on too.
 - **Students get a notification when you open.** Once ordering is open
@@ -146,7 +146,9 @@ from delivered orders), the average order, new students, how many students
 ordered again, and how many orders were cancelled. Below: orders per day
 (per hour for Today), the busiest times of the week (darker = busier),
 each restaurant's share, the top 10 dishes, offers used and the average
-star rating per restaurant.
+star rating per restaurant. **Export … to Excel (CSV)** at the bottom saves
+every order in the chosen range (one row each, with the student, dishes,
+offer, amount and status) as a file that opens in Excel or Google Sheets.
 
 ### Delivery times the students see
 
@@ -200,13 +202,13 @@ out, Offers and the restaurant switches. Past orders still show its name.
 
 Changed your mind? At the bottom of **Menus**, under **Removed
 restaurants**, tap **Add back**. It returns with its whole menu and photos,
-switched **off**, so turn it on from **More** when you're ready.
+switched **off**, so turn it on from **Kitchen** when you're ready.
 
 ## When something changes
 
 | You want to… | Do this |
 |---|---|
-| Stop one restaurant for a while | **Restaurants** (on the dashboard) → **Turn off** (turn it on again later) |
+| Stop one restaurant for a while | **Kitchen** → **Restaurants** → **Turn off** (turn it on again later) |
 | Mark a dish as sold out | **Sold out** → pick the restaurant or search → **Sold out** (tap **Back on sale** to bring it back). Students still see the dish, greyed out, and can't order it. |
 | Block someone who keeps not collecting | **Users** → **Banned users** → search them → **Ban** → **Ban student** (tap **Unban** to undo). This blocks their **phone number**, so a new Google account with the same number is blocked too. |
 | See every past order | **Order history** — grouped by day, with search, restaurant and status filters, and **Export to Excel** (downloads what's on screen) |

@@ -18,7 +18,7 @@ function csvField(value: string): string {
   return `"${value.replace(/"/g, '""')}"`;
 }
 
-function ordersToCsv(orders: AdminOrder[]): string {
+export function ordersToCsv(orders: AdminOrder[]): string {
   const rows = orders.map((o) =>
     [
       formatOrderNumber(o.dailyNumber),
@@ -38,17 +38,21 @@ function ordersToCsv(orders: AdminOrder[]): string {
   return [COLUMNS.map(csvField).join(","), ...rows].join("\r\n");
 }
 
+/** Saves orders as a .csv file (with a BOM, so Excel reads ₹ and names right). */
+export function downloadOrdersCsv(orders: AdminOrder[], filename: string) {
+  const blob = new Blob(["﻿" + ordersToCsv(orders)], { type: "text/csv;charset=utf-8;" });
+  const url = URL.createObjectURL(blob);
+  const link = document.createElement("a");
+  link.href = url;
+  link.download = filename;
+  link.click();
+  URL.revokeObjectURL(url);
+}
+
 /** Downloads the currently-loaded orders as a .csv file — opens fine in Excel or Sheets. */
 export function ExportOrdersButton({ orders }: { orders: AdminOrder[] }) {
   function exportCsv() {
-    const csv = ordersToCsv(orders);
-    const blob = new Blob(["﻿" + csv], { type: "text/csv;charset=utf-8;" });
-    const url = URL.createObjectURL(blob);
-    const link = document.createElement("a");
-    link.href = url;
-    link.download = `mutebites-orders-${new Date().toISOString().slice(0, 10)}.csv`;
-    link.click();
-    URL.revokeObjectURL(url);
+    downloadOrdersCsv(orders, `mutebites-orders-${new Date().toISOString().slice(0, 10)}.csv`);
   }
 
   return (

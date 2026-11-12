@@ -74,7 +74,7 @@ export default async function AdminMenusPage() {
       </ul>
 
       <p className="text-sm text-muted-foreground">
-        A restaurant with no dishes stays hidden from students. Turn restaurants on and off from More. To take one off
+        A restaurant with no dishes stays hidden from students. Turn restaurants on and off from Kitchen. To take one off
         the app, open it and tap Remove restaurant at the bottom.
       </p>
 

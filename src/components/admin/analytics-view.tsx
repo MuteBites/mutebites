@@ -5,6 +5,7 @@ import { ANALYTICS_RANGES, type Analytics, type AnalyticsRange } from "@/lib/dat
 import { formatRupees } from "@/lib/format";
 import { OFFERS } from "@/lib/offers";
 import { cn } from "@/lib/utils";
+import { AnalyticsExport } from "./analytics-export";
 
 const DAY_MS = 24 * 60 * 60 * 1000;
 const WEEKDAYS = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
@@ -185,6 +186,8 @@ export function AnalyticsView({
           )}
         </Card>
       </div>
+
+      <AnalyticsExport range={range} label={ANALYTICS_RANGES.find((r) => r.key === range)?.label ?? "this range"} />
     </>
   );
 }

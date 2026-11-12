@@ -2,10 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { BadgePercent, BookOpen, ChevronRight, History, PackageX, Star, Users, type LucideIcon } from "lucide-react";
 import { IconTile } from "@/components/icon-tile";
-import { RestaurantToggleList } from "@/components/admin/restaurant-toggle-list";
-import { getAdminRestaurants } from "@/lib/data/admin";
 import { getOffers } from "@/lib/data/offers";
-import { getOrderingState } from "@/lib/data/settings";
 
 export const metadata: Metadata = { title: "More · MuteBites Admin" };
 
@@ -20,11 +17,10 @@ const LINKS: { href: string; label: string; note: string; Icon: LucideIcon }[] =
 
 /**
  * The admin's "More" tab (mobile-first redesign, 12 Nov 2026): every admin
- * page as one list, then the restaurant switches — moved off the
- * dashboard so it can be all about the orders.
+ * page as one list. (The restaurant switches live on the Kitchen tab.)
  */
 export default async function AdminMorePage() {
-  const [restaurants, ordering, offers] = await Promise.all([getAdminRestaurants(), getOrderingState(), getOffers()]);
+  const offers = await getOffers();
 
   return (
     <>
@@ -57,15 +53,7 @@ export default async function AdminMorePage() {
         </ul>
       </nav>
 
-      <section>
-        <h2 className="mb-3 font-heading text-title font-bold">Restaurants</h2>
-        <RestaurantToggleList
-          restaurants={restaurants}
-          orderingEnabled={ordering.open}
-          forcedClosed={ordering.mode === "closed"}
-          closedChip={ordering.short}
-        />
-      </section>
+      <p className="text-sm text-muted-foreground">Turn restaurants on and off from the Kitchen tab.</p>
     </>
   );
 }
