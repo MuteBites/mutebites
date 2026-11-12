@@ -1,23 +1,32 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { BadgePercent, BookOpen, ChevronRight, History, PackageX, Star, Users, type LucideIcon } from "lucide-react";
-import { IconTile } from "@/components/icon-tile";
+import { Ban, BookOpen, History, PackageX, Star, Store, Tag, Users, type LucideIcon } from "lucide-react";
+import { InstallAdminButton } from "@/components/admin/install-admin-button";
 import { getOffers } from "@/lib/data/offers";
 
 export const metadata: Metadata = { title: "More · MuteBites Admin" };
 
-const LINKS: { href: string; label: string; note: string; Icon: LucideIcon }[] = [
-  { href: "/admin/history", label: "Order history", note: "Every order, by day", Icon: History },
-  { href: "/admin/users", label: "Users", note: "Students, rewards and bans", Icon: Users },
-  { href: "/admin/reviews", label: "Reviews", note: "Ratings and notes", Icon: Star },
-  { href: "/admin/menus", label: "Menus", note: "Restaurants, sections, dishes", Icon: BookOpen },
-  { href: "/admin/sold-out", label: "Sold out", note: "Take dishes off sale", Icon: PackageX },
-  { href: "/admin/offers", label: "Offers", note: "5% / 10% / 20% and the biryani offer", Icon: BadgePercent },
+const TILES: { href: string; label: string; Icon: LucideIcon }[] = [
+  { href: "/admin/history", label: "History", Icon: History },
+  { href: "/admin/users", label: "Users", Icon: Users },
+  { href: "/admin/reviews", label: "Reviews", Icon: Star },
+  { href: "/admin/menus", label: "Menus", Icon: BookOpen },
+  { href: "/admin/sold-out", label: "Sold out", Icon: PackageX },
+  { href: "/admin/offers", label: "Offers", Icon: Tag },
+  // The on / off switches live on the Kitchen tab.
+  { href: "/admin/kitchen", label: "Restaurants", Icon: Store },
+  { href: "/admin/banned", label: "Banned", Icon: Ban },
 ];
 
+/** One square tile: an icon on a blush square over its name — the mock-up's look. */
+const TILE =
+  "relative flex aspect-square flex-col items-center justify-center gap-2.5 rounded-3xl border bg-card p-2 text-center text-sm font-semibold shadow-card outline-none transition-colors hover:bg-secondary/60 focus-visible:ring-3 focus-visible:ring-ring/80";
+
 /**
- * The admin's "More" tab (mobile-first redesign, 12 Nov 2026): every admin
- * page as one list. (The restaurant switches live on the Kitchen tab.)
+ * The admin's "More" tab (mobile-first redesign, 12 Nov 2026), as in the
+ * approved mock-up: every other admin page as a 3 × 3 grid of tiles, the
+ * last one installing the MuteBites Admin app. (The restaurant switches
+ * live on the Kitchen tab.)
  */
 export default async function AdminMorePage() {
   const offers = await getOffers();
@@ -26,34 +35,28 @@ export default async function AdminMorePage() {
     <>
       <h1 className="font-heading text-headline font-bold">More</h1>
 
-      <nav aria-label="Admin pages" className="overflow-hidden rounded-3xl border bg-card shadow-card">
-        <ul className="divide-y">
-          {LINKS.map(({ href, label, note, Icon }) => (
+      <nav aria-label="Admin pages">
+        <ul className="grid grid-cols-3 gap-3">
+          {TILES.map(({ href, label, Icon }) => (
             <li key={href}>
-              <Link
-                href={href}
-                className="flex items-center gap-3 px-4 py-3.5 outline-none hover:bg-secondary/60 focus-visible:bg-secondary/60"
-              >
-                <IconTile>
+              <Link href={href} className={TILE}>
+                <span className="flex size-12 items-center justify-center rounded-2xl bg-brand-soft text-brand-soft-foreground">
                   <Icon className="size-5" aria-hidden="true" />
-                </IconTile>
-                <span className="min-w-0 flex-1">
-                  <span className="block font-semibold">{label}</span>
-                  <span className="block truncate text-sm text-muted-foreground">{note}</span>
                 </span>
+                {label}
                 {href === "/admin/offers" && offers.active.length > 0 && (
-                  <span className="rounded-full bg-success-soft px-2 py-0.5 text-xs font-bold text-success">
+                  <span className="absolute top-2 right-2 rounded-full bg-success-soft px-1.5 py-0.5 text-[10px] font-bold text-success">
                     {offers.active.length} on
                   </span>
                 )}
-                <ChevronRight className="size-4 shrink-0 text-muted-foreground" aria-hidden="true" />
               </Link>
             </li>
           ))}
+          <li>
+            <InstallAdminButton variant="tile" className={`${TILE} w-full`} />
+          </li>
         </ul>
       </nav>
-
-      <p className="text-sm text-muted-foreground">Turn restaurants on and off from the Kitchen tab.</p>
     </>
   );
 }

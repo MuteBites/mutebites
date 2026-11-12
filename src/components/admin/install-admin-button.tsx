@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useSyncExternalStore } from "react";
-import { Smartphone } from "lucide-react";
+import { Download, Smartphone } from "lucide-react";
 import { Dialog, DialogContent, DialogDescription, DialogTitle } from "@/components/ui/dialog";
 import { toast } from "@/lib/toast/store";
 import { adminPill } from "./styles";
@@ -49,11 +49,12 @@ function subscribeStandalone(listener: () => void) {
 }
 
 /**
- * "Install" in the admin header: installs the separate "MuteBites Admin"
- * app (src/lib/web-manifest.ts), which opens straight on /admin. Hidden
- * once you're already inside the installed app.
+ * "Install" in the admin header (and the "Install app" tile on More,
+ * `variant="tile"`): installs the separate "MuteBites Admin" app
+ * (src/lib/web-manifest.ts), which opens straight on /admin. Hidden once
+ * you're already inside the installed app.
  */
-export function InstallAdminButton() {
+export function InstallAdminButton({ variant = "pill", className }: { variant?: "pill" | "tile"; className?: string }) {
   const prompt = useSyncExternalStore(subscribe, () => deferredPrompt, () => null);
   // Server and first client render say "standalone" so nothing flashes
   // before the real check; already inside the installed app → no button.
@@ -76,10 +77,19 @@ export function InstallAdminButton() {
 
   return (
     <>
-      <button type="button" onClick={install} aria-label="Install the admin app" className={adminPill}>
-        <Smartphone className="size-4" aria-hidden="true" />
-        <span className="hidden sm:inline">Install</span>
-      </button>
+      {variant === "tile" ? (
+        <button type="button" onClick={install} className={className}>
+          <span className="flex size-12 items-center justify-center rounded-2xl bg-brand-soft text-brand-soft-foreground">
+            <Download className="size-5" aria-hidden="true" />
+          </span>
+          Install app
+        </button>
+      ) : (
+        <button type="button" onClick={install} aria-label="Install the admin app" className={adminPill}>
+          <Smartphone className="size-4" aria-hidden="true" />
+          <span className="hidden sm:inline">Install</span>
+        </button>
+      )}
 
       <Dialog open={helpOpen} onOpenChange={setHelpOpen}>
         <DialogContent>

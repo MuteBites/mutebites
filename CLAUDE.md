@@ -604,10 +604,16 @@ admin `<main>` is `pb-28`) is a floating bottom bar like the student one —
 **Orders** (`/admin`), **Kitchen** (`/admin/kitchen`, step 2), **Handover**
 (`/admin/handover`, step 3), **Analytics** (`/admin/analytics`, step 4) and
 **More**
-(`/admin/more`: every admin page as one list — history, users, reviews,
-menus, sold out, offers; the restaurant switches moved to the top of
-**Kitchen**, by the client's call, 12 Nov 2026); it shows only on those tab pages (five tabs, icon over an
-11 px label). **Analytics** (`AnalyticsView`,
+(`/admin/more`: the mock-up's 3 × 3 grid of tiles — History, Users,
+Reviews, Menus, Sold out, Offers, Restaurants (→ Kitchen), Banned, Install
+app (`InstallAdminButton variant="tile"`); the restaurant switches moved to
+the top of **Kitchen**, by the client's call, 12 Nov 2026); it shows only
+on those tab pages (five tabs, icon over an 11 px label). It's a real
+slider like the student TabBar (press and slide sideways: the pill follows
+the finger, a tiny buzz per tab, release opens it; the click after a drag
+is swallowed), and a tap moves the pill at once (`going`, kept only while
+still on the page it was chosen from) instead of waiting for the next page
+to render. **Analytics** (`AnalyticsView`,
 `src/components/admin/analytics-view.tsx`, server-rendered; `getAnalytics()`
 in `src/lib/data/analytics.ts`): `?range=today|7|30` (7 by default, IST
 days, today included), each summed by `admin_order_analytics()` (see the
