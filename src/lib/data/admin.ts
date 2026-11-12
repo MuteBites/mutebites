@@ -23,7 +23,7 @@ export async function getAdminRestaurants(): Promise<AdminRestaurant[]> {
   return data;
 }
 
-export type OrderCounts = { total: number; confirmed: number; completed: number };
+export type OrderCounts = { total: number; confirmed: number; completed: number; cancelled: number };
 
 /**
  * Order counts for the stat cards. Counted rather than fetched in full, so
@@ -47,23 +47,52 @@ export async function getOrderCounts(since?: Date): Promise<OrderCounts> {
     .from("orders")
     .select("id", { count: "exact", head: true })
     .eq("status", "delivered");
+  let cancelledQuery = supabase
+    .from("orders")
+    .select("id", { count: "exact", head: true })
+    .eq("status", "cancelled");
   if (sinceIso) {
     totalQuery = totalQuery.gte("created_at", sinceIso);
     confirmedQuery = confirmedQuery.gte("created_at", sinceIso);
     completedQuery = completedQuery.gte("created_at", sinceIso);
+    cancelledQuery = cancelledQuery.gte("created_at", sinceIso);
   }
 
-  const [total, confirmed, completed] = await Promise.all([totalQuery, confirmedQuery, completedQuery]);
+  const [total, confirmed, completed, cancelled] = await Promise.all([
+    totalQuery,
+    confirmedQuery,
+    completedQuery,
+    cancelledQuery,
+  ]);
 
   if (total.error) throw total.error;
   if (confirmed.error) throw confirmed.error;
   if (completed.error) throw completed.error;
+  if (cancelled.error) throw cancelled.error;
 
   return {
     total: total.count ?? 0,
     confirmed: confirmed.count ?? 0,
     completed: completed.count ?? 0,
+    cancelled: cancelled.count ?? 0,
   };
+}
+
+/**
+ * Cash still to collect at Main Gate: every order not yet delivered or
+ * cancelled, any day (pay on delivery, so it's all still owed).
+ */
+export async function getToCollect(): Promise<{ orders: number; amount: number }> {
+  const supabase = await createClient();
+  const rows = await fetchAllRows((from, to) =>
+    supabase
+      .from("orders")
+      .select("total_amount")
+      .not("status", "in", "(delivered,cancelled)")
+      .order("id")
+      .range(from, to),
+  );
+  return { orders: rows.length, amount: rows.reduce((n, r) => n + Number(r.total_amount), 0) };
 }
 
 export type AdminOrder = {

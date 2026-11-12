@@ -13,7 +13,10 @@ export const THEME_INIT_SCRIPT = `
     var root = document.documentElement;
     var v = localStorage.getItem("mutebites.theme");
     var pref = (v === "light" || v === "dark" || v === "system") ? v : "system";
-    var dark = pref === "dark" || (pref === "system" && matchMedia("(prefers-color-scheme: dark)").matches);
+    // The admin is always dark (night shifts at the gate), whatever the device says.
+    var path = location.pathname;
+    var dark = path === "/admin" || path.indexOf("/admin/") === 0 ||
+      pref === "dark" || (pref === "system" && matchMedia("(prefers-color-scheme: dark)").matches);
     if (dark) {
       root.classList.add("dark");
       root.style.colorScheme = "dark";

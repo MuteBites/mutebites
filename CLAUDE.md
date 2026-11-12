@@ -593,6 +593,40 @@ Food delivery site for VIT-AP University students.
    closed** — nobody gets in, admin role or not — rather than silently
    letting everyone through.
 
+**Mobile-first admin** (redesign, step 1 shipped 12 Nov 2026; the plan,
+from a clickable mock-up the user approved: Orders board → Kitchen sheet →
+Handover mode → Analytics page, one step at a time). The admin is **always
+dark** (`isAdminPath()` in `src/lib/theme/store.ts` and the same check in
+the theme-init script; `ThemeRouteSync` in the root layout re-applies it on
+client navigation in and out of `/admin`). `AdminTabBar`
+(`src/components/admin/admin-tab-bar.tsx`, mounted in the admin layout, so
+admin `<main>` is `pb-28`) is a floating bottom bar like the student one —
+**Orders** (`/admin`) and **More** (`/admin/more`: every admin page as one
+list — history, users, reviews, menus, sold out, offers — then the
+restaurant switches, moved off the dashboard); it shows only on those two
+tab pages, and Kitchen / Handover / Analytics join it as they're built.
+`/admin` is now: the Today card (`StatCards`: `SlotCountdown` — the slot an
+order placed now gets, counting down via `useNowSeconds()`
+(`src/lib/use-now.ts`, a `useSyncExternalStore` clock, null on the server),
+how many open orders are due in it and how many are past their slot — plus
+"N/M restaurants on" and offer chips, with `OrderingKillSwitch` as its
+footer), `TodayTiles` (orders today, **to collect** = every undelivered
+order's total, any day, `getToCollect()`; delivered; cancelled — added to
+`getOrderCounts()`), `NewOrderAlerts`, then **`OrderBoard`**
+(`src/components/admin/order-board.tsx`): search, then New (pending) /
+Confirmed / Done (delivered + cancelled) tabs with counts; each card is
+the token on a hero tile, name, dishes (`itemLine`), restaurant and time,
+amount, and a chip (New: "Waiting N min", amber from 5, red from 10;
+Confirmed: "Due by 1:30 PM", red once the slot ended). **Swipe right**
+moves a card on (Confirm, then Delivered), **swipe left** cancels (New only,
+through the confirm dialog) — pointer events locked to sideways after
+10 px so vertical scrolling still wins, 96 px to act; the same actions are
+buttons on the card (Copy, WhatsApp on New — icon-only under 360 px — and
+a round tick). Changes are optimistic and revert with a toast on refusal;
+the actions still compare-and-swap on the status shown. "Mark all
+delivered" sits on the Confirmed tab. An order arriving while the board is
+open glows once (`.board-fresh`). `OrderList` remains for `/admin/history`.
+
 The main `/admin` dashboard's list is **Current orders**: today's (IST)
 orders until their delivery slot ends (`slotEndTime()`), after which a
 delivered/cancelled order drops off; pending/confirmed ones stay until

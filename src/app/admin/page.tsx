@@ -1,26 +1,36 @@
-import Link from "next/link";
-import { BadgePercent, BookOpen, History, PackageX, Star, Users } from "lucide-react";
 import { MarkAllDeliveredButton } from "@/components/admin/mark-all-delivered-button";
 import { NewOrderAlerts } from "@/components/admin/new-order-alerts";
+import { OrderBoard } from "@/components/admin/order-board";
 import { OrderingKillSwitch } from "@/components/admin/ordering-kill-switch";
-import { OrderList } from "@/components/admin/order-list";
 import { RefreshAt } from "@/components/admin/refresh-at";
-import { RestaurantToggleList } from "@/components/admin/restaurant-toggle-list";
-import { StatCards } from "@/components/admin/stat-cards";
-import { adminPill } from "@/components/admin/styles";
-import { getAdminOrders, getAdminRestaurants, getConfirmedOrderTimes, getOrderCounts } from "@/lib/data/admin";
+import { StatCards, TodayTiles } from "@/components/admin/stat-cards";
+import {
+  getAdminOrders,
+  getAdminRestaurants,
+  getConfirmedOrderTimes,
+  getOrderCounts,
+  getToCollect,
+} from "@/lib/data/admin";
 import { formatShortDay, formatTime, isPastDeliverySlot, slotEndTime, startOfTodayIST } from "@/lib/date";
 import { getOffers } from "@/lib/data/offers";
 import { getOrderingState } from "@/lib/data/settings";
+import { OFFERS } from "@/lib/offers";
 
+/**
+ * The admin's Orders tab (mobile-first redesign, 12 Nov 2026): the Today
+ * card (slot countdown + Open / Closed), today's numbers, the alert
+ * switches, then the live board. Every other admin page, and the
+ * restaurant switches, live on the More tab (/admin/more).
+ */
 export default async function AdminPage() {
-  const [restaurants, orderCounts, ordering, orders, confirmedAll, offers] = await Promise.all([
+  const [restaurants, orderCounts, ordering, orders, confirmedAll, offers, toCollect] = await Promise.all([
     getAdminRestaurants(),
     getOrderCounts(startOfTodayIST()),
     getOrderingState(),
     getAdminOrders(),
     getConfirmedOrderTimes(),
     getOffers(),
+    getToCollect(),
   ]);
 
   const activeRestaurants = restaurants.filter((r) => r.is_active).length;
@@ -29,90 +39,47 @@ export default async function AdminPage() {
   // the same set markAllConfirmedDelivered() acts on.
   const eligibleForDelivery = confirmedAll.filter((o) => isPastDeliverySlot(o.createdAt)).length;
   const waiting = confirmedAll.filter((o) => !isPastDeliverySlot(o.createdAt));
-  // When the next finished order's slot ends and it should move to history.
+  // When the next finished order's slot ends and it should drop off the board.
   const nextDropOff = orders
     .filter((o) => o.status === "delivered" || o.status === "cancelled")
     .map((o) => slotEndTime(o.createdAt).getTime());
   const nextSlotEnd = waiting.length
     ? formatTime(new Date(Math.min(...waiting.map((o) => slotEndTime(o.createdAt).getTime()))).toISOString())
     : null;
+  const openOrders = orders.filter((o) => o.status !== "delivered" && o.status !== "cancelled");
 
   return (
     <>
       <StatCards
         todayLabel={formatShortDay(new Date().toISOString())}
-        totalOrders={orderCounts.total}
-        confirmedOrders={orderCounts.confirmed}
-        completedOrders={orderCounts.completed}
+        openOrders={openOrders.map((o) => ({ createdAt: o.createdAt }))}
         activeRestaurants={activeRestaurants}
         totalRestaurants={restaurants.length}
+        offersOn={offers.active.map((k) => OFFERS[k].short)}
       >
         <OrderingKillSwitch ordering={ordering} />
       </StatCards>
 
-      <div className="flex flex-wrap gap-2">
-        <Link href="/admin/history" className={adminPill}>
-          <History className="size-4" aria-hidden="true" />
-          Order history
-        </Link>
-        <Link href="/admin/users" className={adminPill}>
-          <Users className="size-4" aria-hidden="true" />
-          Users
-        </Link>
-        <Link href="/admin/reviews" className={adminPill}>
-          <Star className="size-4" aria-hidden="true" />
-          Reviews
-        </Link>
-        <Link href="/admin/menus" className={adminPill}>
-          <BookOpen className="size-4" aria-hidden="true" />
-          Menus
-        </Link>
-        <Link href="/admin/sold-out" className={adminPill}>
-          <PackageX className="size-4" aria-hidden="true" />
-          Sold out
-        </Link>
-        <Link href="/admin/offers" className={adminPill}>
-          <BadgePercent className="size-4" aria-hidden="true" />
-          Offers
-          {offers.active.length > 0 && (
-            <span className="rounded-full bg-success-soft px-2 py-0.5 text-xs font-bold text-success">
-              {offers.active.length} on
-            </span>
-          )}
-        </Link>
-      </div>
+      <TodayTiles
+        total={orderCounts.total}
+        delivered={orderCounts.completed}
+        cancelled={orderCounts.cancelled}
+        toCollect={toCollect}
+      />
 
       <NewOrderAlerts />
 
-      <section>
-        <h2 className="mb-3 font-heading text-title font-bold">Restaurants</h2>
-        <RestaurantToggleList
-          restaurants={restaurants}
-          orderingEnabled={ordering.open}
-          forcedClosed={ordering.mode === "closed"}
-          closedChip={ordering.short}
-        />
-      </section>
-
-      <section>
-        <div className="mb-3 flex flex-wrap items-center justify-between gap-2">
-          <h2 className="font-heading text-title font-bold">Current orders</h2>
+      <OrderBoard
+        orders={orders}
+        confirmedTools={
           <MarkAllDeliveredButton
             confirmedCount={confirmedAll.length}
             eligibleCount={eligibleForDelivery}
             nextSlotEnd={nextSlotEnd}
           />
-        </div>
-        <p className="-mt-1 mb-3 text-sm text-muted-foreground">
-          Orders stay here until their delivery window ends, then move to{" "}
-          <Link href="/admin/history" className="font-semibold text-primary underline underline-offset-2">
-            Order history
-          </Link>
-          . Anything still waiting on you stays until it&apos;s done.
-        </p>
-        <OrderList orders={orders} restaurants={restaurants} />
-        <RefreshAt at={nextDropOff.length ? Math.min(...nextDropOff) : null} />
-      </section>
+        }
+      />
+      <RefreshAt at={nextDropOff.length ? Math.min(...nextDropOff) : null} />
     </>
   );
 }

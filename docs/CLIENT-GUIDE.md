@@ -39,8 +39,16 @@ passcode the first time.
 
 ### Open or close ordering
 
-The big plum **Today** card at the top of admin shows today's orders and
-has the **Open / Closed** switch at its foot.
+Admin is built for your phone and is always in dark mode. At the bottom
+there are two tabs: **Orders** (everything about today's orders) and
+**More** (every other admin page, and the restaurant switches).
+
+The big plum **Today** card at the top of **Orders** counts down to the end
+of the current delivery slot ("38:12 left · 1:30 PM slot") with how many
+orders are due in it, and warns you if any order is past its slot. It has
+the **Open / Closed** switch at its foot. Under it, four tiles: orders
+today, **to collect** (the cash for every order not delivered yet),
+delivered and cancelled.
 
 - **Open** — students can order from every restaurant that's turned on.
   It stays open until you close it ("Open until you close it"); there is
@@ -48,7 +56,7 @@ has the **Open / Closed** switch at its foot.
 - **Closed** — nobody can place a new order, and **every restaurant is
   turned off**. Orders already placed are not affected.
 - After re-opening, turn on the restaurants you want under **Restaurants**
-  on the same page. Tapping **Turn on** while ordering is closed asks
+  on the **More** tab. Tapping **Turn on** while ordering is closed asks
   whether to open ordering now — **Open ordering** opens it and turns that
   restaurant on too.
 - **Students get a notification when you open.** Once ordering is open
@@ -70,33 +78,42 @@ has the **Open / Closed** switch at its foot.
 
 ### Handling an order
 
-**Current orders** lists today's orders. A delivered or cancelled one
-drops off once its delivery time has passed; anything still waiting for
-you stays until it's done. Every order ever placed is in **Order history**.
+Today's orders sit in three tabs: **New** (waiting for you to confirm),
+**Confirmed** (placed with the restaurant, waiting to be collected) and
+**Done** (delivered or cancelled). A delivered or cancelled order drops off
+once its delivery time has passed; anything still waiting for you stays
+until it's done. Every order ever placed is in **Order history** (More tab).
+The search box finds an order by token, name or phone.
 
-Each order card shows the **token number** (e.g. #12 — the student shows
-this at the gate), a "From <restaurant>" box with each dish as
-"Dish name - quantity" and its price, the student's note, name and number.
-Extras show with the dish ("Nutella Pop + Ice cream - 1"), and sized
-dishes keep their size ("Apples (500 g) - 2").
+Each card shows the **token number** big on the left (the student shows it
+at the gate), the student's name, each dish as "Dish name - quantity",
+the restaurant, the time and the amount. On **New** orders a chip shows how
+long they've waited: it turns amber after 5 minutes and red after 10. On
+**Confirmed** orders it shows the slot ("Due by 1:30 PM"), red once that
+time has passed.
 
-1. **WhatsApp** — opens a chat with the student with the order already
-   typed out. Ask them to reply "yes".
-2. **Confirm** — once they've confirmed and you've placed it with the
-   restaurant. The student gets a notification.
-3. **Copy** (the copy icon) — copies the student's number, then each
+**Swipe a card right** to move it on: on **New** that confirms it, on
+**Confirmed** it marks it delivered. **Swipe left** on a New order to
+cancel it (you're asked first). The same actions are buttons on the card:
+
+1. **WhatsApp** (New orders) — opens a chat with the student with the
+   order already typed out. Ask them to reply "yes".
+2. **Copy** (the copy icon) — copies the student's number, then each
    dish, to paste to the restaurant. No name, restaurant or prices.
-4. **Mark delivered** — once they've collected it at **VIT-AP Main Gate**.
-   The student is notified and can rate the order.
-5. **Cancel order** — only while the order is still waiting to be
-   confirmed. The student is notified.
+3. **The round tick** — Confirm on a New order (once they've confirmed and
+   you've placed it with the restaurant), Mark delivered on a Confirmed
+   one (once they've collected it at **VIT-AP Main Gate**). The student
+   gets a notification either way, and can rate a delivered order.
 
-**Mark all delivered** marks every confirmed order **whose delivery slot
-has ended** as delivered, in one go (any day, not just today). While no
-slot has ended yet it's greyed out and says when the next one ends
-("Next slot ends 1:30 PM").
+Cancelling only works while an order is still New; the student is
+notified. A new order that arrives while you're looking glows once.
 
-Tap any card (its token) for the full details page: timings, phone, email,
+**Mark all delivered** (on the **Confirmed** tab) marks every confirmed
+order **whose delivery slot has ended** as delivered, in one go (any day,
+not just today). While no slot has ended yet it's greyed out and says when
+the next one ends ("Next slot ends 1:30 PM").
+
+Tap any card for the full details page: timings, phone, email,
 registration number, each dish's price, the total, the note, and the
 student's stars once they've rated it.
 

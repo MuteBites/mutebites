@@ -157,23 +157,28 @@ export function CopyOrderButton({ order }: { order: AdminOrder }) {
       onClick={copyDetails}
       aria-label={copied ? "Order details copied" : "Copy order details"}
       title="Copy order details"
-      className="flex size-10 items-center justify-center rounded-full border bg-card text-muted-foreground outline-none hover:text-foreground focus-visible:ring-3 focus-visible:ring-ring/80"
+      className="flex size-10 shrink-0 items-center justify-center rounded-full border bg-card text-muted-foreground outline-none hover:text-foreground focus-visible:ring-3 focus-visible:ring-ring/80"
     >
       {copied ? <Check className="size-4 text-success" aria-hidden="true" /> : <Copy className="size-4" aria-hidden="true" />}
     </button>
   );
 }
 
-export function WhatsAppButton({ order }: { order: AdminOrder }) {
+/** `compact`: icon only on the narrowest phones (under 360 px) — the order board's action row. */
+export function WhatsAppButton({ order, compact = false }: { order: AdminOrder; compact?: boolean }) {
   return (
     <a
       href={whatsAppLink(order.contactPhone, whatsAppConfirmation(order))}
       target="_blank"
       rel="noopener noreferrer"
-      className="flex h-10 items-center gap-1.5 rounded-full bg-success-soft px-4 text-sm font-semibold text-success outline-none hover:brightness-95 focus-visible:ring-3 focus-visible:ring-ring/80"
+      aria-label={compact ? "WhatsApp" : undefined}
+      className={cn(
+        "flex h-10 shrink-0 items-center gap-1.5 rounded-full bg-success-soft px-4 text-sm font-semibold text-success outline-none hover:brightness-95 focus-visible:ring-3 focus-visible:ring-ring/80",
+        compact && "max-[359px]:px-3",
+      )}
     >
       <MessageCircle className="size-4" aria-hidden="true" />
-      WhatsApp
+      <span className={cn(compact && "max-[359px]:sr-only")}>WhatsApp</span>
     </a>
   );
 }

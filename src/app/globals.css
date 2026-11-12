@@ -1003,6 +1003,19 @@
  * transform/opacity animation at all, never just a faster one.
  */
 @media (prefers-reduced-motion: no-preference) {
+  /* Admin board: an order that arrives while the board is open glows once. */
+  .board-fresh {
+    animation: board-fresh 1.8s var(--ease-out-expo);
+  }
+  @keyframes board-fresh {
+    0% {
+      box-shadow: 0 0 0 3px var(--primary), var(--elevation-card);
+    }
+    100% {
+      box-shadow: 0 0 0 0 transparent, var(--elevation-card);
+    }
+  }
+
   /* ScriptName: per letter (--i), the pen traces the glyph's outline
      (stroke-dashoffset), then the ink floods in; erasing lifts it off. */
   .script-name[data-phase="write"] .script-letter {

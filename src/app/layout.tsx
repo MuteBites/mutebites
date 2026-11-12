@@ -12,6 +12,7 @@ import { UploadedPhotos } from "@/components/uploaded-photos";
 import { getUploadedPhotos } from "@/lib/data/uploaded-photos";
 import { SITE_DESCRIPTION, SITE_NAME, SITE_TITLE, SITE_URL } from "@/lib/site";
 import { THEME_INIT_SCRIPT } from "@/lib/theme/init-script";
+import { ThemeRouteSync } from "@/components/theme/theme-route-sync";
 import "./globals.css";
 
 const jakarta = Plus_Jakarta_Sans({
@@ -149,6 +150,7 @@ export default async function RootLayout({ children }: LayoutProps<"/">) {
           </>
         )}
         <UploadedPhotos photos={photos} />
+        <ThemeRouteSync />
         <SiteStatusWatch />
         <StaleDeployGuard />
         {children}

@@ -33,8 +33,14 @@ function resolvesToDark(pref: ThemePreference): boolean {
   return pref === "dark" || (pref === "system" && systemPrefersDark());
 }
 
+/** The admin is always dark (by the client's call, 12 Nov 2026) — same rule as the theme-init script. */
+function isAdminPath(): boolean {
+  if (typeof location === "undefined") return false;
+  return location.pathname === "/admin" || location.pathname.startsWith("/admin/");
+}
+
 function applyToDocument(pref: ThemePreference) {
-  const dark = resolvesToDark(pref);
+  const dark = isAdminPath() || resolvesToDark(pref);
   document.documentElement.classList.toggle("dark", dark);
   document.documentElement.style.colorScheme = dark ? "dark" : "light";
   syncBrowserBar();
@@ -109,6 +115,11 @@ export function setTheme(pref: ThemePreference) {
   crossFade(() => applyToDocument(pref));
   watchSystemChanges(pref);
   listeners.forEach((l) => l());
+}
+
+/** Re-applies light / dark after a client-side navigation (into or out of /admin). */
+export function syncThemeToRoute() {
+  applyToDocument(getSnapshot());
 }
 
 export function useThemePreference(): ThemePreference {
