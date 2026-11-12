@@ -128,6 +128,34 @@ export async function updateRestaurant(id: string, input: RestaurantInput): Prom
   return { ok: true };
 }
 
+/**
+ * "Remove restaurant" / "Add back" (12 Nov 2026). A restaurant with past
+ * orders can't be deleted (history keeps its name), so removing stamps
+ * restaurants.archived_at and switches it off: it then shows nowhere —
+ * Home, search, its menu (404), Sold out, Offers, the switches. Adding it
+ * back clears the stamp and leaves it off, menu and photos as they were.
+ * The database refuses a removed restaurant that's on
+ * (restaurants_archived_inactive), and place_order() refuses one that's off.
+ */
+export async function setRestaurantRemoved(id: string, removed: boolean): Promise<MenuActionResult> {
+  const denied = await assertAdmin();
+  if (denied) return denied;
+  if (!isUuid(id) || typeof removed !== "boolean") return { ok: false, error: "Unknown restaurant." };
+
+  const supabase = await createClient();
+  const { data, error } = await supabase
+    .from("restaurants")
+    .update(removed ? { archived_at: new Date().toISOString(), is_active: false } : { archived_at: null })
+    .eq("id", id)
+    .select("id");
+  if (error || !data?.length) {
+    return { ok: false, error: removed ? "Couldn't remove the restaurant. Please try again." : "Couldn't add it back. Please try again." };
+  }
+
+  refresh();
+  return { ok: true };
+}
+
 // Sections ----------------------------------------------------------------
 
 export async function createSection(restaurantId: string, name: string): Promise<MenuActionResult> {

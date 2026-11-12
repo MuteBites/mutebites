@@ -11,12 +11,13 @@ import type { OrderStatus } from "./types";
 
 export type AdminRestaurant = { id: string; name: string; is_active: boolean };
 
-/** Every restaurant, for the open/closed toggle list and the vendor stat. */
+/** Every restaurant still on the app (not removed), for the open/closed toggle list, offers and the vendor stat. */
 export async function getAdminRestaurants(): Promise<AdminRestaurant[]> {
   const supabase = await createClient();
   const { data, error } = await supabase
     .from("restaurants")
     .select("id, name, is_active")
+    .is("archived_at", null)
     .order("name");
 
   if (error) throw error;
@@ -494,8 +495,9 @@ export async function getAdminDishes(): Promise<AdminDish[]> {
   const { data, error } = await supabase
     .from("dishes")
     .select(
-      "id, name, price, is_veg, is_available, sort_order, restaurant_id, restaurants(name), dish_categories(name, sort_order)",
+      "id, name, price, is_veg, is_available, sort_order, restaurant_id, restaurants!inner(name, archived_at), dish_categories(name, sort_order)",
     )
+    .is("restaurants.archived_at", null)
     .returns<
       {
         id: string;

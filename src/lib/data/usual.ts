@@ -82,7 +82,12 @@ export async function getUsualCart(userId: string): Promise<UsualCart | null> {
   if (!best) return null;
 
   const [{ data: restaurant }, { data: dishes }] = await Promise.all([
-    supabase.from("restaurants").select("id, name, is_active").eq("id", best.restaurantId).maybeSingle(),
+    supabase
+      .from("restaurants")
+      .select("id, name, is_active")
+      .eq("id", best.restaurantId)
+      .is("archived_at", null)
+      .maybeSingle(),
     supabase
       .from("dishes")
       .select("id, name, price, is_veg, is_available")

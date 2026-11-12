@@ -3,6 +3,7 @@ import { notFound } from "next/navigation";
 import { Pencil } from "lucide-react";
 import { BackToDashboardLink } from "@/components/admin/back-to-dashboard-link";
 import { MenuEditor } from "@/components/admin/menus/menu-editor";
+import { RemoveRestaurantButton } from "@/components/admin/menus/remove-restaurant";
 import { RestaurantFormDialog } from "@/components/admin/menus/restaurant-form-dialog";
 import { adminPill } from "@/components/admin/styles";
 import { getAdminMenu } from "@/lib/data/admin-menus";
@@ -65,6 +66,13 @@ export default async function AdminMenuPage({ params }: PageProps<"/admin/menus/
       />
 
       <MenuEditor menu={menu} lockedSectionIds={lockedSectionIds} photoDishNames={photoDishNames} />
+
+      <div className="mt-4 border-t pt-6">
+        <RemoveRestaurantButton id={restaurant.id} name={restaurant.name} />
+        <p className="mt-2 text-sm text-muted-foreground">
+          Hides it everywhere. Its menu stays saved, so you can add it back from Menus.
+        </p>
+      </div>
     </>
   );
 }

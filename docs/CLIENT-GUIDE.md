@@ -191,6 +191,17 @@ restaurant knows not to charge for them. The total shown is what the
 student pays. If Bheemasena renames one of those three sections, ask the
 developer: the offer matches them by name.
 
+### Removing a restaurant (and adding it back)
+
+Open the restaurant in **Menus** (More tab) and tap **Remove restaurant**
+at the bottom. After you confirm, it disappears from the whole app:
+students can't see it, search it or order from it, and it's gone from Sold
+out, Offers and the restaurant switches. Past orders still show its name.
+
+Changed your mind? At the bottom of **Menus**, under **Removed
+restaurants**, tap **Add back**. It returns with its whole menu and photos,
+switched **off**, so turn it on from **More** when you're ready.
+
 ## When something changes
 
 | You want to… | Do this |

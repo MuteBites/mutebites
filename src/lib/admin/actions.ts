@@ -119,7 +119,8 @@ export async function setRestaurantActive(
   const { error } = await supabase
     .from("restaurants")
     .update({ is_active: active })
-    .eq("id", restaurantId);
+    .eq("id", restaurantId)
+    .is("archived_at", null);
   if (error) return { ok: false, error: "Couldn't update that restaurant. Please try again." };
 
   revalidatePath("/admin");

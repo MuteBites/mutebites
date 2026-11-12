@@ -15,7 +15,7 @@ type LikedRow = {
     is_veg: boolean;
     is_available: boolean;
     restaurant_id: string;
-    restaurants: { name: string } | null;
+    restaurants: { name: string; archived_at: string | null } | null;
     dish_categories: { name: string } | null;
   } | null;
 };
@@ -31,14 +31,15 @@ export const getLikedDishes = cache(async function getLikedDishes(userId: string
   const { data, error } = await supabase
     .from("favorite_dishes")
     .select(
-      "dish_id, dishes(id, name, price, is_veg, is_available, restaurant_id, restaurants(name), dish_categories(name))",
+      "dish_id, dishes(id, name, price, is_veg, is_available, restaurant_id, restaurants(name, archived_at), dish_categories(name))",
     )
     .eq("user_id", userId)
     .order("created_at", { ascending: false })
     .returns<LikedRow[]>();
   if (error || !data) return [];
+  // Hearts on a removed restaurant's dishes stay saved but aren't shown.
   return data.flatMap(({ dishes: d }) =>
-    d
+    d && !d.restaurants?.archived_at
       ? [
           {
             id: d.id,

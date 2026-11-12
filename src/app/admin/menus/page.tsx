@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { ChevronRight, Plus } from "lucide-react";
 import { BackToDashboardLink } from "@/components/admin/back-to-dashboard-link";
+import { AddBackRestaurantButton } from "@/components/admin/menus/remove-restaurant";
 import { RestaurantFormDialog } from "@/components/admin/menus/restaurant-form-dialog";
 import { adminPill } from "@/components/admin/styles";
 import { BlurImage } from "@/components/blur-image";
@@ -18,7 +19,9 @@ export const metadata: Metadata = { title: "Menus · MuteBites Admin" };
  * restaurant, section or dish (photos still go through the developer).
  */
 export default async function AdminMenusPage() {
-  const [restaurants] = await Promise.all([getAdminMenuRestaurants(), getUploadedPhotos()]);
+  const [all] = await Promise.all([getAdminMenuRestaurants(), getUploadedPhotos()]);
+  const restaurants = all.filter((r) => !r.archivedAt);
+  const removed = all.filter((r) => r.archivedAt);
 
   return (
     <>
@@ -71,8 +74,33 @@ export default async function AdminMenusPage() {
       </ul>
 
       <p className="text-sm text-muted-foreground">
-        A restaurant with no dishes stays hidden from students. Turn restaurants on and off from the dashboard.
+        A restaurant with no dishes stays hidden from students. Turn restaurants on and off from More. To take one off
+        the app, open it and tap Remove restaurant at the bottom.
       </p>
+
+      {removed.length > 0 && (
+        <section aria-labelledby="removed-heading">
+          <h2 id="removed-heading" className="font-heading text-title font-bold">
+            Removed restaurants
+          </h2>
+          <p className="mt-1 text-sm text-muted-foreground">
+            Hidden everywhere. Add one back and it returns with its menu, switched off.
+          </p>
+          <ul className="mt-3 divide-y overflow-hidden rounded-[1.5rem] border bg-card shadow-card">
+            {removed.map((r) => (
+              <li key={r.id} className="flex items-center gap-3 px-4 py-3">
+                <span className="min-w-0 flex-1">
+                  <span className="block truncate font-semibold text-muted-foreground">{r.name}</span>
+                  <span className="block text-sm text-muted-foreground">
+                    {r.dishCount === 1 ? "1 dish" : `${r.dishCount} dishes`}
+                  </span>
+                </span>
+                <AddBackRestaurantButton id={r.id} name={r.name} />
+              </li>
+            ))}
+          </ul>
+        </section>
+      )}
     </>
   );
 }

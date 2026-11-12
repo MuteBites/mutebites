@@ -760,6 +760,22 @@ the previous file (deleting a dish deletes its photo). A new dish gets its
 photo after it's added. Renaming only warns when the photo is a developer's
 name-matched file — an upload follows the row. Add-ons (`addons` / `category_addons`) aren't editable there yet. Home
 hides any restaurant with no dishes at all (a just-added one).
+**Remove restaurant / Add back** (12 Nov 2026, `setRestaurantRemoved()` in
+`menu-actions.ts`, buttons in `src/components/admin/menus/remove-restaurant.tsx`):
+the foot of a restaurant's editor has **Remove restaurant** (confirm
+dialog); it stamps `restaurants.archived_at` and switches it off — never a
+real delete, since past orders keep it (`orders.restaurant_id` is restrict)
+and Add back needs it. A removed restaurant shows **nowhere**: every list
+filters `archived_at is null` — `getRestaurants()`, `getSearchableDishes()`
+(and so the food tiles, filters and favourites), `getRestaurantMenu()`
+(its menu 404s), `getRestaurantCount()` (Campus Explorer), liked dishes,
+"Your usual", `getAdminRestaurants()` (switches, Offers, Today card),
+`getAdminDishes()` (Sold out) and `getAdminMenu()` (its editor 404s);
+`setRestaurantActive()` won't switch one on and the database refuses it
+(`restaurants_archived_inactive`). Order history, Kitchen and Analytics
+keep past orders' names. Menus lists removed ones under **Removed
+restaurants**, each with **Add back** (clears the stamp; it comes back
+switched off, menu and photos intact).
 
 **Sold out** (`/admin/sold-out`, a "Sold out" pill on the dashboard) lists
 every dish on every menu — including the ones already off sale, since this
@@ -1267,6 +1283,12 @@ repeat_customers, new_students, by_day / by_hour (IST), by_restaurant,
 top_dishes (10), offers, ratings. **Security invoker** on purpose: it sums
 only what the caller's RLS lets them read (admins: everything), so it adds
 no access; executable by `authenticated` only.
+[`supabase/migrations/20261112020000_restaurant_archive.sql`](supabase/migrations/20261112020000_restaurant_archive.sql)
+(applied 12 Nov 2026 through the connector) adds **`restaurants.archived_at`**
+(nullable timestamptz — when the admin removed it; null = on the app) and
+the check `restaurants_archived_inactive` (`archived_at is null or not
+is_active`), so a removed restaurant can never be on or take orders. The
+existing admin update policies cover it. See **Menus** for what hides it.
 [`supabase/migrations/20261017010000_menu_photos.sql`](supabase/migrations/20261017010000_menu_photos.sql)
 (applied 17 Oct 2026) adds **`dishes.photo_path`** and
 **`restaurants.cover_path`** (nullable text, checked against
@@ -1350,7 +1372,8 @@ on `orders`).
   form (full name + phone) is submitted; that's also how the app tells
   first-time vs. returning users apart (row exists or not).
 - **`restaurants`** — `name`, `phone`, `description`, `cuisine_tags` (text
-  array), `is_active`.
+  array), `is_active`, `archived_at` (removed by an admin — hidden
+  everywhere; see **Menus**).
 - **`dish_categories`** — menu sections scoped to a restaurant (e.g. "VEG
   STARTERS", "NON-VEG BIRYANI"), with `sort_order` for display.
 - **`dishes`** — belongs to a restaurant and (optionally) a category;

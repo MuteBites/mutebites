@@ -5,12 +5,13 @@ import { createClient } from "@/lib/supabase/server";
 import { isUuid } from "@/lib/ids";
 import type { Dish, DishCategory, MenuSection, Restaurant } from "./types";
 
-/** All restaurants for the student home screen — open ones first. */
+/** All restaurants for the student home screen — open ones first; removed ones (archived_at) never. */
 export async function getRestaurants(): Promise<Restaurant[]> {
   const supabase = await createClient();
   const { data, error } = await supabase
     .from("restaurants")
     .select("id, name, phone, description, cuisine_tags, is_active")
+    .is("archived_at", null)
     .order("is_active", { ascending: false })
     .order("name");
 
@@ -32,13 +33,16 @@ export type SearchableDish = {
 /**
  * Every dish on every menu, trimmed to what Home's search needs — ~100
  * rows, so the whole list ships with the page and filtering happens on the
- * client as the student types. Dishes are public-read.
+ * client as the student types. Dishes are public-read. A removed
+ * restaurant's dishes are left out (so the food tiles, filters and
+ * favourites built from this list never show them either).
  */
 export async function getSearchableDishes(): Promise<SearchableDish[]> {
   const supabase = await createClient();
   const { data, error } = await supabase
     .from("dishes")
-    .select("id, name, price, is_veg, is_available, restaurant_id, sort_order, dish_categories(name)")
+    .select("id, name, price, is_veg, is_available, restaurant_id, sort_order, dish_categories(name), restaurants!inner(archived_at)")
+    .is("restaurants.archived_at", null)
     .order("sort_order")
     .returns<
       {
@@ -95,13 +99,14 @@ export async function getRestaurantMenuStats(): Promise<Record<string, Restauran
  * campus ordering Closed switches every restaurant off (every night), and
  * counting only active ones made the target 0 — the badge showed "-5 more
  * restaurants" and re-locked overnight (fixed 15 Oct 2026). A restaurant
- * that's retired for good should be deleted, not just switched off.
+ * the admin removed (archived_at) doesn't count — nobody can order from it.
  */
 export async function getRestaurantCount(): Promise<number> {
   const supabase = await createClient();
   const { count, error } = await supabase
     .from("restaurants")
-    .select("id", { count: "exact", head: true });
+    .select("id", { count: "exact", head: true })
+    .is("archived_at", null);
 
   if (error) throw error;
   return count ?? 0;
@@ -153,6 +158,8 @@ export const getRestaurantMenu = cache(async function getRestaurantMenu(
       .from("restaurants")
       .select("id, name, phone, description, cuisine_tags, is_active")
       .eq("id", id)
+      // A removed restaurant's menu is a 404, like one that never existed.
+      .is("archived_at", null)
       .maybeSingle<Restaurant>(),
     supabase
       .from("dish_categories")
