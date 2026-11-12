@@ -8,6 +8,9 @@ import { DEFAULT_PALETTE, isPaletteId, PALETTE_GROUNDS, type PaletteId } from ".
 export type ThemePreference = "light" | "dark" | "system";
 
 const STORAGE_KEY = "mutebites.theme";
+// The admin's own choice (12 Nov 2026), so picking Dark in admin doesn't
+// change the student app on the same phone, and the other way round.
+const ADMIN_STORAGE_KEY = "mutebites.admin-theme";
 // First-time visitors follow their OS's light/dark setting. Only an
 // explicit choice (the Appearance toggle) moves them off "system".
 const DEFAULT: ThemePreference = "system";
@@ -16,9 +19,14 @@ function isValid(v: unknown): v is ThemePreference {
   return v === "light" || v === "dark" || v === "system";
 }
 
+/** Which preference applies on the current page: the admin's or the student app's. */
+function storageKey() {
+  return isAdminPath() ? ADMIN_STORAGE_KEY : STORAGE_KEY;
+}
+
 function readStored(): ThemePreference {
   try {
-    const v = localStorage.getItem(STORAGE_KEY);
+    const v = localStorage.getItem(storageKey());
     return isValid(v) ? v : DEFAULT;
   } catch {
     return DEFAULT;
@@ -33,14 +41,14 @@ function resolvesToDark(pref: ThemePreference): boolean {
   return pref === "dark" || (pref === "system" && systemPrefersDark());
 }
 
-/** The admin is always dark (by the client's call, 12 Nov 2026) — same rule as the theme-init script. */
+/** Admin pages keep their own preference — same rule as the theme-init script. */
 function isAdminPath(): boolean {
   if (typeof location === "undefined") return false;
   return location.pathname === "/admin" || location.pathname.startsWith("/admin/");
 }
 
 function applyToDocument(pref: ThemePreference) {
-  const dark = isAdminPath() || resolvesToDark(pref);
+  const dark = resolvesToDark(pref);
   document.documentElement.classList.toggle("dark", dark);
   document.documentElement.style.colorScheme = dark ? "dark" : "light";
   syncBrowserBar();
@@ -65,12 +73,17 @@ function crossFade(apply: () => void) {
 
 let current: ThemePreference = DEFAULT;
 let loaded = false;
+// Which key `current` was read from, so moving between admin and the
+// student app re-reads the right preference.
+let loadedKey = "";
 const listeners = new Set<() => void>();
 
 function getSnapshot(): ThemePreference {
-  if (!loaded) {
+  const key = typeof window === "undefined" ? STORAGE_KEY : storageKey();
+  if (!loaded || key !== loadedKey) {
     current = readStored();
     loaded = true;
+    loadedKey = key;
   }
   return current;
 }
@@ -107,8 +120,9 @@ function subscribe(listener: () => void) {
 export function setTheme(pref: ThemePreference) {
   current = pref;
   loaded = true;
+  loadedKey = storageKey();
   try {
-    localStorage.setItem(STORAGE_KEY, pref);
+    localStorage.setItem(loadedKey, pref);
   } catch {
     // Storage unavailable (private mode) — the choice just won't persist.
   }
@@ -117,9 +131,12 @@ export function setTheme(pref: ThemePreference) {
   listeners.forEach((l) => l());
 }
 
-/** Re-applies light / dark after a client-side navigation (into or out of /admin). */
+/** Re-applies light / dark after a client-side navigation (into or out of /admin, which keeps its own choice). */
 export function syncThemeToRoute() {
-  applyToDocument(getSnapshot());
+  const pref = getSnapshot();
+  applyToDocument(pref);
+  watchSystemChanges(pref);
+  listeners.forEach((l) => l());
 }
 
 export function useThemePreference(): ThemePreference {

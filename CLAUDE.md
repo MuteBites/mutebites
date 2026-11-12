@@ -595,10 +595,14 @@ Food delivery site for VIT-AP University students.
 
 **Mobile-first admin** (redesign, step 1 shipped 12 Nov 2026; the plan,
 from a clickable mock-up the user approved: Orders board → Kitchen sheet →
-Handover mode → Analytics page, one step at a time). The admin is **always
-dark** (`isAdminPath()` in `src/lib/theme/store.ts` and the same check in
-the theme-init script; `ThemeRouteSync` in the root layout re-applies it on
-client navigation in and out of `/admin`). `AdminTabBar`
+Handover mode → Analytics page, one step at a time). The admin has **its
+own Light / Dark / System** (More → Appearance, default **System**, since
+12 Nov 2026 — it was forced dark before): localStorage
+`mutebites.admin-theme`, apart from the student app's `mutebites.theme`
+on the same phone (`storageKey()` / `isAdminPath()` in
+`src/lib/theme/store.ts`, the same check in the theme-init script;
+`ThemeRouteSync` in the root layout re-applies the right one on client
+navigation in and out of `/admin`). `AdminTabBar`
 (`src/components/admin/admin-tab-bar.tsx`, mounted in the admin layout, so
 admin `<main>` is `pb-28`) is a floating bottom bar like the student one —
 **Orders** (`/admin`), **Kitchen** (`/admin/kitchen`, step 2), **Handover**

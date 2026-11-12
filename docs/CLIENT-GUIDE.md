@@ -39,7 +39,7 @@ passcode the first time.
 
 ### Open or close ordering
 
-Admin is built for your phone and is always in dark mode. At the bottom
+Admin is built for your phone. It follows your phone's light / dark setting; to pick Light or Dark for admin only, use **More → Appearance**. At the bottom
 there are five tabs: **Orders** (everything about today's orders),
 **Kitchen** (the restaurant switches, and what to tell each restaurant),
 **Handover** (for the Main Gate), **Analytics** (how the business is doing)

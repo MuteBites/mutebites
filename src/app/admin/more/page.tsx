@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { Ban, BookOpen, History, PackageX, Star, Store, Tag, Users, type LucideIcon } from "lucide-react";
 import { InstallAdminButton } from "@/components/admin/install-admin-button";
+import { ThemeIconToggle } from "@/components/theme/theme-icon-toggle";
 import { getOffers } from "@/lib/data/offers";
 
 export const metadata: Metadata = { title: "More · MuteBites Admin" };
@@ -25,8 +26,9 @@ const TILE =
 /**
  * The admin's "More" tab (mobile-first redesign, 12 Nov 2026), as in the
  * approved mock-up: every other admin page as a 3 × 3 grid of tiles, the
- * last one installing the MuteBites Admin app. (The restaurant switches
- * live on the Kitchen tab.)
+ * last one installing the MuteBites Admin app; then Appearance — the
+ * admin's own Light / Dark / System (default System, kept apart from the
+ * student app's). (The restaurant switches live on the Kitchen tab.)
  */
 export default async function AdminMorePage() {
   const offers = await getOffers();
@@ -57,6 +59,19 @@ export default async function AdminMorePage() {
           </li>
         </ul>
       </nav>
+
+      <section
+        aria-labelledby="appearance-heading"
+        className="flex items-center justify-between gap-3 rounded-3xl border bg-card px-4 py-3 shadow-card"
+      >
+        <div className="min-w-0">
+          <h2 id="appearance-heading" className="font-semibold">
+            Appearance
+          </h2>
+          <p className="text-sm text-muted-foreground">System follows this phone. Only changes admin.</p>
+        </div>
+        <ThemeIconToggle />
+      </section>
     </>
   );
 }

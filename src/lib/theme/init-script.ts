@@ -11,12 +11,13 @@ export const THEME_INIT_SCRIPT = `
 (function () {
   try {
     var root = document.documentElement;
-    var v = localStorage.getItem("mutebites.theme");
-    var pref = (v === "light" || v === "dark" || v === "system") ? v : "system";
-    // The admin is always dark (night shifts at the gate), whatever the device says.
+    // The admin keeps its own Light / Dark / System choice (default System),
+    // apart from the student app's on the same phone.
     var path = location.pathname;
-    var dark = path === "/admin" || path.indexOf("/admin/") === 0 ||
-      pref === "dark" || (pref === "system" && matchMedia("(prefers-color-scheme: dark)").matches);
+    var admin = path === "/admin" || path.indexOf("/admin/") === 0;
+    var v = localStorage.getItem(admin ? "mutebites.admin-theme" : "mutebites.theme");
+    var pref = (v === "light" || v === "dark" || v === "system") ? v : "system";
+    var dark = pref === "dark" || (pref === "system" && matchMedia("(prefers-color-scheme: dark)").matches);
     if (dark) {
       root.classList.add("dark");
       root.style.colorScheme = "dark";
