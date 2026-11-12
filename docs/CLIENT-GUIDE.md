@@ -116,8 +116,9 @@ To change these times, ask the developer.
 ### Offers (discounts)
 
 Tap **Offers** on the admin page (next to **Sold out**; it shows "2 on"
-while offers are running). The Offers page has three switches:
+while offers are running). The Offers page has four switches:
 
+- **5% off**: 5% off the whole order, at **every restaurant**.
 - **10% off**: 10% off the whole order, at **every restaurant**.
 - **20% off**: 20% off the whole order, at **every restaurant**.
 - **Buy 3 full biryanis, get 1 single free**: **Bheemasena Restaurant
@@ -126,10 +127,10 @@ while offers are running). The Offers page has three switches:
   student picks one biryani from the **Single Biryani** section free. They
   pay the full price of the full biryanis; the single costs nothing.
 
-Under **10% off** and **20% off** there's a list of every restaurant,
+Under **5% off**, **10% off** and **20% off** there's a list of every restaurant,
 each with its own switch, all on to start. Switch a restaurant off to
 leave it out of that offer: its students see the offer greyed out, "Not
-at this restaurant". A new restaurant joins both offers automatically.
+at this restaurant". A new restaurant joins all three automatically.
 
 Turn on any you like; they take effect straight away. Students see an
 **Apply discount** bar in their cart and pick **one offer per order**.

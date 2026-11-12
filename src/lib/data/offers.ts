@@ -22,7 +22,7 @@ type BiryaniRow = {
 
 /**
  * Which discount offers are on (app_settings, public-read), the
- * restaurants switched off for 10% / 20% (offer_restaurant_exclusions,
+ * restaurants switched off for 5% / 10% / 20% (offer_restaurant_exclusions,
  * public-read), the biryani offer's restaurant, and that restaurant's full biryani ids and (while the
  * biryani offer is on) its single biryanis to pick free — by menu section,
  * the same rule place_order() uses. Only drives the cart and admin;
@@ -34,9 +34,10 @@ export const getOffers = cache(async (): Promise<OffersState> => {
   const [{ data, error }, { data: exclusions }] = await Promise.all([
     supabase
     .from("app_settings")
-    .select("offer_pct10, offer_pct20, offer_biryani, offers_restaurant_id, restaurants(name)")
+    .select("offer_pct5, offer_pct10, offer_pct20, offer_biryani, offers_restaurant_id, restaurants(name)")
     .eq("id", true)
     .single<{
+      offer_pct5: boolean;
       offer_pct10: boolean;
       offer_pct20: boolean;
       offer_biryani: boolean;
@@ -51,13 +52,14 @@ export const getOffers = cache(async (): Promise<OffersState> => {
   ) as OffersState["excluded"];
 
   const flags: Record<OfferKey, boolean> = {
+    pct5: data.offer_pct5,
     pct10: data.offer_pct10,
     pct20: data.offer_pct20,
     biryani: data.offer_biryani,
   };
   const active = OFFER_KEYS.filter((k) => flags[k]);
   const restaurantId = data.offers_restaurant_id;
-  // No biryani restaurant set: 10% / 20% still work everywhere.
+  // No biryani restaurant set: 5% / 10% / 20% still work everywhere.
   if (!restaurantId) return { ...NO_OFFERS, active: active.filter((k) => k !== "biryani"), excluded };
 
   let fullDishIds: string[] = [];

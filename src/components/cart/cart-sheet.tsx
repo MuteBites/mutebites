@@ -150,7 +150,7 @@ function CartContents({
   // Offers (ported from College Bites). Everything below is derived from the
   // cart, so changing the cart can never leave a discount it no longer earns
   // (place_order() re-checks it all anyway).
-  // The biryani offer is one restaurant's; 10% / 20% every restaurant the
+  // The biryani offer is one restaurant's; 5% / 10% / 20% every restaurant the
   // admin hasn't switched off for them.
   const offerHere = offerAppliesTo(offers, "biryani", cart.restaurantId);
   const freeChoices = offerHere ? offers.freeChoices.filter((c) => c.isAvailable) : [];

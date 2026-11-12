@@ -42,7 +42,7 @@ export async function setOfferEnabled(offer: OfferKey, enabled: boolean): Promis
 }
 
 /**
- * Switches 10% / 20% off on or off for one restaurant. Off = a row in
+ * Switches 5% / 10% / 20% off on or off for one restaurant. Off = a row in
  * offer_restaurant_exclusions (so a new restaurant gets every offer);
  * place_order() refuses an offer at a restaurant switched off for it.
  */

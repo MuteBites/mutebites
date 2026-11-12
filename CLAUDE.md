@@ -504,7 +504,7 @@ Food delivery site for VIT-AP University students.
   no emoji, nothing about bodies or appetite by decision; fruit and juice
   lines only while a restaurant whose cuisine tags say fruit / juice /
   sugarcane is on with something on sale, doubled noon–6 PM, none late;
-  5 offer lines instead while 10% / 20% is on), skipping the last 10 ids
+  5 offer lines instead while 5% / 10% / 20% is on, naming the biggest), skipping the last 10 ids
   (`app_settings.recent_open_messages`). Recipients: subscriptions with
   `notify_open`, minus admins, banned accounts and banned phones; tag
   `ordering-open` (a new one replaces an unread one), opens `/`. Delivery
@@ -619,11 +619,11 @@ instead of straight from the dashboard, and its back-link points to
 **Offers** (`/admin/offers`, an "Offers" pill on the dashboard next to
 "Sold out" with an "N on" chip while any is on; ported from College Bites,
 15 Oct 2026; the switches are `OffersCard`,
-`src/components/admin/offers-card.tsx`): three switches, any mix on —
-**10% off**, **20% off** and **Buy 3 full biryanis, get 1 single free** —
-saved straight to `app_settings.offer_pct10 | offer_pct20 | offer_biryani`
+`src/components/admin/offers-card.tsx`): four switches, any mix on —
+**5% off** (added 12 Nov 2026), **10% off**, **20% off** and **Buy 3 full biryanis, get 1 single free** —
+saved straight to `app_settings.offer_pct5 | offer_pct10 | offer_pct20 | offer_biryani`
 by `setOfferEnabled()` (`src/lib/admin/actions.ts`, admin-checked, RLS the
-boundary). **10% / 20% apply at every restaurant** (by decision, 17 Oct
+boundary). **5% / 10% / 20% apply at every restaurant** (by decision, 17 Oct
 2026), each with a switch per restaurant listed under it on the Offers
 page — all on by default; a switched-off one is a row in
 `offer_restaurant_exclusions` (`setOfferRestaurant()`), so a new restaurant
@@ -637,7 +637,7 @@ shows an **Apply discount** bar (`DiscountPicker`,
 group, **one per order, never stacked**, each with what it saves; other
 restaurants' carts list the biryani offer greyed out, "Only at Bheemasena
 Restaurant" (`place_order()` raises `offer_wrong_restaurant` for that and
-for 10% / 20% at a switched-off restaurant). 10% / 20% come off
+for 5% / 10% / 20% at a switched-off restaurant). 5% / 10% / 20% come off
 the paid items, add-ons included (rounded to the rupee). **Full and single
 biryanis are decided by menu section**, not by name (Bheemasena names them
 "Chicken Fry Biryani" / "Single Fry Biryani"): full = a dish in **Veg
@@ -1187,6 +1187,12 @@ delete (`is_admin()`); no update. It also re-creates `place_order()` (same
 signature) with one change: `offer_wrong_restaurant` for `'biryani'` away
 from `offers_restaurant_id`, and for `'pct10'` / `'pct20'` at an excluded
 restaurant.
+[`supabase/migrations/20261112000000_offer_pct5.sql`](supabase/migrations/20261112000000_offer_pct5.sql)
+(applied 12 Nov 2026 through the connector) adds the **5% off** offer:
+`app_settings.offer_pct5` (boolean, default off), `'pct5'` allowed in
+`orders.discount_offer` and `offer_restaurant_exclusions.offer`, and
+`place_order()` re-created (same signature) to accept it, check its switch
+and exclusions like 10% / 20%, and price it at `round(paid * 0.05)`.
 [`supabase/migrations/20261017010000_menu_photos.sql`](supabase/migrations/20261017010000_menu_photos.sql)
 (applied 17 Oct 2026) adds **`dishes.photo_path`** and
 **`restaurants.cover_path`** (nullable text, checked against
@@ -1388,12 +1394,12 @@ RLS is enabled on every table:
   `dishes` (never from the client); leaves `status` at `pending`; and
   computes `total_amount` itself. Offers: with `p_offer` set it raises
   `offer_unavailable` if that switch is off, `offer_wrong_restaurant` if
-  a biryani-offer order isn't from `offers_restaurant_id` or a 10% / 20%
+  a biryani-offer order isn't from `offers_restaurant_id` or a 5% / 10% / 20%
   order is from a restaurant in `offer_restaurant_exclusions`, and for `'biryani'` checks
   every `p_free_items` entry is an available dish in this restaurant's
   "Single Biryani" section with at most one per 3 paid dishes in its "Veg
   Biryani" / "Non-Veg Biryani" sections (`offer_not_eligible`); it computes
-  the discount itself (10% / 20% of the paid items, `round()`ed, or the free
+  the discount itself (5% / 10% / 20% of the paid items, `round()`ed, or the free
   items' value). Free items without the biryani offer are `invalid_items`.
   It also checks `public.ordering_is_open()`
   before anything else (raising `ordering_paused` while the admin has it

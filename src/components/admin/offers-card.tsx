@@ -13,7 +13,7 @@ type Restaurant = { id: string; name: string };
 
 /**
  * The /admin/offers list: one switch per discount (app_settings.offer_*).
- * Any mix can be on; students pick one per order in the cart. 10% / 20%
+ * Any mix can be on; students pick one per order in the cart. 5% / 10% / 20%
  * also list every restaurant with its own switch (all on unless switched
  * off — offer_restaurant_exclusions); the biryani offer is for one
  * restaurant (`restaurantName`). Ported from College Bites.
@@ -44,6 +44,7 @@ export function OffersCard({
   const [, startTransition] = useTransition();
 
   const detail: Record<OfferKey, string> = {
+    pct5: "Off the whole order, at the restaurants switched on below",
     pct10: "Off the whole order, at the restaurants switched on below",
     pct20: "Off the whole order, at the restaurants switched on below",
     biryani: `${restaurantName} only. Students pick which single biryani(s) they get free`,

@@ -7,7 +7,7 @@ import { getOffers } from "@/lib/data/offers";
 export const metadata: Metadata = { title: "Offers · MuteBites Admin" };
 
 /**
- * Switch discount offers on and off (app_settings.offer_*), and 10% / 20%
+ * Switch discount offers on and off (app_settings.offer_*), and 5% / 10% / 20%
  * per restaurant (offer_restaurant_exclusions). While any is on, students
  * at a restaurant it covers get an "Apply discount" bar in the cart and pick one per order; place_order() re-checks the
  * offer is on and computes the discount. Ported from College Bites.

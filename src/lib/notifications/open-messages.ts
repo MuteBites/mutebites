@@ -79,7 +79,7 @@ const MESSAGES: Record<Pool, OpenMessage[]> = {
   ],
 };
 
-/** Sent instead while 10% / 20% off is on. `{pct}` becomes "10%" or "20%". */
+/** Sent instead while 5% / 10% / 20% off is on. `{pct}` becomes the biggest, e.g. "10%". */
 const OFFER_MESSAGES: OpenMessage[] = [
   { id: 101, title: "{pct} off. Yes, really.", body: "Ordering's open, grab it before it's gone." },
   { id: 102, title: "We're open + {pct} off", body: "Discount's on in your cart. Order now." },
@@ -101,7 +101,7 @@ function istHour(now: Date): number {
  * Picks one message for right now: the time of day's pool plus the
  * any-time ones, plus fruit and juice ones while `fruitOn` (twice as
  * likely between noon and 6 PM, left out late at night). While an offer
- * is on (`offerPct` 20 beats 10), an offer message instead. Skips the
+ * is on (`offerPct` 20 beats 10 beats 5), an offer message instead. Skips the
  * `recent` ids; if that leaves nothing, any of them will do.
  */
 export function pickOpenMessage({
@@ -113,7 +113,7 @@ export function pickOpenMessage({
   now?: Date;
   recent: number[];
   fruitOn: boolean;
-  offerPct: 10 | 20 | null;
+  offerPct: 5 | 10 | 20 | null;
 }): OpenMessage {
   let candidates: OpenMessage[];
   if (offerPct) {
