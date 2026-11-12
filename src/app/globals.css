@@ -1003,6 +1003,64 @@
  * transform/opacity animation at all, never just a faster one.
  */
 @media (prefers-reduced-motion: no-preference) {
+  /* Admin Analytics: cards rise in one after another (--i), numbers count
+     up (CountUp), bars grow from their baseline, heatmap cells and change
+     chips pop, and the hero's sparkline draws itself. Replays per range
+     (the view is keyed by it). */
+  .ana-rise {
+    animation: ana-rise 0.7s var(--ease-out-expo) both;
+    animation-delay: calc(var(--i, 0) * 70ms);
+  }
+  @keyframes ana-rise {
+    from {
+      opacity: 0;
+      transform: translateY(14px);
+    }
+  }
+  .ana-grow-y {
+    transform-origin: bottom;
+    animation: ana-grow-y 0.9s var(--ease-spring) both;
+    animation-delay: calc(450ms + var(--i, 0) * 45ms);
+  }
+  @keyframes ana-grow-y {
+    from {
+      transform: scaleY(0);
+    }
+  }
+  .ana-grow-x {
+    transform-origin: left;
+    animation: ana-grow-x 1s var(--ease-out-expo) both;
+    animation-delay: calc(500ms + var(--i, 0) * 90ms);
+  }
+  @keyframes ana-grow-x {
+    from {
+      transform: scaleX(0);
+    }
+  }
+  .ana-pop {
+    animation: ana-pop 0.55s var(--ease-spring) both;
+    animation-delay: calc(400ms + var(--i, 0) * 35ms);
+  }
+  @keyframes ana-pop {
+    from {
+      opacity: 0;
+      transform: scale(0.4);
+    }
+  }
+  .ana-reveal {
+    transform-box: fill-box;
+    transform-origin: left;
+    animation: ana-grow-x 1.6s var(--ease-out-expo) 0.35s both;
+  }
+  .ana-area {
+    animation: ana-area 1.2s ease-out 0.9s both;
+  }
+  @keyframes ana-area {
+    from {
+      opacity: 0;
+    }
+  }
+
   /* Admin board: an order that arrives while the board is open glows once. */
   .board-fresh {
     animation: board-fresh 1.8s var(--ease-out-expo);

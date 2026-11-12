@@ -101,3 +101,11 @@ export async function getAnalytics(range: AnalyticsRange, now: Date = new Date()
     fromIso: new Date(from).toISOString(),
   };
 }
+
+/** Everyone registered on MuteBites (admins read every users row). */
+export async function getStudentCount(): Promise<number> {
+  const supabase = await createClient();
+  const { count, error } = await supabase.from("users").select("id", { count: "exact", head: true });
+  if (error) throw error;
+  return count ?? 0;
+}

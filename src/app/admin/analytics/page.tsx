@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import { AnalyticsView } from "@/components/admin/analytics-view";
-import { getAnalytics, toAnalyticsRange } from "@/lib/data/analytics";
+import { getAnalytics, getStudentCount, toAnalyticsRange } from "@/lib/data/analytics";
 
 export const metadata: Metadata = { title: "Analytics · MuteBites Admin" };
 
@@ -8,12 +8,12 @@ export const metadata: Metadata = { title: "Analytics · MuteBites Admin" };
 export default async function AdminAnalyticsPage({ searchParams }: { searchParams: Promise<{ range?: string | string[] }> }) {
   const { range: raw } = await searchParams;
   const range = toAnalyticsRange(raw);
-  const { current, previous, fromIso } = await getAnalytics(range);
+  const [{ current, previous, fromIso }, students] = await Promise.all([getAnalytics(range), getStudentCount()]);
 
   return (
     <>
       <h1 className="font-heading text-headline font-bold">Analytics</h1>
-      <AnalyticsView range={range} current={current} previous={previous} fromIso={fromIso} />
+      <AnalyticsView key={range} range={range} students={students} current={current} previous={previous} fromIso={fromIso} />
     </>
   );
 }

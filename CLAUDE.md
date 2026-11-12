@@ -624,7 +624,16 @@ day (per hour for Today) as single-hue amber bars with the tallest value
 printed, values in `title` and an `sr-only` table; a weekday × hour heatmap
 (every hour between the first and last with orders); restaurants by value
 booked; top 10 dishes with how many students; offers used; average stars
-per restaurant; and **Export … to Excel (CSV)** (`AnalyticsExport`), which
+per restaurant. On top: a lit hero (`RevenueHero` — the range's revenue
+counting up, its change, a sparkline of orders that draws itself left to
+right via a growing clip rect, `.ana-reveal`) and `StudentsCard` (everyone
+registered, `getStudentCount()`, counting up, "+N joined" and a bar to the
+next 500 / 1,000). **Motion** (`.ana-*` in `globals.css`, reduced-motion
+safe; the view is keyed by range so it replays): cards rise one after
+another, every number counts up (`CountUp`, `src/components/admin/count-up.tsx` —
+server renders the final value, it drops to 0 only on the first animation
+frame so a background tab never shows 0), bars grow from the baseline,
+heatmap cells and change chips pop; and **Export … to Excel (CSV)** (`AnalyticsExport`), which
 fetches the range's orders only on tap (`getRangeOrders()` in
 `src/lib/admin/analytics-actions.ts` → `getAdminOrdersBetween()`, same
 `rangeBounds()` as the numbers) and saves them with Order history's
@@ -1034,8 +1043,9 @@ silently re-enables the button.
     layout's `manifest` field): the root layout links the student app
     (opens `/`), the admin layout links **MuteBites Admin** (`id`/`scope`/
     `start_url` `/admin`, icons `icons/admin-*` = the mark with an "Admin"
-    pill via `appIconResponse({ label })`). The admin header's **Install**
-    button (`install-admin-button.tsx`) fires the browser's install prompt
+    pill via `appIconResponse({ label })`). More's **Install app** tile
+    (`install-admin-button.tsx`, `variant="tile"`; the header's Install
+    pill was dropped for it, 12 Nov 2026) fires the browser's install prompt
     (`beforeinstallprompt`, caught at module load) or, on iPhone / when no
     prompt is available, shows add-to-home-screen steps; it hides inside
     the installed app. `admin.webmanifest` skips the proxy like the rest.

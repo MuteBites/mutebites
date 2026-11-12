@@ -27,12 +27,12 @@ Put admin on your phone's home screen as its own app, **MuteBites Admin**
 (the icon says "Admin" under the mascot). It opens straight on the
 dashboard, separate from the student app.
 
-- **Android (Chrome):** on the dashboard, tap the **phone icon** (Install)
-  at the top, then **Install** in Chrome's popup.
-- **iPhone:** open the dashboard in **Safari**, tap the phone icon to see
-  the steps: **Share** → **Add to Home Screen** → **Add**.
+- **Android (Chrome):** open the **More** tab, tap **Install app**, then
+  **Install** in Chrome's popup.
+- **iPhone:** open admin in **Safari**, go to **More** → **Install app** to
+  see the steps: **Share** → **Add to Home Screen** → **Add**.
 
-The button disappears once it's installed. You still sign in and enter the
+The tile disappears once it's installed. You still sign in and enter the
 passcode the first time.
 
 ## Every day

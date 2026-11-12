@@ -49,8 +49,8 @@ function subscribeStandalone(listener: () => void) {
 }
 
 /**
- * "Install" in the admin header (and the "Install app" tile on More,
- * `variant="tile"`): installs the separate "MuteBites Admin" app
+ * The "Install app" tile on More (`variant="tile"`; the header's
+ * "Install" pill was dropped for it, 12 Nov 2026): installs the separate "MuteBites Admin" app
  * (src/lib/web-manifest.ts), which opens straight on /admin. Hidden once
  * you're already inside the installed app.
  */

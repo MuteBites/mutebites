@@ -1,11 +1,13 @@
 import Link from "next/link";
-import type { ReactNode } from "react";
-import { BadgePercent, Star, TrendingDown, TrendingUp } from "lucide-react";
+import type { CSSProperties, ReactNode } from "react";
+import { BadgePercent, Star, TrendingDown, TrendingUp, UserPlus, Users } from "lucide-react";
 import { ANALYTICS_RANGES, type Analytics, type AnalyticsRange } from "@/lib/data/analytics";
 import { formatRupees } from "@/lib/format";
 import { OFFERS } from "@/lib/offers";
 import { cn } from "@/lib/utils";
+import { HeroMotif } from "@/components/theme/hero-motif";
 import { AnalyticsExport } from "./analytics-export";
+import { CountUp, type CountKind } from "./count-up";
 
 const DAY_MS = 24 * 60 * 60 * 1000;
 const WEEKDAYS = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
@@ -28,11 +30,14 @@ function hourLabel(h: number) {
  */
 export function AnalyticsView({
   range,
+  students,
   current: a,
   previous: p,
   fromIso,
 }: {
   range: AnalyticsRange;
+  /** Everyone registered, all time. */
+  students: number;
   current: Analytics;
   previous: Analytics | null;
   fromIso: string;
@@ -67,27 +72,30 @@ export function AnalyticsView({
         })}
       </nav>
 
+      <RevenueHero a={a} delta={change(a.revenue, p?.revenue)} label={ANALYTICS_RANGES.find((r) => r.key === range)?.label ?? ""} />
+
+      <StudentsCard total={students} joined={a.newStudents} label={ANALYTICS_RANGES.find((r) => r.key === range)?.label ?? ""} />
+
       <section aria-label="Headline numbers">
         <dl className="grid grid-cols-2 gap-3">
-          <Kpi label="Orders" value={String(a.orders)} delta={change(a.orders, p?.orders)} />
+          <Kpi i={0} label="Orders" value={a.orders} delta={change(a.orders, p?.orders)} />
+          <Kpi i={1} label="Students ordered" value={a.customers} delta={change(a.customers, p?.customers)} />
+          <Kpi i={2} label="Average order" value={avg} kind="rupees" delta={change(avg, prevAvg)} />
+          <Kpi i={3} label="New students" value={a.newStudents} delta={change(a.newStudents, p?.newStudents)} />
           <Kpi
-            label="Revenue"
-            note="Delivered orders"
-            value={formatRupees(a.revenue)}
-            delta={change(a.revenue, p?.revenue)}
-          />
-          <Kpi label="Average order" value={formatRupees(Math.round(avg))} delta={change(avg, prevAvg)} />
-          <Kpi label="New students" value={String(a.newStudents)} delta={change(a.newStudents, p?.newStudents)} />
-          <Kpi
+            i={4}
             label="Ordered again"
             note={`${a.repeatCustomers} of ${a.customers} students`}
-            value={`${Math.round(repeat)}%`}
+            value={repeat}
+            kind="percent"
             delta={points(repeat, prevRepeat)}
           />
           <Kpi
+            i={5}
             label="Cancelled"
             note={`${a.cancelled} orders`}
-            value={`${Math.round(cancelRate)}%`}
+            value={cancelRate}
+            kind="percent"
             delta={points(cancelRate, prevCancelRate)}
             lowerIsBetter
           />
@@ -103,7 +111,7 @@ export function AnalyticsView({
           <Empty />
         ) : (
           <ul className="flex flex-col gap-3">
-            {a.byRestaurant.map((r) => (
+            {a.byRestaurant.map((r, i) => (
               <li key={r.name} title={`${r.name}: ${r.orders} orders, ${formatRupees(r.revenue)}`}>
                 <div className="flex items-baseline justify-between gap-3 text-sm">
                   <span className="min-w-0 truncate font-semibold">{r.name}</span>
@@ -113,8 +121,10 @@ export function AnalyticsView({
                 </div>
                 <div className="mt-1.5 h-2.5 rounded-full bg-secondary">
                   <div
-                    className="h-full rounded-full bg-primary"
-                    style={{ width: `${Math.max(2, (r.revenue / a.byRestaurant[0].revenue) * 100)}%` }}
+                    className="ana-grow-x h-full rounded-full bg-primary"
+                    style={
+                      { width: `${Math.max(2, (r.revenue / a.byRestaurant[0].revenue) * 100)}%`, "--i": i } as CSSProperties
+                    }
                   />
                 </div>
               </li>
@@ -129,7 +139,7 @@ export function AnalyticsView({
         ) : (
           <ol className="divide-y">
             {a.topDishes.map((d, i) => (
-              <li key={d.name} className="flex items-center gap-3 py-2.5">
+              <li key={d.name} className="ana-rise flex items-center gap-3 py-2.5" style={{ "--i": i } as CSSProperties}>
                 <span className="flex size-7 shrink-0 items-center justify-center rounded-full bg-amber-soft text-xs font-bold text-amber-soft-foreground">
                   {i + 1}
                 </span>
@@ -212,14 +222,19 @@ function points(now: number, before: number | null): Delta {
 }
 
 function Kpi({
+  i,
   label,
   value,
+  kind = "int",
   note,
   delta,
   lowerIsBetter = false,
 }: {
+  /** Order on screen — staggers the rise and the count-up. */
+  i: number;
   label: string;
-  value: string;
+  value: number;
+  kind?: CountKind;
   note?: string;
   delta: Delta;
   lowerIsBetter?: boolean;
@@ -227,17 +242,23 @@ function Kpi({
   const same = delta?.text === "Same";
   const good = delta && !same ? delta.up !== lowerIsBetter : null;
   return (
-    <div className="flex flex-col-reverse justify-end rounded-3xl border bg-card p-3.5 shadow-card">
+    <div
+      className="ana-rise flex flex-col-reverse justify-end rounded-3xl border bg-card p-3.5 shadow-card"
+      style={{ "--i": i + 1 } as CSSProperties}
+    >
       <dt className="text-sm text-muted-foreground">
         {label}
         {note && <span className="block text-xs">{note}</span>}
       </dt>
       <dd className="mb-1 flex flex-wrap items-baseline gap-x-2">
-        <span className="font-heading text-2xl font-bold tabular-nums">{value}</span>
+        <span className="font-heading text-2xl font-bold tabular-nums">
+          <CountUp value={value} kind={kind} delay={120 + i * 70} />
+        </span>
         {delta && (
           <span
+            style={{ "--i": i + 4 } as CSSProperties}
             className={cn(
-              "inline-flex items-center gap-0.5 text-xs font-bold",
+              "ana-pop inline-flex items-center gap-0.5 text-xs font-bold",
               good === null ? "text-muted-foreground" : good ? "text-success" : "text-destructive",
             )}
           >
@@ -252,7 +273,7 @@ function Kpi({
 
 function Card({ title, note, children }: { title: string; note?: string; children: ReactNode }) {
   return (
-    <section className="rounded-3xl border bg-card p-4 shadow-card">
+    <section className="ana-rise rounded-3xl border bg-card p-4 shadow-card" style={{ "--i": 7 } as CSSProperties}>
       <h2 className="font-heading text-lg font-bold">{title}</h2>
       {note && <p className="text-sm text-muted-foreground">{note}</p>}
       <div className="mt-3">{children}</div>
@@ -275,11 +296,13 @@ function Bars({ bars, caption }: { bars: { label: string; short: string; value: 
         {bars.map((b, i) => (
           <div key={b.label} className="group relative flex h-full min-w-0 flex-1 flex-col justify-end" title={`${b.label}: ${b.value}`}>
             {i === top && b.value > 0 && (
-              <span className="mb-1 text-center text-xs font-bold tabular-nums">{b.value}</span>
+              <span className="ana-pop mb-1 text-center text-xs font-bold tabular-nums" style={{ "--i": bars.length + 8 } as CSSProperties}>
+                {b.value}
+              </span>
             )}
             <div
-              className="rounded-t-[4px] bg-primary transition-opacity group-hover:opacity-80"
-              style={{ height: `${(b.value / max) * 100}%`, minHeight: b.value ? 2 : 0 }}
+              className="ana-grow-y rounded-t-[4px] bg-primary transition-opacity group-hover:opacity-80"
+              style={{ height: `${(b.value / max) * 100}%`, minHeight: b.value ? 2 : 0, "--i": i } as CSSProperties}
             />
           </div>
         ))}
@@ -373,13 +396,13 @@ function BusiestTimes({ a }: { a: Analytics }) {
                 <th scope="row" className="pr-1 text-left font-normal">
                   {day}
                 </th>
-                {hours.map((h) => {
+                {hours.map((h, j) => {
                   const v = cell.get(`${i + 1}-${h}`) ?? 0;
                   return (
                     <td key={h} title={`${day} ${hourLabel(h)}: ${v} orders`} className="p-0">
                       <span
-                        className={cn("block h-6 min-w-6 rounded-[4px]", v ? "bg-primary" : "bg-secondary")}
-                        style={v ? { opacity: 0.2 + 0.8 * (v / max) } : undefined}
+                        className={cn("ana-pop block h-6 min-w-6 rounded-[4px]", v ? "bg-primary" : "bg-secondary")}
+                        style={{ ...(v ? { opacity: 0.2 + 0.8 * (v / max) } : {}), "--i": i + j * 2 } as CSSProperties}
                       >
                         <span className="sr-only">{v}</span>
                       </span>
@@ -392,5 +415,134 @@ function BusiestTimes({ a }: { a: Analytics }) {
         </table>
       </div>
     </Card>
+  );
+}
+
+/**
+ * The page's lit hero: the range's revenue (delivered orders) counting up,
+ * its change, and a sparkline of orders over the range that draws itself
+ * left to right (a clip rect growing — dash tricks break with the
+ * non-scaling stroke) with a soft area fading in.
+ */
+function RevenueHero({ a, delta, label }: { a: Analytics; delta: Delta; label: string }) {
+  // Orders per day, or per hour for a single day (fewer than 2 days of data).
+  const series = a.byDay.length > 1 ? a.byDay.map((d) => d.orders) : hourSeries(a);
+  const max = Math.max(1, ...series);
+  const pts = series.map((v, i) => [series.length === 1 ? 50 : (i / (series.length - 1)) * 100, 36 - (v / max) * 30]);
+  const line = pts.map(([x, y], i) => `${i ? "L" : "M"}${x.toFixed(2)},${y.toFixed(2)}`).join(" ");
+  const area = pts.length > 1 ? `${line} L100,40 L0,40 Z` : "";
+  const up = delta?.text !== "Same" && delta?.up;
+
+  return (
+    <section className="ana-rise surface-hero glow-hero relative overflow-hidden rounded-3xl bg-hero text-hero-foreground">
+      <HeroMotif className="-top-3 right-2 size-24 opacity-70" />
+      <div className="relative px-5 pt-5">
+        <p className="text-sm text-hero-foreground/85">Revenue · {label}</p>
+        <p className="mt-1 font-heading text-5xl leading-none font-bold tabular-nums">
+          <CountUp value={a.revenue} kind="rupees" ms={1400} />
+        </p>
+        <p className="mt-2 flex flex-wrap items-center gap-2 text-sm text-hero-foreground/85">
+          {delta && (
+            <span
+              className={cn(
+                "ana-pop inline-flex items-center gap-1 rounded-full px-2.5 py-0.5 font-bold",
+                delta.text === "Same" ? "bg-hero-foreground/12" : up ? "bg-hero-success/20 text-hero-success" : "bg-hero-danger/15 text-hero-danger",
+              )}
+              style={{ "--i": 10 } as CSSProperties}
+            >
+              {delta.text !== "Same" && (up ? <TrendingUp className="size-4" aria-hidden="true" /> : <TrendingDown className="size-4" aria-hidden="true" />)}
+              {delta.text}
+            </span>
+          )}
+          <span>
+            {a.delivered} delivered · {formatRupees(a.booked)} booked
+          </span>
+        </p>
+      </div>
+      {pts.length > 1 && (
+        <svg viewBox="0 0 100 40" preserveAspectRatio="none" className="relative mt-3 block h-20 w-full" aria-hidden="true">
+          <defs>
+            <clipPath id="ana-spark-reveal">
+              <rect className="ana-reveal" x="0" y="0" width="100" height="40" />
+            </clipPath>
+          </defs>
+          <g clipPath="url(#ana-spark-reveal)">
+            <path d={area} className="ana-area fill-hero-accent/20" />
+            <path
+              d={line}
+              className="fill-none stroke-hero-accent"
+              strokeWidth={2.5}
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              vectorEffect="non-scaling-stroke"
+            />
+          </g>
+        </svg>
+      )}
+      {pts.length <= 1 && <div className="h-5" />}
+    </section>
+  );
+}
+
+function hourSeries(a: Analytics): number[] {
+  const byHour = new Map<number, number>();
+  for (const h of a.byHour) byHour.set(h.hour, (byHour.get(h.hour) ?? 0) + h.orders);
+  return Array.from({ length: 12 }, (_, i) => byHour.get(10 + i) ?? 0);
+}
+
+/** The next round number to aim for: 500s up to 2,000, then 1,000s. */
+function nextMilestone(n: number) {
+  const step = n < 2000 ? 500 : 1000;
+  return (Math.floor(n / step) + 1) * step;
+}
+
+/**
+ * Everyone on MuteBites, all time: the count rolls up, the range's new
+ * students pop in as a chip, and a bar fills towards the next round number
+ * ("158 to 1,500"), its last stretch glowing.
+ */
+function StudentsCard({ total, joined, label }: { total: number; joined: number; label: string }) {
+  const goal = nextMilestone(total);
+  const step = goal < 2000 ? 500 : 1000;
+  const pct = ((total - (goal - step)) / step) * 100;
+  return (
+    <section
+      aria-label="Students"
+      className="ana-rise relative overflow-hidden rounded-3xl border bg-card p-4 shadow-card"
+      style={{ "--i": 1 } as CSSProperties}
+    >
+      <div className="flex items-center gap-4">
+        <span className="ana-pop flex size-14 shrink-0 items-center justify-center rounded-2xl bg-brand-soft text-brand-soft-foreground" style={{ "--i": 2 } as CSSProperties}>
+          <Users className="size-7" aria-hidden="true" />
+        </span>
+        <div className="min-w-0 flex-1">
+          <p className="text-sm text-muted-foreground">Students on MuteBites</p>
+          <p className="font-heading text-4xl leading-none font-bold tabular-nums">
+            <CountUp value={total} ms={1600} delay={150} />
+          </p>
+        </div>
+        {joined > 0 && (
+          <span
+            className="ana-pop inline-flex shrink-0 items-center gap-1 rounded-full bg-success-soft px-2.5 py-1 text-xs font-bold text-success"
+            style={{ "--i": 14 } as CSSProperties}
+          >
+            <UserPlus className="size-3.5" aria-hidden="true" />+{joined}
+            <span className="sr-only"> joined in {label.toLowerCase()}</span>
+          </span>
+        )}
+      </div>
+      <div className="mt-4 h-2.5 overflow-hidden rounded-full bg-secondary">
+        <div
+          className="ana-grow-x h-full rounded-full bg-[linear-gradient(90deg,var(--brand-1),var(--brand-2),var(--brand-3))]"
+          style={{ width: `${Math.max(3, pct)}%`, "--i": 2 } as CSSProperties}
+        />
+      </div>
+      <p className="mt-1.5 flex justify-between text-xs text-muted-foreground">
+        <span>{joined > 0 ? `+${joined} joined · ${label}` : `No new students · ${label}`}</span>
+        <span className="tabular-nums">
+          {(goal - total).toLocaleString("en-IN")} to {goal.toLocaleString("en-IN")}
+        </span>
+      </p>
+    </section>
   );
 }
