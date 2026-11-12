@@ -40,9 +40,10 @@ passcode the first time.
 ### Open or close ordering
 
 Admin is built for your phone and is always in dark mode. At the bottom
-there are four tabs: **Orders** (everything about today's orders),
+there are five tabs: **Orders** (everything about today's orders),
 **Kitchen** (what to tell each restaurant), **Handover** (for the Main
-Gate) and **More** (every other admin page, and the restaurant switches).
+Gate), **Analytics** (how the business is doing) and **More** (every other
+admin page, and the restaurant switches).
 
 The big plum **Today** card at the top of **Orders** counts down to the end
 of the current delivery slot ("38:12 left · 1:30 PM slot") with how many
@@ -135,6 +136,17 @@ into the box at the top to jump to it. Tap the **tick** once they've
 collected it: the card turns green and you get a few seconds to **Undo** a
 wrong tap, then it's saved as delivered and the student is notified. The
 top card shows the cash **collected today** and what's still to hand over.
+
+### How it's going (Analytics)
+
+The **Analytics** tab shows **Today**, the last **7 days** or **30 days**
+(tap the chips at the top). Each number has an arrow comparing it with the
+period just before (green = better, red = worse): orders, revenue (cash
+from delivered orders), the average order, new students, how many students
+ordered again, and how many orders were cancelled. Below: orders per day
+(per hour for Today), the busiest times of the week (darker = busier),
+each restaurant's share, the top 10 dishes, offers used and the average
+star rating per restaurant.
 
 ### Delivery times the students see
 

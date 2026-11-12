@@ -602,11 +602,23 @@ client navigation in and out of `/admin`). `AdminTabBar`
 (`src/components/admin/admin-tab-bar.tsx`, mounted in the admin layout, so
 admin `<main>` is `pb-28`) is a floating bottom bar like the student one —
 **Orders** (`/admin`), **Kitchen** (`/admin/kitchen`, step 2), **Handover**
-(`/admin/handover`, step 3) and **More**
+(`/admin/handover`, step 3), **Analytics** (`/admin/analytics`, step 4) and
+**More**
 (`/admin/more`: every admin page as one list — history, users, reviews,
 menus, sold out, offers — then the restaurant switches, moved off the
-dashboard); it shows only on those tab pages (four tabs, icon over a
-small label), and Analytics joins it once built. **Handover**
+dashboard); it shows only on those tab pages (five tabs, icon over an
+11 px label). **Analytics** (`AnalyticsView`,
+`src/components/admin/analytics-view.tsx`, server-rendered; `getAnalytics()`
+in `src/lib/data/analytics.ts`): `?range=today|7|30` (7 by default, IST
+days, today included), each summed by `admin_order_analytics()` (see the
+schema) for the range and the one just before it, so every tile shows ▲ / ▼
+(orders, revenue = delivered only, average order, new students, "ordered
+again" and cancelled rates in points — lower is better there); orders per
+day (per hour for Today) as single-hue amber bars with the tallest value
+printed, values in `title` and an `sr-only` table; a weekday × hour heatmap
+(every hour between the first and last with orders); restaurants by value
+booked; top 10 dishes with how many students; offers used; average stars
+per restaurant. **Handover**
 (`HandoverView`, `src/components/admin/handover-view.tsx`) is for the Main
 Gate: today's confirmed orders sorted by token — a big token tile, name,
 amount, restaurant and dishes — with a numeric "Token number" search; the
@@ -1246,6 +1258,15 @@ restaurant.
 `orders.discount_offer` and `offer_restaurant_exclusions.offer`, and
 `place_order()` re-created (same signature) to accept it, check its switch
 and exclusions like 10% / 20%, and price it at `round(paid * 0.05)`.
+[`supabase/migrations/20261112010000_admin_order_analytics.sql`](supabase/migrations/20261112010000_admin_order_analytics.sql)
+(applied 12 Nov 2026 through the connector) adds `orders_created_at_idx`
+and **`admin_order_analytics(p_from, p_to)`** — one jsonb answer for a
+date range: orders (not cancelled), cancelled, delivered, revenue
+(delivered totals), booked (non-cancelled totals), customers,
+repeat_customers, new_students, by_day / by_hour (IST), by_restaurant,
+top_dishes (10), offers, ratings. **Security invoker** on purpose: it sums
+only what the caller's RLS lets them read (admins: everything), so it adds
+no access; executable by `authenticated` only.
 [`supabase/migrations/20261017010000_menu_photos.sql`](supabase/migrations/20261017010000_menu_photos.sql)
 (applied 17 Oct 2026) adds **`dishes.photo_path`** and
 **`restaurants.cover_path`** (nullable text, checked against
