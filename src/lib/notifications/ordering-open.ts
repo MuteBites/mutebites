@@ -5,6 +5,7 @@ import type { SupabaseClient } from "@supabase/supabase-js";
 import { getOffers } from "@/lib/data/offers";
 import { pickOpenMessage, RECENT_LIMIT } from "@/lib/notifications/open-messages";
 import { deliver, type SubscriptionRow } from "@/lib/notifications/send";
+import { fetchAllRows } from "@/lib/supabase/fetch-all";
 
 /** At most one "we're open" push per this long, however often ordering is reopened. */
 const COOLDOWN_MS = 3 * 60 * 60 * 1000;
@@ -68,16 +69,24 @@ export async function notifyOrderingOpen(supabase: SupabaseClient): Promise<Open
     const recent: number[] = settings.recent_open_messages ?? [];
     const message = pickOpenMessage({ now, recent, fruitOn, offerPct });
 
-    const [{ data: subs }, { data: banned }] = await Promise.all([
-      supabase
-        .from("push_subscriptions")
-        .select("id, endpoint, p256dh, auth, user_id, users!inner(role, is_banned, phone)")
-        .eq("notify_open", true)
-        .returns<(SubscriptionRow & { user_id: string; users: { role: string; is_banned: boolean; phone: string } })[]>(),
-      supabase.from("users").select("phone").eq("is_banned", true),
+    // Paged: one response stops at 1000 rows, which would leave everyone
+    // past the first 1000 subscriptions without the ping.
+    const [subs, banned] = await Promise.all([
+      fetchAllRows((from, to) =>
+        supabase
+          .from("push_subscriptions")
+          .select("id, endpoint, p256dh, auth, user_id, users!inner(role, is_banned, phone)")
+          .eq("notify_open", true)
+          .order("id")
+          .range(from, to)
+          .returns<(SubscriptionRow & { user_id: string; users: { role: string; is_banned: boolean; phone: string } })[]>(),
+      ),
+      fetchAllRows((from, to) =>
+        supabase.from("users").select("phone").eq("is_banned", true).order("id").range(from, to),
+      ),
     ]);
-    const bannedPhones = new Set((banned ?? []).map((u) => u.phone));
-    const rows = (subs ?? []).filter(
+    const bannedPhones = new Set(banned.map((u) => u.phone));
+    const rows = subs.filter(
       (s) => s.users.role !== "admin" && !s.users.is_banned && !bannedPhones.has(s.users.phone),
     );
 

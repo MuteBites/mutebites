@@ -603,7 +603,10 @@ Every order ever placed lives
 at `/admin/history` instead, grouped by day (newest first), reusing the
 same `OrderList` component in a `groupByDate` mode rather than a separate
 one-off component. Every registered student is browsable (read-only, with
-a client-side search box) at `/admin/users`, reached via a "Users" button
+a client-side search box) at `/admin/users` — every row, paged past
+PostgREST's 1000-row cap by `fetchAllRows()` (`src/lib/supabase/fetch-all.ts`;
+a `.limit(5000)` kept the count stuck at "1000 total" until 12 Nov 2026 —
+use it for any list that can pass 1000 rows) — reached via a "Users" button
 next to "Order history" (a third button, "Reviews", opens `/admin/reviews` —
 see `order_reviews` under Database schema) — this replaced a "Banned users" button that used
 to sit directly on the main dashboard. Banned Users management itself

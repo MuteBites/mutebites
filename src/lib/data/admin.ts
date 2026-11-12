@@ -1,6 +1,7 @@
 import "server-only";
 
 import { createClient } from "@/lib/supabase/server";
+import { fetchAllRows } from "@/lib/supabase/fetch-all";
 import { isPastDeliverySlot, startOfTodayIST } from "@/lib/date";
 import type { OfferKey } from "@/lib/offers";
 import { getUnlockedMilestones, MILESTONES } from "@/components/profile/milestone-badges";
@@ -237,15 +238,19 @@ const HISTORY_ORDERS_LIMIT = 2000;
 /** Every order ever placed, most recent first — for the admin order-history page (grouped by day there). */
 export async function getAdminOrderHistory(): Promise<AdminOrder[]> {
   const supabase = await createClient();
-  const { data, error } = await supabase
-    .from("orders")
-    .select(ADMIN_ORDER_COLUMNS)
-    .order("created_at", { ascending: false })
-    .limit(HISTORY_ORDERS_LIMIT)
-    .returns<AdminOrderRow[]>();
-
-  if (error) throw error;
-  return (data ?? []).map(toAdminOrder);
+  // Paged: a single response stops at 1000 rows, whatever .limit() says.
+  const rows = await fetchAllRows(
+    (from, to) =>
+      supabase
+        .from("orders")
+        .select(ADMIN_ORDER_COLUMNS)
+        .order("created_at", { ascending: false })
+        .order("id")
+        .range(from, to)
+        .returns<AdminOrderRow[]>(),
+    HISTORY_ORDERS_LIMIT,
+  );
+  return rows.map(toAdminOrder);
 }
 
 export type AdminUser = {
@@ -270,49 +275,51 @@ export type AdminUser = {
 async function getDeliveredStatsByUser(): Promise<Map<string, { delivered: number; restaurants: Set<string> }>> {
   const supabase = await createClient();
   const stats = new Map<string, { delivered: number; restaurants: Set<string> }>();
-  const PAGE = 1000;
-  for (let from = 0; ; from += PAGE) {
-    const { data, error } = await supabase
+  const rows = await fetchAllRows((from, to) =>
+    supabase
       .from("orders")
       .select("user_id, restaurant_id")
       .eq("status", "delivered")
       .order("id")
-      .range(from, from + PAGE - 1);
-    if (error) throw error;
-    for (const row of data ?? []) {
-      const s = stats.get(row.user_id) ?? { delivered: 0, restaurants: new Set<string>() };
-      s.delivered += 1;
-      s.restaurants.add(row.restaurant_id);
-      stats.set(row.user_id, s);
-    }
-    if (!data || data.length < PAGE) break;
+      .range(from, to),
+  );
+  for (const row of rows) {
+    const s = stats.get(row.user_id) ?? { delivered: 0, restaurants: new Set<string>() };
+    s.delivered += 1;
+    s.restaurants.add(row.restaurant_id);
+    stats.set(row.user_id, s);
   }
   return stats;
 }
 
-// Capped for the same reason as HISTORY_ORDERS_LIMIT above — keeps the
-// Users page cheap to load as the student base grows.
-const ALL_USERS_LIMIT = 5000;
+// A safety cap only, far above today's numbers. Paged in fetchAllRows():
+// a plain .limit(5000) here got cut to 1000 rows by PostgREST, so the Users
+// page stuck at "1000 total" (fixed 12 Nov 2026).
+const ALL_USERS_LIMIT = 20000;
 
 /** Every registered student, most recently joined first — for the admin Users page. */
 export async function getAllUsers(): Promise<AdminUser[]> {
   const supabase = await createClient();
-  const [{ data, error }, deliveredStats, totalRestaurants, rewards] = await Promise.all([
-    supabase
-      .from("users")
-      .select("id, full_name, phone, email, registration_number, is_banned, created_at")
-      .order("created_at", { ascending: false })
-      .limit(ALL_USERS_LIMIT),
+  const [data, deliveredStats, totalRestaurants, rewards] = await Promise.all([
+    fetchAllRows(
+      (from, to) =>
+        supabase
+          .from("users")
+          .select("id, full_name, phone, email, registration_number, is_banned, created_at")
+          .order("created_at", { ascending: false })
+          .order("id")
+          .range(from, to),
+      ALL_USERS_LIMIT,
+    ),
     getDeliveredStatsByUser(),
     getRestaurantCount(),
     supabase.from("milestone_rewards").select("user_id, claimed_at"),
   ]);
 
-  if (error) throw error;
   // A missing milestone_rewards table (migration not applied yet) just means nobody has claimed.
   const claimedAt = new Map((rewards.data ?? []).map((r) => [r.user_id as string, r.claimed_at as string]));
 
-  return (data ?? []).map((u) => ({
+  return data.map((u) => ({
     rewardEarned:
       getUnlockedMilestones(
         deliveredStats.get(u.id)?.delivered ?? 0,
