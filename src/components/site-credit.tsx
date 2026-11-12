@@ -11,9 +11,10 @@ import { cn } from "@/lib/utils";
 const TAB_PAGES = ["/", "/orders", "/profile"];
 
 /**
- * "~ Made with ♥ by Naga Adithya" at the foot of every page (root layout).
+ * "~ Made with ♥ by Naga Adithya" at the foot of every page (root layout)
+ * except the admin's (left out by the client's call, 12 Nov 2026).
  * The heart beats now and then; the name has a dotted underline and folds
- * open Call · WhatsApp · Mail, like the About popup's credit. A lucide
+ * open WhatsApp · Mail, like the About popup's credit. A lucide
  * heart rather than the emoji — no emoji in the UI (they render differently
  * per phone).
  */
@@ -23,6 +24,7 @@ export function SiteCredit() {
   const tabPage = TAB_PAGES.includes(pathname);
   // Menus carry the cart bar at the bottom; order pages a sticky footer.
   const barPage = pathname.startsWith("/restaurants/");
+  if (pathname === "/admin" || pathname.startsWith("/admin/")) return null;
 
   return (
     <footer

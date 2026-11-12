@@ -845,7 +845,7 @@ silently re-enables the button.
   link or visible number, by the developer's choice, 31 Oct 2026) —
   `DeveloperName` / `DeveloperContact` in `src/components/developer-credit.tsx`,
   shared with **`SiteCredit`**, the "~ Made with ♥ by Naga Adithya" line at
-  the foot of **every page** (root layout, since 20 Oct 2026: a lucide heart
+  the foot of **every page** but the admin's (root layout, since 20 Oct 2026; hidden on `/admin/*` since 12 Nov 2026: a lucide heart
   that double-beats now and then — not the emoji, per the no-emoji rule —
   the contact links rising in one by one; on Home / Orders / Profile it
   tucks into the page's `pb-28` and clears the tab bar, menus leave room
