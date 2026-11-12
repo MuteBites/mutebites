@@ -18,7 +18,7 @@ import { EmptyState } from "@/components/empty-state";
 import { advanceOrderStatus, cancelOrder } from "@/lib/admin/actions";
 import type { AdminOrder } from "@/lib/data/admin";
 import type { OrderStatus } from "@/lib/data/types";
-import { formatTime, slotEndTime } from "@/lib/date";
+import { formatTime } from "@/lib/date";
 import { formatRupees } from "@/lib/format";
 import { itemLine } from "@/lib/orders/admin-text";
 import { advanceLabel, formatOrderNumber, nextStatus, statusBadge } from "@/lib/orders/status";
@@ -54,7 +54,16 @@ const SWIPE_AT = 96;
  * status shown (advanceOrderStatus / cancelOrder), so a stale screen can't
  * skip a step. Tapping a card opens its page.
  */
-export function OrderBoard({ orders, confirmedTools }: { orders: AdminOrder[]; confirmedTools?: ReactNode }) {
+export function OrderBoard({
+  orders,
+  dueById = {},
+  confirmedTools,
+}: {
+  orders: AdminOrder[];
+  /** When each order is due (lunch 1:45–2 PM or its restaurant's set time); null = not set yet. */
+  dueById?: Record<string, string | null>;
+  confirmedTools?: ReactNode;
+}) {
   const router = useRouter();
   // Statuses changed here, until the server re-fetch catches up.
   const [changed, setChanged] = useState<Record<string, OrderStatus>>({});
@@ -228,6 +237,7 @@ export function OrderBoard({ orders, confirmedTools }: { orders: AdminOrder[]; c
             <li key={order.id}>
               <BoardCard
                 order={order}
+                due={dueById[order.id] ?? null}
                 status={statusOf(order)}
                 now={now}
                 fresh={fresh(order.id)}
@@ -269,6 +279,7 @@ export function OrderBoard({ orders, confirmedTools }: { orders: AdminOrder[]; c
 
 function BoardCard({
   order,
+  due,
   status,
   now,
   fresh,
@@ -277,6 +288,7 @@ function BoardCard({
   onCancel,
 }: {
   order: AdminOrder;
+  due: string | null;
   status: OrderStatus;
   now: number | null;
   fresh: boolean;
@@ -339,7 +351,7 @@ function BoardCard({
 
   const badge = statusBadge(status);
   const minutes = now === null ? null : Math.max(0, Math.floor((now * 1000 - new Date(order.createdAt).getTime()) / 60_000));
-  const pastSlot = now !== null && slotEndTime(order.createdAt).getTime() <= now * 1000;
+  const pastSlot = now !== null && due !== null && new Date(due).getTime() <= now * 1000;
   const armed = Math.abs(dx) >= SWIPE_AT;
 
   return (
@@ -431,7 +443,7 @@ function BoardCard({
 
         <div className="relative z-10 mt-3 flex items-center gap-2" data-no-swipe>
           {status === "pending" || status === "confirmed" ? (
-            <AgeChip minutes={minutes} pending={status === "pending"} pastSlot={pastSlot} createdAt={order.createdAt} />
+            <AgeChip minutes={minutes} pending={status === "pending"} pastSlot={pastSlot} due={due} />
           ) : (
             <span className={cn("rounded-full px-2.5 py-1 text-xs font-bold", badge.className)}>{badge.label}</span>
           )}
@@ -462,18 +474,20 @@ function BoardCard({
 
 /**
  * New orders: how long they've waited for a confirm — amber from 5 min,
- * red from 10. Confirmed ones: the slot they're due in, red once it's past.
+ * red from 10. Confirmed ones: when they're due (lunch 1:45–2 PM or the
+ * restaurant's set time), red once it's past; "No time set" until the
+ * admin sets one.
  */
 function AgeChip({
   minutes,
   pending,
   pastSlot,
-  createdAt,
+  due,
 }: {
   minutes: number | null;
   pending: boolean;
   pastSlot: boolean;
-  createdAt: string;
+  due: string | null;
 }) {
   if (minutes === null) return <span className="h-6 w-20" aria-hidden="true" />;
   if (pending) {
@@ -492,16 +506,14 @@ function AgeChip({
       </span>
     );
   }
-  const end = slotEndTime(createdAt);
-  const noSlot = end.getTime() === new Date(createdAt).getTime();
   return (
     <span
       className={cn(
         "truncate rounded-full px-2.5 py-1 text-xs font-bold whitespace-nowrap",
-        pastSlot && !noSlot ? "bg-destructive/10 text-destructive" : "bg-plum-soft text-plum-soft-foreground",
+        !due ? "bg-amber-soft text-amber-soft-foreground" : pastSlot ? "bg-destructive/10 text-destructive" : "bg-plum-soft text-plum-soft-foreground",
       )}
     >
-      {noSlot ? "Time to be confirmed" : pastSlot ? `Slot ended ${formatTime(end.toISOString())}` : `Due by ${formatTime(end.toISOString())}`}
+      {!due ? "No time set" : pastSlot ? `Was due ${formatTime(due)}` : `Due by ${formatTime(due)}`}
     </span>
   );
 }

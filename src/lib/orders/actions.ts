@@ -194,6 +194,8 @@ const PLACE_ORDER_ERRORS: Record<string, string> = {
   invalid_contact_phone: "Enter a valid 10-digit mobile number.",
   notes_too_long: `That note's a bit long — keep it under ${MAX_NOTES} characters.`,
   restaurant_closed: "This restaurant isn't taking orders right now.",
+  // After 12:45 PM a restaurant needs today's delivery time first (public.delivery_info).
+  no_delivery_time: "This restaurant's delivery time isn't set yet — try again in a few minutes. Your cart is saved.",
   empty_cart: "Your cart's empty — go pick something tasty.",
   invalid_items: "Something's off with your cart — give it a quick look and try again.",
   dish_unavailable: "Something in your cart just sold out — hop back to the menu to swap it out.",

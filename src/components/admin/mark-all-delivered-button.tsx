@@ -19,9 +19,9 @@ import { toast } from "@/lib/toast/store";
 import { cn } from "@/lib/utils";
 
 /**
- * Bulk "confirmed → delivered", but only for orders whose delivery slot
- * has actually ended — a confirmed order still inside its window is left
- * alone. `confirmedCount` and `eligibleCount` come from the page, computed
+ * Bulk "confirmed → delivered", but only for orders whose delivery time
+ * (lunch 1:45–2 PM, or the restaurant's set time) has passed — one still
+ * ahead, or with no time set, is left alone. `confirmedCount` and `eligibleCount` come from the page, computed
  * over every confirmed order (not just today's list) against "now" at
  * render time; the server re-checks eligibility itself regardless (see
  * markAllConfirmedDelivered) and reports how many it actually delivered.
@@ -38,7 +38,7 @@ export function MarkAllDeliveredButton({
 }: {
   confirmedCount: number;
   eligibleCount: number;
-  /** "1:30 PM" — when the earliest still-waiting confirmed order's slot ends, or null if none are waiting. */
+  /** "8:30 PM" — when the earliest still-waiting confirmed order is due, or null if none are waiting. */
   nextSlotEnd: string | null;
 }) {
   const router = useRouter();
@@ -71,7 +71,7 @@ export function MarkAllDeliveredButton({
     : confirmedCount === 0
       ? "No confirmed orders to deliver"
       : nextSlotEnd
-        ? `Next slot ends ${nextSlotEnd}`
+        ? `Next delivery at ${nextSlotEnd}`
         : null;
 
   return (
@@ -99,12 +99,12 @@ export function MarkAllDeliveredButton({
             Mark {eligibleCount} order{eligibleCount === 1 ? "" : "s"} delivered?
           </AlertDialogTitle>
           <AlertDialogDescription>
-            Every confirmed order whose delivery slot has already ended will jump straight to
+            Every confirmed order whose delivery time has already passed will jump straight to
             delivered.
             {stillWaiting > 0 &&
               ` ${stillWaiting} other confirmed order${stillWaiting === 1 ? "" : "s"} ${
                 stillWaiting === 1 ? "hasn't reached its" : "haven't reached their"
-              } delivery window yet and will be left as confirmed.`}
+              } delivery time yet (or has none set) and will be left as confirmed.`}
           </AlertDialogDescription>
         </AlertDialogHeader>
         <AlertDialogFooter>

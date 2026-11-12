@@ -2,7 +2,7 @@ import "server-only";
 
 import { createClient } from "@/lib/supabase/server";
 import { fetchAllRows } from "@/lib/supabase/fetch-all";
-import { isPastDeliverySlot, startOfTodayIST } from "@/lib/date";
+import { startOfTodayIST } from "@/lib/date";
 import type { OfferKey } from "@/lib/offers";
 import { getUnlockedMilestones, MILESTONES } from "@/components/profile/milestone-badges";
 import { isUuid } from "@/lib/ids";
@@ -90,21 +90,6 @@ export async function getToCollect(): Promise<{ orders: number; amount: number }
       .from("orders")
       .select("total_amount")
       .not("status", "in", "(delivered,cancelled)")
-      .order("id")
-      .range(from, to),
-  );
-  return { orders: rows.length, amount: rows.reduce((n, r) => n + Number(r.total_amount), 0) };
-}
-
-/** Cash already collected today: every order delivered today (by delivered_at, IST). */
-export async function getCollectedToday(): Promise<{ orders: number; amount: number }> {
-  const supabase = await createClient();
-  const rows = await fetchAllRows((from, to) =>
-    supabase
-      .from("orders")
-      .select("total_amount")
-      .eq("status", "delivered")
-      .gte("delivered_at", startOfTodayIST().toISOString())
       .order("id")
       .range(from, to),
   );
@@ -242,22 +227,21 @@ export async function getAdminOrderDetail(id: string): Promise<AdminOrderDetail 
  * the action would in fact deliver (and could leave the button disabled
  * while there was work to do).
  */
-export async function getConfirmedOrderTimes(): Promise<{ id: string; createdAt: string }[]> {
+export async function getConfirmedOrderTimes(): Promise<{ id: string; createdAt: string; restaurantId: string }[]> {
   const supabase = await createClient();
-  const { data, error } = await supabase.from("orders").select("id, created_at").eq("status", "confirmed");
+  const { data, error } = await supabase.from("orders").select("id, created_at, restaurant_id").eq("status", "confirmed");
 
   if (error) throw error;
-  return (data ?? []).map((o) => ({ id: o.id, createdAt: o.created_at }));
+  return (data ?? []).map((o) => ({ id: o.id, createdAt: o.created_at, restaurantId: o.restaurant_id }));
 }
 
 /**
- * The main dashboard's "Current orders": today's orders (IST) whose
- * delivery slot hasn't ended yet, plus any of today's that still need an
- * admin (pending / confirmed) even past their slot, so nothing actionable
- * disappears. Delivered or cancelled orders drop off once their slot's
- * end time passes — they live on /admin/history (getAdminOrderHistory()).
+ * The main dashboard's board: every order placed today (IST). Delivered
+ * and cancelled ones sit on the Done tab until midnight (they used to drop
+ * off at the fixed slot's end, which no longer exists — 12 Nov 2026);
+ * every order ever is on /admin/history (getAdminOrderHistory()).
  */
-export async function getAdminOrders(now: Date = new Date()): Promise<AdminOrder[]> {
+export async function getAdminOrders(): Promise<AdminOrder[]> {
   const supabase = await createClient();
   const { data, error } = await supabase
     .from("orders")
@@ -267,13 +251,7 @@ export async function getAdminOrders(now: Date = new Date()): Promise<AdminOrder
     .returns<AdminOrderRow[]>();
 
   if (error) throw error;
-  return (data ?? [])
-    .map(toAdminOrder)
-    .filter((o) => !isFinished(o.status) || !isPastDeliverySlot(o.createdAt, now));
-}
-
-function isFinished(status: OrderStatus) {
-  return status === "delivered" || status === "cancelled";
+  return (data ?? []).map(toAdminOrder);
 }
 
 /** Every order placed in [from, to), oldest first — the Analytics page's CSV export. */

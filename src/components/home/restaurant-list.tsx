@@ -64,8 +64,8 @@ export function RestaurantList({
   dishOrderCounts: Record<string, number>;
   /** getTrendingDishes() — ranked first in the "Campus favourites" photo row. */
   trendingDishes: TrendingDish[];
-  /** deliveryWindow() for an order placed now — the promo card's delivery line. */
-  slot: { lead: string; time: string };
+  /** promoDelivery() — the admin's delivery time for what's on, for the promo card (null while none is set). */
+  slot: { lead: string; time: string } | null;
   /** Food-type keys to lead "What's on your mind?": the taste profile's
    *  cravings, then what the student's hearted dishes point to (cravingOrder()). */
   cravings?: string[];

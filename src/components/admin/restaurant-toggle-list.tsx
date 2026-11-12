@@ -20,14 +20,19 @@ import { setOrderingMode, setRestaurantActive } from "@/lib/admin/actions";
 import { openPushNote } from "@/lib/notifications/open-note";
 import { toast } from "@/lib/toast/store";
 import { cn } from "@/lib/utils";
+import { deliveryLine, isLunchNow, isSetToday, LUNCH_WINDOW, type DeliveryInfo } from "@/lib/delivery";
+import { DeliveryDialog } from "./delivery-dialog";
 
 function RestaurantToggleCard({
   restaurant,
   orderingEnabled,
   forcedClosed,
   closedChip,
+  delivery,
 }: {
   restaurant: AdminRestaurant;
+  /** Its delivery time (public.delivery_info); turning it on needs one set today. */
+  delivery?: DeliveryInfo;
   /** Campus-wide kill switch — a restaurant can be individually "open" and still not actually take orders while this is off. */
   orderingEnabled: boolean;
   /** An admin set ordering to Closed — turning a restaurant on first asks to reopen ordering. */
@@ -46,6 +51,9 @@ function RestaurantToggleCard({
   }
   const [pending, startTransition] = useTransition();
   const [askReopen, setAskReopen] = useState(false);
+  // No delivery time today → ask for one before turning it on (no fallback).
+  const [askTime, setAskTime] = useState(false);
+  const timeToday = isSetToday(delivery) ? delivery : null;
   // This restaurant itself is open, but campus-wide ordering is off — its
   // own toggle didn't do this, so it gets a distinct label rather than
   // being shown as plain "Open" (which would read as taking orders right
@@ -55,6 +63,16 @@ function RestaurantToggleCard({
 
   function toggle() {
     const next = !active;
+    // Before 12:45 PM it's lunch (fixed 1:45–2 PM) — no time to set.
+    if (next && !timeToday && !isLunchNow()) {
+      setAskTime(true);
+      return;
+    }
+    turn(next);
+  }
+
+  /** After a time is set (or when one already is): reopen ordering first if it's Closed. */
+  function turn(next: boolean) {
     if (next && forcedClosed) {
       setAskReopen(true);
       return;
@@ -114,6 +132,13 @@ function RestaurantToggleCard({
         {paused && (
           <p className="mt-1 text-xs text-muted-foreground">Campus ordering is closed — see Today above.</p>
         )}
+        <p className="mt-0.5 truncate text-xs text-muted-foreground">
+          {timeToday
+            ? `${deliveryLine(timeToday).lead} ${deliveryLine(timeToday).time}`.replace(/ /g, " ")
+            : isLunchNow()
+              ? `Lunch: delivery ${LUNCH_WINDOW}`
+              : "No delivery time set today"}
+        </p>
       </div>
 
       <button
@@ -130,6 +155,17 @@ function RestaurantToggleCard({
         {pending && <Loader2 className="size-3.5 animate-spin" />}
         {active ? "Turn off" : "Turn on"}
       </button>
+
+      <DeliveryDialog
+        open={askTime}
+        onOpenChange={setAskTime}
+        restaurants={[{ id: restaurant.id, name: restaurant.name }]}
+        current={delivery}
+        onSaved={() => {
+          router.refresh();
+          turn(true);
+        }}
+      />
 
       <AlertDialog open={askReopen} onOpenChange={(open) => !open && !pending && setAskReopen(false)}>
         <AlertDialogContent>
@@ -158,11 +194,14 @@ export function RestaurantToggleList({
   orderingEnabled,
   forcedClosed,
   closedChip,
+  delivery = {},
 }: {
   restaurants: AdminRestaurant[];
   orderingEnabled: boolean;
   forcedClosed: boolean;
   closedChip: string;
+  /** Delivery times by restaurant id (getDeliveryInfos()). */
+  delivery?: Record<string, DeliveryInfo>;
 }) {
   return (
     <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
@@ -173,6 +212,7 @@ export function RestaurantToggleList({
           orderingEnabled={orderingEnabled}
           forcedClosed={forcedClosed}
           closedChip={closedChip}
+          delivery={delivery[restaurant.id]}
         />
       ))}
     </div>

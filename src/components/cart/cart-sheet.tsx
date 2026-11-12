@@ -6,6 +6,7 @@ import { useRouter } from "next/navigation";
 import { Banknote, Loader2, MapPin, Phone, Plus, QrCode, X } from "lucide-react";
 import { EmptyState } from "@/components/empty-state";
 import { IconTile } from "@/components/icon-tile";
+import { useCartDelivery } from "./use-cart-delivery";
 import { CartLineRow } from "@/components/cart/cart-line-row";
 import { Sheet, SheetContent, SheetDescription, SheetTitle } from "@/components/ui/sheet";
 import { Textarea } from "@/components/ui/textarea";
@@ -138,6 +139,8 @@ function CartContents({
   offers: OffersState;
   onPlaced: () => void;
 }) {
+  // When it'll come: lunch's fixed window, or the restaurant's time set today.
+  const deliveryNote = useCartDelivery(cart.restaurantId, true);
   const router = useRouter();
   const [notes, setNotes] = useState("");
   const [contactPhone, setContactPhone] = useState(profilePhone);
@@ -273,6 +276,11 @@ function CartContents({
             <div>
               <p className={eyebrow}>Handover point</p>
               <p className="font-semibold">VIT-AP Main Gate</p>
+              {deliveryNote && (
+                <p className={cn("text-sm", deliveryNote === "none" ? "font-semibold text-destructive" : "text-muted-foreground")}>
+                  {deliveryNote === "none" ? "No delivery time set yet — try again soon" : deliveryNote}
+                </p>
+              )}
             </div>
           </div>
           <ContactPhone value={contactPhone} onChange={setContactPhone} />

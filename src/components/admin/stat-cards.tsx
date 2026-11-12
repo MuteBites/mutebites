@@ -7,8 +7,8 @@ import { SlotCountdown } from "./slot-countdown";
 
 /*
  * The dashboard's one plum block (mobile-first redesign, 12 Nov 2026): the
- * running delivery slot counting down, with how many open orders are due
- * in it, quick chips (restaurants on, offers on) and — via `children` — the
+ * next delivery counting down, with how many open orders are due then,
+ * quick chips (restaurants on, offers on) and — via `children` — the
  * campus Open / Closed switch as its footer row.
  */
 export function StatCards({
@@ -21,8 +21,8 @@ export function StatCards({
 }: {
   /** "Sat 19 Sep" — shown under the heading. */
   todayLabel: string;
-  /** Every order not yet delivered or cancelled — for the slot countdown. */
-  openOrders: { createdAt: string }[];
+  /** Every order not yet delivered or cancelled, with when it's due (null = no time set) — for the countdown. */
+  openOrders: { due: string | null }[];
   activeRestaurants: number;
   totalRestaurants: number;
   /** Short names of the offers switched on ("10% off"). */

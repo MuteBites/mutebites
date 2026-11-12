@@ -10,6 +10,9 @@ import {
   ChefHat,
   CookingPot,
   MapPin,
+  MessageCircle,
+  MessageSquareText,
+  Phone,
   Receipt,
   Share2,
   type LucideIcon,
@@ -23,7 +26,9 @@ import { RateOrder } from "@/components/orders/rate-order";
 import { SupportButtons } from "@/components/support-buttons";
 import type { OrderDetail } from "@/lib/data/orders";
 import type { OrderStatus } from "@/lib/data/types";
-import { deliveryWindow, formatTime } from "@/lib/date";
+import { formatTime } from "@/lib/date";
+import { DELIVERY_COLUMNS, deliveryLine, orderDelivery, toDeliveryInfo, type DeliveryInfo, type DeliveryRow } from "@/lib/delivery";
+import { formatStoredMobile, whatsAppLink } from "@/lib/phone";
 import { getDishPhoto } from "@/lib/data/dish-photos";
 import { formatRupees } from "@/lib/format";
 import { NAV_TRANSITION } from "@/lib/nav-transition";
@@ -76,10 +81,13 @@ const STEP_ICONS: LucideIcon[] = [Receipt, ChefHat, CookingPot];
  */
 export function OrderTracking({
   initialOrder,
+  initialDelivery,
   justPlaced = false,
   openRating = false,
 }: {
   initialOrder: OrderDetail;
+  /** The restaurant's delivery time (public.delivery_info) — kept live below. */
+  initialDelivery: DeliveryInfo | null;
   /** True once, right after this order was placed — shows a brief success moment. */
   justPlaced?: boolean;
   /** ?rate=1 — open the rating sheet on arrival (if the order is rateable). */
@@ -97,6 +105,7 @@ export function OrderTracking({
   const [updatedAt, setUpdatedAt] = useState(initialOrder.updatedAt);
   const [deliveredAt, setDeliveredAt] = useState(initialOrder.deliveredAt);
   const [live, setLive] = useState(false);
+  const [deliveryInfo, setDeliveryInfo] = useState(initialDelivery);
 
   useEffect(() => {
     // Strip ?placed=1 right away so a refresh doesn't replay the moment.
@@ -118,15 +127,39 @@ export function OrderTracking({
       )
       .subscribe((subscribeStatus) => setLive(subscribeStatus === "SUBSCRIBED"));
 
+    // The admin moving this restaurant's delivery time / message / rider
+    // reaches the open ticket at once. A DELETE carries only the key, so
+    // re-read the row (gone = no time set).
+    const deliveryChannel = supabase
+      .channel(`delivery-${initialOrder.restaurantId}`)
+      .on(
+        "postgres_changes",
+        { event: "*", schema: "public", table: "delivery_info", filter: `restaurant_id=eq.${initialOrder.restaurantId}` },
+        async () => {
+          const { data } = await supabase
+            .from("delivery_info")
+            .select(DELIVERY_COLUMNS)
+            .eq("restaurant_id", initialOrder.restaurantId)
+            .maybeSingle<DeliveryRow>();
+          setDeliveryInfo(data ? toDeliveryInfo(data) : null);
+        },
+      )
+      .subscribe();
+
     return () => {
       setLive(false);
       supabase.removeChannel(channel);
+      supabase.removeChannel(deliveryChannel);
     };
-  }, [initialOrder.id]);
+  }, [initialOrder.id, initialOrder.restaurantId]);
 
   const cancelled = status === "cancelled";
   const steps = cancelled ? [] : orderTimeline(status);
-  const eta = deliveryWindow(initialOrder.createdAt);
+  // Lunch (ordered before 12:45 PM) is the fixed 1:45–2 PM; otherwise the
+  // admin's time for this restaurant, if set that day. No fallback: until
+  // one's set, the ticket says it's coming.
+  const delivery = orderDelivery(initialOrder.createdAt, deliveryInfo, initialOrder.restaurantId);
+  const eta = delivery ? deliveryLine(delivery) : { lead: "Delivery time", time: "coming soon" };
   // Up to three distinct photos of what was ordered, for the ticket's header.
   const photos = initialOrder.items
     .map((item) => ({ dishName: item.dishName, src: getDishPhoto(initialOrder.restaurantName, item.dishName) }))
@@ -238,12 +271,51 @@ export function OrderTracking({
                   Collect at <strong className="font-semibold">VIT-AP Main Gate</strong> · pay on delivery
                 </span>
               </p>
+              {!cancelled && status !== "delivered" && delivery && (delivery.note || delivery.riderPhone) && (
+                <div key={delivery.updatedAt} className="animate-pop-in mt-3 rounded-2xl bg-hero-foreground/10 px-4 py-3 rim-light">
+                  {delivery.note && (
+                    <p className="flex items-start gap-2 text-sm">
+                      <MessageSquareText className="mt-0.5 size-4 shrink-0 text-hero-accent" aria-hidden="true" />
+                      <span>{delivery.note}</span>
+                    </p>
+                  )}
+                  {delivery.riderPhone && (
+                    <div className={cn("flex items-center gap-2", delivery.note && "mt-3")}>
+                      <span className="min-w-0 flex-1 text-sm">
+                        <span className="block text-hero-foreground/85">Delivery person</span>
+                        <span className="font-semibold tabular-nums">{formatStoredMobile(delivery.riderPhone)}</span>
+                      </span>
+                      <a
+                        href={`tel:${delivery.riderPhone}`}
+                        aria-label="Call the delivery person"
+                        className="flex size-10 shrink-0 items-center justify-center rounded-full bg-hero-foreground/15 outline-none focus-visible:ring-2 focus-visible:ring-hero-foreground"
+                      >
+                        <Phone className="size-4" aria-hidden="true" />
+                      </a>
+                      <a
+                        href={whatsAppLink(delivery.riderPhone)}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        aria-label="WhatsApp the delivery person"
+                        className="flex size-10 shrink-0 items-center justify-center rounded-full bg-hero-foreground/15 outline-none focus-visible:ring-2 focus-visible:ring-hero-foreground"
+                      >
+                        <MessageCircle className="size-4" aria-hidden="true" />
+                      </a>
+                    </div>
+                  )}
+                </div>
+              )}
             </div>
 
             {/* Stays once delivered: the rider turns into a tick at the gate. */}
             {!cancelled && (
               <div className="border-t border-hero-foreground/15 bg-hero-foreground/5 px-6 pt-4 pb-5">
-                <DeliveryRoad status={status} restaurantName={initialOrder.restaurantName} createdAt={initialOrder.createdAt} />
+                <DeliveryRoad
+                  status={status}
+                  restaurantName={initialOrder.restaurantName}
+                  createdAt={initialOrder.createdAt}
+                  deliverAt={delivery?.deliverAt ?? null}
+                />
               </div>
             )}
           </div>

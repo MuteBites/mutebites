@@ -2,7 +2,8 @@
 
 import { Phone, Star } from "lucide-react";
 import type { AdminOrderDetail } from "@/lib/data/admin";
-import { deliveryWindow, formatOrderTimestamp } from "@/lib/date";
+import { formatOrderTimestamp } from "@/lib/date";
+import { deliveryLine, orderDelivery, type DeliveryInfo } from "@/lib/delivery";
 import { formatRupees } from "@/lib/format";
 import { itemLine } from "@/lib/orders/admin-text";
 import { formatOrderNumber, statusBadge } from "@/lib/orders/status";
@@ -12,10 +13,11 @@ import { cn } from "@/lib/utils";
 import { CopyOrderButton, OrderActions, useOrderStatus, WhatsAppButton } from "./order-card";
 
 /** Everything about one order, for /admin/orders/[id] — opened by tapping an order card. */
-export function OrderDetailView({ order }: { order: AdminOrderDetail }) {
+export function OrderDetailView({ order, delivery }: { order: AdminOrderDetail; delivery?: DeliveryInfo }) {
   const [status, setStatus] = useOrderStatus(order.status);
   const badge = statusBadge(status);
-  const slot = deliveryWindow(order.createdAt);
+  const due = orderDelivery(order.createdAt, delivery, order.restaurantId);
+  const slot = due ? deliveryLine(due) : { lead: "Delivery time", time: "Not set yet" };
 
   return (
     <div className="mx-auto flex w-full max-w-2xl flex-col gap-4">

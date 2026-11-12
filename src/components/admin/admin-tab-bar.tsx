@@ -3,13 +3,13 @@
 import { useRef, useState, type MouseEvent, type PointerEvent } from "react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
-import { ChartColumn, ChefHat, ClipboardList, LayoutGrid, MapPin } from "lucide-react";
+import { ChartColumn, ChefHat, ClipboardList, LayoutGrid, Truck } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 const TABS = [
   { href: "/admin", label: "Orders", Icon: ClipboardList },
   { href: "/admin/kitchen", label: "Kitchen", Icon: ChefHat },
-  { href: "/admin/handover", label: "Handover", Icon: MapPin },
+  { href: "/admin/delivery", label: "Delivery", Icon: Truck },
   { href: "/admin/analytics", label: "Analytics", Icon: ChartColumn },
   { href: "/admin/more", label: "More", Icon: LayoutGrid },
 ] as const;

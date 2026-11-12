@@ -12,7 +12,9 @@ import { getDishOrderCounts, getTrendingDishes } from "@/lib/data/trending";
 import { getUsualCart } from "@/lib/data/usual";
 import { getRatePromptOrder } from "@/lib/data/orders";
 import { RatePrompt } from "@/components/home/rate-prompt";
-import { deliveryWindow, getTimeOfDayIST, isThursdayIST } from "@/lib/date";
+import { getTimeOfDayIST, isThursdayIST } from "@/lib/date";
+import { getTodaysDeliveryInfos } from "@/lib/data/delivery";
+import { promoDelivery } from "@/lib/delivery";
 import { NAV_TRANSITION, REVEAL_ENTER } from "@/lib/nav-transition";
 import { requireProfile } from "@/lib/profile";
 import { initialsOf } from "@/components/taste/avatar";
@@ -36,6 +38,7 @@ export default async function Home({ searchParams }: PageProps<"/">) {
   const trendingDishesPromise = getTrendingDishes();
   const dishOrderCountsPromise = getDishOrderCounts();
   const thursdaySpecialPromise = isThursdayIST() ? getThursdaySpecial() : Promise.resolve(null);
+  const deliveryPromise = getTodaysDeliveryInfos();
 
   const profile = await profilePromise;
   const [
@@ -94,7 +97,10 @@ export default async function Home({ searchParams }: PageProps<"/">) {
             dishes={dishes}
             dishOrderCounts={dishOrderCounts}
             trendingDishes={trendingDishes}
-            slot={deliveryWindow(new Date().toISOString())}
+            slot={promoDelivery(
+              restaurants.filter((r) => r.is_active).map((r) => r.id),
+              await deliveryPromise,
+            )}
             cravings={cravingOrder(taste, fromHearts)}
           />
         </ViewTransition>

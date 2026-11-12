@@ -11,7 +11,7 @@ import { PlumRide } from "./plum-ride";
  * are never fetched (lazy + display: none).
  *
  *   MuteBites Plum  the pitch and the real delivery time an order placed
- *                   now gets (deliveryWindow(), passed in from the server so
+ *                   now gets (promoDelivery(), passed in from the server so
  *                   it can't disagree with the ticket) over "On the way to
  *                   you" (PlumRide, 18 Oct 2026): the camera rides
  *                   alongside the big mascot while the sunset sky, campus
@@ -28,14 +28,15 @@ import { PlumRide } from "./plum-ride";
  *                   (`promo-*` in globals.css); reduced motion parks the
  *                   rider at the foot of the road.
  */
-export function PromoCard({ slot }: { slot: { lead: string; time: string } }) {
+/** `slot`: the admin's delivery time for what's on (promoDelivery()), or null while none is set. */
+export function PromoCard({ slot }: { slot: { lead: string; time: string } | null }) {
   return (
     <>
       <section
         aria-label="Hot food, at Main Gate"
         className="only-plum surface-hero glow-hero @container relative mt-6 min-h-[13.5rem] overflow-hidden rounded-[1.75rem] bg-hero p-5 text-hero-foreground"
       >
-        <PlumRide time={slot.time} />
+        <PlumRide time={slot?.time ?? ""} />
         <div className="relative z-10 max-w-[52%] [text-shadow:0_1px_10px_rgb(58_27_49/0.55)] @[20rem]:max-w-[56%]">
           <h2 className="font-heading text-title leading-tight font-bold">Hot food, at Main&nbsp;Gate</h2>
           <p className="mt-1 text-sm text-hero-foreground/85">Order here, pay when you collect.</p>
@@ -43,7 +44,13 @@ export function PromoCard({ slot }: { slot: { lead: string; time: string } }) {
             <Clock className="mt-0.5 size-4 shrink-0 text-hero-accent" aria-hidden="true" />
             {/* Short on purpose: the rider rides the road just right of this. */}
             <span>
-              {slot.lead} <span className="text-hero-accent">{slot.time}</span>
+              {slot ? (
+                <>
+                  {slot.lead} <span className="text-hero-accent">{slot.time}</span>
+                </>
+              ) : (
+                "Delivery times coming soon"
+              )}
             </span>
           </p>
         </div>

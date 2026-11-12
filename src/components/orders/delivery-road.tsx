@@ -3,19 +3,17 @@
 import { useEffect, useState, type CSSProperties } from "react";
 import { Check, ChefHat, CookingPot, MapPin, Motorbike } from "lucide-react";
 import type { OrderStatus } from "@/lib/data/types";
-import { slotEndTime } from "@/lib/date";
 import { cn } from "@/lib/utils";
 
 /*
- * The road follows the order's delivery SLOT (slotEndTime(): by 1:30 /
- * 7:30 / 8:15 PM), not a fixed number of minutes — animation only; the
- * ticket's "Delivery by" line is the promise. While the food is being
- * made, a cooking pot sits at the kitchen end with a kitchen line over it;
- * for the last RIDE_MINUTES before the slot ends (never before
- * MIN_COOK_SHARE of the way through), the rider takes over and rides with
- * the clock, reaching just short of Main Gate at slot end. Past the slot
- * end, the bubble apologises instead (LATE_LINES). An order placed after
- * 7:00 PM has no slot, so it gets NO_SLOT_MINUTES.
+ * The road follows the delivery time the admin set for the restaurant
+ * (public.delivery_info, `deliverAt`) — animation only; the ticket's
+ * "Delivery by" line is the promise. While the food is being made, a
+ * cooking pot sits at the kitchen end with a kitchen line over it; for the
+ * last RIDE_MINUTES before that time (never before MIN_COOK_SHARE of the
+ * way through), the rider takes over and rides with the clock, reaching
+ * just short of Main Gate on time. Past it, the bubble apologises instead
+ * (LATE_LINES). With no time set yet, the pot stays at the kitchen.
  *
  * Status keeps it honest: a pending order (not confirmed yet) never leaves
  * the kitchen, "out for delivery" always shows the rider, and nothing
@@ -23,7 +21,8 @@ import { cn } from "@/lib/utils";
  */
 const RIDE_MINUTES = 35;
 const MIN_COOK_SHARE = 0.4;
-const NO_SLOT_MINUTES = 60;
+/** A time set before the order (or at once) still gives the road at least this long. */
+const MIN_RUN_MINUTES = 15;
 /** The pot sits right on the kitchen (over the chef's hat). */
 const KITCHEN_P = 0;
 /** Where the rider sets off, just past the kitchen. */
@@ -75,27 +74,26 @@ type Phase = {
 
 const pick = (lines: string[], ms: number) => lines[Math.floor(Math.max(0, ms) / LINE_MS) % lines.length];
 
-/** When the rider sets off and when the slot ends, as epoch ms. */
-function timeline(createdAt: string) {
+/** When the rider sets off and when it's due at the gate, as epoch ms. */
+function timeline(createdAt: string, deliverAt: string) {
   const start = new Date(createdAt).getTime();
-  const slotEnd = slotEndTime(createdAt).getTime();
-  const end = slotEnd > start ? slotEnd : start + NO_SLOT_MINUTES * 60_000;
+  const end = Math.max(new Date(deliverAt).getTime(), start + MIN_RUN_MINUTES * 60_000);
   const rideStart = Math.max(start + (end - start) * MIN_COOK_SHARE, end - RIDE_MINUTES * 60_000);
   return { start, rideStart, end };
 }
 
-function phaseAt(status: OrderStatus, createdAt: string, now: number | null): Phase {
+function phaseAt(status: OrderStatus, createdAt: string, deliverAt: string | null, now: number | null): Phase {
   if (status === "delivered") return { p: 1, cooking: false, line: null, late: false };
   if (status === "cancelled") return { p: 0, cooking: false, line: null, late: false };
   const onTheWay = status === "out_for_delivery";
   // Before the first tick (and on the server) it sits at the kitchen, so
   // the server and browser render the same thing.
-  if (now === null) {
+  if (now === null || !deliverAt) {
     return onTheWay
       ? { p: 0.5, cooking: false, line: null, late: false }
       : { p: KITCHEN_P, cooking: true, line: null, late: false };
   }
-  const { start, rideStart, end } = timeline(createdAt);
+  const { start, rideStart, end } = timeline(createdAt, deliverAt);
   const late = now >= end;
   const lateLine = late ? pick(LATE_LINES, now - end) : null;
 
@@ -137,13 +135,16 @@ export function DeliveryRoad({
   status,
   restaurantName,
   createdAt,
+  deliverAt,
   tone = "hero",
   showMessage = true,
 }: {
   status: OrderStatus;
   restaurantName: string;
-  /** When the order was placed — its slot comes from this. */
+  /** When the order was placed. */
   createdAt: string;
+  /** The admin's delivery time for it (orderDelivery()), or null while none is set. */
+  deliverAt: string | null;
   tone?: "hero" | "card";
   showMessage?: boolean;
 }) {
@@ -159,7 +160,7 @@ export function DeliveryRoad({
       clearInterval(every);
     };
   }, [riding]);
-  const { p, cooking, line, late } = phaseAt(status, createdAt, now);
+  const { p, cooking, line, late } = phaseAt(status, createdAt, deliverAt, now);
   const arrived = status === "delivered";
   const hero = tone === "hero";
 

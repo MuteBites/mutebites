@@ -4,6 +4,7 @@ import { useMemo, useState } from "react";
 import { Check, ChefHat, Copy, MessageCircle } from "lucide-react";
 import { EmptyState } from "@/components/empty-state";
 import type { AdminOrder } from "@/lib/data/admin";
+import type { DeliveryInfo } from "@/lib/delivery";
 import { buildKitchen, kitchenText, type KitchenRestaurant } from "@/lib/orders/kitchen";
 import { formatOrderNumber } from "@/lib/orders/status";
 import { toast } from "@/lib/toast/store";
@@ -11,18 +12,27 @@ import { cn } from "@/lib/utils";
 
 /**
  * The Kitchen tab (mobile admin step 2, 12 Nov 2026): today's confirmed
- * orders by delivery slot, then per restaurant with every dish summed, and
+ * orders by when they're due (lunch, or each restaurant's set time), then per restaurant with every dish summed, and
  * a Copy / WhatsApp button per restaurant so each gets one list per slot.
  * New (not yet confirmed) orders can be added with the switch — off by
  * default, since a restaurant should only cook what's been confirmed.
  * WhatsApp opens the share picker (wa.me with no number): every restaurant
  * row still carries MuteBites' own number, so the admin picks the contact.
  */
-export function KitchenView({ confirmed, pending }: { confirmed: AdminOrder[]; pending: AdminOrder[] }) {
+export function KitchenView({
+  confirmed,
+  pending,
+  delivery = {},
+}: {
+  confirmed: AdminOrder[];
+  pending: AdminOrder[];
+  /** Restaurants' delivery times — the lists group by when orders are due. */
+  delivery?: Record<string, DeliveryInfo>;
+}) {
   const [withNew, setWithNew] = useState(false);
   const slots = useMemo(
-    () => buildKitchen(withNew ? [...confirmed, ...pending] : confirmed),
-    [confirmed, pending, withNew],
+    () => buildKitchen(withNew ? [...confirmed, ...pending] : confirmed, delivery),
+    [confirmed, pending, withNew, delivery],
   );
   const [picked, setPicked] = useState<string | null>(null);
   const slot = slots.find((s) => s.key === picked) ?? slots[0];

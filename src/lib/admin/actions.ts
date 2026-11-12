@@ -3,7 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { after } from "next/server";
 import { assertAdmin } from "@/lib/admin/assert";
-import { isPastDeliverySlot } from "@/lib/date";
+import { DELIVERY_COLUMNS, isLunchNow, orderDelivery, toDeliveryInfo, type DeliveryRow } from "@/lib/delivery";
 import { notifyOrderingOpen, type OpenPushResult } from "@/lib/notifications/ordering-open";
 import { notifyUser, type PushPayload } from "@/lib/notifications/send";
 import type { OrderStatus } from "@/lib/data/types";
@@ -116,6 +116,13 @@ export async function setRestaurantActive(
   if (denied) return denied;
 
   const supabase = await createClient();
+  // After 12:45 PM, no delivery time set today = no promise to make
+  // (place_order() refuses it too), so it can't be turned on yet. Before
+  // that it's lunch, delivered 1:45–2 PM with nothing to set.
+  if (active && !isLunchNow()) {
+    const { data: hasTime } = await supabase.rpc("delivery_set_today", { p_restaurant_id: restaurantId });
+    if (hasTime !== true) return { ok: false, error: "Set its delivery time for today first." };
+  }
   const { error } = await supabase
     .from("restaurants")
     .update({ is_active: active })
@@ -303,10 +310,10 @@ export async function setStudentBanned(userId: string, banned: boolean): Promise
 }
 
 /**
- * Bulk-advances every `confirmed` order whose delivery slot has already
- * ended straight to `delivered` — a confirmed order still inside its
- * window is left alone even though it's shown in the same list. Re-checks
- * slot end here rather than trusting whatever the client sent, same as
+ * Bulk-advances every `confirmed` order whose delivery time has passed
+ * (lunch 1:45–2 PM, or its restaurant's time set that day) straight to
+ * `delivered` — one still ahead, or with no time set, is left alone.
+ * Re-checks here rather than trusting whatever the client sent, same as
  * every other admin write in this file trusting only what it reads itself.
  */
 export async function markAllConfirmedDelivered(): Promise<
@@ -316,17 +323,22 @@ export async function markAllConfirmedDelivered(): Promise<
   if (denied) return denied;
 
   const supabase = await createClient();
-  const { data: confirmed, error: fetchError } = await supabase
-    .from("orders")
-    .select("id, created_at")
-    .eq("status", "confirmed");
+  const [{ data: confirmed, error: fetchError }, { data: infoRows }] = await Promise.all([
+    supabase.from("orders").select("id, created_at, restaurant_id").eq("status", "confirmed"),
+    supabase.from("delivery_info").select(DELIVERY_COLUMNS).returns<DeliveryRow[]>(),
+  ]);
   if (fetchError) return { ok: false, error: "Couldn't load confirmed orders. Please try again." };
+  const infos = new Map((infoRows ?? []).map((r) => [r.restaurant_id, toDeliveryInfo(r)]));
 
+  const now = Date.now();
   const eligibleIds = (confirmed ?? [])
-    .filter((o) => isPastDeliverySlot(o.created_at))
+    .filter((o) => {
+      const due = orderDelivery(o.created_at, infos.get(o.restaurant_id), o.restaurant_id);
+      return !!due && new Date(due.deliverAt).getTime() <= now;
+    })
     .map((o) => o.id);
   if (eligibleIds.length === 0) {
-    return { ok: false, error: "No confirmed orders have passed their delivery slot yet." };
+    return { ok: false, error: "No confirmed orders have reached their delivery time yet." };
   }
 
   // Compare-and-swap on status like the single-order actions: an order a

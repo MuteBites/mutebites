@@ -42,12 +42,12 @@ passcode the first time.
 Admin is built for your phone. It follows your phone's light / dark setting; to pick Light or Dark for admin only, use **More → Appearance**. At the bottom
 there are five tabs: **Orders** (everything about today's orders),
 **Kitchen** (the restaurant switches, and what to tell each restaurant),
-**Handover** (for the Main Gate), **Analytics** (how the business is doing)
+**Delivery** (today's delivery times), **Analytics** (how the business is doing)
 and **More** (every other admin page).
 
-The big plum **Today** card at the top of **Orders** counts down to the end
-of the current delivery slot ("38:12 left · 1:30 PM slot") with how many
-orders are due in it, and warns you if any order is past its slot. It has
+The big plum **Today** card at the top of **Orders** counts down to the next
+delivery ("38:12 to the 8:30 PM delivery") with how many orders are due
+then, and warns you if any order is past its time or has no time set. It has
 the **Open / Closed** switch at its foot. Under it, four tiles: orders
 today, **to collect** (the cash for every order not delivered yet),
 delivered and cancelled.
@@ -58,7 +58,9 @@ delivered and cancelled.
 - **Closed** — nobody can place a new order, and **every restaurant is
   turned off**. Orders already placed are not affected.
 - After re-opening, turn on the restaurants you want under **Restaurants**
-  on the **Kitchen** tab. Tapping **Turn on** while ordering is closed asks
+  on the **Kitchen** tab. After 12:45 PM it first asks **when it will
+  deliver** (see **Delivery times** below) — a restaurant can't be turned
+  on without one. Tapping **Turn on** while ordering is closed asks
   whether to open ordering now — **Open ordering** opens it and turns that
   restaurant on too.
 - **Students get a notification when you open.** Once ordering is open
@@ -68,7 +70,7 @@ delivered and cancelled.
   most once every 3 hours, so closing and reopening by mistake won't ping
   them twice. Students who turn off Notifications in Profile stop getting these (and their order updates).
 - **Close ordering at night.** If it's left open, an order placed after
-  midnight is promised for the next lunch slot (by 1:30 PM).
+  midnight counts as lunch (delivered 1:45–2 PM).
 
 ### New orders
 
@@ -82,17 +84,15 @@ delivered and cancelled.
 
 Today's orders sit in three tabs: **New** (waiting for you to confirm),
 **Confirmed** (placed with the restaurant, waiting to be collected) and
-**Done** (delivered or cancelled). A delivered or cancelled order drops off
-once its delivery time has passed; anything still waiting for you stays
-until it's done. Every order ever placed is in **Order history** (More tab).
+**Done** (delivered or cancelled — they stay there until midnight). Every order ever placed is in **Order history** (More tab).
 The search box finds an order by token, name or phone.
 
 Each card shows the **token number** big on the left (the student shows it
 at the gate), the student's name, each dish as "Dish name - quantity",
 the restaurant, the time and the amount. On **New** orders a chip shows how
 long they've waited: it turns amber after 5 minutes and red after 10. On
-**Confirmed** orders it shows the slot ("Due by 1:30 PM"), red once that
-time has passed.
+**Confirmed** orders it shows when it's due ("Due by 8:30 PM"), red once
+that time has passed, or "No time set" if you haven't set one yet.
 
 **Swipe a card right** to move it on: on **New** that confirms it, on
 **Confirmed** it marks it delivered. **Swipe left** on a New order to
@@ -111,9 +111,9 @@ Cancelling only works while an order is still New; the student is
 notified. A new order that arrives while you're looking glows once.
 
 **Mark all delivered** (on the **Confirmed** tab) marks every confirmed
-order **whose delivery slot has ended** as delivered, in one go (any day,
-not just today). While no slot has ended yet it's greyed out and says when
-the next one ends ("Next slot ends 1:30 PM").
+order **whose delivery time has passed** as delivered, in one go (any day,
+not just today). Until one has, it's greyed out and says when the next is
+("Next delivery at 8:30 PM").
 
 Tap any card for the full details page: timings, phone, email,
 registration number, each dish's price, the total, the note, and the
@@ -122,20 +122,11 @@ student's stars once they've rated it.
 ### Telling the restaurants (Kitchen)
 
 The **Kitchen** tab adds up today's **confirmed** orders for you: pick a
-delivery slot at the top ("By 1:30 PM"), and each restaurant gets one card
+delivery time at the top ("Lunch 1:45–2 PM", "By 8:30 PM"), and each restaurant gets one card
 with every dish and how many ("Chicken Fry Biryani × 3"), plus the token
 numbers. **Copy list** copies it; **WhatsApp** opens WhatsApp with the list
 typed out, and you choose the restaurant's chat. Orders you haven't
 confirmed yet aren't counted — switch on **Include new orders** to add them.
-
-### At the Main Gate (Handover)
-
-The **Handover** tab lists every confirmed order, sorted by token, with the
-student's name and the cash to take. Type the token the student shows you
-into the box at the top to jump to it. Tap the **tick** once they've
-collected it: the card turns green and you get a few seconds to **Undo** a
-wrong tap, then it's saved as delivered and the student is notified. The
-top card shows the cash **collected today** and what's still to hand over.
 
 ### How it's going (Analytics)
 
@@ -150,18 +141,30 @@ star rating per restaurant. **Export … to Excel (CSV)** at the bottom saves
 every order in the chosen range (one row each, with the student, dishes,
 offer, amount and status) as a file that opens in Excel or Google Sheets.
 
-### Delivery times the students see
+### Delivery times (the Delivery tab)
 
-The order ticket promises a time based on **when the order was placed**:
-
-| Placed before | Delivery by |
-|---|---|
-| 12:45 PM | 1:30 PM |
-| 6:00 PM | 7:30 PM |
-| 7:00 PM | 8:15 PM |
-| after 7:00 PM | "Delivery time to be confirmed" |
-
-To change these times, ask the developer.
+- **Lunch is fixed.** Any order placed **before 12:45 PM** is delivered
+  **between 1:45 and 2 PM**. Nothing to set.
+- **Evening and night: you set the time,** per restaurant, on the
+  **Delivery** tab (or when you turn a restaurant on after 12:45 PM). Tap
+  **Set delivery time** (or **Change**) and pick:
+  - **At a time** — tap a half-hour chip (7:00 · 7:30 · 8:00 …) or pick any
+    time under **Other time**; or
+  - **Within minutes** — 15, 20, 30, 45 or 60 minutes from now (students
+    see the clock time it comes to, e.g. "by 7:55 PM").
+  - Optionally a **message** for students ("Evening batch — collect at
+    Main Gate") and the **delivery person's phone** — students get Call
+    and WhatsApp buttons for it.
+  - **Same for all restaurants that are on** sets them all in one go.
+- **No time, no orders.** After 12:45 PM a restaurant with no time set
+  for today can't take orders, and can't be turned on. Times only count
+  for the day you set them, so set them again each day.
+- **Running late?** On the restaurant's card tap **Late? +15 min** or
+  **+30 min**: the time moves back and students see "Running a little
+  late, sorry!" (or your own message). Or tap **Change** to set anything.
+- **Students see every change at once** on their order page, and everyone
+  with a live order from that restaurant gets a notification ("Delivery
+  update: by 8:45 PM at Main Gate").
 
 ### Offers (discounts)
 

@@ -210,27 +210,34 @@ Food delivery site for VIT-AP University students.
 - **Order tracking ticket**: the token card (`order-tracking.tsx`) is a
   ticket stub — up to three distinct photos of the ordered dishes on top,
   a dashed tear line with edge notches (`bg-background` circles), then the
-  token and the delivery window. `deliveryWindow()` (`src/lib/date.ts`)
-  returns `{ lead, time }` with no-break spaces inside `time`, so "8:15 PM"
-  can never wrap apart. Its cut-offs are the old daily schedule's, kept by
-  decision when ordering became Open / Closed only (14 Oct 2026): placed
-  before 12:45 PM → by 1:30 PM, before 6:00 PM → by 7:30 PM, before 7:00 PM
-  → by 8:15 PM, later → "to be confirmed"; they mirror `slotEndTime()` —
-  see `app_settings` under Database schema. Once delivered, the ticket page also carries the
+  token and the delivery time. **Delivery times** (`src/lib/delivery.ts`,
+  since 12 Nov 2026 — the old fixed slots `deliveryWindow()` /
+  `slotEndTime()` are gone): **lunch is fixed** — ordered before 12:45 PM
+  (IST) → "Delivery between 1:45–2 PM" (`LUNCH_WINDOW`, due 2 PM); after
+  that the **admin sets each restaurant's time** on the Delivery tab
+  (`public.delivery_info`; see **Delivery** under Admin access), and
+  `orderDelivery(createdAt, info, restaurantId)` is the one rule every
+  screen uses: lunch, else the restaurant's time if it was set on the day
+  the order was placed, else **null — no fallback, by decision**; the
+  ticket then says "Delivery time coming soon". Students always see a
+  clock time ("Delivery by 7:55 PM"), even for a "within N min" setting.
+  The ticket also shows the admin's message and the delivery person's
+  phone (Call / WhatsApp), and follows `delivery_info` over Realtime, so a
+  changed time lands at once (with a push from the action). Once delivered, the ticket page also carries the
   rating card (`RateOrder`, see `order_reviews`).
   Redesign (15 Oct 2026): the stub is the lit plum hero, the token is
   `text-6xl`, the gate line is a pill ("Collect at VIT-AP Main Gate · pay
   on delivery"), the step list sits in a card, and while the order is live
   a footer strip carries **`DeliveryRoad`**
   (`src/components/orders/delivery-road.tsx`): the road from the kitchen
-  (chef's hat) to Main Gate (pin), timed by the order's **slot**, not
-  minutes — a jiggling `CookingPot` with steam (`animate-cook`,
+  (chef's hat) to Main Gate (pin), timed by the order's **delivery time**
+  (`deliverAt`, prop) — a jiggling `CookingPot` with steam (`animate-cook`,
   `cook-steam`) at the kitchen with a kitchen line (`COOK_LINES`) while
   it's made, then lucide's `Motorbike` (`animate-scooter`) riding for the
-  last `RIDE_MINUTES` (35) before `slotEndTime()` (never before 40% of the
-  way), reaching just short of the gate at slot end with ride lines; past
-  slot end the bubble apologises (`LATE_LINES`). An order after 7 PM (no
-  slot) gets a 60-minute run. Re-read every 15 s; lines change every 30 s.
+  last `RIDE_MINUTES` (35) before it (never before 40% of the way, and at
+  least `MIN_RUN_MINUTES` from the order), reaching just short of the gate
+  on time with ride lines; past it the bubble apologises (`LATE_LINES`).
+  With no time set yet the pot stays at the kitchen. Re-read every 15 s; lines change every 30 s.
   Status keeps it honest: pending stays at the kitchen with no line, out
   for delivery always shows the rider (from 50%), delivered → a tick at the
   gate (the road stays on the ticket after delivery, "At the gate. Enjoy!";
@@ -366,7 +373,9 @@ Food delivery site for VIT-AP University students.
   (two-column photo cards → `?dish=`, 12 at a time) and the restaurants
   serving something in it. Browsing: `PromoCard` (only while ordering is
   open — the lit plum "Hot food, at Main Gate" with the real
-  `deliveryWindow()` for an order placed now over each palette's animated
+  delivery time (`promoDelivery()`: lunch's window before 12:45 PM, then
+  the restaurants that are on — one shared time, or "Next delivery" —
+  or "Delivery times coming soon") over each palette's animated
   scene — see Themes), then `PopularRail` "Campus
   favourites" (`buildRail()`: the week's trending dishes ranked #1, #2…,
   then signature dishes, `getSignatureDishes()`, to fill 8) — it replaced
@@ -595,7 +604,8 @@ Food delivery site for VIT-AP University students.
 
 **Mobile-first admin** (redesign, step 1 shipped 12 Nov 2026; the plan,
 from a clickable mock-up the user approved: Orders board → Kitchen sheet →
-Handover mode → Analytics page, one step at a time). The admin has **its
+Delivery → Analytics, one step at a time; Handover was built, then
+replaced by Delivery on 12 Nov 2026). The admin has **its
 own Light / Dark / System** (More → Appearance, default **System**, since
 12 Nov 2026 — it was forced dark before): localStorage
 `mutebites.admin-theme`, apart from the student app's `mutebites.theme`
@@ -605,8 +615,8 @@ on the same phone (`storageKey()` / `isAdminPath()` in
 navigation in and out of `/admin`). `AdminTabBar`
 (`src/components/admin/admin-tab-bar.tsx`, mounted in the admin layout, so
 admin `<main>` is `pb-28`) is a floating bottom bar like the student one —
-**Orders** (`/admin`), **Kitchen** (`/admin/kitchen`, step 2), **Handover**
-(`/admin/handover`, step 3), **Analytics** (`/admin/analytics`, step 4) and
+**Orders** (`/admin`), **Kitchen** (`/admin/kitchen`, step 2), **Delivery**
+(`/admin/delivery`), **Analytics** (`/admin/analytics`, step 4) and
 **More**
 (`/admin/more`: the mock-up's 3 × 3 grid of tiles — History, Users,
 Reviews, Menus, Sold out, Offers, Restaurants (→ Kitchen), Banned, Install
@@ -642,18 +652,30 @@ fetches the range's orders only on tap (`getRangeOrders()` in
 `src/lib/admin/analytics-actions.ts` → `getAdminOrdersBetween()`, same
 `rangeBounds()` as the numbers) and saves them with Order history's
 columns (`downloadOrdersCsv()` / `ordersToCsv()` in
-`export-orders-button.tsx`). **Handover**
-(`HandoverView`, `src/components/admin/handover-view.tsx`) is for the Main
-Gate: today's confirmed orders sorted by token — a big token tile, name,
-amount, restaurant and dishes — with a numeric "Token number" search; the
-tick turns the card green with **Undo** for 4 s (`UNDO_MS`), then saves
-it delivered via `advanceOrderStatus(id, "confirmed")` (leaving the page
-mid-undo saves at once, never drops it). Up top: **collected today**
-(`getCollectedToday()` — today's delivered totals by `delivered_at`) and
-what's still to hand over. **Kitchen** (`KitchenView`,
+`export-orders-button.tsx`). **Delivery** (`DeliveryView` /
+`DeliveryDialog`, `src/components/admin/delivery-*.tsx`; actions in
+`src/lib/admin/delivery-actions.ts`; it replaced Handover, 12 Nov 2026):
+per restaurant (on first, then switched off), today's delivery time — set
+in a dialog as **At a time** (eight half-hour chips from now, or any time
+in a time input) or **Within minutes** (15 / 20 / 30 / 45 / 60, stored as
+the time it comes to), an optional message (≤ 200) and the delivery
+person's phone; "Same for all N restaurants that are on". Cards show the
+time, note, phone and when it was set, with **Late? +15 / +30 min**
+(`delayDelivery()`: pushes it back from max(now, the time), adds "Running
+a little late, sorry!" unless there's a note) and Clear. `setDeliveryInfo()`
+upserts and `notifyLiveOrders()` pings students with a live evening order
+from those restaurants today ("Delivery update · #12"). Kitchen's **Turn
+on** asks for a time first after 12:45 PM (`RestaurantToggleList` opens
+the dialog, then turns it on), and `setRestaurantActive()` refuses
+without one. The board's Today card counts down to the next due time
+(`SlotCountdown`: next ahead, how many past their time, how many with no
+time), Confirmed chips say "Due by 8:30 PM" / "Was due" / "No time set",
+and "Mark all delivered" takes orders whose time has passed
+(`dueSummary()`; the action re-checks with `orderDelivery()`). **Kitchen** (`KitchenView`,
 `src/components/admin/kitchen-view.tsx`; `buildKitchen()` / `kitchenText()`
 in `src/lib/orders/kitchen.ts`): today's confirmed orders grouped by
-delivery slot (`slotEndTime()`; slot chips, "Time to be confirmed" last),
+when they're due (`orderDelivery()`: "Lunch 1:45–2 PM", "By 8:30 PM",
+"No time set" last),
 then per restaurant with each dish summed ("Chicken Fry Biryani × 3";
 extras part of the name, a free biryani its own "Free" line) and the
 tokens; "Include new orders" adds the unconfirmed ones (off by default).
@@ -682,12 +704,10 @@ the actions still compare-and-swap on the status shown. "Mark all
 delivered" sits on the Confirmed tab. An order arriving while the board is
 open glows once (`.board-fresh`). `OrderList` remains for `/admin/history`.
 
-The main `/admin` dashboard's list is **Current orders**: today's (IST)
-orders until their delivery slot ends (`slotEndTime()`), after which a
-delivered/cancelled order drops off; pending/confirmed ones stay until
-they're done, so nothing actionable disappears (`getAdminOrders()`).
-`RefreshAt` re-fetches the page the moment the next slot ends. The stat
-cards still count the whole day (`getOrderCounts(startOfTodayIST())`).
+The main `/admin` board shows every order placed today (IST,
+`getAdminOrders()`; finished ones stay on Done until midnight — they used
+to drop off at the fixed slot's end). The stat cards count the whole day
+(`getOrderCounts(startOfTodayIST())`).
 Every order ever placed lives
 at `/admin/history` instead, grouped by day (newest first), reusing the
 same `OrderList` component in a `groupByDate` mode rather than a separate
@@ -1314,6 +1334,19 @@ no access; executable by `authenticated` only.
 the check `restaurants_archived_inactive` (`archived_at is null or not
 is_active`), so a removed restaurant can never be on or take orders. The
 existing admin update policies cover it. See **Menus** for what hides it.
+[`supabase/migrations/20261112030000_delivery_info.sql`](supabase/migrations/20261112030000_delivery_info.sql)
+adds **`delivery_info`** — one row per restaurant, today's delivery
+promise set by the admin: `mode` (`'at' | 'within'`), `deliver_at` (not
+null — for 'within' the time it comes to), `within_minutes` (5–180, only
+for 'within'), `note` (≤ 200), `rider_phone` (`+91XXXXXXXXXX`),
+`updated_at`, `updated_by`. It counts for the IST day of `updated_at`.
+RLS: **signed-in users read** (tickets show it; anon can't see the rider's
+number), admins insert / update / delete (`is_admin()`). In the
+`supabase_realtime` publication (tickets update live).
+`delivery_set_today(restaurant)` (security definer, authenticated) and
+`place_order()` re-created with one check after `restaurant_closed`: from
+12:45 PM IST, `no_delivery_time` unless that restaurant has a time set
+today (lunch needs none).
 [`supabase/migrations/20261017010000_menu_photos.sql`](supabase/migrations/20261017010000_menu_photos.sql)
 (applied 17 Oct 2026) adds **`dishes.photo_path`** and
 **`restaurants.cover_path`** (nullable text, checked against
@@ -1491,11 +1524,9 @@ on `orders`).
   authenticated) is the single source of truth — `place_order()` checks
   it, and the app reads it via `getOrderingState()`
   (`src/lib/data/settings.ts`), with the wording ("Ordering is closed
-  right now") from `describeOrdering()`. Delivery promises keep the old
-  slot cut-offs: `deliveryWindow()` / `slotEndTime()` (`src/lib/date.ts`) —
-  before 12:45 PM → by 1:30 PM, before 6:00 PM → by 7:30 PM, before 7:00
-  PM → by 8:15 PM; an order placed after 7:00 PM gets "Delivery time to be
-  confirmed" and counts as past its slot immediately. The old `ordering_enabled` boolean
+  right now") from `describeOrdering()`. Delivery promises no longer come
+  from fixed slots: lunch (before 12:45 PM) is 1:45–2 PM, later ones the
+  admin's per-restaurant time — see `delivery_info` below. The old `ordering_enabled` boolean
   it replaced was dropped in
   [`20260919010000_drop_ordering_enabled.sql`](supabase/migrations/20260919010000_drop_ordering_enabled.sql).
 

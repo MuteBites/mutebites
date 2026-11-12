@@ -1,5 +1,6 @@
 import type { AdminOrder } from "@/lib/data/admin";
-import { formatTime, slotEndTime } from "@/lib/date";
+import { formatTime } from "@/lib/date";
+import { orderDelivery, type DeliveryInfo } from "@/lib/delivery";
 import { formatOrderNumber } from "./status";
 
 /** One dish line for a restaurant: the same dish with the same extras, summed over orders. */
@@ -15,7 +16,7 @@ export type KitchenRestaurant = {
 };
 
 export type KitchenSlot = {
-  /** Slot end (epoch ms), or "tbc" for orders after 7 PM (no slot). */
+  /** When they're due (epoch ms), or "tbc" for orders with no delivery time set yet. */
   key: string;
   label: string;
   orders: number;
@@ -23,20 +24,20 @@ export type KitchenSlot = {
 };
 
 /**
- * The Kitchen sheet's data: orders grouped by delivery slot
- * (slotEndTime), then by restaurant, each dish summed — "Chicken Fry
+ * The Kitchen sheet's data: orders grouped by when they're due (lunch
+ * 1:45–2 PM, or each restaurant's time set for the day), then by restaurant, each dish summed — "Chicken Fry
  * Biryani × 6" — so the admin can send each restaurant one list per slot
  * instead of order by order. Extras are part of the dish's name
  * ("Nutella Pop + Ice cream"); a free biryani stays its own line.
- * Earliest slot first; "to be confirmed" last.
+ * Earliest first; "No time set" last.
  */
-export function buildKitchen(orders: AdminOrder[]): KitchenSlot[] {
-  const slots = new Map<string, { end: number | null; orders: AdminOrder[] }>();
+export function buildKitchen(orders: AdminOrder[], delivery: Record<string, DeliveryInfo> = {}): KitchenSlot[] {
+  const slots = new Map<string, { end: number | null; window?: string; orders: AdminOrder[] }>();
   for (const order of orders) {
-    const end = slotEndTime(order.createdAt).getTime();
-    const noSlot = end === new Date(order.createdAt).getTime();
-    const key = noSlot ? "tbc" : String(end);
-    const slot = slots.get(key) ?? { end: noSlot ? null : end, orders: [] };
+    const due = orderDelivery(order.createdAt, delivery[order.restaurantId], order.restaurantId);
+    const end = due ? new Date(due.deliverAt).getTime() : null;
+    const key = end === null ? "tbc" : String(end);
+    const slot = slots.get(key) ?? { end, window: due?.window, orders: [] };
     slot.orders.push(order);
     slots.set(key, slot);
   }
@@ -45,7 +46,12 @@ export function buildKitchen(orders: AdminOrder[]): KitchenSlot[] {
     .sort(([, a], [, b]) => (a.end ?? Infinity) - (b.end ?? Infinity))
     .map(([key, slot]) => ({
       key,
-      label: slot.end === null ? "Time to be confirmed" : `By ${formatTime(new Date(slot.end).toISOString())}`,
+      label:
+        slot.end === null
+          ? "No time set"
+          : slot.window
+            ? `Lunch ${slot.window}`
+            : `By ${formatTime(new Date(slot.end).toISOString())}`,
       orders: slot.orders.length,
       restaurants: byRestaurant(slot.orders),
     }));
