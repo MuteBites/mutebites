@@ -1,13 +1,14 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { DELIVERY_COLUMNS, deliveryLine, isLunchNow, isSetToday, LUNCH_WINDOW, toDeliveryInfo, type DeliveryRow } from "@/lib/delivery";
+import { BATCH_COLUMNS, clockTime, isLunchNow, LUNCH_WINDOW, todayKey, type BatchRow } from "@/lib/delivery";
 import { createClient } from "@/lib/supabase/client";
 
 /**
  * The cart's delivery line for an order placed now: lunch (before 12:45
- * PM) is the fixed window; otherwise the restaurant's time set today, read
- * when the cart opens. "none" = no time set, so it can't be ordered yet
+ * PM) is the fixed window; otherwise the batch it would join (the
+ * restaurant's first today whose cut-off is still ahead), read when the
+ * cart opens. "none" = no batch open, so it can't be ordered yet
  * (place_order() refuses with no_delivery_time) — said up front.
  */
 export function useCartDelivery(restaurantId: string | null, open: boolean): string | "none" | null {
@@ -23,16 +24,18 @@ export function useCartDelivery(restaurantId: string | null, open: boolean): str
       };
     }
     createClient()
-      .from("delivery_info")
-      .select(DELIVERY_COLUMNS)
+      .from("delivery_batches")
+      .select(BATCH_COLUMNS)
       .eq("restaurant_id", restaurantId)
-      .maybeSingle<DeliveryRow>()
+      .eq("day", todayKey())
+      .gt("order_until", new Date().toISOString())
+      .order("order_until")
+      .limit(1)
+      .maybeSingle<BatchRow>()
       .then(({ data }) => {
         if (cancelled) return;
-        const info = data ? toDeliveryInfo(data) : null;
-        if (!isSetToday(info)) return setLine("none");
-        const l = deliveryLine(info);
-        setLine(`${l.lead} ${l.time}`);
+        if (!data) return setLine("none");
+        setLine(`Delivery by ${clockTime(data.deliver_at)} (orders until ${clockTime(data.order_until)})`);
       });
     return () => {
       cancelled = true;

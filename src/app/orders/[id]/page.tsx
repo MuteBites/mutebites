@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { OrderTracking } from "@/components/orders/order-tracking";
 import { getOrder } from "@/lib/data/orders";
-import { getDeliveryInfos } from "@/lib/data/delivery";
+import { getBatch } from "@/lib/data/delivery";
 import { requireProfile } from "@/lib/profile";
 
 export const metadata: Metadata = { title: "Order details · MuteBites", robots: { index: false, follow: false } };
@@ -10,8 +10,9 @@ export const metadata: Metadata = { title: "Order details · MuteBites", robots:
 export default async function OrderDetailPage({ params, searchParams }: PageProps<"/orders/[id]">) {
   const profile = await requireProfile();
   const { id } = await params;
-  const [order, delivery] = await Promise.all([getOrder(id, profile.id), getDeliveryInfos()]);
+  const order = await getOrder(id, profile.id);
   if (!order) notFound();
+  const batch = await getBatch(order.batchId);
 
   // ?placed=1 is added once, by the cart sheet's redirect right after a
   // successful order — it triggers the one-time success moment below.
@@ -29,7 +30,7 @@ export default async function OrderDetailPage({ params, searchParams }: PageProp
   return (
     <OrderTracking
       initialOrder={order}
-      initialDelivery={delivery[order.restaurantId] ?? null}
+      initialBatch={batch}
       justPlaced={justPlaced}
       openRating={openRating}
     />

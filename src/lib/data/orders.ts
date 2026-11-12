@@ -24,6 +24,8 @@ export type OrderSummary = {
   dailyNumber: number;
   /** Delivered within the last 7 days and not rated yet — the Orders list's "Rate" pill. */
   rateable: boolean;
+  /** When it was promised (orders.promised_at; null for evening orders placed before batches). */
+  promisedAt: string | null;
 };
 
 function isRateable(status: OrderStatus, deliveredAt: string | null, reviewed: boolean): boolean {
@@ -86,6 +88,9 @@ export type OrderDetail = {
   /** The discount offer used, if any; totalAmount is already after it. */
   discountOffer: OfferKey | null;
   discountAmount: number;
+  /** Its delivery batch (null for lunch) and promised time. */
+  batchId: string | null;
+  promisedAt: string | null;
 };
 
 type OrderSummaryRow = {
@@ -99,6 +104,7 @@ type OrderSummaryRow = {
   daily_number: number;
   delivered_at: string | null;
   order_reviews: { order_id: string } | { order_id: string }[] | null;
+  promised_at: string | null;
 };
 
 function summarizeItems(items: ({ dish_name: string; quantity: number } & ItemAddonRows)[]): string {
@@ -120,7 +126,7 @@ export async function getOrderHistory(userId: string): Promise<OrderSummary[]> {
   const { data, error } = await supabase
     .from("orders")
     .select(
-      "id, status, total_amount, created_at, restaurant_id, restaurants(name), order_items(dish_name, quantity, order_item_addons(addon_name)), daily_number, delivered_at, order_reviews(order_id)",
+      "id, status, total_amount, created_at, restaurant_id, restaurants(name), order_items(dish_name, quantity, order_item_addons(addon_name)), daily_number, delivered_at, order_reviews(order_id), promised_at",
     )
     .eq("user_id", userId)
     .order("created_at", { ascending: false })
@@ -140,6 +146,7 @@ export async function getOrderHistory(userId: string): Promise<OrderSummary[]> {
     dishNames: o.order_items.map((i) => i.dish_name),
     dailyNumber: o.daily_number,
     rateable: isRateable(o.status, o.delivered_at, hasReview(o.order_reviews)),
+    promisedAt: o.promised_at,
   }));
 }
 
@@ -204,6 +211,8 @@ type OrderDetailRow = {
   discount_offer: OfferKey | null;
   discount_amount: number;
   delivered_at: string | null;
+  batch_id: string | null;
+  promised_at: string | null;
   // One-to-one via order_reviews.order_id; PostgREST may return an object or a one-element array.
   order_reviews: ReviewRow | ReviewRow[] | null;
 };
@@ -357,7 +366,7 @@ export const getOrder = cache(async function getOrder(
   const { data, error } = await supabase
     .from("orders")
     .select(
-      "id, status, total_amount, created_at, updated_at, delivered_at, contact_phone, notes, restaurant_id, restaurants(name, phone), order_items(id, dish_name, unit_price, addons_price, quantity, subtotal, is_free, order_item_addons(addon_name)), daily_number, discount_offer, discount_amount, order_reviews(note, created_at, order_item_ratings(order_item_id, rating))",
+      "id, status, total_amount, created_at, updated_at, delivered_at, contact_phone, notes, restaurant_id, restaurants(name, phone), order_items(id, dish_name, unit_price, addons_price, quantity, subtotal, is_free, order_item_addons(addon_name)), daily_number, discount_offer, discount_amount, batch_id, promised_at, order_reviews(note, created_at, order_item_ratings(order_item_id, rating))",
     )
     .eq("id", id)
     .eq("user_id", userId)
@@ -391,5 +400,7 @@ export const getOrder = cache(async function getOrder(
     dailyNumber: data.daily_number,
     discountOffer: data.discount_offer,
     discountAmount: Number(data.discount_amount),
+    batchId: data.batch_id,
+    promisedAt: data.promised_at,
   };
 });

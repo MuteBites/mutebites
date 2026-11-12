@@ -3,9 +3,8 @@
 import { useState, useTransition } from "react";
 import { Loader2 } from "lucide-react";
 import { Dialog, DialogContent, DialogDescription, DialogTitle } from "@/components/ui/dialog";
-import { setDeliveryInfo, type DeliveryInput } from "@/lib/admin/delivery-actions";
-import { formatTime } from "@/lib/date";
-import { MAX_DELIVERY_NOTE, WITHIN_CHOICES, isSetToday, type DeliveryInfo, type DeliveryMode } from "@/lib/delivery";
+import { addBatch, updateBatch, type BatchInput } from "@/lib/admin/delivery-actions";
+import { MAX_DELIVERY_NOTE, type Batch } from "@/lib/delivery";
 import { formatLocalMobile } from "@/lib/phone";
 import { toast } from "@/lib/toast/store";
 import { cn } from "@/lib/utils";
@@ -17,11 +16,16 @@ function toHHMM(d: Date) {
   return istHHMM.format(d);
 }
 
-/** The next eight half-hours from now (IST), as "HH:MM" — the quick time chips. */
-function nextHalfHours(now: Date): string[] {
-  const step = 30 * 60_000;
-  const first = Math.ceil((now.getTime() + 10 * 60_000) / step) * step;
-  return Array.from({ length: 8 }, (_, i) => toHHMM(new Date(first + i * step)));
+/** "19:30" → minutes since midnight. */
+function minutesOf(hhmm: string) {
+  const [h, m] = hhmm.split(":").map(Number);
+  return h * 60 + m;
+}
+
+/** Minutes since midnight → "19:30". */
+function hhmmOf(minutes: number) {
+  const m = ((minutes % 1440) + 1440) % 1440;
+  return `${String(Math.floor(m / 60)).padStart(2, "0")}:${String(m % 60).padStart(2, "0")}`;
 }
 
 /** "19:30" → "7:30 PM". */
@@ -30,65 +34,71 @@ function label(hhmm: string) {
   return `${h % 12 === 0 ? 12 : h % 12}:${String(m).padStart(2, "0")} ${h < 12 ? "AM" : "PM"}`;
 }
 
+/** The next eight half-hours from now (IST) — the cut-off chips. */
+function nextHalfHours(now: Date): string[] {
+  const step = 30 * 60_000;
+  const first = Math.ceil((now.getTime() + 5 * 60_000) / step) * step;
+  return Array.from({ length: 8 }, (_, i) => toHHMM(new Date(first + i * step)));
+}
+
 const chip =
   "flex h-10 shrink-0 items-center justify-center rounded-full border px-3.5 text-sm font-semibold outline-none focus-visible:ring-3 focus-visible:ring-ring/80";
 const chipOn = "surface-ink border-transparent bg-ink text-ink-foreground";
+const timeInput =
+  "h-11 rounded-full border border-input bg-card px-4 text-base outline-none focus-visible:ring-3 focus-visible:ring-ring/80";
 
 /**
- * Set when one or more restaurants will deliver today: an exact time
- * (quick half-hour chips, or any time from the picker) or "within N
- * minutes", plus an optional message and the delivery person's phone —
- * what students then see on their ticket. Opened from the Delivery tab, and
- * before turning a restaurant on (no time = no orders, by decision).
+ * Add or edit a delivery batch: orders until HH:MM (half-hour chips or any
+ * time) → delivered by HH:MM (chips 20 / 30 / 40 / 60 min after the
+ * cut-off, or any time), plus an optional message and the delivery
+ * person's phone — what students see on their ticket. Adding can go to
+ * every restaurant that's on at once. Opened from the Delivery tab, and
+ * before turning a restaurant on after 12:45 PM (no batch = no orders).
  */
 export function DeliveryDialog({
   open,
   onOpenChange,
   restaurants,
-  current,
+  batch,
   allOn,
   onSaved,
 }: {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  /** The restaurant(s) being set. */
+  /** Who the new batch is for (ignored when editing). */
   restaurants: { id: string; name: string }[];
-  /** What's set now (prefills the form when it's from today). */
-  current?: DeliveryInfo | null;
-  /** Every restaurant that's on — offers "Same for all N restaurants". */
+  /** Editing this batch; omitted = a new one. */
+  batch?: Batch | null;
+  /** Every restaurant that's on — offers "Same for all N". */
   allOn?: { id: string; name: string }[];
   onSaved?: () => void;
 }) {
-  const today = isSetToday(current) ? current : null;
-  const [mode, setMode] = useState<DeliveryMode>(today?.mode ?? "at");
-  const [time, setTime] = useState(today && today.mode === "at" ? toHHMM(new Date(today.deliverAt)) : "");
-  const [minutes, setMinutes] = useState<number>(today?.withinMinutes ?? 15);
-  const [note, setNote] = useState(today?.note ?? "");
-  const [phone, setPhone] = useState(today?.riderPhone ? formatLocalMobile(today.riderPhone.replace(/^\+91/, "")) : "");
+  const [chips] = useState(() => nextHalfHours(new Date()));
+  const [until, setUntil] = useState(batch ? toHHMM(new Date(batch.orderUntil)) : "");
+  const [at, setAt] = useState(batch ? toHHMM(new Date(batch.deliverAt)) : "");
+  const [note, setNote] = useState(batch?.note ?? "");
+  const [phone, setPhone] = useState(batch?.riderPhone ? formatLocalMobile(batch.riderPhone.replace(/^\+91/, "")) : "");
   const [forAll, setForAll] = useState(false);
   const [pending, startTransition] = useTransition();
-  const [chips] = useState(() => nextHalfHours(new Date()));
 
   const targets = forAll && allOn?.length ? allOn : restaurants;
-  const title = restaurants.length === 1 ? `When will ${restaurants[0].name} deliver?` : "When will these deliver?";
+  const name = restaurants.length === 1 ? restaurants[0].name : `${restaurants.length} restaurants`;
+  const afterChips = until ? [20, 30, 40, 60].map((m) => hhmmOf(minutesOf(until) + m)) : [];
 
   function save() {
-    const input: DeliveryInput = { mode, note, riderPhone: phone, ...(mode === "at" ? { time } : { minutes }) };
-    if (mode === "at" && !time) {
-      toast.error("Pick a delivery time.");
+    if (!until || !at) {
+      toast.error(!until ? "Pick until when orders join this batch." : "Pick when it'll be delivered.");
       return;
     }
+    const input: BatchInput = { orderUntil: until, deliverAt: at, note, riderPhone: phone };
     startTransition(async () => {
-      const result = await setDeliveryInfo(
-        targets.map((r) => r.id),
-        input,
-      );
+      const result = batch ? await updateBatch(batch.id, input) : await addBatch(targets.map((r) => r.id), input);
       if (!result.ok) {
         toast.error(result.error);
         return;
       }
       toast.success(
-        `Delivery time set for ${targets.length === 1 ? targets[0].name : `${targets.length} restaurants`}.${
+        `${batch ? "Batch saved" : `Batch added for ${targets.length === 1 ? targets[0].name : `${targets.length} restaurants`}`}.${
           result.notified ? ` ${result.notified} ${result.notified === 1 ? "student" : "students"} notified.` : ""
         }`,
       );
@@ -100,62 +110,43 @@ export function DeliveryDialog({
   return (
     <Dialog open={open} onOpenChange={(next) => (pending ? null : onOpenChange(next))}>
       <DialogContent className="max-h-[90dvh] overflow-y-auto">
-        <DialogTitle>{title}</DialogTitle>
+        <DialogTitle>{batch ? "Edit batch" : `New batch · ${name}`}</DialogTitle>
         <DialogDescription className="mt-1">
-          Students see this on their order. It only counts for today.
-          {today && ` Now: ${today.mode === "within" ? `within ${today.withinMinutes} min (set ${formatTime(today.updatedAt)})` : formatTime(today.deliverAt)}.`}
+          Orders placed until the cut-off join this batch, and students see its delivery time. Today only.
         </DialogDescription>
 
-        <div role="radiogroup" aria-label="How" className="mt-4 grid grid-cols-2 gap-1 rounded-full bg-secondary p-1">
-          {(["at", "within"] as const).map((m) => (
-            <button
-              key={m}
-              type="button"
-              role="radio"
-              aria-checked={mode === m}
-              onClick={() => setMode(m)}
-              className={cn(
-                "h-10 rounded-full text-sm font-semibold outline-none focus-visible:ring-3 focus-visible:ring-ring/80",
-                mode === m ? "surface-slider glow-slider bg-slider text-slider-foreground" : "text-muted-foreground",
-              )}
-            >
-              {m === "at" ? "At a time" : "Within minutes"}
-            </button>
-          ))}
+        <div className="mt-4">
+          <p className="text-label text-muted-foreground">Orders until</p>
+          <div className="mt-2 flex flex-wrap gap-2">
+            {chips.map((c) => (
+              <button key={c} type="button" onClick={() => setUntil(c)} className={cn(chip, until === c ? chipOn : "bg-card")}>
+                {label(c)}
+              </button>
+            ))}
+          </div>
+          <label className="mt-2 flex items-center gap-3 text-sm">
+            <span className="text-muted-foreground">Other time</span>
+            <input type="time" value={until} onChange={(e) => setUntil(e.target.value)} className={timeInput} />
+          </label>
         </div>
 
-        {mode === "at" ? (
-          <div className="mt-4">
-            <p className="text-label text-muted-foreground">Delivered at Main Gate by</p>
+        <div className="mt-5">
+          <p className="text-label text-muted-foreground">Delivered at Main Gate by</p>
+          {afterChips.length > 0 && (
             <div className="mt-2 flex flex-wrap gap-2">
-              {chips.map((c) => (
-                <button key={c} type="button" onClick={() => setTime(c)} className={cn(chip, time === c ? chipOn : "bg-card")}>
+              {afterChips.map((c, i) => (
+                <button key={c} type="button" onClick={() => setAt(c)} className={cn(chip, at === c ? chipOn : "bg-card")}>
                   {label(c)}
+                  <span className="ml-1 text-xs opacity-75">+{[20, 30, 40, 60][i]}</span>
                 </button>
               ))}
             </div>
-            <label className="mt-3 flex items-center gap-3 text-sm">
-              <span className="text-muted-foreground">Other time</span>
-              <input
-                type="time"
-                value={time}
-                onChange={(e) => setTime(e.target.value)}
-                className="h-11 rounded-full border border-input bg-card px-4 text-base outline-none focus-visible:ring-3 focus-visible:ring-ring/80"
-              />
-            </label>
-          </div>
-        ) : (
-          <div className="mt-4">
-            <p className="text-label text-muted-foreground">Delivered within (from now)</p>
-            <div className="mt-2 flex flex-wrap gap-2">
-              {WITHIN_CHOICES.map((m) => (
-                <button key={m} type="button" onClick={() => setMinutes(m)} className={cn(chip, minutes === m ? chipOn : "bg-card")}>
-                  {m} min
-                </button>
-              ))}
-            </div>
-          </div>
-        )}
+          )}
+          <label className="mt-2 flex items-center gap-3 text-sm">
+            <span className="text-muted-foreground">Other time</span>
+            <input type="time" value={at} onChange={(e) => setAt(e.target.value)} className={timeInput} />
+          </label>
+        </div>
 
         <label className="mt-5 block">
           <span className="text-label text-muted-foreground">Message for students (optional)</span>
@@ -163,7 +154,7 @@ export function DeliveryDialog({
             value={note}
             onChange={(e) => setNote(e.target.value.slice(0, MAX_DELIVERY_NOTE))}
             rows={2}
-            placeholder="e.g. Evening batch — collect at Main Gate"
+            placeholder="e.g. Second batch — collect at Main Gate"
             className="mt-1.5 w-full resize-none rounded-2xl border border-input bg-card px-4 py-3 text-base outline-none focus-visible:ring-3 focus-visible:ring-ring/80"
           />
           <span className="block text-right text-xs text-muted-foreground tabular-nums">
@@ -184,10 +175,10 @@ export function DeliveryDialog({
           />
         </label>
 
-        {allOn && allOn.length > 1 && (
+        {!batch && allOn && allOn.length > 1 && (
           <label className="mt-4 flex items-center gap-3 text-sm font-semibold">
             <input type="checkbox" checked={forAll} onChange={(e) => setForAll(e.target.checked)} className="size-5 accent-[var(--primary)]" />
-            Same for all {allOn.length} restaurants that are on
+            Same batch for all {allOn.length} restaurants that are on
           </label>
         )}
 

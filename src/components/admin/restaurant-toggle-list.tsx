@@ -20,7 +20,8 @@ import { setOrderingMode, setRestaurantActive } from "@/lib/admin/actions";
 import { openPushNote } from "@/lib/notifications/open-note";
 import { toast } from "@/lib/toast/store";
 import { cn } from "@/lib/utils";
-import { deliveryLine, isLunchNow, isSetToday, LUNCH_WINDOW, type DeliveryInfo } from "@/lib/delivery";
+import { isLunchNow, LUNCH_WINDOW, openBatch, type Batch } from "@/lib/delivery";
+import { formatTime } from "@/lib/date";
 import { DeliveryDialog } from "./delivery-dialog";
 
 function RestaurantToggleCard({
@@ -28,11 +29,11 @@ function RestaurantToggleCard({
   orderingEnabled,
   forcedClosed,
   closedChip,
-  delivery,
+  batches,
 }: {
   restaurant: AdminRestaurant;
-  /** Its delivery time (public.delivery_info); turning it on needs one set today. */
-  delivery?: DeliveryInfo;
+  /** Its delivery batches today; after 12:45 PM turning it on needs one still open. */
+  batches?: Batch[];
   /** Campus-wide kill switch — a restaurant can be individually "open" and still not actually take orders while this is off. */
   orderingEnabled: boolean;
   /** An admin set ordering to Closed — turning a restaurant on first asks to reopen ordering. */
@@ -51,9 +52,9 @@ function RestaurantToggleCard({
   }
   const [pending, startTransition] = useTransition();
   const [askReopen, setAskReopen] = useState(false);
-  // No delivery time today → ask for one before turning it on (no fallback).
+  // No batch open → ask for one before turning it on (no fallback).
   const [askTime, setAskTime] = useState(false);
-  const timeToday = isSetToday(delivery) ? delivery : null;
+  const timeToday = openBatch(batches);
   // This restaurant itself is open, but campus-wide ordering is off — its
   // own toggle didn't do this, so it gets a distinct label rather than
   // being shown as plain "Open" (which would read as taking orders right
@@ -134,10 +135,10 @@ function RestaurantToggleCard({
         )}
         <p className="mt-0.5 truncate text-xs text-muted-foreground">
           {timeToday
-            ? `${deliveryLine(timeToday).lead} ${deliveryLine(timeToday).time}`.replace(/ /g, " ")
+            ? `Orders until ${formatTime(timeToday.orderUntil)} · by ${formatTime(timeToday.deliverAt)}`
             : isLunchNow()
               ? `Lunch: delivery ${LUNCH_WINDOW}`
-              : "No delivery time set today"}
+              : "No delivery batch open"}
         </p>
       </div>
 
@@ -160,7 +161,6 @@ function RestaurantToggleCard({
         open={askTime}
         onOpenChange={setAskTime}
         restaurants={[{ id: restaurant.id, name: restaurant.name }]}
-        current={delivery}
         onSaved={() => {
           router.refresh();
           turn(true);
@@ -194,14 +194,14 @@ export function RestaurantToggleList({
   orderingEnabled,
   forcedClosed,
   closedChip,
-  delivery = {},
+  batches = {},
 }: {
   restaurants: AdminRestaurant[];
   orderingEnabled: boolean;
   forcedClosed: boolean;
   closedChip: string;
-  /** Delivery times by restaurant id (getDeliveryInfos()). */
-  delivery?: Record<string, DeliveryInfo>;
+  /** Today's delivery batches by restaurant id (getTodaysBatches()). */
+  batches?: Record<string, Batch[]>;
 }) {
   return (
     <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
@@ -212,7 +212,7 @@ export function RestaurantToggleList({
           orderingEnabled={orderingEnabled}
           forcedClosed={forcedClosed}
           closedChip={closedChip}
-          delivery={delivery[restaurant.id]}
+          batches={batches[restaurant.id]}
         />
       ))}
     </div>

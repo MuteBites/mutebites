@@ -214,16 +214,19 @@ Food delivery site for VIT-AP University students.
   since 12 Nov 2026 — the old fixed slots `deliveryWindow()` /
   `slotEndTime()` are gone): **lunch is fixed** — ordered before 12:45 PM
   (IST) → "Delivery between 1:45–2 PM" (`LUNCH_WINDOW`, due 2 PM); after
-  that the **admin sets each restaurant's time** on the Delivery tab
-  (`public.delivery_info`; see **Delivery** under Admin access), and
-  `orderDelivery(createdAt, info, restaurantId)` is the one rule every
-  screen uses: lunch, else the restaurant's time if it was set on the day
-  the order was placed, else **null — no fallback, by decision**; the
-  ticket then says "Delivery time coming soon". Students always see a
-  clock time ("Delivery by 7:55 PM"), even for a "within N min" setting.
-  The ticket also shows the admin's message and the delivery person's
-  phone (Call / WhatsApp), and follows `delivery_info` over Realtime, so a
-  changed time lands at once (with a push from the action). Once delivered, the ticket page also carries the
+  that the evening and night run in **delivery batches** the admin sets
+  per restaurant on the Delivery tab (`public.delivery_batches`; see
+  **Delivery** under Admin access): "orders until 7:00 PM → by 7:40",
+  "until 7:40 → by 8:10". An order joins the first batch whose cut-off is
+  still ahead and **keeps that promise** (`orders.batch_id` /
+  `promised_at`, set by `place_order()`), so a later batch never moves
+  earlier tickets. `orderPromise(order, batch)` is the one rule every
+  screen uses: lunch's window, else `promisedAt`, else **null — no
+  fallback, by decision** ("Delivery time coming soon"). The ticket also
+  shows the batch's message and the delivery person's phone (Call /
+  WhatsApp) and follows the order row (promise moved by Late +N or a
+  move) and `delivery_batches` (message / rider edits) over Realtime,
+  with a push from the action. Once delivered, the ticket page also carries the
   rating card (`RateOrder`, see `order_reviews`).
   Redesign (15 Oct 2026): the stub is the lit plum hero, the token is
   `text-6xl`, the gate line is a pill ("Collect at VIT-AP Main Gate · pay
@@ -655,26 +658,30 @@ columns (`downloadOrdersCsv()` / `ordersToCsv()` in
 `export-orders-button.tsx`). **Delivery** (`DeliveryView` /
 `DeliveryDialog`, `src/components/admin/delivery-*.tsx`; actions in
 `src/lib/admin/delivery-actions.ts`; it replaced Handover, 12 Nov 2026):
-per restaurant that's **on** (switched-off ones aren't listed — they get a time when turned on in Kitchen), today's delivery time — set
-in a dialog as **At a time** (eight half-hour chips from now, or any time
-in a time input) or **Within minutes** (15 / 20 / 30 / 45 / 60, stored as
-the time it comes to), an optional message (≤ 200) and the delivery
-person's phone; "Same for all N restaurants that are on". Cards show the
-time, note, phone and when it was set, with **Late? +15 / +30 min**
-(`delayDelivery()`: pushes it back from max(now, the time), adds "Running
-a little late, sorry!" unless there's a note) and Clear. `setDeliveryInfo()`
-upserts and `notifyLiveOrders()` pings students with a live evening order
-from those restaurants today ("Delivery update · #12"). Kitchen's **Turn
-on** asks for a time first after 12:45 PM (`RestaurantToggleList` opens
-the dialog, then turns it on), and `setRestaurantActive()` refuses
-without one. The board's Today card counts down to the next due time
-(`SlotCountdown`: next ahead, how many past their time, how many with no
-time), Confirmed chips say "Due by 8:30 PM" / "Was due" / "No time set",
-and "Mark all delivered" takes orders whose time has passed
-(`dueSummary()`; the action re-checks with `orderDelivery()`). **Kitchen** (`KitchenView`,
+per restaurant that's **on** (switched-off ones aren't listed — they get
+a batch when turned on in Kitchen), today's **batches**: each "orders
+until HH:MM → by HH:MM" (cut-off chips for the next half-hours; delivery
+chips 20 / 30 / 40 / 60 min after the cut-off; or any time), an optional
+message (≤ 200) and the delivery person's phone — both can be added or
+changed later with the pencil. "Add one batch to all N that are on".
+Each batch shows its open-order count, **Late? +15 / +30 min**
+(`delayBatch()`: pushes it back from max(now, its time), adds "Running a
+little late, sorry!" unless there's a note, moves its open orders'
+`promised_at`), Edit (`updateBatch()`, moves its orders too) and Remove
+(orders keep their time). `addBatch()` upserts on (restaurant, cut-off);
+every change pings that batch's students (`notifyBatchOrders()`). An open
+order's page (`OrderDetailView` → `MoveToBatch`, `moveOrderToBatch()`)
+moves it to another batch. Kitchen's **Turn on** asks for a batch first
+after 12:45 PM (`RestaurantToggleList` opens the dialog, then turns it
+on), and `setRestaurantActive()` refuses without one open
+(`delivery_open_batch()`). The board's Today card counts down to the next
+due time (`SlotCountdown`), Confirmed chips say "Due by 8:10 PM" / "Was
+due" / "No time set", and "Mark all delivered" takes orders whose
+promised time has passed (`dueSummary()`; the action re-checks with
+`orderPromise()`). **Kitchen** (`KitchenView`,
 `src/components/admin/kitchen-view.tsx`; `buildKitchen()` / `kitchenText()`
 in `src/lib/orders/kitchen.ts`): today's confirmed orders grouped by
-when they're due (`orderDelivery()`: "Lunch 1:45–2 PM", "By 8:30 PM",
+when they're due (`orderPromise()`: "Lunch 1:45–2 PM", "By 8:10 PM",
 "No time set" last),
 then per restaurant with each dish summed ("Chicken Fry Biryani × 3";
 extras part of the name, a free biryani its own "Free" line) and the
@@ -1335,18 +1342,20 @@ the check `restaurants_archived_inactive` (`archived_at is null or not
 is_active`), so a removed restaurant can never be on or take orders. The
 existing admin update policies cover it. See **Menus** for what hides it.
 [`supabase/migrations/20261112030000_delivery_info.sql`](supabase/migrations/20261112030000_delivery_info.sql)
-adds **`delivery_info`** — one row per restaurant, today's delivery
-promise set by the admin: `mode` (`'at' | 'within'`), `deliver_at` (not
-null — for 'within' the time it comes to), `within_minutes` (5–180, only
-for 'within'), `note` (≤ 200), `rider_phone` (`+91XXXXXXXXXX`),
-`updated_at`, `updated_by`. It counts for the IST day of `updated_at`.
-RLS: **signed-in users read** (tickets show it; anon can't see the rider's
-number), admins insert / update / delete (`is_admin()`). In the
-`supabase_realtime` publication (tickets update live).
-`delivery_set_today(restaurant)` (security definer, authenticated) and
-`place_order()` re-created with one check after `restaurant_closed`: from
-12:45 PM IST, `no_delivery_time` unless that restaurant has a time set
-today (lunch needs none).
+added a single per-restaurant time (`delivery_info`), replaced the same
+day (still empty) by
+[`supabase/migrations/20261112040000_delivery_batches.sql`](supabase/migrations/20261112040000_delivery_batches.sql):
+**`delivery_batches`** — `restaurant_id`, `day` (IST date), `order_until`
+(the cut-off), `deliver_at` (≥ cut-off), `note` (≤ 200), `rider_phone`
+(`+91XXXXXXXXXX`), `updated_at` / `updated_by`; unique (restaurant,
+cut-off). RLS: **signed-in users read** (anon can't see riders' numbers),
+admins insert / update / delete. In `supabase_realtime`. **`orders.batch_id`**
+(→ batch, on delete set null) and **`orders.promised_at`** — the promise,
+written by `place_order()`: before 12:45 PM IST 2 PM that day (lunch, no
+batch); after, the restaurant's first batch today whose cut-off is ahead,
+else `no_delivery_time`. Admins move them under the existing orders
+update policy. `delivery_open_batch(restaurant)` (security definer,
+authenticated) backs the Turn-on check.
 [`supabase/migrations/20261017010000_menu_photos.sql`](supabase/migrations/20261017010000_menu_photos.sql)
 (applied 17 Oct 2026) adds **`dishes.photo_path`** and
 **`restaurants.cover_path`** (nullable text, checked against
@@ -1526,7 +1535,7 @@ on `orders`).
   (`src/lib/data/settings.ts`), with the wording ("Ordering is closed
   right now") from `describeOrdering()`. Delivery promises no longer come
   from fixed slots: lunch (before 12:45 PM) is 1:45–2 PM, later ones the
-  admin's per-restaurant time — see `delivery_info` below. The old `ordering_enabled` boolean
+  admin's delivery batches — see `delivery_batches` below. The old `ordering_enabled` boolean
   it replaced was dropped in
   [`20260919010000_drop_ordering_enabled.sql`](supabase/migrations/20260919010000_drop_ordering_enabled.sql).
 

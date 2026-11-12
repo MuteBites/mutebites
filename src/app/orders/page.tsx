@@ -7,8 +7,7 @@ import { EmptyState } from "@/components/empty-state";
 import { getDishPhoto } from "@/lib/data/dish-photos";
 import { getUploadedPhotos } from "@/lib/data/uploaded-photos";
 import { getOrderHistory, type OrderSummary } from "@/lib/data/orders";
-import { getDeliveryInfos } from "@/lib/data/delivery";
-import { deliveryLine, orderDelivery, type DeliveryInfo } from "@/lib/delivery";
+import { deliveryLine, orderPromise, type DeliveryPromise } from "@/lib/delivery";
 import { formatDayHeading, formatTime, istDayKey } from "@/lib/date";
 import { formatRupees } from "@/lib/format";
 import { NAV_TRANSITION, REVEAL_ENTER } from "@/lib/nav-transition";
@@ -29,7 +28,7 @@ export const metadata: Metadata = { title: "Your orders · MuteBites", robots: {
 export default async function OrdersPage() {
   const profile = await requireProfile();
   // Uploaded photos registered before getDishPhoto() runs below.
-  const [orders, , delivery] = await Promise.all([getOrderHistory(profile.id), getUploadedPhotos(), getDeliveryInfos()]);
+  const [orders] = await Promise.all([getOrderHistory(profile.id), getUploadedPhotos()]);
 
   const inProgress = orders.filter((o) => isActiveStatus(o.status));
   const past = orders.filter((o) => !isActiveStatus(o.status));
@@ -66,7 +65,7 @@ export default async function OrdersPage() {
               <ul className="mt-2.5 flex flex-col gap-3">
                 {inProgress.map((order) => (
                   <li key={order.id}>
-                    <ActiveOrderCard order={order} delivery={orderDelivery(order.createdAt, delivery[order.restaurantId], order.restaurantId)} />
+                    <ActiveOrderCard order={order} delivery={orderPromise(order)} />
                   </li>
                 ))}
               </ul>
@@ -140,7 +139,7 @@ function OrderThumb({ order, className }: { order: OrderSummary; className?: str
   );
 }
 
-function ActiveOrderCard({ order, delivery }: { order: OrderSummary; delivery: DeliveryInfo | null }) {
+function ActiveOrderCard({ order, delivery }: { order: OrderSummary; delivery: DeliveryPromise | null }) {
   const eta = delivery ? deliveryLine(delivery) : null;
   const badge = statusBadge(order.status);
   return (

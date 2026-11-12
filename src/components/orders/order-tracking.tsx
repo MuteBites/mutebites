@@ -27,7 +27,7 @@ import { SupportButtons } from "@/components/support-buttons";
 import type { OrderDetail } from "@/lib/data/orders";
 import type { OrderStatus } from "@/lib/data/types";
 import { formatTime } from "@/lib/date";
-import { DELIVERY_COLUMNS, deliveryLine, orderDelivery, toDeliveryInfo, type DeliveryInfo, type DeliveryRow } from "@/lib/delivery";
+import { BATCH_COLUMNS, deliveryLine, orderPromise, toBatch, type Batch, type BatchRow } from "@/lib/delivery";
 import { formatStoredMobile, whatsAppLink } from "@/lib/phone";
 import { getDishPhoto } from "@/lib/data/dish-photos";
 import { formatRupees } from "@/lib/format";
@@ -81,13 +81,13 @@ const STEP_ICONS: LucideIcon[] = [Receipt, ChefHat, CookingPot];
  */
 export function OrderTracking({
   initialOrder,
-  initialDelivery,
+  initialBatch,
   justPlaced = false,
   openRating = false,
 }: {
   initialOrder: OrderDetail;
-  /** The restaurant's delivery time (public.delivery_info) — kept live below. */
-  initialDelivery: DeliveryInfo | null;
+  /** Its delivery batch (message, rider) — kept live below. */
+  initialBatch: Batch | null;
   /** True once, right after this order was placed — shows a brief success moment. */
   justPlaced?: boolean;
   /** ?rate=1 — open the rating sheet on arrival (if the order is rateable). */
@@ -105,7 +105,11 @@ export function OrderTracking({
   const [updatedAt, setUpdatedAt] = useState(initialOrder.updatedAt);
   const [deliveredAt, setDeliveredAt] = useState(initialOrder.deliveredAt);
   const [live, setLive] = useState(false);
-  const [deliveryInfo, setDeliveryInfo] = useState(initialDelivery);
+  // The promise moves when the admin runs a batch late or moves the order.
+  const [promisedAt, setPromisedAt] = useState(initialOrder.promisedAt);
+  const [batchId, setBatchId] = useState(initialOrder.batchId);
+  const [batch, setBatch] = useState(initialBatch);
+  const [batchTick, setBatchTick] = useState(0);
 
   useEffect(() => {
     // Strip ?placed=1 right away so a refresh doesn't replay the moment.
@@ -116,33 +120,27 @@ export function OrderTracking({
     const supabase = createClient();
     const channel = supabase
       .channel(`order-${initialOrder.id}`)
-      .on<{ status: OrderStatus; updated_at: string; delivered_at: string | null }>(
+      .on<{ status: OrderStatus; updated_at: string; delivered_at: string | null; promised_at: string | null; batch_id: string | null }>(
         "postgres_changes",
         { event: "UPDATE", schema: "public", table: "orders", filter: `id=eq.${initialOrder.id}` },
         (payload) => {
           setStatus(payload.new.status);
           setUpdatedAt(payload.new.updated_at);
           setDeliveredAt(payload.new.delivered_at);
+          setPromisedAt(payload.new.promised_at);
+          setBatchId(payload.new.batch_id);
         },
       )
       .subscribe((subscribeStatus) => setLive(subscribeStatus === "SUBSCRIBED"));
 
-    // The admin moving this restaurant's delivery time / message / rider
-    // reaches the open ticket at once. A DELETE carries only the key, so
-    // re-read the row (gone = no time set).
+    // The admin editing this restaurant's batches (message, rider) reaches
+    // the open ticket at once; re-read the order's own batch on any change.
     const deliveryChannel = supabase
-      .channel(`delivery-${initialOrder.restaurantId}`)
+      .channel(`batches-${initialOrder.restaurantId}`)
       .on(
         "postgres_changes",
-        { event: "*", schema: "public", table: "delivery_info", filter: `restaurant_id=eq.${initialOrder.restaurantId}` },
-        async () => {
-          const { data } = await supabase
-            .from("delivery_info")
-            .select(DELIVERY_COLUMNS)
-            .eq("restaurant_id", initialOrder.restaurantId)
-            .maybeSingle<DeliveryRow>();
-          setDeliveryInfo(data ? toDeliveryInfo(data) : null);
-        },
+        { event: "*", schema: "public", table: "delivery_batches", filter: `restaurant_id=eq.${initialOrder.restaurantId}` },
+        () => setBatchTick((t) => t + 1),
       )
       .subscribe();
 
@@ -153,12 +151,31 @@ export function OrderTracking({
     };
   }, [initialOrder.id, initialOrder.restaurantId]);
 
+  // Re-read the batch when the order moves to another, or a batch changes.
+  useEffect(() => {
+    if (batchTick === 0 && batchId === initialOrder.batchId) return;
+    let cancelled = false;
+    const supabase = createClient();
+    if (!batchId) {
+      queueMicrotask(() => !cancelled && setBatch(null));
+    } else {
+      supabase
+        .from("delivery_batches")
+        .select(BATCH_COLUMNS)
+        .eq("id", batchId)
+        .maybeSingle<BatchRow>()
+        .then(({ data }) => !cancelled && setBatch(data ? toBatch(data) : null));
+    }
+    return () => {
+      cancelled = true;
+    };
+  }, [batchId, batchTick, initialOrder.batchId]);
+
   const cancelled = status === "cancelled";
   const steps = cancelled ? [] : orderTimeline(status);
   // Lunch (ordered before 12:45 PM) is the fixed 1:45–2 PM; otherwise the
-  // admin's time for this restaurant, if set that day. No fallback: until
-  // one's set, the ticket says it's coming.
-  const delivery = orderDelivery(initialOrder.createdAt, deliveryInfo, initialOrder.restaurantId);
+  // batch time it was promised (moved live by the admin). No fallback.
+  const delivery = orderPromise({ createdAt: initialOrder.createdAt, promisedAt }, batch);
   const eta = delivery ? deliveryLine(delivery) : { lead: "Delivery time", time: "coming soon" };
   // Up to three distinct photos of what was ordered, for the ticket's header.
   const photos = initialOrder.items
@@ -272,7 +289,7 @@ export function OrderTracking({
                 </span>
               </p>
               {!cancelled && status !== "delivered" && delivery && (delivery.note || delivery.riderPhone) && (
-                <div key={delivery.updatedAt} className="animate-pop-in mt-3 rounded-2xl bg-hero-foreground/10 px-4 py-3 rim-light">
+                <div key={`${delivery.note}|${delivery.riderPhone}`} className="animate-pop-in mt-3 rounded-2xl bg-hero-foreground/10 px-4 py-3 rim-light">
                   {delivery.note && (
                     <p className="flex items-start gap-2 text-sm">
                       <MessageSquareText className="mt-0.5 size-4 shrink-0 text-hero-accent" aria-hidden="true" />

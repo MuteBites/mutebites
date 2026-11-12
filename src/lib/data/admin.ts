@@ -116,6 +116,9 @@ export type AdminOrder = {
   discountOffer: OfferKey | null;
   discountAmount: number;
   dailyNumber: number;
+  /** The delivery batch it joined (null for lunch) and when it's due (orders.promised_at). */
+  batchId: string | null;
+  promisedAt: string | null;
 };
 
 type AdminOrderRow = {
@@ -133,10 +136,12 @@ type AdminOrderRow = {
   order_items: { dish_name: string; quantity: number; subtotal: number; is_free: boolean; order_item_addons?: { addon_name: string }[] | null }[];
   discount_offer: OfferKey | null;
   discount_amount: number;
+  batch_id: string | null;
+  promised_at: string | null;
 };
 
 const ADMIN_ORDER_COLUMNS =
-  "id, status, total_amount, created_at, contact_phone, notes, user_id, restaurant_id, restaurants(name), users(full_name, is_banned), order_items(dish_name, quantity, subtotal, is_free, order_item_addons(addon_name)), daily_number, discount_offer, discount_amount";
+  "id, status, total_amount, created_at, contact_phone, notes, user_id, restaurant_id, restaurants(name), users(full_name, is_banned), order_items(dish_name, quantity, subtotal, is_free, order_item_addons(addon_name)), daily_number, discount_offer, discount_amount, batch_id, promised_at";
 
 function toAdminOrder(o: AdminOrderRow): AdminOrder {
   return {
@@ -161,6 +166,8 @@ function toAdminOrder(o: AdminOrderRow): AdminOrder {
     dailyNumber: o.daily_number,
     discountOffer: o.discount_offer,
     discountAmount: Number(o.discount_amount),
+    batchId: o.batch_id,
+    promisedAt: o.promised_at,
   };
 }
 
@@ -181,7 +188,7 @@ export async function getAdminOrderDetail(id: string): Promise<AdminOrderDetail 
     supabase
       .from("orders")
       .select(
-        "id, status, total_amount, created_at, delivered_at, contact_phone, notes, user_id, restaurant_id, daily_number, restaurants(name), users(full_name, is_banned, email, registration_number), order_items(id, dish_name, quantity, unit_price, addons_price, subtotal, is_free, order_item_addons(addon_name)), discount_offer, discount_amount",
+        "id, status, total_amount, created_at, delivered_at, contact_phone, notes, user_id, restaurant_id, daily_number, restaurants(name), users(full_name, is_banned, email, registration_number), order_items(id, dish_name, quantity, unit_price, addons_price, subtotal, is_free, order_item_addons(addon_name)), discount_offer, discount_amount, batch_id, promised_at",
       )
       .eq("id", id)
       .maybeSingle<
@@ -227,12 +234,12 @@ export async function getAdminOrderDetail(id: string): Promise<AdminOrderDetail 
  * the action would in fact deliver (and could leave the button disabled
  * while there was work to do).
  */
-export async function getConfirmedOrderTimes(): Promise<{ id: string; createdAt: string; restaurantId: string }[]> {
+export async function getConfirmedOrderTimes(): Promise<{ id: string; createdAt: string; promisedAt: string | null }[]> {
   const supabase = await createClient();
-  const { data, error } = await supabase.from("orders").select("id, created_at, restaurant_id").eq("status", "confirmed");
+  const { data, error } = await supabase.from("orders").select("id, created_at, promised_at").eq("status", "confirmed");
 
   if (error) throw error;
-  return (data ?? []).map((o) => ({ id: o.id, createdAt: o.created_at, restaurantId: o.restaurant_id }));
+  return (data ?? []).map((o) => ({ id: o.id, createdAt: o.created_at, promisedAt: o.promised_at }));
 }
 
 /**

@@ -145,28 +145,32 @@ offer, amount and status) as a file that opens in Excel or Google Sheets.
 
 - **Lunch is fixed.** Any order placed **before 12:45 PM** is delivered
   **between 1:45 and 2 PM**. Nothing to set.
-- **Evening and night: you set the time,** per restaurant, on the
-  **Delivery** tab, which lists the restaurants that are turned on (a
-  switched-off one asks for its time when you turn it on in Kitchen after
-  12:45 PM). Tap
-  **Set delivery time** (or **Change**) and pick:
-  - **At a time** — tap a half-hour chip (7:00 · 7:30 · 8:00 …) or pick any
-    time under **Other time**; or
-  - **Within minutes** — 15, 20, 30, 45 or 60 minutes from now (students
-    see the clock time it comes to, e.g. "by 7:55 PM").
-  - Optionally a **message** for students ("Evening batch — collect at
-    Main Gate") and the **delivery person's phone** — students get Call
-    and WhatsApp buttons for it.
-  - **Same for all restaurants that are on** sets them all in one go.
-- **No time, no orders.** After 12:45 PM a restaurant with no time set
-  for today can't take orders, and can't be turned on. Times only count
-  for the day you set them, so set them again each day.
-- **Running late?** On the restaurant's card tap **Late? +15 min** or
-  **+30 min**: the time moves back and students see "Running a little
-  late, sorry!" (or your own message). Or tap **Change** to set anything.
-- **Students see every change at once** on their order page, and everyone
-  with a live order from that restaurant gets a notification ("Delivery
-  update: by 8:45 PM at Main Gate").
+- **Evening and night run in batches** you add per restaurant on the
+  **Delivery** tab (it lists the restaurants that are turned on). Each
+  batch is **"orders until … → delivered by …"**, for example:
+  - Batch 1: orders until **7:00 PM** → delivered by **7:40 PM**
+  - Batch 2: orders until **7:40 PM** → delivered by **8:10 PM**
+
+  Tap **Add a batch**, pick the cut-off (quick chips, or **Other time**)
+  and the delivery time (chips for 20 / 30 / 40 / 60 minutes after the
+  cut-off, or any time). A **message** for students and the **delivery
+  person's phone** are optional — add or change them later with the ✎.
+  **Add one batch to all … that are on** does every restaurant at once.
+- **Each order keeps its batch's time.** An order placed at 6:50 is "by
+  7:40"; one at 7:05 is "by 8:10". Adding batch 2 never changes batch 1's
+  orders.
+- **No batch, no orders.** After 12:45 PM a restaurant with no batch still
+  open (all cut-offs passed) can't take orders, and can't be turned on —
+  turning it on in Kitchen asks for a batch first. Batches are for today
+  only.
+- **Running late?** Tap **Late? +15 min** or **+30 min** on that batch:
+  its time moves back for every order in it, and they see "Running a
+  little late, sorry!" (or your own message). The ✎ changes anything.
+- **Someone just missed the cut-off?** Open the order (tap its card) and
+  use **Batch → Move** to put it in the other batch.
+- **Students see every change at once** on their order page, and those in
+  the batch get a notification ("Delivery update: by 8:25 PM at Main
+  Gate").
 
 ### Offers (discounts)
 

@@ -2,24 +2,31 @@ import "server-only";
 
 import { cache } from "react";
 import { createClient } from "@/lib/supabase/server";
-import { DELIVERY_COLUMNS, isSetToday, toDeliveryInfo, type DeliveryInfo, type DeliveryRow } from "@/lib/delivery";
+import { BATCH_COLUMNS, todayKey, toBatch, type Batch, type BatchRow } from "@/lib/delivery";
 
 /**
- * Every restaurant's delivery time, as a map by restaurant id — including
- * ones set on an earlier day (orders placed that day still use them; see
- * orderDelivery()). `todayOnly` drops those. Signed-in users only (RLS).
- * Errors read as "none set". Cached per request.
+ * Today's delivery batches (IST), by restaurant id, earliest cut-off
+ * first. Signed-in users only (RLS). Errors read as "none". Cached per
+ * request.
  */
-export const getDeliveryInfos = cache(async function getDeliveryInfos(): Promise<Record<string, DeliveryInfo>> {
+export const getTodaysBatches = cache(async function getTodaysBatches(): Promise<Record<string, Batch[]>> {
   const supabase = await createClient();
-  const { data, error } = await supabase.from("delivery_info").select(DELIVERY_COLUMNS).returns<DeliveryRow[]>();
+  const { data, error } = await supabase
+    .from("delivery_batches")
+    .select(BATCH_COLUMNS)
+    .eq("day", todayKey())
+    .order("order_until")
+    .returns<BatchRow[]>();
   if (error || !data) return {};
-  return Object.fromEntries(data.map((r) => [r.restaurant_id, toDeliveryInfo(r)]));
+  const byRestaurant: Record<string, Batch[]> = {};
+  for (const row of data) (byRestaurant[row.restaurant_id] ??= []).push(toBatch(row));
+  return byRestaurant;
 });
 
-/** Only the times set today (IST). */
-export async function getTodaysDeliveryInfos(): Promise<Record<string, DeliveryInfo>> {
-  const all = await getDeliveryInfos();
-  const now = new Date();
-  return Object.fromEntries(Object.entries(all).filter(([, info]) => isSetToday(info, now)));
+/** One batch (an order's), or null. */
+export async function getBatch(id: string | null): Promise<Batch | null> {
+  if (!id) return null;
+  const supabase = await createClient();
+  const { data } = await supabase.from("delivery_batches").select(BATCH_COLUMNS).eq("id", id).maybeSingle<BatchRow>();
+  return data ? toBatch(data) : null;
 }

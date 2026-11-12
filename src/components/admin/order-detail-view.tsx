@@ -3,7 +3,8 @@
 import { Phone, Star } from "lucide-react";
 import type { AdminOrderDetail } from "@/lib/data/admin";
 import { formatOrderTimestamp } from "@/lib/date";
-import { deliveryLine, orderDelivery, type DeliveryInfo } from "@/lib/delivery";
+import { deliveryLine, orderPromise, type Batch } from "@/lib/delivery";
+import { MoveToBatch } from "./move-to-batch";
 import { formatRupees } from "@/lib/format";
 import { itemLine } from "@/lib/orders/admin-text";
 import { formatOrderNumber, statusBadge } from "@/lib/orders/status";
@@ -13,11 +14,11 @@ import { cn } from "@/lib/utils";
 import { CopyOrderButton, OrderActions, useOrderStatus, WhatsAppButton } from "./order-card";
 
 /** Everything about one order, for /admin/orders/[id] — opened by tapping an order card. */
-export function OrderDetailView({ order, delivery }: { order: AdminOrderDetail; delivery?: DeliveryInfo }) {
+export function OrderDetailView({ order, batches = [] }: { order: AdminOrderDetail; batches?: Batch[] }) {
   const [status, setStatus] = useOrderStatus(order.status);
   const badge = statusBadge(status);
-  const due = orderDelivery(order.createdAt, delivery, order.restaurantId);
-  const slot = due ? deliveryLine(due) : { lead: "Delivery time", time: "Not set yet" };
+  const due = orderPromise(order);
+  const slot = due ? deliveryLine(due) : { lead: "Delivery time", time: "Not set" };
 
   return (
     <div className="mx-auto flex w-full max-w-2xl flex-col gap-4">
@@ -42,6 +43,9 @@ export function OrderDetailView({ order, delivery }: { order: AdminOrderDetail; 
             value={order.deliveredAt ? formatOrderTimestamp(order.deliveredAt) : status === "cancelled" ? "Cancelled" : "Not yet"}
           />
         </dl>
+        {batches.length > 0 && !due?.window && status !== "delivered" && status !== "cancelled" && (
+          <MoveToBatch orderId={order.id} current={order.batchId} batches={batches} />
+        )}
       </Section>
 
       <Section title="Student">

@@ -11,8 +11,7 @@ import {
   getToCollect,
 } from "@/lib/data/admin";
 import { formatShortDay, formatTime, startOfTodayIST } from "@/lib/date";
-import { getDeliveryInfos } from "@/lib/data/delivery";
-import { dueSummary, orderDelivery } from "@/lib/delivery";
+import { dueSummary, orderPromise } from "@/lib/delivery";
 import { getOffers } from "@/lib/data/offers";
 import { getOrderingState } from "@/lib/data/settings";
 import { OFFERS } from "@/lib/offers";
@@ -24,7 +23,7 @@ import { OFFERS } from "@/lib/offers";
  * Delivery tab (lunch is fixed 1:45–2 PM).
  */
 export default async function AdminPage() {
-  const [restaurants, orderCounts, ordering, orders, confirmedAll, offers, toCollect, delivery] = await Promise.all([
+  const [restaurants, orderCounts, ordering, orders, confirmedAll, offers, toCollect] = await Promise.all([
     getAdminRestaurants(),
     getOrderCounts(startOfTodayIST()),
     getOrderingState(),
@@ -32,15 +31,13 @@ export default async function AdminPage() {
     getConfirmedOrderTimes(),
     getOffers(),
     getToCollect(),
-    getDeliveryInfos(),
   ]);
 
   const activeRestaurants = restaurants.filter((r) => r.is_active).length;
 
-  // When each order is due: lunch 1:45–2 PM, else its restaurant's time
-  // for that day (null = not set yet).
-  const dueOf = (o: { createdAt: string; restaurantId: string }) =>
-    orderDelivery(o.createdAt, delivery[o.restaurantId], o.restaurantId)?.deliverAt ?? null;
+  // When each order is due: lunch 1:45–2 PM, else the batch time it was
+  // promised (null = an evening order from before batches).
+  const dueOf = (o: { createdAt: string; promisedAt: string | null }) => orderPromise(o)?.deliverAt ?? null;
   // Counted over every confirmed order (not just today's board) — the same
   // set markAllConfirmedDelivered() acts on: due time already passed.
   const { passed: eligibleForDelivery, next } = dueSummary(confirmedAll.map((o) => dueOf(o)));

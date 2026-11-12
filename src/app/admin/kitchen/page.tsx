@@ -3,7 +3,7 @@ import { KitchenView } from "@/components/admin/kitchen-view";
 import { RestaurantToggleList } from "@/components/admin/restaurant-toggle-list";
 import { getAdminOrders, getAdminRestaurants } from "@/lib/data/admin";
 import { getOrderingState } from "@/lib/data/settings";
-import { getDeliveryInfos } from "@/lib/data/delivery";
+import { getTodaysBatches } from "@/lib/data/delivery";
 
 export const metadata: Metadata = { title: "Kitchen · MuteBites Admin" };
 
@@ -17,7 +17,7 @@ export default async function AdminKitchenPage() {
     getAdminOrders(),
     getAdminRestaurants(),
     getOrderingState(),
-    getDeliveryInfos(),
+    getTodaysBatches(),
   ]);
   // Oldest first, so tokens and lists read in the order they came in.
   const open = [...orders].reverse();
@@ -34,14 +34,13 @@ export default async function AdminKitchenPage() {
           orderingEnabled={ordering.open}
           forcedClosed={ordering.mode === "closed"}
           closedChip={ordering.short}
-          delivery={delivery}
+          batches={delivery}
         />
       </section>
       <h2 className="-mb-2 font-heading text-title font-bold">What to cook</h2>
       <KitchenView
         confirmed={open.filter((o) => o.status === "confirmed" || o.status === "preparing" || o.status === "out_for_delivery")}
         pending={open.filter((o) => o.status === "pending")}
-        delivery={delivery}
       />
     </>
   );

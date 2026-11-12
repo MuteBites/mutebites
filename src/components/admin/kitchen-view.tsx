@@ -4,7 +4,6 @@ import { useMemo, useState } from "react";
 import { Check, ChefHat, Copy, MessageCircle } from "lucide-react";
 import { EmptyState } from "@/components/empty-state";
 import type { AdminOrder } from "@/lib/data/admin";
-import type { DeliveryInfo } from "@/lib/delivery";
 import { buildKitchen, kitchenText, type KitchenRestaurant } from "@/lib/orders/kitchen";
 import { formatOrderNumber } from "@/lib/orders/status";
 import { toast } from "@/lib/toast/store";
@@ -22,17 +21,14 @@ import { cn } from "@/lib/utils";
 export function KitchenView({
   confirmed,
   pending,
-  delivery = {},
 }: {
   confirmed: AdminOrder[];
   pending: AdminOrder[];
-  /** Restaurants' delivery times — the lists group by when orders are due. */
-  delivery?: Record<string, DeliveryInfo>;
 }) {
   const [withNew, setWithNew] = useState(false);
   const slots = useMemo(
-    () => buildKitchen(withNew ? [...confirmed, ...pending] : confirmed, delivery),
-    [confirmed, pending, withNew, delivery],
+    () => buildKitchen(withNew ? [...confirmed, ...pending] : confirmed),
+    [confirmed, pending, withNew],
   );
   const [picked, setPicked] = useState<string | null>(null);
   const slot = slots.find((s) => s.key === picked) ?? slots[0];

@@ -13,7 +13,7 @@ import { getUsualCart } from "@/lib/data/usual";
 import { getRatePromptOrder } from "@/lib/data/orders";
 import { RatePrompt } from "@/components/home/rate-prompt";
 import { getTimeOfDayIST, isThursdayIST } from "@/lib/date";
-import { getTodaysDeliveryInfos } from "@/lib/data/delivery";
+import { getTodaysBatches } from "@/lib/data/delivery";
 import { promoDelivery } from "@/lib/delivery";
 import { NAV_TRANSITION, REVEAL_ENTER } from "@/lib/nav-transition";
 import { requireProfile } from "@/lib/profile";
@@ -38,7 +38,7 @@ export default async function Home({ searchParams }: PageProps<"/">) {
   const trendingDishesPromise = getTrendingDishes();
   const dishOrderCountsPromise = getDishOrderCounts();
   const thursdaySpecialPromise = isThursdayIST() ? getThursdaySpecial() : Promise.resolve(null);
-  const deliveryPromise = getTodaysDeliveryInfos();
+  const deliveryPromise = getTodaysBatches();
 
   const profile = await profilePromise;
   const [
