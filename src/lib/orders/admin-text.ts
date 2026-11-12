@@ -37,14 +37,10 @@ export function whatsAppConfirmation(order: AdminOrder): string {
 }
 
 /**
- * The copy button's text: name and number first, then the restaurant and
- * each dish — nothing else (no token, prices or times).
+ * The copy button's text: the student's number, then each dish — nothing
+ * else (no name, restaurant, token, prices or times; the client's call,
+ * 12 Nov 2026).
  */
 export function orderDetailsText(order: AdminOrder): string {
-  return [
-    order.studentName,
-    formatStoredMobile(order.contactPhone),
-    order.restaurantName,
-    ...order.items.map(itemLine),
-  ].join("\n");
+  return [formatStoredMobile(order.contactPhone), ...order.items.map(itemLine)].join("\n");
 }

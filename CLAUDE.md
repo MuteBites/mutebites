@@ -750,8 +750,8 @@ Order cards carry a "From <restaurant>" box: one line per dish as
 the student's name and number. The WhatsApp button's message and the copy
 button's text come from `src/lib/orders/admin-text.ts` (WhatsApp: full
 name; restaurant, each dish and the question on their own lines; a total
-line only for multi-dish orders. Copy: name, number,
-restaurant, each dish — nothing else) — keep them in step with the card.
+line only for multi-dish orders. Copy: number, then
+each dish — nothing else, no name or restaurant since 12 Nov 2026) — keep them in step with the card.
 Tapping a card opens **`/admin/orders/[id]`** (`getAdminOrderDetail()` +
 `OrderDetailView`): timing (placed, delivery window, delivered at),
 student (phone, reg. number, email, Call / WhatsApp / Copy), each dish

@@ -84,8 +84,8 @@ dishes keep their size ("Apples (500 g) - 2").
    typed out. Ask them to reply "yes".
 2. **Confirm** — once they've confirmed and you've placed it with the
    restaurant. The student gets a notification.
-3. **Copy** (the copy icon) — copies the student's name and number, then
-   the restaurant and each dish, to paste to the restaurant. No prices.
+3. **Copy** (the copy icon) — copies the student's number, then each
+   dish, to paste to the restaurant. No name, restaurant or prices.
 4. **Mark delivered** — once they've collected it at **VIT-AP Main Gate**.
    The student is notified and can rate the order.
 5. **Cancel order** — only while the order is still waiting to be
