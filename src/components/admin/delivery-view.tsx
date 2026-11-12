@@ -19,8 +19,9 @@ type Target = { restaurants: { id: string; name: string }[]; current?: DeliveryI
  * The admin's Delivery tab (12 Nov 2026, it replaced Handover): each
  * restaurant's delivery time for today — an exact time or "within N min",
  * an optional message and the delivery person's phone — which is what
- * students see on their ticket. Restaurants that are on come first; one
- * with no time today can't take orders (no fallback, by decision).
+ * students see on their ticket. Only restaurants that are on are listed;
+ * after 12:45 PM one with no time today can't take orders (no fallback,
+ * by decision).
  */
 export function DeliveryView({
   restaurants,
@@ -32,8 +33,9 @@ export function DeliveryView({
   const router = useRouter();
   const [target, setTarget] = useState<Target>(null);
   const [clearing, startClear] = useTransition();
+  // Only restaurants that are on (Kitchen) — the client's call, 12 Nov
+  // 2026. A switched-off one gets its time when it's turned on.
   const on = restaurants.filter((r) => r.is_active);
-  const off = restaurants.filter((r) => !r.is_active);
   const allOn = on.map(({ id, name }) => ({ id, name }));
   const missing = on.filter((r) => !isSetToday(delivery[r.id]));
 
@@ -185,25 +187,12 @@ export function DeliveryView({
         )}
       </section>
 
-      {restaurants.length === 0 ? (
-        <EmptyState icon={Truck} title="No restaurants" compact>
-          Add restaurants from Menus.
+      {on.length === 0 ? (
+        <EmptyState icon={Truck} title="No restaurant is on" compact>
+          Turn one on in Kitchen — it asks for its delivery time then.
         </EmptyState>
       ) : (
-        <>
-          {on.length > 0 && <ul className="flex flex-col gap-3">{on.map(card)}</ul>}
-          {off.length > 0 && (
-            <section aria-labelledby="off-heading">
-              <h2 id="off-heading" className="mb-3 font-heading text-title font-bold">
-                Switched off
-              </h2>
-              <p className="-mt-2 mb-3 text-sm text-muted-foreground">
-                Set a time here, or when you turn one on in Kitchen.
-              </p>
-              <ul className="flex flex-col gap-3">{off.map(card)}</ul>
-            </section>
-          )}
-        </>
+        <ul className="flex flex-col gap-3">{on.map(card)}</ul>
       )}
 
       {target && (

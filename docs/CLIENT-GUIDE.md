@@ -146,7 +146,9 @@ offer, amount and status) as a file that opens in Excel or Google Sheets.
 - **Lunch is fixed.** Any order placed **before 12:45 PM** is delivered
   **between 1:45 and 2 PM**. Nothing to set.
 - **Evening and night: you set the time,** per restaurant, on the
-  **Delivery** tab (or when you turn a restaurant on after 12:45 PM). Tap
+  **Delivery** tab, which lists the restaurants that are turned on (a
+  switched-off one asks for its time when you turn it on in Kitchen after
+  12:45 PM). Tap
   **Set delivery time** (or **Change**) and pick:
   - **At a time** — tap a half-hour chip (7:00 · 7:30 · 8:00 …) or pick any
     time under **Other time**; or

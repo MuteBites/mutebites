@@ -655,7 +655,7 @@ columns (`downloadOrdersCsv()` / `ordersToCsv()` in
 `export-orders-button.tsx`). **Delivery** (`DeliveryView` /
 `DeliveryDialog`, `src/components/admin/delivery-*.tsx`; actions in
 `src/lib/admin/delivery-actions.ts`; it replaced Handover, 12 Nov 2026):
-per restaurant (on first, then switched off), today's delivery time — set
+per restaurant that's **on** (switched-off ones aren't listed — they get a time when turned on in Kitchen), today's delivery time — set
 in a dialog as **At a time** (eight half-hour chips from now, or any time
 in a time input) or **Within minutes** (15 / 20 / 30 / 45 / 60, stored as
 the time it comes to), an optional message (≤ 200) and the delivery
