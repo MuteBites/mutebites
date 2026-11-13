@@ -21,6 +21,8 @@ export type Batch = {
   orderUntil: string;
   /** When it'll be at Main Gate. */
   deliverAt: string;
+  /** Normal delivery's window start ("between 8:00 and 8:15"), or null. */
+  deliverFrom: string | null;
   note: string | null;
   /** "+91XXXXXXXXXX", or null. */
   riderPhone: string | null;
@@ -33,12 +35,13 @@ export type BatchRow = {
   day: string;
   order_until: string;
   deliver_at: string;
+  deliver_from: string | null;
   note: string | null;
   rider_phone: string | null;
   updated_at: string;
 };
 
-export const BATCH_COLUMNS = "id, restaurant_id, day, order_until, deliver_at, note, rider_phone, updated_at";
+export const BATCH_COLUMNS = "id, restaurant_id, day, order_until, deliver_at, deliver_from, note, rider_phone, updated_at";
 
 export const MAX_DELIVERY_NOTE = 200;
 
@@ -49,6 +52,7 @@ export function toBatch(r: BatchRow): Batch {
     day: r.day,
     orderUntil: r.order_until,
     deliverAt: r.deliver_at,
+    deliverFrom: r.deliver_from,
     note: r.note,
     riderPhone: r.rider_phone,
     updatedAt: r.updated_at,
@@ -110,11 +114,19 @@ export function orderPromise(
   order: { createdAt: string; promisedAt: string | null },
   batch?: Batch | null,
 ): DeliveryPromise | null {
-  if (isLunchOrder(order.createdAt)) {
+  // Lunch = promised 2 PM before 12:45; an express restaurant's lunch-time
+  // order (Shawarma Hub, within 45 min) has its own time instead.
+  if (isLunchOrder(order.createdAt) && (!order.promisedAt || order.promisedAt === lunchDue(order.createdAt))) {
     return { deliverAt: order.promisedAt ?? lunchDue(order.createdAt), window: LUNCH_WINDOW, note: null, riderPhone: null };
   }
   if (!order.promisedAt) return null;
-  return { deliverAt: order.promisedAt, note: batch?.note ?? null, riderPhone: batch?.riderPhone ?? null };
+  const from = batch?.deliverFrom && batch.deliverAt === order.promisedAt ? batch.deliverFrom : null;
+  return {
+    deliverAt: order.promisedAt,
+    window: from ? `${formatTime(from).replace(/ ?[AP]M/, "")}–${clockTime(order.promisedAt)}` : undefined,
+    note: batch?.note ?? null,
+    riderPhone: batch?.riderPhone ?? null,
+  };
 }
 
 /** "8:30 PM" with a no-break space, so it never wraps apart. */
@@ -125,6 +137,7 @@ export function clockTime(iso: string): string {
 /** "Delivery by 8:30 PM" / "Delivery between 1:45–2 PM" — the line students see. */
 export function deliveryLine(p: { deliverAt: string; window?: string }): { lead: string; time: string } {
   if (p.window) return { lead: "Delivery between", time: p.window };
+  // An express restaurant (no batch) still reads "Delivery by 7:42 PM".
   return { lead: "Delivery by", time: clockTime(p.deliverAt) };
 }
 

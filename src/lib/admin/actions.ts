@@ -3,7 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { after } from "next/server";
 import { assertAdmin } from "@/lib/admin/assert";
-import { isLunchNow, orderPromise } from "@/lib/delivery";
+import { isLunchNow, orderPromise, todayKey } from "@/lib/delivery";
 import { notifyOrderingOpen, type OpenPushResult } from "@/lib/notifications/ordering-open";
 import { notifyUser, type PushPayload } from "@/lib/notifications/send";
 import type { OrderStatus } from "@/lib/data/types";
@@ -120,8 +120,28 @@ export async function setRestaurantActive(
   // (place_order() refuses it too), so it can't be turned on yet. Before
   // that it's lunch, delivered 1:45–2 PM with nothing to set.
   if (active && !isLunchNow()) {
-    const { data: hasBatch } = await supabase.rpc("delivery_open_batch", { p_restaurant_id: restaurantId });
-    if (hasBatch !== true) return { ok: false, error: "Add a delivery batch for it first (Delivery tab)." };
+    const [{ data: hasBatch }, { data: r }, { data: settings }] = await Promise.all([
+      supabase.rpc("delivery_open_batch", { p_restaurant_id: restaurantId }),
+      supabase.from("restaurants").select("delivery_minutes").eq("id", restaurantId).maybeSingle(),
+      supabase.from("app_settings").select("delivery_mode").eq("id", true).maybeSingle(),
+    ]);
+    // Express restaurants (within N minutes) need no batch.
+    if (hasBatch !== true && r?.delivery_minutes == null) {
+      // Normal delivery: it joins today's normal delivery, copied from another restaurant.
+      const { data: normal } =
+        settings?.delivery_mode === "normal"
+          ? await supabase
+              .from("delivery_batches")
+              .select("order_until, deliver_at, deliver_from, note, rider_phone, day")
+              .eq("day", todayKey())
+              .gt("order_until", new Date().toISOString())
+              .order("updated_at", { ascending: false })
+              .limit(1)
+              .maybeSingle()
+          : { data: null };
+      if (!normal) return { ok: false, error: "Set today's delivery first (Delivery tab)." };
+      await supabase.from("delivery_batches").insert({ ...normal, restaurant_id: restaurantId });
+    }
   }
   const { error } = await supabase
     .from("restaurants")

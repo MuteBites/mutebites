@@ -3,7 +3,7 @@
 import { useState, useTransition } from "react";
 import { Loader2 } from "lucide-react";
 import { Dialog, DialogContent, DialogDescription, DialogTitle } from "@/components/ui/dialog";
-import { addBatch, updateBatch, type BatchInput } from "@/lib/admin/delivery-actions";
+import { addBatch, setNormalDelivery, updateBatch, type BatchInput } from "@/lib/admin/delivery-actions";
 import { MAX_DELIVERY_NOTE, type Batch } from "@/lib/delivery";
 import { formatLocalMobile } from "@/lib/phone";
 import { toast } from "@/lib/toast/store";
@@ -61,8 +61,11 @@ export function DeliveryDialog({
   restaurants,
   batch,
   allOn,
+  normal = false,
   onSaved,
 }: {
+  /** Normal delivery: one for every restaurant that's on, with a "from" time (window). */
+  normal?: boolean;
   open: boolean;
   onOpenChange: (open: boolean) => void;
   /** Who the new batch is for (ignored when editing). */
@@ -76,6 +79,7 @@ export function DeliveryDialog({
   const [chips] = useState(() => nextHalfHours(new Date()));
   const [until, setUntil] = useState(batch ? toHHMM(new Date(batch.orderUntil)) : "");
   const [at, setAt] = useState(batch ? toHHMM(new Date(batch.deliverAt)) : "");
+  const [from, setFrom] = useState(batch?.deliverFrom ? toHHMM(new Date(batch.deliverFrom)) : "");
   const [note, setNote] = useState(batch?.note ?? "");
   const [phone, setPhone] = useState(batch?.riderPhone ? formatLocalMobile(batch.riderPhone.replace(/^\+91/, "")) : "");
   const [forAll, setForAll] = useState(false);
@@ -90,9 +94,19 @@ export function DeliveryDialog({
       toast.error(!until ? "Pick until when orders join this batch." : "Pick when it'll be delivered.");
       return;
     }
-    const input: BatchInput = { orderUntil: until, deliverAt: at, note, riderPhone: phone };
+    const input: BatchInput = {
+      orderUntil: until,
+      deliverAt: at,
+      deliverFrom: normal ? from || undefined : undefined,
+      note,
+      riderPhone: phone,
+    };
     startTransition(async () => {
-      const result = batch ? await updateBatch(batch.id, input) : await addBatch(targets.map((r) => r.id), input);
+      const result = normal
+        ? await setNormalDelivery(input)
+        : batch
+          ? await updateBatch(batch.id, input)
+          : await addBatch(targets.map((r) => r.id), input);
       if (!result.ok) {
         toast.error(result.error);
         return;
@@ -110,7 +124,7 @@ export function DeliveryDialog({
   return (
     <Dialog open={open} onOpenChange={(next) => (pending ? null : onOpenChange(next))}>
       <DialogContent className="max-h-[90dvh] overflow-y-auto">
-        <DialogTitle>{batch ? "Edit batch" : `New batch · ${name}`}</DialogTitle>
+        <DialogTitle>{normal ? "Normal delivery" : batch ? "Edit batch" : `New batch · ${name}`}</DialogTitle>
         <DialogDescription className="mt-1">
           Orders placed until the cut-off join this batch, and students see its delivery time. Today only.
         </DialogDescription>
@@ -131,7 +145,13 @@ export function DeliveryDialog({
         </div>
 
         <div className="mt-5">
-          <p className="text-label text-muted-foreground">Delivered at Main Gate by</p>
+          {normal && (
+            <label className="mb-3 flex items-center gap-3 text-sm">
+              <span className="text-muted-foreground">Delivered from</span>
+              <input type="time" value={from} onChange={(e) => setFrom(e.target.value)} className={timeInput} />
+            </label>
+          )}
+          <p className="text-label text-muted-foreground">{normal ? "Delivered by (end of the window)" : "Delivered at Main Gate by"}</p>
           {afterChips.length > 0 && (
             <div className="mt-2 flex flex-wrap gap-2">
               {afterChips.map((c, i) => (
@@ -175,7 +195,7 @@ export function DeliveryDialog({
           />
         </label>
 
-        {!batch && allOn && allOn.length > 1 && (
+        {!normal && !batch && allOn && allOn.length > 1 && (
           <label className="mt-4 flex items-center gap-3 text-sm font-semibold">
             <input type="checkbox" checked={forAll} onChange={(e) => setForAll(e.target.checked)} className="size-5 accent-[var(--primary)]" />
             Same batch for all {allOn.length} restaurants that are on

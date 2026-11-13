@@ -9,14 +9,14 @@ import { isUuid } from "@/lib/ids";
 import { getRestaurantCount } from "./restaurants";
 import type { OrderStatus } from "./types";
 
-export type AdminRestaurant = { id: string; name: string; is_active: boolean };
+export type AdminRestaurant = { id: string; name: string; is_active: boolean; delivery_minutes?: number | null };
 
 /** Every restaurant still on the app (not removed), for the open/closed toggle list, offers and the vendor stat. */
 export async function getAdminRestaurants(): Promise<AdminRestaurant[]> {
   const supabase = await createClient();
   const { data, error } = await supabase
     .from("restaurants")
-    .select("id, name, is_active")
+    .select("id, name, is_active, delivery_minutes")
     .is("archived_at", null)
     .order("name");
 

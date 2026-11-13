@@ -19,6 +19,8 @@ export type BatchInput = {
   orderUntil: string;
   /** "HH:MM", 24-hour IST — when it'll be at Main Gate. */
   deliverAt: string;
+  /** "HH:MM" — normal delivery's window start ("between 8:00 and 8:15"), optional. */
+  deliverFrom?: string;
   note?: string;
   riderPhone?: string;
 };
@@ -41,6 +43,10 @@ function parseInput(input: BatchInput, now: Date) {
   if (!until) return { error: "Pick until when orders join this batch." } as const;
   if (!at) return { error: "Pick when it'll be delivered." } as const;
   if (at.getTime() < until.getTime()) return { error: "Delivery can't be before the orders close." } as const;
+  const from = input.deliverFrom ? todayAt(input.deliverFrom, now) : null;
+  if (from && (from.getTime() > at.getTime() || from.getTime() < until.getTime())) {
+    return { error: "The window should start after the cut-off and end with the delivery time." } as const;
+  }
   const note = (input.note ?? "").replace(/\s+/g, " ").trim();
   if (note.length > MAX_DELIVERY_NOTE) return { error: `Keep the message under ${MAX_DELIVERY_NOTE} characters.` } as const;
   let riderPhone: string | null = null;
@@ -48,7 +54,7 @@ function parseInput(input: BatchInput, now: Date) {
     riderPhone = normalizeIndianMobile(input.riderPhone);
     if (!riderPhone) return { error: "That phone number doesn't look right — 10 digits, starting 6–9." } as const;
   }
-  return { until, at, note: note || null, riderPhone } as const;
+  return { until, at, from, note: note || null, riderPhone } as const;
 }
 
 /**
@@ -106,6 +112,7 @@ export async function addBatch(restaurantIds: string[], input: BatchInput): Prom
     day: todayKey(now),
     order_until: parsed.until.toISOString(),
     deliver_at: parsed.at.toISOString(),
+    deliver_from: parsed.from?.toISOString() ?? null,
     note: parsed.note,
     rider_phone: parsed.riderPhone,
     updated_at: now.toISOString(),
@@ -143,6 +150,7 @@ export async function updateBatch(batchId: string, input: BatchInput): Promise<D
     .update({
       order_until: parsed.until.toISOString(),
       deliver_at: parsed.at.toISOString(),
+      deliver_from: parsed.from?.toISOString() ?? null,
       note: parsed.note,
       rider_phone: parsed.riderPhone,
       updated_at: now.toISOString(),
@@ -238,4 +246,77 @@ export async function moveOrderToBatch(orderId: string, batchId: string): Promis
   );
   revalidatePath("/", "layout");
   return { ok: true, notified: 1 };
+}
+
+/** The Delivery tab's switch: one normal evening delivery for all, or batches per restaurant. */
+export async function setDeliveryMode(mode: "normal" | "batches"): Promise<{ ok: true } | { ok: false; error: string }> {
+  const denied = await assertAdmin();
+  if (denied) return denied;
+  if (mode !== "normal" && mode !== "batches") return { ok: false, error: "Unknown mode." };
+  const supabase = await createClient();
+  const { error } = await supabase.from("app_settings").update({ delivery_mode: mode }).eq("id", true);
+  if (error) return { ok: false, error: "Couldn't switch. Please try again." };
+  revalidatePath("/admin", "layout");
+  return { ok: true };
+}
+
+/**
+ * Normal delivery: one evening delivery for every restaurant that's on
+ * (express ones aside) — orders until X, delivered between Y and Z. It
+ * replaces today's batches for them, and today's open evening orders move
+ * to it (and are told), so there's always exactly one time.
+ */
+export async function setNormalDelivery(input: BatchInput): Promise<DeliveryActionResult> {
+  const denied = await assertAdmin();
+  if (denied) return denied;
+  const now = new Date();
+  const parsed = parseInput(input, now);
+  if ("error" in parsed) return { ok: false, error: parsed.error! };
+  const supabase = await createClient();
+  const { data: on } = await supabase
+    .from("restaurants")
+    .select("id")
+    .eq("is_active", true)
+    .is("archived_at", null)
+    .is("delivery_minutes", null);
+  const ids = (on ?? []).map((r) => r.id);
+  if (ids.length === 0) return { ok: false, error: "Turn a restaurant on in Kitchen first." };
+
+  await supabase.from("delivery_batches").delete().in("restaurant_id", ids).eq("day", todayKey(now));
+  const { profile } = await getSessionProfile();
+  const { data: rows, error } = await supabase
+    .from("delivery_batches")
+    .insert(
+      ids.map((id) => ({
+        restaurant_id: id,
+        day: todayKey(now),
+        order_until: parsed.until.toISOString(),
+        deliver_at: parsed.at.toISOString(),
+        deliver_from: parsed.from?.toISOString() ?? null,
+        note: parsed.note,
+        rider_phone: parsed.riderPhone,
+        updated_at: now.toISOString(),
+        updated_by: profile?.id ?? null,
+      })),
+    )
+    .select("id, restaurant_id");
+  if (error || !rows) return { ok: false, error: "Couldn't save the delivery. Please try again." };
+  // Today's open evening orders (lost their batch above) join the new one.
+  for (const r of rows) {
+    await supabase
+      .from("orders")
+      .update({ batch_id: r.id, promised_at: parsed.at.toISOString() })
+      .eq("restaurant_id", r.restaurant_id)
+      .is("batch_id", null)
+      .gte("created_at", startOfTodayIST(now).toISOString())
+      .neq("promised_at", new Date(startOfTodayIST(now).getTime() + 14 * 3600_000).toISOString())
+      .in("status", OPEN);
+  }
+  const notified = await notifyBatchOrders(
+    supabase,
+    rows.map((r) => r.id),
+    () => `Delivery by ${formatTime(parsed.at.toISOString())} at Main Gate.${parsed.note ? ` ${parsed.note}` : ""}`,
+  );
+  revalidatePath("/", "layout");
+  return { ok: true, notified };
 }

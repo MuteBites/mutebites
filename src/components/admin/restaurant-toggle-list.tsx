@@ -65,10 +65,8 @@ function RestaurantToggleCard({
   function toggle() {
     const next = !active;
     // Before 12:45 PM it's lunch (fixed 1:45–2 PM) — no time to set.
-    if (next && !timeToday && !isLunchNow()) {
-      setAskTime(true);
-      return;
-    }
+    // The server decides (normal delivery copies today's, express needs
+    // none); it asks for a batch only when it refuses.
     turn(next);
   }
 
@@ -84,6 +82,7 @@ function RestaurantToggleCard({
         setActive(next);
         toast.success(`${restaurant.name} is now ${next ? "open" : "closed"}.${next ? openPushNote(result.push, true) : ""}`);
       } else {
+        if (result.error.startsWith("Set today's")) setAskTime(true);
         toast.error(result.error);
       }
     });

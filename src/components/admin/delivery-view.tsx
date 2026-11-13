@@ -4,7 +4,7 @@ import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { MessageSquareText, Pencil, Phone, Plus, Trash2, Truck } from "lucide-react";
 import { EmptyState } from "@/components/empty-state";
-import { delayBatch, removeBatch } from "@/lib/admin/delivery-actions";
+import { delayBatch, removeBatch, setDeliveryMode } from "@/lib/admin/delivery-actions";
 import type { AdminRestaurant } from "@/lib/data/admin";
 import { formatTime } from "@/lib/date";
 import { LUNCH_WINDOW, openBatch, type Batch } from "@/lib/delivery";
@@ -13,7 +13,7 @@ import { toast } from "@/lib/toast/store";
 import { cn } from "@/lib/utils";
 import { DeliveryDialog } from "./delivery-dialog";
 
-type Target = { restaurants: { id: string; name: string }[]; batch?: Batch } | null;
+type Target = { restaurants: { id: string; name: string }[]; batch?: Batch; normal?: boolean } | null;
 
 /**
  * The admin's Delivery tab (12 Nov 2026, it replaced Handover): for each
@@ -27,7 +27,10 @@ export function DeliveryView({
   restaurants,
   batches,
   openByBatch,
+  mode,
 }: {
+  /** app_settings.delivery_mode: one normal evening delivery, or batches. */
+  mode: "normal" | "batches";
   restaurants: AdminRestaurant[];
   batches: Record<string, Batch[]>;
   /** Open orders per batch id. */
@@ -37,7 +40,18 @@ export function DeliveryView({
   const [target, setTarget] = useState<Target>(null);
   const [busy, startBusy] = useTransition();
   // Only restaurants that are on (Kitchen) — the client's call.
-  const on = restaurants.filter((r) => r.is_active);
+  const on = restaurants.filter((r) => r.is_active && r.delivery_minutes == null);
+  const express = restaurants.filter((r) => r.is_active && r.delivery_minutes != null);
+  // Normal delivery: today's shared one (any restaurant's open batch).
+  const normalBatch = on.map((r) => openBatch(batches[r.id])).find(Boolean) ?? null;
+
+  async function delayAll(m: number) {
+    for (const r of on) {
+      const b = openBatch(batches[r.id]);
+      if (b) await delayBatch(b.id, m);
+    }
+    return { ok: true as const };
+  }
   const allOn = on.map(({ id, name }) => ({ id, name }));
   const missing = on.filter((r) => !openBatch(batches[r.id]));
 
@@ -196,7 +210,85 @@ export function DeliveryView({
         )}
       </section>
 
-      {on.length === 0 ? (
+      <div role="radiogroup" aria-label="Evening delivery" className="grid grid-cols-2 gap-1 rounded-full border bg-card p-1 shadow-card">
+        {(["normal", "batches"] as const).map((m) => (
+          <button
+            key={m}
+            type="button"
+            role="radio"
+            aria-checked={mode === m}
+            disabled={busy}
+            onClick={() =>
+              mode !== m && run(() => setDeliveryMode(m), () => (m === "normal" ? "Normal delivery on." : "Batches delivery on."))
+            }
+            className={cn(
+              "h-11 rounded-full text-sm font-semibold outline-none focus-visible:ring-3 focus-visible:ring-ring/80",
+              mode === m ? "surface-slider glow-slider bg-slider text-slider-foreground" : "text-muted-foreground",
+            )}
+          >
+            {m === "normal" ? "Normal delivery" : "Batches delivery"}
+          </button>
+        ))}
+      </div>
+
+      {express.length > 0 && (
+        <p className="text-sm text-muted-foreground">
+          {express.map((r) => `${r.name}: within ${r.delivery_minutes} min`).join(" · ")} — no batch needed.
+        </p>
+      )}
+
+      {mode === "normal" ? (
+        <section className="rounded-3xl border bg-card p-4 shadow-card">
+          <h2 className="font-heading text-lg font-bold">Today&apos;s delivery</h2>
+          {normalBatch ? (
+            <div className="mt-2 text-sm">
+              <p>
+                Orders until <b>{formatTime(normalBatch.orderUntil)}</b> → delivered{" "}
+                <b>
+                  {normalBatch.deliverFrom ? `${formatTime(normalBatch.deliverFrom)}–` : "by "}
+                  {formatTime(normalBatch.deliverAt)}
+                </b>
+              </p>
+              {normalBatch.note && (
+                <p className="mt-1 flex items-start gap-2">
+                  <MessageSquareText className="mt-0.5 size-4 shrink-0 text-muted-foreground" aria-hidden="true" />
+                  {normalBatch.note}
+                </p>
+              )}
+              {normalBatch.riderPhone && (
+                <p className="mt-1 flex items-center gap-2 tabular-nums">
+                  <Phone className="size-4 shrink-0 text-muted-foreground" aria-hidden="true" />
+                  {formatStoredMobile(normalBatch.riderPhone)}
+                </p>
+              )}
+              <div className="mt-2.5 flex items-center gap-2">
+                <span className="font-semibold text-muted-foreground">Late?</span>
+                {[15, 30].map((m) => (
+                  <button
+                    key={m}
+                    type="button"
+                    disabled={busy}
+                    onClick={() => run(() => delayAll(m), () => `Pushed back ${m} min. Students told.`)}
+                    className="h-9 rounded-full bg-amber-soft px-3.5 text-sm font-bold text-amber-soft-foreground disabled:opacity-60"
+                  >
+                    +{m} min
+                  </button>
+                ))}
+              </div>
+            </div>
+          ) : (
+            <p className="mt-1 text-sm font-semibold text-destructive">Not set yet. After 12:45 PM students can&apos;t order until it is.</p>
+          )}
+          <button
+            type="button"
+            onClick={() => setTarget({ restaurants: allOn, batch: normalBatch ?? undefined, normal: true })}
+            className="surface-primary mt-3 flex h-10 w-full items-center justify-center gap-1.5 rounded-full bg-primary text-sm font-bold text-primary-foreground"
+          >
+            <Pencil className="size-4" aria-hidden="true" />
+            {normalBatch ? "Change time, message or phone" : "Set today's delivery"}
+          </button>
+        </section>
+      ) : on.length === 0 ? (
         <EmptyState icon={Truck} title="No restaurant is on" compact>
           Turn one on in Kitchen — after 12:45 PM it asks for a batch then.
         </EmptyState>
@@ -211,6 +303,7 @@ export function DeliveryView({
           onOpenChange={(open) => !open && setTarget(null)}
           restaurants={target.restaurants}
           batch={target.batch}
+          normal={target.normal}
           allOn={!target.batch && target.restaurants.length === 1 ? allOn : undefined}
           onSaved={() => router.refresh()}
         />

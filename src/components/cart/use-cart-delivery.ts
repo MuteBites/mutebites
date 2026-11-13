@@ -17,13 +17,27 @@ export function useCartDelivery(restaurantId: string | null, open: boolean): str
   useEffect(() => {
     if (!open || !restaurantId) return;
     let cancelled = false;
-    if (isLunchNow()) {
+    if (false) {
       queueMicrotask(() => !cancelled && setLine(`Delivery between ${LUNCH_WINDOW}`));
       return () => {
         cancelled = true;
       };
     }
-    createClient()
+    const supabase = createClient();
+    supabase
+      .from("restaurants")
+      .select("delivery_minutes")
+      .eq("id", restaurantId)
+      .maybeSingle()
+      .then(({ data: r }) => {
+        if (cancelled) return;
+        // Express (e.g. Shawarma Hub): within N minutes, no batch.
+        if (r?.delivery_minutes) return setLine(`Delivery within ${r.delivery_minutes} min`);
+        if (isLunchNow()) return setLine(`Delivery between ${LUNCH_WINDOW}`);
+        return readBatch();
+      });
+    const readBatch = () =>
+      supabase
       .from("delivery_batches")
       .select(BATCH_COLUMNS)
       .eq("restaurant_id", restaurantId)
