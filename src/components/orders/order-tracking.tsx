@@ -175,7 +175,7 @@ export function OrderTracking({
   const steps = cancelled ? [] : orderTimeline(status);
   // Lunch (ordered before 12:45 PM) is the fixed 1:45–2 PM; otherwise the
   // batch time it was promised (moved live by the admin). No fallback.
-  const delivery = orderPromise({ createdAt: initialOrder.createdAt, promisedAt }, batch);
+  const delivery = orderPromise({ createdAt: initialOrder.createdAt, promisedAt, batchId }, batch);
   const eta = delivery ? deliveryLine(delivery) : { lead: "Delivery time", time: "coming soon" };
   // Up to three distinct photos of what was ordered, for the ticket's header.
   const photos = initialOrder.items

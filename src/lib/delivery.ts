@@ -100,6 +100,8 @@ export type DeliveryPromise = {
   deliverAt: string;
   /** "1:45–2 PM" for lunch, instead of one time. */
   window?: string;
+  /** Express restaurants (no batch): "within 45 min" of ordering. */
+  withinMinutes?: number;
   note: string | null;
   riderPhone: string | null;
 };
@@ -111,7 +113,7 @@ export type DeliveryPromise = {
  * before batches existed) — never a guess.
  */
 export function orderPromise(
-  order: { createdAt: string; promisedAt: string | null },
+  order: { createdAt: string; promisedAt: string | null; batchId?: string | null },
   batch?: Batch | null,
 ): DeliveryPromise | null {
   // Lunch = promised 2 PM before 12:45; an express restaurant's lunch-time
@@ -120,6 +122,10 @@ export function orderPromise(
     return { deliverAt: order.promisedAt ?? lunchDue(order.createdAt), window: LUNCH_WINDOW, note: null, riderPhone: null };
   }
   if (!order.promisedAt) return null;
+  if (order.batchId === null) {
+    const within = Math.round((new Date(order.promisedAt).getTime() - new Date(order.createdAt).getTime()) / 60_000);
+    return { deliverAt: order.promisedAt, withinMinutes: within, note: null, riderPhone: null };
+  }
   const from = batch?.deliverFrom && batch.deliverAt === order.promisedAt ? batch.deliverFrom : null;
   return {
     deliverAt: order.promisedAt,
@@ -135,7 +141,8 @@ export function clockTime(iso: string): string {
 }
 
 /** "Delivery by 8:30 PM" / "Delivery between 1:45–2 PM" — the line students see. */
-export function deliveryLine(p: { deliverAt: string; window?: string }): { lead: string; time: string } {
+export function deliveryLine(p: { deliverAt: string; window?: string; withinMinutes?: number }): { lead: string; time: string } {
+  if (p.withinMinutes) return { lead: "Delivery within", time: `${p.withinMinutes} min` };
   if (p.window) return { lead: "Delivery between", time: p.window };
   // An express restaurant (no batch) still reads "Delivery by 7:42 PM".
   return { lead: "Delivery by", time: clockTime(p.deliverAt) };
