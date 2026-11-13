@@ -77,9 +77,9 @@ export function DeliveryDialog({
   onSaved?: () => void;
 }) {
   const [chips] = useState(() => nextHalfHours(new Date()));
-  const [until, setUntil] = useState(batch ? toHHMM(new Date(batch.orderUntil)) : "");
-  const [at, setAt] = useState(batch ? toHHMM(new Date(batch.deliverAt)) : "");
-  const [from, setFrom] = useState(batch?.deliverFrom ? toHHMM(new Date(batch.deliverFrom)) : "");
+  const [until, setUntil] = useState(batch ? toHHMM(new Date(batch.orderUntil)) : normal ? "18:50" : "");
+  const [at, setAt] = useState(batch ? toHHMM(new Date(batch.deliverAt)) : normal ? "20:15" : "");
+  const [from, setFrom] = useState(batch?.deliverFrom ? toHHMM(new Date(batch.deliverFrom)) : normal ? "20:00" : "");
   const [note, setNote] = useState(batch?.note ?? "");
   const [phone, setPhone] = useState(batch?.riderPhone ? formatLocalMobile(batch.riderPhone.replace(/^\+91/, "")) : "");
   const [forAll, setForAll] = useState(false);
