@@ -248,6 +248,9 @@ export async function moveOrderToBatch(orderId: string, batchId: string): Promis
   return { ok: true, notified: 1 };
 }
 
+/** Normal delivery's fixed times (IST). */
+const NORMAL_TIMES = { orderUntil: "18:50", deliverFrom: "20:00", deliverAt: "20:15" };
+
 /** The Delivery tab's switch: one normal evening delivery for all, or batches per restaurant. */
 export async function setDeliveryMode(mode: "normal" | "batches"): Promise<{ ok: true } | { ok: false; error: string }> {
   const denied = await assertAdmin();
@@ -270,7 +273,10 @@ export async function setNormalDelivery(input: BatchInput): Promise<DeliveryActi
   const denied = await assertAdmin();
   if (denied) return denied;
   const now = new Date();
-  const parsed = parseInput(input, now);
+  // Normal delivery's times are fixed (client's call, 13 Nov 2026): orders
+  // until 6:50 PM, delivered 8:00–8:15 PM. Only the message and the
+  // delivery person's phone are the admin's.
+  const parsed = parseInput({ ...input, ...NORMAL_TIMES }, now);
   if ("error" in parsed) return { ok: false, error: parsed.error! };
   const supabase = await createClient();
   const { data: on } = await supabase

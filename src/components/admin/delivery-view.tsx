@@ -277,7 +277,7 @@ export function DeliveryView({
               </div>
             </div>
           ) : (
-            <p className="mt-1 text-sm font-semibold text-destructive">Not set yet. After 12:45 PM students can&apos;t order until it is.</p>
+            <p className="mt-1 text-sm">Orders until <b>6:50 PM</b> → delivered <b>8:00–8:15 PM</b>. Set automatically when a restaurant is turned on.</p>
           )}
           <button
             type="button"
@@ -285,7 +285,7 @@ export function DeliveryView({
             className="surface-primary mt-3 flex h-10 w-full items-center justify-center gap-1.5 rounded-full bg-primary text-sm font-bold text-primary-foreground"
           >
             <Pencil className="size-4" aria-hidden="true" />
-            {normalBatch ? "Change time, message or phone" : "Set today's delivery"}
+            {normalBatch ? "Change message or phone" : "Add message or phone"}
           </button>
         </section>
       ) : on.length === 0 ? (

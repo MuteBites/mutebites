@@ -4,6 +4,7 @@ import { revalidatePath } from "next/cache";
 import { after } from "next/server";
 import { assertAdmin } from "@/lib/admin/assert";
 import { isLunchNow, orderPromise, todayKey } from "@/lib/delivery";
+import { startOfTodayIST } from "@/lib/date";
 import { notifyOrderingOpen, type OpenPushResult } from "@/lib/notifications/ordering-open";
 import { notifyUser, type PushPayload } from "@/lib/notifications/send";
 import type { OrderStatus } from "@/lib/data/types";
@@ -139,8 +140,24 @@ export async function setRestaurantActive(
               .limit(1)
               .maybeSingle()
           : { data: null };
-      if (!normal) return { ok: false, error: "Set today's delivery first (Delivery tab)." };
-      await supabase.from("delivery_batches").insert({ ...normal, restaurant_id: restaurantId });
+      if (settings?.delivery_mode === "normal") {
+        // Normal delivery: fixed times — orders until 6:50 PM, delivered
+        // 8:00–8:15 PM — with today's message / rider copied if set.
+        const day = startOfTodayIST().getTime();
+        const at = (h: number, m: number) => new Date(day + (h * 60 + m) * 60_000).toISOString();
+        const { error: batchError } = await supabase.from("delivery_batches").insert({
+          restaurant_id: restaurantId,
+          day: todayKey(),
+          order_until: at(18, 50),
+          deliver_from: at(20, 0),
+          deliver_at: at(20, 15),
+          note: normal?.note ?? null,
+          rider_phone: normal?.rider_phone ?? null,
+        });
+        if (batchError) return { ok: false, error: "Couldn't turn it on. Please try again." };
+      } else {
+        return { ok: false, error: "Set today's delivery first (Delivery tab)." };
+      }
     }
   }
   const { error } = await supabase

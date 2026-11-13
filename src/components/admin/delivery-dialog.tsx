@@ -129,6 +129,12 @@ export function DeliveryDialog({
           Orders placed until the cut-off join this batch, and students see its delivery time. Today only.
         </DialogDescription>
 
+        {normal ? (
+          <p className="mt-4 rounded-2xl bg-secondary px-4 py-3 text-sm">
+            Fixed times: orders until <b>6:50 PM</b>, delivered <b>8:00–8:15 PM</b>.
+          </p>
+        ) : (
+        <>
         <div className="mt-4">
           <p className="text-label text-muted-foreground">Orders until</p>
           <div className="mt-2 flex flex-wrap gap-2">
@@ -167,6 +173,9 @@ export function DeliveryDialog({
             <input type="time" value={at} onChange={(e) => setAt(e.target.value)} className={timeInput} />
           </label>
         </div>
+
+        </>
+        )}
 
         <label className="mt-5 block">
           <span className="text-label text-muted-foreground">Message for students (optional)</span>
