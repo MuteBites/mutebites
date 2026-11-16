@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { Ban, BookOpen, History, PackageX, Star, Store, Tag, Users, type LucideIcon } from "lucide-react";
+import { Ban, BookOpen, History, PackageX, Star, Tag, Users, type LucideIcon } from "lucide-react";
 import { InstallAdminButton } from "@/components/admin/install-admin-button";
 import { ThemeIconToggle } from "@/components/theme/theme-icon-toggle";
 import { getOffers } from "@/lib/data/offers";
@@ -14,8 +14,6 @@ const TILES: { href: string; label: string; Icon: LucideIcon }[] = [
   { href: "/admin/menus", label: "Menus", Icon: BookOpen },
   { href: "/admin/sold-out", label: "Sold out", Icon: PackageX },
   { href: "/admin/offers", label: "Offers", Icon: Tag },
-  // The on / off switches live on the Kitchen tab.
-  { href: "/admin/kitchen", label: "Restaurants", Icon: Store },
   { href: "/admin/banned", label: "Banned", Icon: Ban },
 ];
 

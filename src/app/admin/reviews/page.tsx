@@ -11,7 +11,7 @@ export default async function AdminReviewsPage() {
   return (
     <>
       <div>
-        <BackToDashboardLink />
+        <BackToDashboardLink href="/admin/more" label="Back to More" />
         <h1 className="mt-4 font-heading text-headline font-bold">Reviews</h1>
         <p className="mt-1 text-muted-foreground">
           Star ratings and notes students left on delivered orders — {reviews.length}{" "}

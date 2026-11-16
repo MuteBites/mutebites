@@ -26,7 +26,7 @@ export default async function AdminMenusPage() {
   return (
     <>
       <div>
-        <BackToDashboardLink />
+        <BackToDashboardLink href="/admin/more" label="Back to More" />
         <h1 className="mt-4 font-heading text-headline font-bold">Menus</h1>
         <p className="mt-1 text-muted-foreground">
           Add a restaurant, or open one to add and edit its sections and dishes.

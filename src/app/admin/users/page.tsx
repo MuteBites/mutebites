@@ -15,7 +15,7 @@ export default async function AdminUsersPage() {
     <>
       <div>
         <div className="flex flex-wrap items-center justify-between gap-2">
-          <BackToDashboardLink />
+          <BackToDashboardLink href="/admin/more" label="Back to More" />
           <Link
             href="/admin/banned"
             className={adminPill}

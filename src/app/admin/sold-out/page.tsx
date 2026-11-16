@@ -18,7 +18,7 @@ export default async function AdminSoldOutPage() {
   return (
     <>
       <div>
-        <BackToDashboardLink />
+        <BackToDashboardLink href="/admin/more" label="Back to More" />
         <h1 className="mt-4 font-heading text-headline font-bold">Sold out</h1>
         <p className="mt-1 text-muted-foreground">
           {soldOut > 0

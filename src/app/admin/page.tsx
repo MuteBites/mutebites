@@ -1,3 +1,6 @@
+import Link from "next/link";
+import { History } from "lucide-react";
+import { adminPill } from "@/components/admin/styles";
 import { MarkAllDeliveredButton } from "@/components/admin/mark-all-delivered-button";
 import { NewOrderAlerts } from "@/components/admin/new-order-alerts";
 import { OrderBoard } from "@/components/admin/order-board";
@@ -64,7 +67,13 @@ export default async function AdminPage() {
         toCollect={toCollect}
       />
 
-      <NewOrderAlerts />
+      <div className="flex flex-wrap items-center gap-2">
+        <NewOrderAlerts />
+        <Link href="/admin/history" className={adminPill}>
+          <History className="size-4" aria-hidden="true" />
+          Order history
+        </Link>
+      </div>
 
       <OrderBoard
         orders={orders}

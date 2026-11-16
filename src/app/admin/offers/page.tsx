@@ -19,7 +19,7 @@ export default async function AdminOffersPage() {
   return (
     <>
       <div>
-        <BackToDashboardLink />
+        <BackToDashboardLink href="/admin/more" label="Back to More" />
         <h1 className="mt-4 font-heading text-headline font-bold">Offers</h1>
         <p className="mt-1 text-muted-foreground">
           {active.length === 0

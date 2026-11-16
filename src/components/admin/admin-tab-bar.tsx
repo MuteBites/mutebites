@@ -48,6 +48,10 @@ export function AdminTabBar() {
   // we're still on the page it was chosen from.
   const [going, setGoing] = useState<{ tab: number; from: string } | null>(null);
 
+  // A tap counts only until we leave the page it was made on; otherwise
+  // coming back to that page later (e.g. More → Offers → back) showed the
+  // pill stuck on the old target.
+  if (going && going.from !== pathname) setGoing(null);
   const active = TABS.findIndex((t) => t.href === pathname);
   if (active === -1) return null;
 

@@ -14,7 +14,7 @@ export default async function AdminOrderPage({ params }: PageProps<"/admin/order
 
   return (
     <>
-      <BackToDashboardLink />
+      <BackToDashboardLink label="Back to orders" />
       <OrderDetailView order={order} batches={batches[order.restaurantId]} />
     </>
   );
