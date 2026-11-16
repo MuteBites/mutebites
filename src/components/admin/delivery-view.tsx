@@ -249,18 +249,6 @@ export function DeliveryView({
                   {formatTime(normalBatch.deliverAt)}
                 </b>
               </p>
-              {normalBatch.note && (
-                <p className="mt-1 flex items-start gap-2">
-                  <MessageSquareText className="mt-0.5 size-4 shrink-0 text-muted-foreground" aria-hidden="true" />
-                  {normalBatch.note}
-                </p>
-              )}
-              {normalBatch.riderPhone && (
-                <p className="mt-1 flex items-center gap-2 tabular-nums">
-                  <Phone className="size-4 shrink-0 text-muted-foreground" aria-hidden="true" />
-                  {formatStoredMobile(normalBatch.riderPhone)}
-                </p>
-              )}
               <div className="mt-2.5 flex items-center gap-2">
                 <span className="font-semibold text-muted-foreground">Late?</span>
                 {[15, 30].map((m) => (
@@ -279,14 +267,41 @@ export function DeliveryView({
           ) : (
             <p className="mt-1 text-sm">Orders until <b>6:50 PM</b> → delivered <b>8:00–8:15 PM</b>. Set automatically when a restaurant is turned on.</p>
           )}
-          <button
-            type="button"
-            onClick={() => setTarget({ restaurants: allOn, batch: normalBatch ?? undefined, normal: true })}
-            className="surface-primary mt-3 flex h-10 w-full items-center justify-center gap-1.5 rounded-full bg-primary text-sm font-bold text-primary-foreground"
-          >
-            <Pencil className="size-4" aria-hidden="true" />
-            {normalBatch ? "Change message or phone" : "Add message or phone"}
-          </button>
+          {/* Each restaurant's own message and delivery person. */}
+          <ul className="mt-3 flex flex-col gap-2">
+            {on.map((r) => {
+              const b = openBatch(batches[r.id]);
+              return (
+                <li key={r.id} className="rounded-2xl border bg-secondary/40 px-3.5 py-3">
+                  <div className="flex items-center justify-between gap-2">
+                    <p className="min-w-0 truncate font-semibold">{r.name}</p>
+                    {b && (
+                      <button
+                        type="button"
+                        onClick={() => setTarget({ restaurants: [{ id: r.id, name: r.name }], batch: b, normal: true })}
+                        className="flex h-9 shrink-0 items-center gap-1.5 rounded-full border bg-card px-3 text-sm font-semibold"
+                      >
+                        <Pencil className="size-3.5" aria-hidden="true" />
+                        {b.note || b.riderPhone ? "Change" : "Add message"}
+                      </button>
+                    )}
+                  </div>
+                  {b?.note && (
+                    <p className="mt-1 flex items-start gap-2 text-sm">
+                      <MessageSquareText className="mt-0.5 size-4 shrink-0 text-muted-foreground" aria-hidden="true" />
+                      {b.note}
+                    </p>
+                  )}
+                  {b?.riderPhone && (
+                    <p className="mt-1 flex items-center gap-2 text-sm tabular-nums">
+                      <Phone className="size-4 shrink-0 text-muted-foreground" aria-hidden="true" />
+                      {formatStoredMobile(b.riderPhone)}
+                    </p>
+                  )}
+                </li>
+              );
+            })}
+          </ul>
         </section>
       ) : on.length === 0 ? (
         <EmptyState icon={Truck} title="No restaurant is on" compact>

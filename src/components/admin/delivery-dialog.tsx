@@ -3,7 +3,7 @@
 import { useState, useTransition } from "react";
 import { Loader2 } from "lucide-react";
 import { Dialog, DialogContent, DialogDescription, DialogTitle } from "@/components/ui/dialog";
-import { addBatch, setNormalDelivery, updateBatch, type BatchInput } from "@/lib/admin/delivery-actions";
+import { addBatch, setBatchNote, setNormalDelivery, updateBatch, type BatchInput } from "@/lib/admin/delivery-actions";
 import { MAX_DELIVERY_NOTE, type Batch } from "@/lib/delivery";
 import { formatLocalMobile } from "@/lib/phone";
 import { toast } from "@/lib/toast/store";
@@ -103,7 +103,9 @@ export function DeliveryDialog({
     };
     startTransition(async () => {
       const result = normal
-        ? await setNormalDelivery(input)
+        ? batch
+          ? await setBatchNote(batch.id, note, phone)
+          : await setNormalDelivery(input)
         : batch
           ? await updateBatch(batch.id, input)
           : await addBatch(targets.map((r) => r.id), input);
@@ -124,7 +126,7 @@ export function DeliveryDialog({
   return (
     <Dialog open={open} onOpenChange={(next) => (pending ? null : onOpenChange(next))}>
       <DialogContent className="max-h-[90dvh] overflow-y-auto">
-        <DialogTitle>{normal ? "Normal delivery" : batch ? "Edit batch" : `New batch · ${name}`}</DialogTitle>
+        <DialogTitle>{normal ? `Message · ${name}` : batch ? "Edit batch" : `New batch · ${name}`}</DialogTitle>
         <DialogDescription className="mt-1">
           Orders placed until the cut-off join this batch, and students see its delivery time. Today only.
         </DialogDescription>

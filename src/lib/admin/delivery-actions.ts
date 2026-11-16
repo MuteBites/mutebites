@@ -326,3 +326,29 @@ export async function setNormalDelivery(input: BatchInput): Promise<DeliveryActi
   revalidatePath("/", "layout");
   return { ok: true, notified };
 }
+
+/** Normal delivery: one restaurant's own message and delivery person (times stay fixed). */
+export async function setBatchNote(batchId: string, note: string, riderPhone: string): Promise<DeliveryActionResult> {
+  const denied = await assertAdmin();
+  if (denied) return denied;
+  if (!isUuid(batchId)) return { ok: false, error: "Unknown restaurant." };
+  const text = (note ?? "").replace(/\s+/g, " ").trim();
+  if (text.length > MAX_DELIVERY_NOTE) return { ok: false, error: `Keep the message under ${MAX_DELIVERY_NOTE} characters.` };
+  let phone: string | null = null;
+  if (riderPhone && riderPhone.trim()) {
+    phone = normalizeIndianMobile(riderPhone);
+    if (!phone) return { ok: false, error: "That phone number doesn't look right — 10 digits, starting 6–9." };
+  }
+  const supabase = await createClient();
+  const { profile } = await getSessionProfile();
+  const { error } = await supabase
+    .from("delivery_batches")
+    .update({ note: text || null, rider_phone: phone, updated_at: new Date().toISOString(), updated_by: profile?.id ?? null })
+    .eq("id", batchId);
+  if (error) return { ok: false, error: "Couldn't save. Please try again." };
+  const notified = text
+    ? await notifyBatchOrders(supabase, [batchId], (o) => `Delivery by ${o.promised_at ? formatTime(o.promised_at) : "soon"} at Main Gate. ${text}`)
+    : 0;
+  revalidatePath("/", "layout");
+  return { ok: true, notified };
+}
