@@ -100,7 +100,7 @@ export type DeliveryPromise = {
   deliverAt: string;
   /** "1:45–2 PM" for lunch, instead of one time. */
   window?: string;
-  /** Express restaurants (no batch): "within 45 min" of ordering. */
+  /** Express restaurants (no batch): "within 40 min" of ordering. */
   withinMinutes?: number;
   note: string | null;
   riderPhone: string | null;
@@ -117,7 +117,7 @@ export function orderPromise(
   batch?: Batch | null,
 ): DeliveryPromise | null {
   // Lunch = promised 2 PM before 12:45; an express restaurant's lunch-time
-  // order (Shawarma Hub, within 45 min) has its own time instead.
+  // order (Shawarma Hub, within 40 min) has its own time instead.
   if (isLunchOrder(order.createdAt) && (!order.promisedAt || order.promisedAt === lunchDue(order.createdAt))) {
     return { deliverAt: order.promisedAt ?? lunchDue(order.createdAt), window: LUNCH_WINDOW, note: null, riderPhone: null };
   }

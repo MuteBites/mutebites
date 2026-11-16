@@ -217,7 +217,7 @@ Food delivery site for VIT-AP University students.
   `delivery_batches` rows with `deliver_from` for the window); the admin
   only sets a message and the delivery person's phone per restaurant.
   Batches = the per-restaurant batches below. **Express restaurants**
-  (`restaurants.delivery_minutes`, Shawarma Hub) skip both: delivered
+  (`restaurants.delivery_minutes`, Shawarma Hub = 40) skip both: delivered
   "within N min" of ordering. **Delivery times** (`src/lib/delivery.ts`,
   since 12 Nov 2026 — the old fixed slots `deliveryWindow()` /
   `slotEndTime()` are gone): **lunch is fixed** — ordered before 12:45 PM
