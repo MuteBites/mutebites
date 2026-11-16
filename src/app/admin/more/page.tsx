@@ -1,8 +1,8 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { Ban, BookOpen, History, PackageX, Star, Tag, Users, type LucideIcon } from "lucide-react";
+import { Ban, BookOpen, History, PackageX, Star, Store, Tag, Users, type LucideIcon } from "lucide-react";
 import { InstallAdminButton } from "@/components/admin/install-admin-button";
-import { ThemeIconToggle } from "@/components/theme/theme-icon-toggle";
+import { ThemeTile } from "@/components/admin/theme-tile";
 import { getOffers } from "@/lib/data/offers";
 
 export const metadata: Metadata = { title: "More · MuteBites Admin" };
@@ -23,10 +23,11 @@ const TILE =
 
 /**
  * The admin's "More" tab (mobile-first redesign, 12 Nov 2026), as in the
- * approved mock-up: every other admin page as a 3 × 3 grid of tiles, the
- * last one installing the MuteBites Admin app; then Appearance — the
- * admin's own Light / Dark / System (default System, kept apart from the
- * student app's). (The restaurant switches live on the Kitchen tab.)
+ * approved mock-up: always a full 3 × 3 grid — seven admin pages, then
+ * Appearance (the admin's own Light / Dark / System, a tap steps through
+ * them, kept apart from the student app's) and Student app (opens / in a
+ * new tab). Install MuteBites Admin is a banner above, hidden inside the
+ * installed app, so the grid never has a gap. (The restaurant switches live on the Kitchen tab.)
  */
 export default async function AdminMorePage() {
   const offers = await getOffers();
@@ -34,6 +35,11 @@ export default async function AdminMorePage() {
   return (
     <>
       <h1 className="font-heading text-headline font-bold">More</h1>
+
+      <InstallAdminButton
+        variant="banner"
+        className="flex w-full items-center gap-3 rounded-3xl border bg-card px-4 py-3 shadow-card outline-none transition-colors hover:bg-secondary/60 focus-visible:ring-3 focus-visible:ring-ring/80"
+      />
 
       <nav aria-label="Admin pages">
         <ul className="grid grid-cols-3 gap-3">
@@ -53,23 +59,19 @@ export default async function AdminMorePage() {
             </li>
           ))}
           <li>
-            <InstallAdminButton variant="tile" className={`${TILE} w-full`} />
+            <ThemeTile className={`${TILE} w-full`} />
+          </li>
+          <li>
+            <Link href="/" target="_blank" rel="noopener" className={TILE}>
+              <span className="flex size-12 items-center justify-center rounded-2xl bg-brand-soft text-brand-soft-foreground">
+                <Store className="size-5" aria-hidden="true" />
+              </span>
+              Student app
+            </Link>
           </li>
         </ul>
       </nav>
 
-      <section
-        aria-labelledby="appearance-heading"
-        className="flex items-center justify-between gap-3 rounded-3xl border bg-card px-4 py-3 shadow-card"
-      >
-        <div className="min-w-0">
-          <h2 id="appearance-heading" className="font-semibold">
-            Appearance
-          </h2>
-          <p className="text-sm text-muted-foreground">System follows this phone. Only changes admin.</p>
-        </div>
-        <ThemeIconToggle />
-      </section>
     </>
   );
 }

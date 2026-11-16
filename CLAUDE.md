@@ -629,9 +629,9 @@ admin `<main>` is `pb-28`) is a floating bottom bar like the student one —
 **Orders** (`/admin`), **Kitchen** (`/admin/kitchen`, step 2), **Delivery**
 (`/admin/delivery`), **Analytics** (`/admin/analytics`, step 4) and
 **More**
-(`/admin/more`: the mock-up's 3 × 3 grid of tiles — History, Users,
-Reviews, Restaurants & menus, Sold out, Offers, Banned, Install
-app (`InstallAdminButton variant="tile"`); the restaurant switches moved to
+(`/admin/more`: always a full 3 × 3 grid — History, Users,
+Reviews, Restaurants & menus, Sold out, Offers, Banned, Appearance (`ThemeTile`, a tap steps Light → Dark → System) and Student app (`/` in a new tab), with Install
+MuteBites Admin as a banner above it (`InstallAdminButton variant="banner"`, hidden in the installed app, 16 Nov 2026); the restaurant switches moved to
 the top of **Kitchen**, by the client's call, 12 Nov 2026); it shows only
 on those tab pages (five tabs, icon over an 11 px label). It's a real
 slider like the student TabBar (press and slide sideways: the pill follows
