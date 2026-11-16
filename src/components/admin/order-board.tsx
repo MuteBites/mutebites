@@ -19,6 +19,7 @@ import { advanceOrderStatus, cancelOrder } from "@/lib/admin/actions";
 import type { AdminOrder } from "@/lib/data/admin";
 import type { OrderStatus } from "@/lib/data/types";
 import { formatTime } from "@/lib/date";
+import { orderPromise } from "@/lib/delivery";
 import { formatRupees } from "@/lib/format";
 import { itemLine } from "@/lib/orders/admin-text";
 import { advanceLabel, formatOrderNumber, nextStatus, statusBadge } from "@/lib/orders/status";
@@ -352,6 +353,8 @@ function BoardCard({
   const badge = statusBadge(status);
   const minutes = now === null ? null : Math.max(0, Math.floor((now * 1000 - new Date(order.createdAt).getTime()) / 60_000));
   const pastSlot = now !== null && due !== null && new Date(due).getTime() <= now * 1000;
+  // Express restaurants (Shawarma Hub): "Within 40 min · by 7:42 PM".
+  const within = order.batchId === null ? orderPromise(order)?.withinMinutes : undefined;
   const armed = Math.abs(dx) >= SWIPE_AT;
 
   return (
@@ -443,7 +446,7 @@ function BoardCard({
 
         <div className="relative z-10 mt-3 flex items-center gap-2" data-no-swipe>
           {status === "pending" || status === "confirmed" ? (
-            <AgeChip minutes={minutes} pending={status === "pending"} pastSlot={pastSlot} due={due} />
+            <AgeChip minutes={minutes} pending={status === "pending"} pastSlot={pastSlot} due={due} within={within} />
           ) : (
             <span className={cn("rounded-full px-2.5 py-1 text-xs font-bold", badge.className)}>{badge.label}</span>
           )}
@@ -483,11 +486,13 @@ function AgeChip({
   pending,
   pastSlot,
   due,
+  within,
 }: {
   minutes: number | null;
   pending: boolean;
   pastSlot: boolean;
   due: string | null;
+  within?: number;
 }) {
   if (minutes === null) return <span className="h-6 w-20" aria-hidden="true" />;
   if (pending) {
@@ -513,7 +518,13 @@ function AgeChip({
         !due ? "bg-amber-soft text-amber-soft-foreground" : pastSlot ? "bg-destructive/10 text-destructive" : "bg-plum-soft text-plum-soft-foreground",
       )}
     >
-      {!due ? "No time set" : pastSlot ? `Was due ${formatTime(due)}` : `Due by ${formatTime(due)}`}
+      {!due
+        ? "No time set"
+        : pastSlot
+          ? `Was due ${formatTime(due)}`
+          : within
+            ? `Within ${within} min · by ${formatTime(due)}`
+            : `Due by ${formatTime(due)}`}
     </span>
   );
 }

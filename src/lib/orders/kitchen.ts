@@ -1,6 +1,6 @@
 import type { AdminOrder } from "@/lib/data/admin";
 import { formatTime } from "@/lib/date";
-import { orderPromise } from "@/lib/delivery";
+import { LUNCH_WINDOW, orderPromise } from "@/lib/delivery";
 import { formatOrderNumber } from "./status";
 
 /** One dish line for a restaurant: the same dish with the same extras, summed over orders. */
@@ -32,12 +32,14 @@ export type KitchenSlot = {
  * Earliest first; "No time set" last.
  */
 export function buildKitchen(orders: AdminOrder[]): KitchenSlot[] {
-  const slots = new Map<string, { end: number | null; window?: string; orders: AdminOrder[] }>();
+  const slots = new Map<string, { end: number | null; window?: string; within?: number; orders: AdminOrder[] }>();
   for (const order of orders) {
     const due = orderPromise(order);
     const end = due ? new Date(due.deliverAt).getTime() : null;
-    const key = end === null ? "tbc" : String(end);
-    const slot = slots.get(key) ?? { end, window: due?.window, orders: [] };
+    // Express orders (Shawarma Hub) share one group, sorted by the earliest due.
+    const key = due?.withinMinutes ? `express-${due.withinMinutes}` : end === null ? "tbc" : String(end);
+    const slot = slots.get(key) ?? { end, window: due?.window, within: due?.withinMinutes, orders: [] };
+    if (end !== null && slot.end !== null && end < slot.end) slot.end = end;
     slot.orders.push(order);
     slots.set(key, slot);
   }
@@ -49,9 +51,13 @@ export function buildKitchen(orders: AdminOrder[]): KitchenSlot[] {
       label:
         slot.end === null
           ? "No time set"
-          : slot.window
-            ? `Lunch ${slot.window}`
-            : `By ${formatTime(new Date(slot.end).toISOString())}`,
+          : slot.within
+            ? `Express · within ${slot.within} min`
+            : slot.window
+              ? slot.window === LUNCH_WINDOW
+                ? `Lunch ${slot.window}`
+                : slot.window
+              : `By ${formatTime(new Date(slot.end).toISOString())}`,
       orders: slot.orders.length,
       restaurants: byRestaurant(slot.orders),
     }));
