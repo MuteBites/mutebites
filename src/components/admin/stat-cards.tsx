@@ -1,5 +1,6 @@
 import type { ReactNode } from "react";
 import { Banknote, CircleCheck, CircleX, ReceiptText } from "lucide-react";
+import Link from "next/link";
 import { HeroMotif } from "@/components/theme/hero-motif";
 import { formatRupees } from "@/lib/format";
 import { cn } from "@/lib/utils";
@@ -94,8 +95,12 @@ export function TodayTiles({
       {tiles.map(({ label, value, note, Icon, tone }) => (
         <div
           key={label}
-          className="flex w-36 shrink-0 snap-start flex-col-reverse justify-end rounded-3xl border bg-card p-3.5 shadow-card sm:w-auto"
+          className="relative flex w-36 shrink-0 snap-start flex-col-reverse justify-end rounded-3xl border bg-card p-3.5 shadow-card sm:w-auto"
         >
+          {/* "To collect" opens every order still open, any day, to settle it. */}
+          {label === "To collect" && (
+            <Link href="/admin/history?open=1" className="absolute inset-0 rounded-3xl" aria-label="See the orders still to collect" />
+          )}
           <dt className="flex items-center gap-1.5 text-sm text-muted-foreground">
             <Icon className={cn("size-4 shrink-0", tone)} aria-hidden="true" />
             {label}
