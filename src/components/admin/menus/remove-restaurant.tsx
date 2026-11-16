@@ -30,7 +30,7 @@ export function RemoveRestaurantButton({ id, name }: { id: string; name: string 
       const result = await setRestaurantRemoved(id, true);
       if (result.ok) {
         setOpen(false);
-        toast.success(`${name} is removed. Add it back any time from Menus.`);
+        toast.success(`${name} is removed. Add it back any time from Restaurants & menus.`);
         router.push("/admin/menus");
       } else {
         toast.error(result.error);
@@ -97,5 +97,89 @@ export function AddBackRestaurantButton({ id, name }: { id: string; name: string
       {pending ? <Loader2 className="size-4 animate-spin" aria-hidden="true" /> : <RotateCcw className="size-4" aria-hidden="true" />}
       Add back
     </button>
+  );
+}
+
+/**
+ * "Remove restaurant" beside "Add restaurant" on Menus: the admin picks
+ * which one, confirms, and it moves to Removed restaurants (Add back there).
+ */
+export function RemoveRestaurantPicker({ restaurants }: { restaurants: { id: string; name: string }[] }) {
+  const router = useRouter();
+  const [open, setOpen] = useState(false);
+  const [picked, setPicked] = useState<string | null>(null);
+  const [pending, startTransition] = useTransition();
+  const chosen = restaurants.find((r) => r.id === picked);
+
+  function remove() {
+    if (!chosen) return;
+    startTransition(async () => {
+      const result = await setRestaurantRemoved(chosen.id, true);
+      if (result.ok) {
+        setOpen(false);
+        setPicked(null);
+        toast.success(`${chosen.name} is removed. Add it back any time under Removed restaurants.`);
+        router.refresh();
+      } else {
+        toast.error(result.error);
+      }
+    });
+  }
+
+  return (
+    <AlertDialog
+      open={open}
+      onOpenChange={(next) => {
+        if (pending) return;
+        setOpen(next);
+        if (!next) setPicked(null);
+      }}
+    >
+      <AlertDialogTrigger
+        disabled={restaurants.length === 0}
+        render={
+          <button
+            type="button"
+            className={cn(adminPill, "w-fit border-destructive/30 text-destructive hover:bg-destructive/10")}
+          />
+        }
+      >
+        <Trash2 className="size-4" aria-hidden="true" />
+        Remove restaurant
+      </AlertDialogTrigger>
+      <AlertDialogContent>
+        <AlertDialogHeader>
+          <AlertDialogTitle>{chosen ? `Remove ${chosen.name}?` : "Which restaurant?"}</AlertDialogTitle>
+          <AlertDialogDescription>
+            It disappears from the app for everyone and students can&apos;t order from it. Past orders keep its name,
+            and its menu and photos are kept, so you can add it back any time.
+          </AlertDialogDescription>
+        </AlertDialogHeader>
+        <div role="radiogroup" aria-label="Restaurant to remove" className="max-h-72 space-y-1.5 overflow-y-auto">
+          {restaurants.map((r) => (
+            <button
+              key={r.id}
+              type="button"
+              role="radio"
+              aria-checked={picked === r.id}
+              onClick={() => setPicked(r.id)}
+              className={cn(
+                "flex w-full items-center justify-between rounded-xl border px-3.5 py-2.5 text-left font-semibold outline-none focus-visible:ring-3 focus-visible:ring-ring/80",
+                picked === r.id ? "surface-ink bg-ink text-ink-foreground" : "bg-card hover:bg-secondary/60",
+              )}
+            >
+              {r.name}
+            </button>
+          ))}
+        </div>
+        <AlertDialogFooter>
+          <AlertDialogCancel disabled={pending}>Keep it</AlertDialogCancel>
+          <AlertDialogAction disabled={pending || !chosen} onClick={remove} variant="danger">
+            {pending && <Loader2 className="size-4 animate-spin" />}
+            Remove restaurant
+          </AlertDialogAction>
+        </AlertDialogFooter>
+      </AlertDialogContent>
+    </AlertDialog>
   );
 }

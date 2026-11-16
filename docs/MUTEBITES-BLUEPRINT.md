@@ -1102,25 +1102,31 @@ action buttons.
 ### Ordering and delivery windows
 Since 14 Oct 2026 (redesign) ordering is a plain **Open / Closed** switch
 the admin flips — no daily schedule, no Auto. Closed also turns every
-restaurant off. Delivery promises keep the old slot cut-offs (by decision):
+restaurant off.
 
-| Placed (IST) | Delivery by |
-|---|---|
-| before 12:45 PM | 1:30 PM |
-| 12:45 – 6:00 PM | 7:30 PM |
-| 6:00 – 7:00 PM | 8:15 PM |
-| after 7:00 PM | "to be confirmed" |
+Delivery times (since 12–16 Nov 2026, `src/lib/delivery.ts`; the old
+fixed slots are gone):
 
-`deliveryWindow()` / `slotEndTime()` (`src/lib/date.ts`). All times are IST
-(fixed +5:30). The old `'auto'` mode and `ordering_schedule_open()` were
-removed from the database on 15 Oct 2026 (migration #41,
-`20261015000000_ordering_open_closed_only.sql`), ahead of the redesign's
-deploy — until it's pushed, the old live admin's "Auto" button is refused
-(Open / Closed work).
+- **Lunch** is fixed: ordered before 12:45 PM → delivered 1:45–2 PM.
+- **Evening** follows the Delivery tab's **Normal / Batches** switch
+  (`app_settings.delivery_mode`):
+  - **Normal** (default): one fixed delivery for every restaurant —
+    orders until 6:50 PM, delivered 8:00–8:15 PM. Per restaurant the admin
+    only adds a message and the delivery person's phone.
+  - **Batches**: per restaurant the admin sets "orders until → delivered
+    by" (several a night). An order joins the first batch still open and
+    keeps that promise (`orders.promised_at`); Late +15 / +30 moves a
+    batch and its orders.
+- **Express restaurants** (`restaurants.delivery_minutes`, Shawarma Hub)
+  skip batches: delivered within N minutes of ordering.
+- No delivery time open after 12:45 PM = no orders (no fallback, by
+  decision). All times IST.
 
 ### Tokens
 `#1, #2, …` per IST day, across all restaurants, from the database
-trigger. Student and admin always see the same number.
+trigger. Student and admin always see the same number. Since 16 Nov 2026
+token **5 is skipped** (1, 2, 3, 4, 6 …; 15, 25 are fine) by the client's
+call.
 
 ### Bans
 By phone number: if any account with that phone is banned, no account with
@@ -1642,6 +1648,15 @@ in order, without the MuteBites menu data.
 10-15 08:46 Profile redesign: campus pass, glowing milestones, reward bar; fix Campus Explorer
 10-15 12:56 Sign-in and welcome redesign; fix splash hydration warning
 10-15 13:38 Admin polish; fix red and green dialog confirms rendering amber
+11-12       Mobile admin: Orders / Kitchen / Delivery / Analytics / More tabs; 5% off; Remove restaurant
+11-12       Delivery batches replace fixed slots; Delivery tab replaces Handover
+11-13       Delivery: Normal / Batches switch; express restaurants (Shawarma Hub)
+11-13       Normal delivery: orders until 6:50, delivered 8:00-8:15 PM
+11-16       Order tokens skip 5
+11-16       Admin: Order history on Orders, More's pages go back to More, slider no longer sticks
+11-16       Normal delivery: a message and delivery person per restaurant
+11-16       To collect tile opens the open orders to settle them
+11-16       Restaurants & menus: Remove restaurant picker next to Add restaurant
 ```
 
 ---
@@ -1710,3 +1725,10 @@ Run them in this order; each one assumes the ones before it. After #40,
 | 47 | `20261017020000_menu_photos_allow_jpg.sql` | photo paths may end `.jpg` too (Safari can't encode WebP) | Run |
 | 48 | `20261017030000_open_push_notifications.sql` | "ordering is open" pushes: 3-hour rule, recent messages, per-device mute | Run |
 | 49 | `20261018000000_site_status.sql` | developer kill switch / maintenance: `developers`, `site_status`, `is_developer()`, `set_site_mode()`; `place_order()` refuses `site_offline` | Run, then insert the developer emails by hand (not in the file) |
+| 50 | `20261112000000_offer_pct5.sql` | 5% off offer | Run |
+| 51 | `20261112010000_admin_order_analytics.sql` | `admin_order_analytics()` for the Analytics tab | Run |
+| 52 | `20261112020000_restaurant_archive.sql` | `restaurants.archived_at` (Remove / Add back) | Run |
+| 53 | `20261112030000_delivery_info.sql` | per-restaurant delivery time (replaced by #54 the same day) | Run |
+| 54 | `20261112040000_delivery_batches.sql` | `delivery_batches`, `orders.batch_id` / `promised_at` | Run |
+| 55 | `20261113000000_delivery_modes_express.sql` | `delivery_mode` Normal / Batches, `deliver_from` window, `restaurants.delivery_minutes` (express) | Run |
+| 56 | `20261116000000_skip_five_tokens.sql` | tokens skip 5 | Run |

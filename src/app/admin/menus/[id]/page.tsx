@@ -34,7 +34,7 @@ export default async function AdminMenuPage({ params }: PageProps<"/admin/menus/
   return (
     <>
       <div>
-        <BackToDashboardLink href="/admin/menus" label="Menus" />
+        <BackToDashboardLink href="/admin/menus" label="Restaurants & menus" />
         <h1 className="mt-4 font-heading text-headline font-bold">{restaurant.name}</h1>
         <p className="mt-1 text-muted-foreground">
           {dishCount === 1 ? "1 dish" : `${dishCount} dishes`} ·{" "}

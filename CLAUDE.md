@@ -210,7 +210,15 @@ Food delivery site for VIT-AP University students.
 - **Order tracking ticket**: the token card (`order-tracking.tsx`) is a
   ticket stub — up to three distinct photos of the ordered dishes on top,
   a dashed tear line with edge notches (`bg-background` circles), then the
-  token and the delivery time. **Delivery times** (`src/lib/delivery.ts`,
+  token and the delivery time. **Delivery modes** (13–16 Nov 2026): the
+  Delivery tab has a **Normal / Batches** switch (`app_settings.delivery_mode`,
+  default `normal`). Normal = one fixed evening delivery for every
+  restaurant — orders until 6:50 PM, delivered 8:00–8:15 PM (stored as
+  `delivery_batches` rows with `deliver_from` for the window); the admin
+  only sets a message and the delivery person's phone per restaurant.
+  Batches = the per-restaurant batches below. **Express restaurants**
+  (`restaurants.delivery_minutes`, Shawarma Hub) skip both: delivered
+  "within N min" of ordering. **Delivery times** (`src/lib/delivery.ts`,
   since 12 Nov 2026 — the old fixed slots `deliveryWindow()` /
   `slotEndTime()` are gone): **lunch is fixed** — ordered before 12:45 PM
   (IST) → "Delivery between 1:45–2 PM" (`LUNCH_WINDOW`, due 2 PM); after
@@ -622,7 +630,7 @@ admin `<main>` is `pb-28`) is a floating bottom bar like the student one —
 (`/admin/delivery`), **Analytics** (`/admin/analytics`, step 4) and
 **More**
 (`/admin/more`: the mock-up's 3 × 3 grid of tiles — History, Users,
-Reviews, Menus, Sold out, Offers, Restaurants (→ Kitchen), Banned, Install
+Reviews, Restaurants & menus, Sold out, Offers, Banned, Install
 app (`InstallAdminButton variant="tile"`); the restaurant switches moved to
 the top of **Kitchen**, by the client's call, 12 Nov 2026); it shows only
 on those tab pages (five tabs, icon over an 11 px label). It's a real
@@ -694,7 +702,7 @@ order placed now gets, counting down via `useNowSeconds()`
 (`src/lib/use-now.ts`, a `useSyncExternalStore` clock, null on the server),
 how many open orders are due in it and how many are past their slot — plus
 "N/M restaurants on" and offer chips, with `OrderingKillSwitch` as its
-footer), `TodayTiles` (orders today, **to collect** = every undelivered
+footer), `TodayTiles` (orders today, **to collect** (taps through to `/admin/history?open=1`, the open orders to settle) = every undelivered
 order's total, any day, `getToCollect()`; delivered; cancelled — added to
 `getOrderCounts()`), `NewOrderAlerts`, then **`OrderBoard`**
 (`src/components/admin/order-board.tsx`): search, then New (pending) /
@@ -813,8 +821,10 @@ name-matched file — an upload follows the row. Add-ons (`addons` / `category_a
 hides any restaurant with no dishes at all (a just-added one).
 **Remove restaurant / Add back** (12 Nov 2026, `setRestaurantRemoved()` in
 `menu-actions.ts`, buttons in `src/components/admin/menus/remove-restaurant.tsx`):
-the foot of a restaurant's editor has **Remove restaurant** (confirm
-dialog); it stamps `restaurants.archived_at` and switches it off — never a
+the page is titled **Restaurants & menus** (so is More's tile, 16 Nov
+2026); **Remove restaurant** sits beside Add restaurant
+(`RemoveRestaurantPicker`: pick one, confirm) and also at the foot of a
+restaurant's editor; it stamps `restaurants.archived_at` and switches it off — never a
 real delete, since past orders keep it (`orders.restaurant_id` is restrict)
 and Add back needs it. A removed restaurant shows **nowhere**: every list
 filters `archived_at is null` — `getRestaurants()`, `getSearchableDishes()`
@@ -1459,7 +1469,9 @@ on `orders`).
   screen or two admins clicking at once can't skip a step or act on a
   status that's already changed. Also `daily_number` (`not null int`) —
   the order's position that IST calendar day, campus-wide across every
-  restaurant, starting over at 1 each day — this is the "token"/order
+  restaurant, starting over at 1 each day (**token 5 is skipped** since
+  16 Nov 2026, client's call: 1, 2, 3, 4, 6 …; 15, 25 are fine —
+  `20261116000000_skip_five_tokens.sql`) — this is the "token"/order
   number shown to both the student (pickup) and the admin (order list),
   so the two must always agree. Assigned once, atomically, by the
   `set_daily_order_number` trigger (`before insert on orders`) via the

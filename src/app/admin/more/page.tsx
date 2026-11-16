@@ -11,7 +11,7 @@ const TILES: { href: string; label: string; Icon: LucideIcon }[] = [
   { href: "/admin/history", label: "History", Icon: History },
   { href: "/admin/users", label: "Users", Icon: Users },
   { href: "/admin/reviews", label: "Reviews", Icon: Star },
-  { href: "/admin/menus", label: "Menus", Icon: BookOpen },
+  { href: "/admin/menus", label: "Restaurants & menus", Icon: BookOpen },
   { href: "/admin/sold-out", label: "Sold out", Icon: PackageX },
   { href: "/admin/offers", label: "Offers", Icon: Tag },
   { href: "/admin/banned", label: "Banned", Icon: Ban },
