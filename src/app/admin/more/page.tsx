@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { Ban, BookOpen, History, PackageX, Star, Store, Tag, Users, type LucideIcon } from "lucide-react";
+import { Ban, BookOpen, Hash, History, PackageX, Star, Tag, Users, type LucideIcon } from "lucide-react";
 import { InstallAdminButton } from "@/components/admin/install-admin-button";
 import { ThemeTile } from "@/components/admin/theme-tile";
 import { getOffers } from "@/lib/data/offers";
@@ -15,6 +15,7 @@ const TILES: { href: string; label: string; Icon: LucideIcon }[] = [
   { href: "/admin/sold-out", label: "Sold out", Icon: PackageX },
   { href: "/admin/offers", label: "Offers", Icon: Tag },
   { href: "/admin/banned", label: "Banned", Icon: Ban },
+  { href: "/admin/tokens", label: "Block order number", Icon: Hash },
 ];
 
 /** One square tile: an icon on a blush square over its name — the mock-up's look. */
@@ -23,10 +24,10 @@ const TILE =
 
 /**
  * The admin's "More" tab (mobile-first redesign, 12 Nov 2026), as in the
- * approved mock-up: always a full 3 × 3 grid — seven admin pages, then
- * Appearance (the admin's own Light / Dark / System, a tap steps through
- * them, kept apart from the student app's) and Student app (opens / in a
- * new tab). Install MuteBites Admin is a banner above, hidden inside the
+ * approved mock-up: always a full 3 × 3 grid — eight admin pages, then
+ * Block order number (tokens to skip today), then Appearance (the admin's
+ * own Light / Dark / System, a tap steps through them, kept apart from the
+ * student app's). Install MuteBites Admin is a banner above, hidden inside the
  * installed app, so the grid never has a gap. (The restaurant switches live on the Kitchen tab.)
  */
 export default async function AdminMorePage() {
@@ -60,14 +61,6 @@ export default async function AdminMorePage() {
           ))}
           <li>
             <ThemeTile className={`${TILE} w-full`} />
-          </li>
-          <li>
-            <Link href="/" target="_blank" rel="noopener" className={TILE}>
-              <span className="flex size-12 items-center justify-center rounded-2xl bg-brand-soft text-brand-soft-foreground">
-                <Store className="size-5" aria-hidden="true" />
-              </span>
-              Student app
-            </Link>
           </li>
         </ul>
       </nav>

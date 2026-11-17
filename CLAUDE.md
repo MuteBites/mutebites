@@ -638,7 +638,7 @@ admin `<main>` is `pb-28`) is a floating bottom bar like the student one —
 (`/admin/delivery`), **Analytics** (`/admin/analytics`, step 4) and
 **More**
 (`/admin/more`: always a full 3 × 3 grid — History, Users,
-Reviews, Restaurants & menus, Sold out, Offers, Banned, Appearance (`ThemeTile`, a tap steps Light → Dark → System) and Student app (`/` in a new tab), with Install
+Reviews, Restaurants & menus, Sold out, Offers, Banned, **Block order number** (`/admin/tokens`, `TokenBlocker`: today's next 60 numbers not yet given out, tap to block / unblock — `blocked_tokens`, `setTokenBlocked()`; it replaced the Student app tile, 17 Nov 2026) and Appearance (`ThemeTile`, a tap steps Light → Dark → System), with Install
 MuteBites Admin as a banner above it (`InstallAdminButton variant="banner"`, hidden in the installed app, 16 Nov 2026); the restaurant switches moved to
 the top of **Kitchen**, by the client's call, 12 Nov 2026); it shows only
 on those tab pages (five tabs, icon over an 11 px label). It's a real
@@ -1479,7 +1479,10 @@ on `orders`).
   the order's position that IST calendar day, campus-wide across every
   restaurant, starting over at 1 each day (**token 5 is skipped** since
   16 Nov 2026, client's call: 1, 2, 3, 4, 6 …; 15, 25 are fine —
-  `20261116000000_skip_five_tokens.sql`) — this is the "token"/order
+  `20261116000000_skip_five_tokens.sql`), plus any number the admin blocked
+  for that day (**`blocked_tokens`**: `day`, `number`, primary key both;
+  admin-only RLS; admins may also read `daily_order_counters` —
+  `20261117010000_blocked_tokens.sql`) — this is the "token"/order
   number shown to both the student (pickup) and the admin (order list),
   so the two must always agree. Assigned once, atomically, by the
   `set_daily_order_number` trigger (`before insert on orders`) via the
