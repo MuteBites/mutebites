@@ -7,13 +7,13 @@ import { EmptyState } from "@/components/empty-state";
 import { delayBatch, removeBatch, setDeliveryMode } from "@/lib/admin/delivery-actions";
 import type { AdminRestaurant } from "@/lib/data/admin";
 import { formatTime } from "@/lib/date";
-import { LUNCH_WINDOW, openBatch, type Batch } from "@/lib/delivery";
+import { LUNCH_WINDOW, isLunchBatch, openBatch, type Batch } from "@/lib/delivery";
 import { formatStoredMobile } from "@/lib/phone";
 import { toast } from "@/lib/toast/store";
 import { cn } from "@/lib/utils";
 import { DeliveryDialog } from "./delivery-dialog";
 
-type Target = { restaurants: { id: string; name: string }[]; batch?: Batch; normal?: boolean } | null;
+type Target = { restaurants: { id: string; name: string }[]; batch?: Batch; normal?: boolean; lunch?: boolean } | null;
 
 /**
  * The admin's Delivery tab (12 Nov 2026, it replaced Handover): for each
@@ -70,10 +70,43 @@ export function DeliveryView({
     });
   }
 
+  /** One restaurant's message + delivery person row, with its Add / Change pill. */
+  function messageRow(r: AdminRestaurant, b: Batch | null | undefined, open: () => void, canEdit = true) {
+    return (
+      <li key={r.id} className="rounded-2xl border bg-secondary/40 px-3.5 py-3">
+        <div className="flex items-center justify-between gap-2">
+          <p className="min-w-0 truncate font-semibold">{r.name}</p>
+          {canEdit && (
+            <button
+              type="button"
+              onClick={open}
+              className="flex h-9 shrink-0 items-center gap-1.5 rounded-full border bg-card px-3 text-sm font-semibold"
+            >
+              <Pencil className="size-3.5" aria-hidden="true" />
+              {b?.note || b?.riderPhone ? "Change" : "Add message"}
+            </button>
+          )}
+        </div>
+        {b?.note && (
+          <p className="mt-1 flex items-start gap-2 text-sm">
+            <MessageSquareText className="mt-0.5 size-4 shrink-0 text-muted-foreground" aria-hidden="true" />
+            {b.note}
+          </p>
+        )}
+        {b?.riderPhone && (
+          <p className="mt-1 flex items-center gap-2 text-sm tabular-nums">
+            <Phone className="size-4 shrink-0 text-muted-foreground" aria-hidden="true" />
+            {formatStoredMobile(b.riderPhone)}
+          </p>
+        )}
+      </li>
+    );
+  }
+
   const told = (n?: number) => (n ? ` ${n} ${n === 1 ? "student" : "students"} told.` : "");
 
   function card(r: AdminRestaurant) {
-    const list = batches[r.id] ?? [];
+    const list = (batches[r.id] ?? []).filter((b) => !isLunchBatch(b));
     const open = openBatch(list);
     return (
       <li key={r.id}>
@@ -237,9 +270,27 @@ export function DeliveryView({
         </p>
       )}
 
+      {on.length > 0 && (
+        <section className="rounded-3xl border bg-card p-4 shadow-card">
+          <h2 className="font-heading text-lg font-bold">Lunch · {LUNCH_WINDOW}</h2>
+          <p className="mt-1 text-sm">
+            Orders until <b>12:45 PM</b>. Add a message or delivery person for each restaurant that&apos;s on.
+          </p>
+          <ul className="mt-3 flex flex-col gap-2">
+            {on.map((r) =>
+              messageRow(
+                r,
+                (batches[r.id] ?? []).find(isLunchBatch),
+                () => setTarget({ restaurants: [{ id: r.id, name: r.name }], lunch: true, batch: (batches[r.id] ?? []).find(isLunchBatch) }),
+              ),
+            )}
+          </ul>
+        </section>
+      )}
+
       {mode === "normal" ? (
         <section className="rounded-3xl border bg-card p-4 shadow-card">
-          <h2 className="font-heading text-lg font-bold">Today&apos;s delivery</h2>
+          <h2 className="font-heading text-lg font-bold">Evening delivery</h2>
           {normalBatch ? (
             <div className="mt-2 text-sm">
               <p>
@@ -271,34 +322,11 @@ export function DeliveryView({
           <ul className="mt-3 flex flex-col gap-2">
             {on.map((r) => {
               const b = openBatch(batches[r.id]);
-              return (
-                <li key={r.id} className="rounded-2xl border bg-secondary/40 px-3.5 py-3">
-                  <div className="flex items-center justify-between gap-2">
-                    <p className="min-w-0 truncate font-semibold">{r.name}</p>
-                    {b && (
-                      <button
-                        type="button"
-                        onClick={() => setTarget({ restaurants: [{ id: r.id, name: r.name }], batch: b, normal: true })}
-                        className="flex h-9 shrink-0 items-center gap-1.5 rounded-full border bg-card px-3 text-sm font-semibold"
-                      >
-                        <Pencil className="size-3.5" aria-hidden="true" />
-                        {b.note || b.riderPhone ? "Change" : "Add message"}
-                      </button>
-                    )}
-                  </div>
-                  {b?.note && (
-                    <p className="mt-1 flex items-start gap-2 text-sm">
-                      <MessageSquareText className="mt-0.5 size-4 shrink-0 text-muted-foreground" aria-hidden="true" />
-                      {b.note}
-                    </p>
-                  )}
-                  {b?.riderPhone && (
-                    <p className="mt-1 flex items-center gap-2 text-sm tabular-nums">
-                      <Phone className="size-4 shrink-0 text-muted-foreground" aria-hidden="true" />
-                      {formatStoredMobile(b.riderPhone)}
-                    </p>
-                  )}
-                </li>
+              return messageRow(
+                r,
+                b,
+                () => b && setTarget({ restaurants: [{ id: r.id, name: r.name }], batch: b, normal: true }),
+                !!b,
               );
             })}
           </ul>
@@ -319,6 +347,7 @@ export function DeliveryView({
           restaurants={target.restaurants}
           batch={target.batch}
           normal={target.normal}
+          lunch={target.lunch}
           allOn={!target.batch && target.restaurants.length === 1 ? allOn : undefined}
           onSaved={() => router.refresh()}
         />

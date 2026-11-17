@@ -3,7 +3,7 @@
 import { useState, useTransition } from "react";
 import { Loader2 } from "lucide-react";
 import { Dialog, DialogContent, DialogDescription, DialogTitle } from "@/components/ui/dialog";
-import { addBatch, setBatchNote, setNormalDelivery, updateBatch, type BatchInput } from "@/lib/admin/delivery-actions";
+import { addBatch, setBatchNote, setLunchNote, setNormalDelivery, updateBatch, type BatchInput } from "@/lib/admin/delivery-actions";
 import { MAX_DELIVERY_NOTE, type Batch } from "@/lib/delivery";
 import { formatLocalMobile } from "@/lib/phone";
 import { toast } from "@/lib/toast/store";
@@ -62,8 +62,11 @@ export function DeliveryDialog({
   batch,
   allOn,
   normal = false,
+  lunch = false,
   onSaved,
 }: {
+  /** Lunch's message and delivery person (times fixed, 1:45–2 PM). */
+  lunch?: boolean;
   /** Normal delivery: one for every restaurant that's on, with a "from" time (window). */
   normal?: boolean;
   open: boolean;
@@ -90,7 +93,7 @@ export function DeliveryDialog({
   const afterChips = until ? [20, 30, 40, 60].map((m) => hhmmOf(minutesOf(until) + m)) : [];
 
   function save() {
-    if (!until || !at) {
+    if (!lunch && (!until || !at)) {
       toast.error(!until ? "Pick until when orders join this batch." : "Pick when it'll be delivered.");
       return;
     }
@@ -102,7 +105,9 @@ export function DeliveryDialog({
       riderPhone: phone,
     };
     startTransition(async () => {
-      const result = normal
+      const result = lunch
+        ? await setLunchNote(restaurants[0].id, note, phone)
+        : normal
         ? batch
           ? await setBatchNote(batch.id, note, phone)
           : await setNormalDelivery(input)
@@ -114,7 +119,7 @@ export function DeliveryDialog({
         return;
       }
       toast.success(
-        `${batch ? "Batch saved" : `Batch added for ${targets.length === 1 ? targets[0].name : `${targets.length} restaurants`}`}.${
+        `${lunch || normal ? "Message saved" : batch ? "Batch saved" : `Batch added for ${targets.length === 1 ? targets[0].name : `${targets.length} restaurants`}`}.${
           result.notified ? ` ${result.notified} ${result.notified === 1 ? "student" : "students"} notified.` : ""
         }`,
       );
@@ -126,12 +131,16 @@ export function DeliveryDialog({
   return (
     <Dialog open={open} onOpenChange={(next) => (pending ? null : onOpenChange(next))}>
       <DialogContent className="max-h-[90dvh] overflow-y-auto">
-        <DialogTitle>{normal ? `Message · ${name}` : batch ? "Edit batch" : `New batch · ${name}`}</DialogTitle>
+        <DialogTitle>{lunch ? `Lunch message · ${name}` : normal ? `Message · ${name}` : batch ? "Edit batch" : `New batch · ${name}`}</DialogTitle>
         <DialogDescription className="mt-1">
           Orders placed until the cut-off join this batch, and students see its delivery time. Today only.
         </DialogDescription>
 
-        {normal ? (
+        {lunch ? (
+          <p className="mt-4 rounded-2xl bg-secondary px-4 py-3 text-sm">
+            Fixed times: orders until <b>12:45 PM</b>, delivered <b>1:45–2 PM</b>.
+          </p>
+        ) : normal ? (
           <p className="mt-4 rounded-2xl bg-secondary px-4 py-3 text-sm">
             Fixed times: orders until <b>6:50 PM</b>, delivered <b>8:00–8:15 PM</b>.
           </p>
@@ -206,7 +215,7 @@ export function DeliveryDialog({
           />
         </label>
 
-        {!normal && !batch && allOn && allOn.length > 1 && (
+        {!normal && !lunch && !batch && allOn && allOn.length > 1 && (
           <label className="mt-4 flex items-center gap-3 text-sm font-semibold">
             <input type="checkbox" checked={forAll} onChange={(e) => setForAll(e.target.checked)} className="size-5 accent-[var(--primary)]" />
             Same batch for all {allOn.length} restaurants that are on

@@ -288,7 +288,14 @@ export async function setNormalDelivery(input: BatchInput): Promise<DeliveryActi
   const ids = (on ?? []).map((r) => r.id);
   if (ids.length === 0) return { ok: false, error: "Turn a restaurant on in Kitchen first." };
 
-  await supabase.from("delivery_batches").delete().in("restaurant_id", ids).eq("day", todayKey(now));
+  // Keep each restaurant's lunch message row (cut off at 12:45 PM).
+  const lunchCut = new Date(startOfTodayIST(now).getTime() + (12 * 60 + 45) * 60_000).toISOString();
+  await supabase
+    .from("delivery_batches")
+    .delete()
+    .in("restaurant_id", ids)
+    .eq("day", todayKey(now))
+    .neq("order_until", lunchCut);
   const { profile } = await getSessionProfile();
   const { data: rows, error } = await supabase
     .from("delivery_batches")
@@ -349,6 +356,61 @@ export async function setBatchNote(batchId: string, note: string, riderPhone: st
   const notified = text
     ? await notifyBatchOrders(supabase, [batchId], (o) => `Delivery by ${o.promised_at ? formatTime(o.promised_at) : "soon"} at Main Gate. ${text}`)
     : 0;
+  revalidatePath("/", "layout");
+  return { ok: true, notified };
+}
+
+/**
+ * Lunch (orders before 12:45 PM, delivered 1:45–2 PM): one restaurant's
+ * message and delivery person for today. Kept as a delivery_batches row cut
+ * off at 12:45 PM; place_order() attaches lunch orders to it, and today's
+ * lunch orders already placed join it now (and are told).
+ */
+export async function setLunchNote(restaurantId: string, note: string, riderPhone: string): Promise<DeliveryActionResult> {
+  const denied = await assertAdmin();
+  if (denied) return denied;
+  if (!isUuid(restaurantId)) return { ok: false, error: "Unknown restaurant." };
+  const text = (note ?? "").replace(/\s+/g, " ").trim();
+  if (text.length > MAX_DELIVERY_NOTE) return { ok: false, error: `Keep the message under ${MAX_DELIVERY_NOTE} characters.` };
+  let phone: string | null = null;
+  if (riderPhone && riderPhone.trim()) {
+    phone = normalizeIndianMobile(riderPhone);
+    if (!phone) return { ok: false, error: "That phone number doesn't look right — 10 digits, starting 6–9." };
+  }
+  const now = new Date();
+  const day0 = startOfTodayIST(now).getTime();
+  const at = (m: number) => new Date(day0 + m * 60_000).toISOString();
+  const due = at(14 * 60);
+  const supabase = await createClient();
+  const { profile } = await getSessionProfile();
+  const { data: row, error } = await supabase
+    .from("delivery_batches")
+    .upsert(
+      {
+        restaurant_id: restaurantId,
+        day: todayKey(now),
+        order_until: at(12 * 60 + 45),
+        deliver_from: at(13 * 60 + 45),
+        deliver_at: due,
+        note: text || null,
+        rider_phone: phone,
+        updated_at: now.toISOString(),
+        updated_by: profile?.id ?? null,
+      },
+      { onConflict: "restaurant_id,order_until" },
+    )
+    .select("id")
+    .single();
+  if (error || !row) return { ok: false, error: "Couldn't save. Please try again." };
+  await supabase
+    .from("orders")
+    .update({ batch_id: row.id })
+    .eq("restaurant_id", restaurantId)
+    .is("batch_id", null)
+    .eq("promised_at", due)
+    .gte("created_at", new Date(day0).toISOString())
+    .in("status", OPEN);
+  const notified = text ? await notifyBatchOrders(supabase, [row.id], () => `Lunch delivery 1:45–2 PM at Main Gate. ${text}`) : 0;
   revalidatePath("/", "layout");
   return { ok: true, notified };
 }

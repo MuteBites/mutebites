@@ -216,6 +216,14 @@ Food delivery site for VIT-AP University students.
   restaurant — orders until 6:50 PM, delivered 8:00–8:15 PM (stored as
   `delivery_batches` rows with `deliver_from` for the window); the admin
   only sets a message and the delivery person's phone per restaurant.
+  **Lunch has its own message too** (17 Nov 2026, both modes): the
+  Delivery tab's "Lunch · 1:45–2 PM" card sets a message and delivery
+  person per restaurant that's on (`setLunchNote()`), kept as a
+  `delivery_batches` row cut off at 12:45 PM (`isLunchBatch()`; `openBatch()`
+  and the batch cards skip it, Normal's reset keeps it). `place_order()`
+  attaches lunch orders to it (`20261117000000_lunch_delivery_message.sql`),
+  already-placed lunch orders join it, and `orderPromise()`'s lunch branch
+  carries its note / phone to the ticket.
   Batches = the per-restaurant batches below. **Express restaurants**
   (`restaurants.delivery_minutes`, Shawarma Hub = 40) skip both: delivered
   "within N min" of ordering. **Delivery times** (`src/lib/delivery.ts`,

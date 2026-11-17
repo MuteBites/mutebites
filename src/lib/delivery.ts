@@ -77,6 +77,15 @@ function istMinutes(iso: string): number {
   return (h % 24) * 60 + m;
 }
 
+/**
+ * A restaurant's lunch message row (17 Nov 2026): a delivery_batches row cut
+ * off at 12:45 PM that only holds the lunch message and delivery person —
+ * never an evening batch.
+ */
+export function isLunchBatch(b: { orderUntil: string }): boolean {
+  return istMinutes(b.orderUntil) === LUNCH_CUTOFF_MINUTES;
+}
+
 /** Placed before 12:45 PM (IST)? Then it's lunch — the fixed 1:45–2 PM delivery. */
 export function isLunchOrder(createdAt: string): boolean {
   return istMinutes(createdAt) < LUNCH_CUTOFF_MINUTES;
@@ -119,7 +128,13 @@ export function orderPromise(
   // Lunch = promised 2 PM before 12:45; an express restaurant's lunch-time
   // order (Shawarma Hub, within 40 min) has its own time instead.
   if (isLunchOrder(order.createdAt) && (!order.promisedAt || order.promisedAt === lunchDue(order.createdAt))) {
-    return { deliverAt: order.promisedAt ?? lunchDue(order.createdAt), window: LUNCH_WINDOW, note: null, riderPhone: null };
+    // The lunch message row (isLunchBatch) carries the admin's message and delivery person.
+    return {
+      deliverAt: order.promisedAt ?? lunchDue(order.createdAt),
+      window: LUNCH_WINDOW,
+      note: batch?.note ?? null,
+      riderPhone: batch?.riderPhone ?? null,
+    };
   }
   if (!order.promisedAt) return null;
   if (order.batchId === null) {
@@ -158,7 +173,7 @@ export function openBatch(batches: Batch[] | undefined, now: Date = new Date()):
   const today = todayKey(now);
   return (
     (batches ?? [])
-      .filter((b) => b.day === today && new Date(b.orderUntil).getTime() > now.getTime())
+      .filter((b) => b.day === today && !isLunchBatch(b) && new Date(b.orderUntil).getTime() > now.getTime())
       .sort((a, b) => a.orderUntil.localeCompare(b.orderUntil))[0] ?? null
   );
 }
