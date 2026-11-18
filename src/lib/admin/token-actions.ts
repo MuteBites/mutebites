@@ -18,6 +18,14 @@ export async function setTokenBlocked(number: number, blocked: boolean): Promise
   const supabase = await createClient();
   const day = istDayKey(new Date().toISOString());
 
+  // 5 is blocked by default, every day, until the admin lets it through.
+  if (number === 5) {
+    const { error } = await supabase.from("app_settings").update({ skip_five: blocked }).eq("id", true);
+    if (error) return { ok: false, error: "Couldn't save that. Try again." };
+    revalidatePath("/admin/tokens");
+    return { ok: true };
+  }
+
   if (blocked) {
     const { data: counter } = await supabase
       .from("daily_order_counters")

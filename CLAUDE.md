@@ -1477,8 +1477,9 @@ on `orders`).
   screen or two admins clicking at once can't skip a step or act on a
   status that's already changed. Also `daily_number` (`not null int`) —
   the order's position that IST calendar day, campus-wide across every
-  restaurant, starting over at 1 each day (**token 5 is skipped** since
-  16 Nov 2026, client's call: 1, 2, 3, 4, 6 …; 15, 25 are fine —
+  restaurant, starting over at 1 each day (**token 5 is skipped by default** since
+  16 Nov 2026, client's call — since 18 Nov a setting, `app_settings.skip_five`,
+  which tapping 5 on Block order number turns off / on: 1, 2, 3, 4, 6 …; 15, 25 are fine —
   `20261116000000_skip_five_tokens.sql`), plus any number the admin blocked
   for that day (**`blocked_tokens`**: `day`, `number`, primary key both;
   admin-only RLS; admins may also read `daily_order_counters` —
