@@ -820,7 +820,7 @@ its quantity**; "I've sent it" goes to the tracking page
 `/orders/fh/<id>` — FoodHub's order page (arched window with Handi from
 `public/foodhub/`, hanging sign, luggage tag, scalloped "What's in the
 bag", Contact FoodHub Call / WhatsApp to FoodHub's number). It reads
-**delivered from 8:30 PM IST** that day (an hour after, if placed later;
+**delivered from 8:00 PM IST** that day (an hour after, if placed later;
 `partnerDeliveredAt()`). Orders lists them under "From FoodHub". Spice
 Magic's Mini / Full biryanis are one card with a size picker ("Mini" is a
 size word in `portions.ts`). Adding FoodHub restaurants from the admin is

@@ -25,7 +25,7 @@ const timeFmt = new Intl.DateTimeFormat("en-IN", { timeZone: "Asia/Kolkata", hou
  * FoodHub's own order page and always in its dark theme: the arched window
  * with Handi and a hanging sign, the promised time, the luggage-tag card,
  * "What's in the bag" on a scalloped bill and "Contact FoodHub". No status
- * is kept — it reads delivered from 8:30 PM (partnerDeliveredAt()).
+ * is kept — it reads delivered from 8:00 PM (partnerDeliveredAt()).
  */
 export default async function PartnerOrderPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;

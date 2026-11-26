@@ -42,14 +42,14 @@ export const PARTNER_MAX_ITEMS = 15;
 export const PARTNER_MAX_TOTAL = 3000;
 /**
  * When a Spice Magic order counts as delivered on its tracking page (no
- * status is kept — the client's call): 8:30 PM IST on the day it was
+ * status is kept — the client's call): 8:00 PM IST on the day it was
  * placed, or an hour after it if it came in later than that.
  */
 export function partnerDeliveredAt(createdAt: string): Date {
   const IST = 330 * 60_000;
   const placed = new Date(createdAt).getTime();
   const day = new Date(placed + IST);
-  day.setUTCHours(20, 30, 0, 0);
+  day.setUTCHours(20, 0, 0, 0);
   const due = day.getTime() - IST;
   return new Date(placed < due ? due : placed + 60 * 60_000);
 }

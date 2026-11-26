@@ -260,7 +260,7 @@ function PastOrderRow({ order }: { order: OrderSummary }) {
 
 const istTime = new Intl.DateTimeFormat("en-IN", { timeZone: "Asia/Kolkata", hour: "numeric", minute: "2-digit" });
 
-/** A FoodHub restaurant's order (Spice Magic): its dark pine card, delivered from 8:30 PM. */
+/** A FoodHub restaurant's order (Spice Magic): its dark pine card, delivered from 8:00 PM. */
 function PartnerOrderCard({ order }: { order: PartnerOrder }) {
   const due = partnerDeliveredAt(order.createdAt);
   // eslint-disable-next-line react-hooks/purity -- server render, once per request

@@ -53,10 +53,27 @@ export function PartnerCart({
       // again), with WhatsApp opening over it.
       clearCart();
       onDone();
-      // WhatsApp first (a client-side navigation started before it cancelled
-      // it on iPhone), then the tracking page once the student is back.
+      // WhatsApp first, always: the tracking page only opens once the
+      // student comes back from it (the page was hidden), so the two never
+      // race. If WhatsApp never took over (no app), it opens after 4 s.
+      const track = `/orders/fh/${res.orderId}`;
+      let left = false;
+      let done = false;
+      const go = () => {
+        if (done) return;
+        done = true;
+        document.removeEventListener("visibilitychange", onVis);
+        router.push(track, { transitionTypes: ["nav-forward"] });
+      };
+      const onVis = () => {
+        if (document.visibilityState === "hidden") left = true;
+        else if (left) go();
+      };
+      document.addEventListener("visibilitychange", onVis);
+      window.setTimeout(() => {
+        if (!left && document.visibilityState === "visible") go();
+      }, 4000);
       window.location.href = res.url;
-      setTimeout(() => router.push(`/orders/fh/${res.orderId}`, { transitionTypes: ["nav-forward"] }), 700);
     });
   }
 
