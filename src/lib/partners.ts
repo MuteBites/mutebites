@@ -19,8 +19,8 @@ export type Partner = {
 export const FOODHUB: Partner = {
   brand: "FoodHub",
   whatsapp: "918464975652",
-  url: "https://foodhub.in",
-  urlLabel: "foodhub.in",
+  url: "https://foodhub-vitap.vercel.app/",
+  urlLabel: "foodhub-vitap.vercel.app",
 };
 
 const PARTNERS: Record<string, Partner> = {

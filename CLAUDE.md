@@ -813,7 +813,7 @@ edited or hand-typed message shows "Not a real MuteBites order"; valid for
 24 h. No MuteBites offers or deals (`NO_OFFERS`), left out of Delivery and
 Offers. Looks: FoodHub's own pine + gold tokens and Baloo 2 headings under
 `.foodhub` (menu page, its cart sheet, the verify page; `globals.css`),
-the "Visit FoodHub" link (foodhub.in) in a `.collab-wash` strip on the
+the "Visit FoodHub" link (foodhub-vitap.vercel.app) in a `.collab-wash` strip on the
 menu, and on Home a `PartnerCard` lit pine → gold → blood plum with a ring
 of light circling it, a breathing halo and a sweep (`.collab-*`), listed
 after the open MuteBites restaurants and before the switched-off ones.
