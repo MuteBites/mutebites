@@ -152,7 +152,7 @@ export function RestaurantPhotoSlides({
               />
             )}
             {slide.dish && (
-              <span className="absolute bottom-2.5 left-2.5 flex max-w-[calc(100%-1.25rem)] items-center gap-1.5 rounded-full bg-card/90 py-1 pr-2.5 pl-1.5 text-xs font-semibold backdrop-blur-sm">
+              <span className="absolute bottom-2.5 left-2.5 flex max-w-[calc(100%-1.25rem)] items-center gap-1.5 rounded-full bg-card/90 py-1 pr-2.5 pl-1.5 text-xs font-semibold text-foreground backdrop-blur-sm">
                 <VegMark isVeg={slide.dish.isVeg} className="size-3.5 bg-card [&>span]:size-1.5" />
                 <span className="truncate">{slide.dish.name}</span>
                 <span className="shrink-0 tabular-nums">· {formatRupees(slide.dish.price)}</span>

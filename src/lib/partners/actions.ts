@@ -110,7 +110,6 @@ export async function preparePartnerOrder(input: {
     "",
     `Name: ${profile.full_name}`,
     `Phone: ${formatStoredMobile(profile.phone)}`,
-    "Pay on delivery",
     ...(token ? ["", `Verify: ${SITE_URL}/v/${token}`] : []),
   ].join("\n");
 

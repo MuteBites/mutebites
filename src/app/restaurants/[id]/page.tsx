@@ -141,7 +141,6 @@ export default async function RestaurantPage({ params, searchParams }: PageProps
                     Visit {partner.brand}
                     <ExternalLink className="size-4" aria-hidden="true" />
                   </a>
-                  <span className="rounded-full bg-hero-foreground/15 px-3 py-1.5 text-sm">{partner.urlLabel}</span>
                 </div>
               </div>
             )}
