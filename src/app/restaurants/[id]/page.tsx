@@ -11,6 +11,7 @@ import { getUploadedPhotos } from "@/lib/data/uploaded-photos";
 import { getLikedDishes } from "@/lib/data/favorites";
 import { getTasteProfile } from "@/lib/data/taste";
 import { getOffers } from "@/lib/data/offers";
+import { DealBanner } from "@/components/menu/deal-banner";
 import { getFavoriteDishId, getTriedDishIds } from "@/lib/data/orders";
 import { menuItems } from "@/lib/menu/portions";
 import { getHighlyReorderedDishIds } from "@/lib/data/reorders";
@@ -135,6 +136,7 @@ export default async function RestaurantPage({ params, searchParams }: PageProps
                 </li>
               </ul>
               <MenuProgress restaurantName={restaurant.name} tried={dishesTried} total={totalDishes} />
+              <DealBanner restaurantName={restaurant.name} on={offers.deals.on} />
               {!active && (
                 <p className="mt-4 rounded-2xl bg-secondary px-4 py-3 text-sm">
                   <strong className="font-semibold">Closed right now.</strong> You can browse the

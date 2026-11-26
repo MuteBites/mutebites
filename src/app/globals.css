@@ -2057,6 +2057,30 @@
   .offer-celebration {
     animation: offer-fade 2.2s linear both;
   }
+  /* Cart bar: the "Deal unlocked!" pill pops up, holds, and drops away;
+     the old price slides in struck through beside the new one. */
+  .deal-pill {
+    animation: deal-pill 3.4s var(--ease-spring) both;
+  }
+  .offer-rise-in {
+    animation: offer-rise-in 600ms var(--ease-spring) both;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .deal-pill {
+    display: none;
+  }
+}
+@keyframes deal-pill {
+  0% { opacity: 0; transform: translateY(18px) scale(0.7); }
+  12% { opacity: 1; transform: translateY(0) scale(1.06); }
+  18% { transform: translateY(0) scale(1); }
+  85% { opacity: 1; transform: translateY(0) scale(1); }
+  100% { opacity: 0; transform: translateY(8px) scale(0.95); }
+}
+@keyframes offer-rise-in {
+  0% { opacity: 0; transform: translateX(-8px) scale(0.8); }
+  100% { opacity: 1; transform: none; }
 }
 @keyframes offer-glow {
   0% { box-shadow: 0 0 0 0 color-mix(in oklab, var(--success) 55%, transparent); }

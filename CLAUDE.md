@@ -817,6 +817,12 @@ MuteBites colours, 26 Nov 2026: `.offer-glow` green ring, `ConfettiBurst`,
 "Free!" / "−₹50" chip, in `globals.css`) with gift chips to pick, plus an "Add N more … for …" nudge; picks go as
 `p_deal_choices` (bad / missing → the first option). Every order view,
 WhatsApp / copy text, Kitchen (gifts as free lines) and the CSV show them.
+Like FoodHub: the menu page shows a green **`DealBanner`**
+(`components/menu/deal-banner.tsx`, every step of that restaurant's deals
+that are on, a light sweeping across), and the **cart bar** shows the next
+deal's nudge in place of the item count, the price after the deal's money
+off (old price struck through) and a **"Deal unlocked!"** pill with confetti
+above it whenever the cart earns a new deal (`.deal-pill`).
 
 **Menus** (`/admin/menus`, a "Menus" pill on the dashboard, 17 Oct 2026):
 the admin keeps the menus — no migration needed for a new restaurant,
