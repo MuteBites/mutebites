@@ -14,6 +14,8 @@ import { MAX_NOTES } from "@/lib/cart/limits";
 import { spiceNote } from "@/lib/taste/options";
 import { DiscountPicker, type OfferOption } from "@/components/cart/discount-picker";
 import { DealsCard } from "@/components/cart/deals-card";
+import { PartnerCart } from "@/components/cart/partner-cart";
+import { partnerOf } from "@/lib/partners";
 import { cartDeals, type DealKey } from "@/lib/deals";
 import {
   discountAmount,
@@ -57,13 +59,15 @@ export function CartSheet({
 }) {
   const cart = useCart();
   const empty = cart.lines.length === 0;
+  // Spice Magic (FoodHub's collab): FoodHub's theme and the WhatsApp cart.
+  const partner = empty ? null : partnerOf(cart.restaurantName);
 
   return (
     <Sheet open={open} onOpenChange={onOpenChange}>
       <SheetContent
         side="bottom"
         showCloseButton={false}
-        className="mx-auto max-h-[92dvh] w-full max-w-md gap-0 rounded-t-[2rem] border-t-0 bg-background p-0 text-base"
+        className={cn("mx-auto max-h-[92dvh] w-full max-w-md gap-0 rounded-t-[2rem] border-t-0 bg-background p-0 text-base", partner && "foodhub")}
       >
         <header className="flex items-start gap-3 border-b px-6 pt-6 pb-4">
           <div className="min-w-0 flex-1">
@@ -86,6 +90,14 @@ export function CartSheet({
 
         {empty ? (
           <EmptyCart onBrowse={() => onOpenChange(false)} />
+        ) : partner ? (
+          <PartnerCart
+            cart={cart}
+            partner={partner}
+            orderingEnabled
+            suggestedNote={spiceNote(spiceLevel)}
+            onDone={() => onOpenChange(false)}
+          />
         ) : (
           <CartContents
             cart={cart}

@@ -794,6 +794,31 @@ admin card and detail page, WhatsApp text (`offerLine()`), the copy text
 columns). A free biryani is left out of "Your usual" (`usual.ts`) so a
 re-order never adds it as paid.
 
+**Spice Magic — MuteBites x FoodHub collab** (27 Nov 2026, `src/lib/partners.ts`,
+`20261127000000_seed_spice_magic.sql`): a restaurant FoodHub runs, shown
+inside MuteBites. Its menu is a normal restaurant row (FoodHub's menu and
+photos, `public/MuteBites/Spice Magic/`), kept on Restaurants & menus and
+switched on / off **only by its own Kitchen switch** — no delivery batch
+needed, no "we're open" push, and campus Closed leaves it alone
+(`setOrderingMode` skips `PARTNER_NAMES`). **MuteBites takes no order for
+it, saves nothing, gives no token** (by decision): the cart (`PartnerCart`)
+calls `preparePartnerOrder()` (`src/lib/partners/actions.ts` — signed in,
+profile, not banned, restaurant on, dishes on sale, DB prices, caps 15
+items / ₹3,000) and opens FoodHub's WhatsApp (`FOODHUB.whatsapp`, +91 84649
+75652) with the order typed out; the student taps Send, FoodHub confirms,
+delivers and takes payment. The message ends with a **verify link**
+`/v/<token>` (public, noindex, no splash): the order signed with an HMAC
+keyed off `SUPABASE_SERVICE_ROLE_KEY` (`src/lib/partners/sign.ts`), so an
+edited or hand-typed message shows "Not a real MuteBites order"; valid for
+24 h. No MuteBites offers or deals (`NO_OFFERS`), left out of Delivery and
+Offers. Looks: FoodHub's own pine + gold tokens and Baloo 2 headings under
+`.foodhub` (menu page, its cart sheet, the verify page; `globals.css`),
+the "Visit FoodHub" link (foodhub.in) in a `.collab-wash` strip on the
+menu, and on Home a `PartnerCard` lit pine → gold → blood plum with a ring
+of light circling it, a breathing halo and a sweep (`.collab-*`), listed
+after the open MuteBites restaurants and before the switched-off ones.
+Matched **by name** ("Spice Magic") — renaming it needs `partners.ts` too.
+
 **Restaurant deals** (26 Nov 2026, `src/lib/deals.ts` + `place_order()`,
 `20261126000000_restaurant_deals.sql`): auto-applied; "Restaurant deals" sits at the top of the Offers page with
 **one switch per restaurant** (`DealsCard`, `setDealEnabled(restaurant)` flips

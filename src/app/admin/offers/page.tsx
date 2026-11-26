@@ -1,3 +1,4 @@
+import { isPartnerRestaurant } from "@/lib/partners";
 import type { Metadata } from "next";
 import { BackToDashboardLink } from "@/components/admin/back-to-dashboard-link";
 import { DealsCard } from "@/components/admin/deals-card";
@@ -34,7 +35,7 @@ export default async function AdminOffersPage() {
       <OffersCard
         active={active}
         restaurantName={where}
-        restaurants={restaurants.map(({ id, name }) => ({ id, name }))}
+        restaurants={restaurants.filter((r) => !isPartnerRestaurant(r.name)).map(({ id, name }) => ({ id, name }))}
         excluded={excluded}
       />
 

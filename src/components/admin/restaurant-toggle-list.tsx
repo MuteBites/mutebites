@@ -21,6 +21,7 @@ import { openPushNote } from "@/lib/notifications/open-note";
 import { toast } from "@/lib/toast/store";
 import { cn } from "@/lib/utils";
 import { isLunchNow, LUNCH_WINDOW, openBatch, type Batch } from "@/lib/delivery";
+import { partnerOf } from "@/lib/partners";
 import { formatTime } from "@/lib/date";
 import { DeliveryDialog } from "./delivery-dialog";
 
@@ -59,7 +60,9 @@ function RestaurantToggleCard({
   // own toggle didn't do this, so it gets a distinct label rather than
   // being shown as plain "Open" (which would read as taking orders right
   // now) or "Closed" (which would misattribute the pause to this restaurant).
-  const paused = active && !orderingEnabled;
+  // Spice Magic (FoodHub's collab): its own switch, no campus pause, no batch.
+  const partner = partnerOf(restaurant.name);
+  const paused = active && !orderingEnabled && !partner;
   const cover = getRestaurantCoverPhoto(restaurant.name);
 
   function toggle() {
@@ -72,7 +75,7 @@ function RestaurantToggleCard({
 
   /** After a time is set (or when one already is): reopen ordering first if it's Closed. */
   function turn(next: boolean) {
-    if (next && forcedClosed) {
+    if (next && forcedClosed && !partner) {
       setAskReopen(true);
       return;
     }
@@ -133,7 +136,9 @@ function RestaurantToggleCard({
           <p className="mt-1 text-xs text-muted-foreground">Campus ordering is closed — see Today above.</p>
         )}
         <p className="mt-0.5 truncate text-xs text-muted-foreground">
-          {timeToday
+          {partner
+            ? `${partner.brand} collab · orders go to their WhatsApp`
+            : timeToday
             ? `Orders until ${formatTime(timeToday.orderUntil)} · by ${formatTime(timeToday.deliverAt)}`
             : isLunchNow()
               ? `Lunch: delivery ${LUNCH_WINDOW}`

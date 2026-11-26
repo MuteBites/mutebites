@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { ViewTransition } from "react";
-import { ArrowLeft, MapPin } from "lucide-react";
+import { ArrowLeft, ExternalLink, MapPin, Truck } from "lucide-react";
 import { BlurImage } from "@/components/blur-image";
 import { MenuProgress } from "@/components/menu/menu-progress";
 import { MenuView } from "@/components/menu/menu-view";
@@ -11,6 +11,8 @@ import { getUploadedPhotos } from "@/lib/data/uploaded-photos";
 import { getLikedDishes } from "@/lib/data/favorites";
 import { getTasteProfile } from "@/lib/data/taste";
 import { getOffers } from "@/lib/data/offers";
+import { NO_OFFERS } from "@/lib/offers";
+import { partnerOf } from "@/lib/partners";
 import { DealBanner } from "@/components/menu/deal-banner";
 import { getFavoriteDishId, getTriedDishIds } from "@/lib/data/orders";
 import { menuItems } from "@/lib/menu/portions";
@@ -64,7 +66,10 @@ export default async function RestaurantPage({ params, searchParams }: PageProps
 
   const { restaurant, sections } = menu;
   const active = restaurant.is_active;
-  const orderingEnabled = ordering.open;
+  // Spice Magic (FoodHub's collab): FoodHub's theme, its own Kitchen switch
+  // instead of campus Open / Closed, no MuteBites offers or deals.
+  const partner = partnerOf(restaurant.name);
+  const orderingEnabled = partner ? true : ordering.open;
   const orderable = active && orderingEnabled;
   const paused = active && !orderingEnabled;
   // Counted in menu cards, like the menu shows them: a dish's sizes (Apples
@@ -95,7 +100,7 @@ export default async function RestaurantPage({ params, searchParams }: PageProps
   // its bottom edge as a rounded sheet carrying the name, the facts as chips
   // (cuisines, free delivery to Main Gate) and the lit "tried N of M" bar.
   return (
-    <main className="mx-auto w-full max-w-md">
+    <main className={cn("mx-auto w-full max-w-md", partner && "foodhub min-h-dvh")}>
       <ViewTransition {...NAV_TRANSITION}>
         <ViewTransition {...REVEAL_ENTER}>
           <div className={cn("relative aspect-[16/10] bg-stripes", !active && "grayscale")}>
@@ -119,6 +124,27 @@ export default async function RestaurantPage({ params, searchParams }: PageProps
           </div>
 
           <div className="relative -mt-7 rounded-t-[1.75rem] bg-background px-6 shadow-[0_-12px_30px_-18px_var(--glow-hero)]">
+            {partner && (
+              <div className="collab-wash relative -mx-6 overflow-hidden rounded-t-[1.75rem] px-6 pt-5 pb-5">
+                <span className="collab-sweep" aria-hidden="true" />
+                <p className="relative text-sm font-semibold text-hero-accent">A MuteBites × {partner.brand} collab</p>
+                <p className="relative mt-1 text-sm text-hero-foreground/85">
+                  Order here, it goes to {partner.brand} on WhatsApp. They cook, deliver and take payment.
+                </p>
+                <div className="relative mt-3 flex flex-wrap items-center gap-2">
+                  <a
+                    href={partner.url}
+                    target="_blank"
+                    rel="noopener"
+                    className="glow-amber inline-flex h-10 items-center gap-1.5 rounded-full bg-hero-accent px-4 text-sm font-bold text-hero outline-none hover:brightness-110 focus-visible:ring-3 focus-visible:ring-hero-foreground/60"
+                  >
+                    Visit {partner.brand}
+                    <ExternalLink className="size-4" aria-hidden="true" />
+                  </a>
+                  <span className="rounded-full bg-hero-foreground/15 px-3 py-1.5 text-sm">{partner.urlLabel}</span>
+                </div>
+              </div>
+            )}
             <header className="pt-6 pb-3">
               <h1 className="font-heading text-headline font-bold">{restaurant.name}</h1>
               {restaurant.description && (
@@ -130,13 +156,20 @@ export default async function RestaurantPage({ params, searchParams }: PageProps
                     {tag}
                   </li>
                 ))}
-                <li className="inline-flex items-center gap-1 rounded-full bg-secondary px-2.5 py-1">
-                  <MapPin className="size-3.5 shrink-0 text-primary" aria-hidden="true" />
-                  Free to Main Gate
-                </li>
+                {partner ? (
+                  <li className="inline-flex items-center gap-1 rounded-full bg-secondary px-2.5 py-1">
+                    <Truck className="size-3.5 shrink-0 text-primary" aria-hidden="true" />
+                    Delivered by {partner.brand}
+                  </li>
+                ) : (
+                  <li className="inline-flex items-center gap-1 rounded-full bg-secondary px-2.5 py-1">
+                    <MapPin className="size-3.5 shrink-0 text-primary" aria-hidden="true" />
+                    Free to Main Gate
+                  </li>
+                )}
               </ul>
               <MenuProgress restaurantName={restaurant.name} tried={dishesTried} total={totalDishes} />
-              <DealBanner restaurantName={restaurant.name} on={offers.deals.on} />
+              {!partner && <DealBanner restaurantName={restaurant.name} on={offers.deals.on} />}
               {!active && (
                 <p className="mt-4 rounded-2xl bg-secondary px-4 py-3 text-sm">
                   <strong className="font-semibold">Closed right now.</strong> You can browse the
@@ -161,7 +194,7 @@ export default async function RestaurantPage({ params, searchParams }: PageProps
               highlyReorderedDishIds={highlyReorderedDishIds}
               likedDishIds={liked.filter((d) => d.restaurantId === id).map((d) => d.id)}
               spiceLevel={taste.spiceLevel}
-              offers={offers}
+              offers={partner ? NO_OFFERS : offers}
               focusDishId={focusDishId}
             />
           </div>

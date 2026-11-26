@@ -32,6 +32,7 @@ export const RESTAURANT_COVER_PHOTOS: Record<string, string> = {
   // No photos of its own yet — same Indo-Chinese dishes as Food Corner.
   "Ramana Fast Food": `${BASE}/covers/mutebites-chinese-v2.jpg`,
   "Waffle Pops": `${BASE}/covers/waffle-pops.jpg`,
+  "Spice Magic": `${BASE}/covers/spice-magic.jpg`,
 };
 
 const BHEEMASENA = `${BASE}/Bheemasena`;
@@ -42,6 +43,8 @@ const CHINESE = `${BASE}/MuteBites Chinese`;
 const FRUITS = `${BASE}/Mutebites fresh fruits`;
 const SUGARCANE = `${BASE}/MuteBites Sugarcane Juice`;
 const WAFFLE_POPS = `${BASE}/Waffle Pops`;
+// FoodHub's own photos (the collab, 27 Nov 2026).
+const SPICE = `${BASE}/Spice Magic`;
 
 /** Restaurant name -> { dish name -> thumbnail photo }. */
 export const DISH_PHOTOS: Record<string, Record<string, string>> = {
@@ -180,6 +183,22 @@ export const DISH_PHOTOS: Record<string, Record<string, string>> = {
 
   // Free-licence Unsplash stock (the restaurant sent no photos) for a few
   // signature items only; everything else shows the placeholder by design.
+  "Spice Magic": {
+    "Chicken Dum Mini": `${SPICE}/chicken-dum-biryani.jpg`,
+    "Chicken Fry Mini": `${SPICE}/chicken-fry-biryani.jpg`,
+    "Chicken Dum Full": `${SPICE}/chicken-dum-biryani.jpg`,
+    "Chicken Fry Full": `${SPICE}/chicken-fry-biryani.jpg`,
+    "Chicken Mixed": `${SPICE}/mixed-chicken-biryani.jpg`,
+    "Chicken Moghlai Biryani": `${SPICE}/mughlai-biryani.jpg`,
+    "Chicken 65 Biryani": `${SPICE}/chicken-65-biryani.jpg`,
+    "Balayya Babu Biryani": `${SPICE}/balayya-babu-biryani.jpg`,
+    "Chicken Dum Combo Pack": `${SPICE}/combo-dum.jpg`,
+    "Chicken Fry Combo Pack": `${SPICE}/combo-fry.jpg`,
+    "Chicken Mixed Combo Pack": `${SPICE}/combo-mixed.jpg`,
+    "Chicken Dum Bucket": `${SPICE}/bucket-dum.jpg`,
+    "Chicken Fry Bucket": `${SPICE}/bucket-fry.jpg`,
+    "Chicken Mixed Bucket": `${SPICE}/bucket-mixed.jpg`,
+  },
   "Waffle Pops": {
     "Belgian Dark Chocolate": `${WAFFLE_POPS}/Belgian Dark Chocolate.jpg`,
     "Butterscotch": `${WAFFLE_POPS}/Butterscotch.jpg`,

@@ -58,7 +58,7 @@ export const SPLASH = {
   /** localStorage key; set it to "off" to disable on one device. */
   disableKey: "mutebites.splash",
   /** Never on these (admin tool, OAuth callback, Google's review bot on the legal pages, the dev page). */
-  skipPaths: ["/admin", "/auth", "/privacy", "/terms", "/dev"],
+  skipPaths: ["/admin", "/auth", "/privacy", "/terms", "/dev", "/v"],
 } as const;
 
 /** Build-time switch: NEXT_PUBLIC_DISABLE_SPLASH=1 removes the splash entirely (e.g. in .env.local while developing). */

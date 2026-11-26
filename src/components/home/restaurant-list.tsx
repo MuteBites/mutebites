@@ -28,6 +28,7 @@ import { FoodTypeRail } from "./food-type-rail";
 import { buildRail, PopularRail } from "./popular-rail";
 import { PromoCard } from "./promo-card";
 import { RestaurantCard } from "./restaurant-card";
+import { isPartnerRestaurant } from "@/lib/partners";
 
 /**
  * Everything on Home below the header: the search pill, "What's on your
@@ -156,6 +157,11 @@ export function RestaurantList({
             (from.size === 0 || from.has(r.id))),
       )
     : restaurants;
+  // Order (27 Nov 2026): MuteBites' open restaurants, then Spice Magic
+  // (FoodHub's collab), then the switched-off ones.
+  const rank = (r: (typeof restaurants)[number]) =>
+    isPartnerRestaurant(r.name) ? (r.is_active ? 1 : 2) : r.is_active ? 0 : 3;
+  const ordered = [...visible].sort((a, b) => rank(a) - rank(b));
 
   // When the filters change while you're scrolled past the chips (they're
   // sticky), bring the top of the results up to meet them.
@@ -272,7 +278,7 @@ export function RestaurantList({
             </p>
           )}
           <ul className="mt-4 flex flex-col gap-5">
-            {visible.map((r, i) => (
+            {ordered.map((r, i) => (
               <li
                 key={r.id}
                 className="animate-slide-up-in"

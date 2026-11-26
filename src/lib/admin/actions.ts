@@ -1,5 +1,6 @@
 "use server";
 
+import { isPartnerRestaurant, PARTNER_NAMES } from "@/lib/partners";
 import { DEALS } from "@/lib/deals";
 import { revalidatePath } from "next/cache";
 import { after } from "next/server";
@@ -111,7 +112,9 @@ export async function setOrderingMode(mode: OrderingMode): Promise<OpenActionRes
     const { error: restaurantsError } = await supabase
       .from("restaurants")
       .update({ is_active: false })
-      .eq("is_active", true);
+      .eq("is_active", true)
+      // Spice Magic keeps its own Kitchen switch (FoodHub's collab).
+      .not("name", "in", `(${PARTNER_NAMES.map((n) => `"${n}"`).join(",")})`);
     if (restaurantsError) {
       revalidatePath("/admin");
       return { ok: false, error: "Ordering is closed, but turning the restaurants off failed. Please try again." };
@@ -134,10 +137,14 @@ export async function setRestaurantActive(
   if (denied) return denied;
 
   const supabase = await createClient();
+  // Spice Magic (FoodHub's collab) takes no MuteBites orders: no delivery
+  // batch to set and no "we're open" push for it.
+  const { data: self } = await supabase.from("restaurants").select("name").eq("id", restaurantId).maybeSingle();
+  const partner = isPartnerRestaurant(self?.name);
   // After 12:45 PM, no delivery time set today = no promise to make
   // (place_order() refuses it too), so it can't be turned on yet. Before
   // that it's lunch, delivered 1:45–2 PM with nothing to set.
-  if (active && !isLunchNow()) {
+  if (active && !partner && !isLunchNow()) {
     const [{ data: hasBatch }, { data: r }, { data: settings }] = await Promise.all([
       supabase.rpc("delivery_open_batch", { p_restaurant_id: restaurantId }),
       supabase.from("restaurants").select("delivery_minutes").eq("id", restaurantId).maybeSingle(),
@@ -187,7 +194,7 @@ export async function setRestaurantActive(
   revalidatePath("/admin");
   revalidatePath("/", "layout"); // student home + menu pages also read is_active
   // The first restaurant on while ordering is open sends the "we're open" push.
-  if (active) return { ok: true, push: await notifyOrderingOpen(supabase) };
+  if (active && !partner) return { ok: true, push: await notifyOrderingOpen(supabase) };
   return { ok: true };
 }
 

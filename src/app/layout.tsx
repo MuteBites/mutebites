@@ -1,5 +1,5 @@
 import type { Metadata, Viewport } from "next";
-import { Cormorant_Garamond, Fraunces, Grey_Qo, Inter, Love_Light, Plus_Jakarta_Sans, Poppins, Sirivennela } from "next/font/google";
+import { Baloo_2, Cormorant_Garamond, Fraunces, Grey_Qo, Inter, Love_Light, Plus_Jakarta_Sans, Poppins, Sirivennela } from "next/font/google";
 import { AppSplash } from "@/components/splash/app-splash";
 import { SPLASH_DISABLED } from "@/components/splash/config";
 import { SPLASH_INIT_SCRIPT } from "@/components/splash/init-script";
@@ -36,6 +36,13 @@ const fraunces = Fraunces({
 const inter = Inter({
   variable: "--font-inter",
   subsets: ["latin"],
+  preload: false,
+});
+// FoodHub's heading face, only on Spice Magic's pages (the collab).
+const baloo = Baloo_2({
+  variable: "--font-baloo",
+  subsets: ["latin"],
+  weight: ["600", "700", "800"],
   preload: false,
 });
 const poppins = Poppins({
@@ -129,7 +136,7 @@ export default async function RootLayout({ children }: LayoutProps<"/">) {
       // "dark" class / colorScheme style, and the splash-init script
       // data-splash, before React hydrates — expected, not a real mismatch.
       suppressHydrationWarning
-      className={`${jakarta.variable} ${fraunces.variable} ${inter.variable} ${poppins.variable} ${cormorant.variable} ${loveLight.variable} ${greyQo.variable} ${sirivennela.variable} h-full antialiased`}
+      className={`${jakarta.variable} ${fraunces.variable} ${inter.variable} ${poppins.variable} ${baloo.variable} ${cormorant.variable} ${loveLight.variable} ${greyQo.variable} ${sirivennela.variable} h-full antialiased`}
     >
       <body className="min-h-full flex flex-col">
         {/* Raw inline <script>, not next/script: beforeInteractive inline

@@ -2208,3 +2208,219 @@
     transform: translateY(0);
   }
 }
+/* ---------------------------------------------------------------------
+   FoodHub theme (Spice Magic, the MuteBites x FoodHub collab, 27 Nov
+   2026): FoodHub's own pine + gold tokens, scoped to `.foodhub` (Spice
+   Magic's menu page, its cart sheet and the verify page). Values copied
+   from FoodHub's globals.css; set on the element itself, so they win over
+   whatever palette the page around it uses.
+   --------------------------------------------------------------------- */
+.foodhub {
+  --background: #f8f3e4;
+  --foreground: #14301f;
+  --card: #fffdf6;
+  --card-foreground: #14301f;
+  --popover: #fffef9;
+  --popover-foreground: #14301f;
+  --primary: #7f5c0e;
+  --primary-2: #6e5410;
+  --primary-foreground: #ffffff;
+  --secondary: #efe9d3;
+  --secondary-foreground: #14301f;
+  --skeleton: #ebe3c8;
+  --skeleton-shine: #f8f3e3;
+  --muted: #efe9d3;
+  --muted-foreground: #4f6256;
+  --accent: #efe9d3;
+  --accent-foreground: #14301f;
+  --destructive: #b42b1c;
+  --destructive-foreground: #ffffff;
+  --border: #ddd5b8;
+  --input: #8a8566;
+  --ring: #2f7a55;
+  --ink: #0f3b2a;
+  --ink-foreground: #fffaea;
+  --ink-2: #1d5a40;
+  --ink-surface: linear-gradient(180deg, rgb(255 255 255 / 14%), transparent 55%),
+    linear-gradient(115deg, var(--ink) 0%, var(--ink-2) 100%);
+  --hero: #0f3b2a;
+  --hero-a: #17503a;
+  --hero-b: #11442f;
+  --hero-c: #0a2a1d;
+  --hero-glow: rgb(228 190 90 / 13%);
+  --hero-bloom: rgb(30 120 80 / 52%);
+  --hero-foreground: #fffaea;
+  --hero-accent: #f3da8f;
+  --hero-success: #bfe8d1;
+  --hero-danger: #ffe9e4;
+  --glow-amber: rgb(212 165 55 / 42%);
+  --glow-rose: rgb(154 116 22 / 34%);
+  --glow-hero: rgb(15 59 42 / 42%);
+  --amber-soft: #f4ead0;
+  --amber-soft-foreground: #5e4710;
+  --brand-soft: #f1eccb;
+  --brand-soft-foreground: #5e4a10;
+  --rose: #2f7a55;
+  --rose-foreground: #ffffff;
+  --amber: #d4a537;
+  --success: #2f6b4f;
+  --success-foreground: #ffffff;
+  --success-soft: #e3efe7;
+  --stripe-a: #ebe3c6;
+  --stripe-b: #f4efdc;
+  --elevation-card: 0 1px 2px rgb(15 59 42 / 6%), 0 8px 22px -10px rgb(212 165 55 / 22%);
+  --elevation-raised: 0 2px 4px rgb(15 59 42 / 6%), 0 16px 32px -12px rgb(154 116 22 / 24%);
+  --elevation-overlay: 0 4px 8px rgb(15 59 42 / 8%), 0 24px 48px -12px rgb(15 59 42 / 28%);
+  --brand-1: #0f3b2a;
+  --brand-2: #2f7a55;
+  --brand-3: #d4a537;
+  --confetti-1: #d4a537;
+  --confetti-2: #2f7a55;
+  --confetti-3: #b6d2bd;
+  --confetti-4: #2f6b4f;
+  --confetti-5: #0f3b2a;
+  --heading-a: #14301f;
+  --heading-b: #1d5a40;
+  --heading-c: #6b5210;
+  --app-heading: var(--font-baloo), var(--font-jakarta);
+  --app-display: var(--font-baloo), var(--font-jakarta);
+  --surface-primary: linear-gradient(180deg, rgb(255 255 255 / 18%), transparent 50%),
+    linear-gradient(115deg, var(--primary) 0%, var(--primary-2) 100%);
+  --hero-surface: radial-gradient(60% 45% at 18% 0%, rgb(255 255 255 / 9%), transparent 70%),
+    radial-gradient(90% 80% at 100% 0%, var(--hero-glow), transparent 65%),
+    radial-gradient(70% 60% at 0% 100%, var(--hero-bloom), transparent 70%),
+    linear-gradient(150deg, var(--hero-a) 0%, var(--hero-b) 55%, var(--hero-c) 100%);
+  background-color: var(--background);
+  color: var(--foreground);
+  font-family: var(--font-jakarta), ui-sans-serif, system-ui, sans-serif;
+}
+.dark .foodhub,
+.dark.foodhub {
+  --background: #08150f;
+  --foreground: #f2efdc;
+  --card: #10241a;
+  --card-foreground: #f2efdc;
+  --popover: #17301f;
+  --popover-foreground: #f2efdc;
+  --primary: #e0b64a;
+  --primary-2: #cfa73c;
+  --primary-foreground: #1c1404;
+  --secondary: #15291e;
+  --secondary-foreground: #f2efdc;
+  --skeleton: #1b3527;
+  --skeleton-shine: #284a36;
+  --muted: #15291e;
+  --muted-foreground: #a3b8a8;
+  --accent: #15291e;
+  --accent-foreground: #f2efdc;
+  --destructive: #f08271;
+  --destructive-foreground: #2a0e09;
+  --border: rgb(240 238 220 / 11%);
+  --input: rgb(240 238 220 / 40%);
+  --ring: #e0c46c;
+  --ink: #f0dc9a;
+  --ink-foreground: #0f2a1c;
+  --ink-2: #e0c46c;
+  --glow-amber: rgb(224 182 74 / 34%);
+  --glow-rose: rgb(224 196 108 / 22%);
+  --glow-hero: rgb(30 110 75 / 40%);
+  --amber-soft: #2e2a0f;
+  --amber-soft-foreground: #f0d98a;
+  --brand-soft: #1b3326;
+  --brand-soft-foreground: #dfe9c0;
+  --rose: #e0c46c;
+  --rose-foreground: #0f2a1c;
+  --amber: #e0b64a;
+  --success: #7cc4a0;
+  --success-foreground: #0f2419;
+  --success-soft: #15271e;
+  --stripe-a: #0d1f16;
+  --stripe-b: #0d1f16;
+  --elevation-card: inset 0 1px 0 rgb(255 255 255 / 6%), 0 1px 2px rgb(0 0 0 / 35%), 0 10px 26px -12px rgb(0 0 0 / 55%);
+  --elevation-raised: inset 0 1px 0 rgb(255 255 255 / 7%), 0 2px 4px rgb(0 0 0 / 30%), 0 16px 32px -12px rgb(0 0 0 / 60%);
+  --elevation-overlay: 0 4px 8px rgb(0 0 0 / 35%), 0 24px 48px -12px rgb(0 0 0 / 60%);
+  --heading-a: #f2efdc;
+  --heading-b: #cfe3c8;
+  --heading-c: #e8c46a;
+}
+
+/* The collab light: FoodHub pine, gold and MuteBites' blood plum merging.
+   Home's Spice Magic card (`.collab-card`) gets a ring of light circling
+   its edge, a breathing halo and a sweep now and then; Spice Magic's menu
+   header (`.collab-wash`) the same colours. Reduced motion: still. */
+.collab-wash {
+  background:
+    radial-gradient(70% 90% at 100% 0%, rgb(224 182 74 / 30%), transparent 60%),
+    radial-gradient(70% 90% at 0% 100%, rgb(30 154 96 / 35%), transparent 65%),
+    linear-gradient(125deg, #0f3b2a 0%, #17503a 32%, #5a1a33 72%, #3f2037 100%);
+  color: #fffaea;
+}
+.collab-card {
+  position: relative;
+  isolation: isolate;
+  border-radius: 1.75rem;
+  padding: 2px;
+}
+.collab-card::before {
+  content: "";
+  position: absolute;
+  inset: -10px;
+  z-index: -2;
+  border-radius: 2.25rem;
+  background:
+    radial-gradient(60% 80% at 15% 50%, rgb(30 154 96 / 55%), transparent 70%),
+    radial-gradient(60% 80% at 85% 50%, rgb(122 31 61 / 55%), transparent 70%);
+  filter: blur(14px);
+  opacity: 0.7;
+}
+.collab-ring {
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  overflow: hidden;
+  border-radius: inherit;
+}
+.collab-ring::before {
+  content: "";
+  position: absolute;
+  inset: -60%;
+  background: conic-gradient(#1e9a60, #e0b64a, #7a1f3d, #3f2037, #1e9a60);
+}
+.collab-sweep {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  border-radius: inherit;
+  pointer-events: none;
+}
+.collab-sweep::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: -50%;
+  width: 40%;
+  background: linear-gradient(100deg, transparent, rgb(255 240 200 / 26%), transparent);
+}
+@media (prefers-reduced-motion: no-preference) {
+  .collab-ring::before {
+    animation: collab-spin 4s linear infinite;
+  }
+  .collab-card::before {
+    animation: collab-breathe 2.6s ease-in-out infinite;
+  }
+  .collab-sweep::after {
+    animation: collab-sweep 3.4s var(--ease-in-quad) infinite;
+  }
+}
+@keyframes collab-spin {
+  to { transform: rotate(360deg); }
+}
+@keyframes collab-breathe {
+  0%, 100% { opacity: 0.5; }
+  50% { opacity: 1; }
+}
+@keyframes collab-sweep {
+  0%, 35% { left: -50%; }
+  85%, 100% { left: 120%; }
+}
