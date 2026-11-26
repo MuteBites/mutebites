@@ -821,7 +821,12 @@ its quantity**; "I've sent it" goes to the tracking page
 `public/foodhub/`, hanging sign, luggage tag, scalloped "What's in the
 bag", Contact FoodHub Call / WhatsApp to FoodHub's number). It reads
 **delivered from 8:00 PM IST** that day (an hour after, if placed later;
-`partnerDeliveredAt()`). Orders lists them under "From FoodHub". Spice
+`partnerDeliveredAt()`). Orders lists them under "From FoodHub". Spice Magic has **FoodHub's own deal** (`sm_5` / `sm_10` in `DEALS`, one
+switch "Spice Magic" in Offers → Restaurant deals, off by default): its
+"Biryanis" section counts; 5 → a Mini Fry or Mini Dum Biryani free, 10 → a
+Chicken Starter or 2 Mini Biryanis free (student picks); the cart shows it
+like the other deals, and `preparePartnerOrder()` re-checks it and adds the
+gift as a "(free)" line to the saved order and the WhatsApp message. Spice
 Magic's Mini / Full biryanis are one card with a size picker ("Mini" is a
 size word in `portions.ts`). Adding FoodHub restaurants from the admin is
 planned, not built.

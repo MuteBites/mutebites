@@ -4,6 +4,8 @@ import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { BadgeCheck, Loader2, MessageCircle, ShieldCheck, Truck } from "lucide-react";
 import { CartLineRow } from "@/components/cart/cart-line-row";
+import { DealsCard } from "@/components/cart/deals-card";
+import { cartDeals, type DealKey, type DealsState } from "@/lib/deals";
 import { IconTile } from "@/components/icon-tile";
 import { cartTotals, clearCart, lineKey, reconcileCart, type Cart } from "@/lib/cart/store";
 import { formatRupees } from "@/lib/format";
@@ -21,11 +23,14 @@ import { cn } from "@/lib/utils";
 export function PartnerCart({
   cart,
   partner,
+  deals,
   orderingEnabled,
   onDone,
 }: {
   cart: Cart;
   partner: Partner;
+  /** Restaurant deals the admin has on (Spice Magic's FoodHub deal). */
+  deals: DealsState;
   /** The restaurant's own Kitchen switch. */
   orderingEnabled: boolean;
   onDone: () => void;
@@ -34,6 +39,8 @@ export function PartnerCart({
   const [error, setError] = useState<string | null>(null);
   const [sending, startSending] = useTransition();
   const { amount } = cartTotals(cart);
+  const [picks, setPicks] = useState<Partial<Record<DealKey, string[]>>>({});
+  const earned = cartDeals(cart.lines, deals, picks);
 
   function send() {
     if (!cart.restaurantId) return;
@@ -43,6 +50,7 @@ export function PartnerCart({
         restaurantId: cart.restaurantId!,
         lines: cart.lines.map((l) => ({ dishId: l.dishId, quantity: l.quantity })),
         notes: "",
+        dealChoices: picks,
       });
       if (!res.ok) {
         setError(res.error);
@@ -85,6 +93,13 @@ export function PartnerCart({
             <CartLineRow key={lineKey(line)} line={line} restaurantName={cart.restaurantName} />
           ))}
         </ul>
+
+        <DealsCard
+          applied={earned.applied}
+          next={earned.next}
+          picks={picks}
+          onPick={(key, choice) => setPicks((p) => ({ ...p, [key]: choice }))}
+        />
 
         <div className="mt-4 divide-y overflow-hidden rounded-[1.5rem] border bg-card shadow-card">
           <div className="flex items-center gap-3.5 px-5 py-4">

@@ -15,10 +15,12 @@ export type DealKey =
   | "bh_full_2"
   | "bh_full_5"
   | "bh_full_10"
-  | "bh_mini_10";
+  | "bh_mini_10"
+  | "sm_5"
+  | "sm_10";
 
 /** What a cart dish counts towards (decided on the server by restaurant + section / name). */
-export type DealGroup = "a1" | "shawarma" | "bh_full" | "bh_mini";
+export type DealGroup = "a1" | "shawarma" | "bh_full" | "bh_mini" | "sm";
 
 type DealDef = {
   key: DealKey;
@@ -43,6 +45,11 @@ export const DEALS: DealDef[] = [
   { key: "bh_full_10", group: "bh_full", min: 10, restaurant: "Bheemasena Restaurant", title: "Buy 10 full biryanis, get any 2 mini biryanis free", unit: "full biryanis", off: 0, choose: { count: 2, options: "mini" } },
   { key: "bh_full_5", group: "bh_full", min: 5, restaurant: "Bheemasena Restaurant", title: "Buy 5 full biryanis, get Chicken Curry or Half Chicken 65 free", unit: "full biryanis", off: 0, choose: { count: 1, options: ["Chicken Curry", "Half Chicken 65"] } },
   { key: "bh_full_2", group: "bh_full", min: 2, restaurant: "Bheemasena Restaurant", title: "Buy 2 full biryanis, get a Thums Up (pet bottle) free", unit: "full biryanis", off: 0 },
+  // Spice Magic (FoodHub's collab, 27 Nov 2026): FoodHub's own deal. Its
+  // orders go to FoodHub's WhatsApp, so preparePartnerOrder() is the rule
+  // here (not place_order()); the gift goes in the message.
+  { key: "sm_10", group: "sm", min: 10, restaurant: "Spice Magic", title: "Buy 10 biryanis, get a Chicken Starter or 2 Mini Biryanis free", unit: "biryanis", off: 0, choose: { count: 1, options: ["Chicken Starter", "2 Mini Dum Biryanis", "2 Mini Fry Biryanis"] } },
+  { key: "sm_5", group: "sm", min: 5, restaurant: "Spice Magic", title: "Buy 5 biryanis, get a Mini Fry or Mini Dum Biryani free", unit: "biryanis", off: 0, choose: { count: 1, options: ["Mini Fry Biryani", "Mini Dum Biryani"] } },
   { key: "bh_mini_10", group: "bh_mini", min: 10, restaurant: "Bheemasena Restaurant", title: "Buy 10 mini biryanis, get a Chicken Fry Biryani (full) free", unit: "mini biryanis", off: 0 },
 ];
 
@@ -88,6 +95,11 @@ function labelFor(def: DealDef, deals: DealsState, picks: string[] | undefined):
       return "Free Thums Up (pet bottle)";
     case "bh_mini_10":
       return "Free Chicken Fry Biryani (full)";
+    case "sm_5":
+    case "sm_10": {
+      const opts = dealOptions(def, deals);
+      return `Free ${picks?.[0] && opts.includes(picks[0]) ? picks[0] : opts[0]}`;
+    }
     case "bh_full_5": {
       const opts = dealOptions(def, deals);
       return `Free ${picks?.[0] && opts.includes(picks[0]) ? picks[0] : "Chicken Curry"}`;
@@ -108,14 +120,14 @@ export function cartDeals(
   deals: DealsState,
   picks: Partial<Record<DealKey, string[]>> = {},
 ): { applied: AppliedDeal[]; next: NextDeal | null } {
-  const counts: Record<DealGroup, number> = { a1: 0, shawarma: 0, bh_full: 0, bh_mini: 0 };
+  const counts: Record<DealGroup, number> = { a1: 0, shawarma: 0, bh_full: 0, bh_mini: 0, sm: 0 };
   for (const l of lines) {
     const g = deals.groups[l.dishId];
     if (g) counts[g] += l.quantity;
   }
   const applied: AppliedDeal[] = [];
   let next: NextDeal | null = null;
-  for (const group of ["a1", "shawarma", "bh_full", "bh_mini"] as DealGroup[]) {
+  for (const group of ["a1", "shawarma", "bh_full", "bh_mini", "sm"] as DealGroup[]) {
     if (counts[group] === 0) continue;
     const tiers = DEALS.filter((d) => d.group === group && deals.on.includes(d.key));
     const hit = tiers.find((d) => counts[group] >= d.min);

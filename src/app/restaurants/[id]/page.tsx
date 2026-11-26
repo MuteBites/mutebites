@@ -168,7 +168,7 @@ export default async function RestaurantPage({ params, searchParams }: PageProps
                 )}
               </ul>
               <MenuProgress restaurantName={restaurant.name} tried={dishesTried} total={totalDishes} />
-              {!partner && <DealBanner restaurantName={restaurant.name} on={offers.deals.on} />}
+              <DealBanner restaurantName={restaurant.name} on={offers.deals.on} />
               {!active && (
                 <p className="mt-4 rounded-2xl bg-secondary px-4 py-3 text-sm">
                   <strong className="font-semibold">Closed right now.</strong> You can browse the
@@ -193,7 +193,7 @@ export default async function RestaurantPage({ params, searchParams }: PageProps
               highlyReorderedDishIds={highlyReorderedDishIds}
               likedDishIds={liked.filter((d) => d.restaurantId === id).map((d) => d.id)}
               spiceLevel={taste.spiceLevel}
-              offers={partner ? NO_OFFERS : offers}
+              offers={partner ? { ...NO_OFFERS, deals: offers.deals } : offers}
               focusDishId={focusDishId}
             />
           </div>

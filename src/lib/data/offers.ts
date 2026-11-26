@@ -45,6 +45,7 @@ async function getDeals(supabase: Awaited<ReturnType<typeof createClient>>): Pro
     else if (r === "Shawarma Hub" && d.name === "Chicken Shawarma") g = "shawarma";
     else if (r === "Bheemasena Restaurant" && FULL_BIRYANI_SECTIONS.includes(section)) g = "bh_full";
     else if (r === "Bheemasena Restaurant" && section === SINGLE_BIRYANI_SECTION) g = "bh_mini";
+    else if (r === "Spice Magic" && section === "Biryanis") g = "sm";
     if (g) groups[d.id] = g;
     if (g === "bh_mini" && d.is_available) miniOptions.push(d.name);
   }

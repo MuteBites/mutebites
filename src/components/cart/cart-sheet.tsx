@@ -94,6 +94,7 @@ export function CartSheet({
           <PartnerCart
             cart={cart}
             partner={partner}
+            deals={offers.deals}
             orderingEnabled
             onDone={() => onOpenChange(false)}
           />

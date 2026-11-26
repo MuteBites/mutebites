@@ -1,6 +1,7 @@
 "use server";
 
 import { formatRupees } from "@/lib/format";
+import { DEALS, dealOptions, NO_DEALS } from "@/lib/deals";
 import { MAX_NOTES } from "@/lib/cart/limits";
 import {
   PARTNER_MAX_ITEMS,
@@ -27,6 +28,8 @@ export async function preparePartnerOrder(input: {
   restaurantId: string;
   lines: { dishId: string; quantity: number }[];
   notes: string;
+  /** The gift picked per deal key (bad / missing = the first option). */
+  dealChoices?: Record<string, string[] | undefined>;
 }): Promise<PartnerOrderResult> {
   const supabase = await createClient();
   const {
@@ -62,7 +65,7 @@ export async function preparePartnerOrder(input: {
 
   const { data: dishes } = await supabase
     .from("dishes")
-    .select("id, name, price, is_available, sort_order")
+    .select("id, name, price, is_available, sort_order, dish_categories(name)")
     .eq("restaurant_id", restaurant.id)
     .in("id", [...qty.keys()]);
   const byId = new Map((dishes ?? []).map((d) => [d.id, d]));
@@ -75,6 +78,27 @@ export async function preparePartnerOrder(input: {
     const d = byId.get(id)!;
     return [d.name, q, d.price];
   });
+  // The restaurant's deal (FoodHub's), same rule as the cart's cartDeals():
+  // dishes in its "Biryanis" section count; the biggest tier that's on.
+  const counted = [...qty].reduce((n, [id, q]) => {
+    const cat = byId.get(id)?.dish_categories as { name: string } | { name: string }[] | null | undefined;
+    const section = Array.isArray(cat) ? cat[0]?.name : cat?.name;
+    return section === "Biryanis" ? n + q : n;
+  }, 0);
+  const { data: switches } = await supabase.from("deal_switches").select("key, enabled");
+  const on = new Set((switches ?? []).filter((s) => s.enabled).map((s) => s.key));
+  const deal = DEALS.filter((d) => d.restaurant === restaurant.name && on.has(d.key)).find((d) => counted >= d.min);
+  const gifts: [string, number, number][] = [];
+  if (deal) {
+    const options = dealOptions(deal, NO_DEALS);
+    const asked = input.dealChoices?.[deal.key]?.[0];
+    const pick = asked && options.includes(asked) ? asked : options[0];
+    if (pick) {
+      const m = pick.match(/^(\d+) (.+?)s$/);
+      gifts.push(m ? [`${m[2]} (free)`, Number(m[1]), 0] : [`${pick} (free)`, 1, 0]);
+    }
+  }
+
   const count = items.reduce((n, [, q]) => n + q, 0);
   const total = items.reduce((n, [, q, p]) => n + q * p, 0);
   if (count > PARTNER_MAX_ITEMS || total > PARTNER_MAX_TOTAL) {
@@ -92,7 +116,7 @@ export async function preparePartnerOrder(input: {
       user_id: user.id,
       restaurant_id: restaurant.id,
       restaurant_name: restaurant.name,
-      items: items.map(([name, quantity, price]) => ({ name, quantity, price })),
+      items: [...items, ...gifts].map(([name, quantity, price]) => ({ name, quantity, price })),
       total_amount: total,
       notes: note || null,
     })
@@ -103,7 +127,7 @@ export async function preparePartnerOrder(input: {
   return { ok: true, orderId: saved.id, url: partnerWhatsAppUrl(
       partner,
       formatStoredMobile(profile.phone),
-      items.map(([name, quantity]) => ({ name, quantity })),
+      [...items, ...gifts].map(([name, quantity]) => ({ name, quantity })),
     ),
   };
 }
