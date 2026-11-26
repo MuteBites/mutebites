@@ -53,8 +53,10 @@ export function PartnerCart({
       // again), with WhatsApp opening over it.
       clearCart();
       onDone();
-      router.push(`/orders/fh/${res.orderId}`, { transitionTypes: ["nav-forward"] });
+      // WhatsApp first (a client-side navigation started before it cancelled
+      // it on iPhone), then the tracking page once the student is back.
       window.location.href = res.url;
+      setTimeout(() => router.push(`/orders/fh/${res.orderId}`, { transitionTypes: ["nav-forward"] }), 700);
     });
   }
 

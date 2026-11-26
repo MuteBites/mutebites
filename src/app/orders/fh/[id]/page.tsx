@@ -44,7 +44,7 @@ export default async function PartnerOrderPage({ params }: { params: Promise<{ i
   return (
     <main className="foodhub dark mx-auto min-h-dvh w-full max-w-md px-6 pb-12">
       <ViewTransition {...NAV_TRANSITION}>
-        <div className="flex items-center gap-3 pt-4 pb-2">
+        <div className="flex items-center gap-3 pt-3 pb-1">
           <Link
             href="/orders"
             aria-label="Back to your orders"
@@ -56,7 +56,7 @@ export default async function PartnerOrderPage({ params }: { params: Promise<{ i
         </div>
 
         <section aria-live="polite" className="fh-arch-card glow-hero border bg-card p-2 text-center">
-          <div className="fh-arch surface-hero relative h-64 overflow-hidden bg-hero ring-2 ring-amber/60">
+          <div className="fh-arch surface-hero relative h-40 overflow-hidden bg-hero ring-2 ring-amber/60">
             {cover && <BlurImage src={cover} alt="" sizes="(min-width: 448px) 400px, 90vw" className="object-cover opacity-45" />}
             <Image
               src={delivered ? "/foodhub/happy.webp" : "/foodhub/excited.webp"}
@@ -64,7 +64,7 @@ export default async function PartnerOrderPage({ params }: { params: Promise<{ i
               width={176}
               height={176}
               priority
-              className="animate-pop-in absolute inset-x-0 bottom-0 mx-auto size-44 object-contain"
+              className="animate-pop-in absolute inset-x-0 bottom-0 mx-auto size-32 object-contain"
             />
           </div>
           <div className="relative z-10 -mt-3 flex flex-col items-center px-3">
@@ -76,7 +76,7 @@ export default async function PartnerOrderPage({ params }: { params: Promise<{ i
               {delivered ? "Delivered. Enjoy!" : "Handi's promise"}
             </p>
           </div>
-          <div className="px-4 pt-3 pb-4">
+          <div className="px-4 pt-2 pb-3">
             {!delivered && (
               <p>
                 <span className="block text-sm text-muted-foreground">Your food will be delivered by</span>
@@ -94,31 +94,14 @@ export default async function PartnerOrderPage({ params }: { params: Promise<{ i
         {!delivered && (
           <a
             href={partnerWhatsAppUrl(partner, formatStoredMobile(profile.phone), order.items)}
-            className="glow-hero mt-5 flex h-14 w-full items-center justify-center gap-2 rounded-full bg-success text-lg font-bold text-success-foreground outline-none hover:brightness-110 focus-visible:ring-3 focus-visible:ring-ring/80"
+            className="glow-hero mt-4 flex h-14 w-full items-center justify-center gap-2 rounded-full bg-success text-lg font-bold text-success-foreground outline-none hover:brightness-110 focus-visible:ring-3 focus-visible:ring-ring/80"
           >
             <MessageCircle className="size-5" aria-hidden="true" />
             Open WhatsApp again and send it
           </a>
         )}
 
-        <section className="surface-hero glow-hero relative mt-5 -rotate-1 rounded-[1.4rem] bg-hero p-5 pl-11 text-hero-foreground">
-          <span
-            aria-hidden="true"
-            className="absolute top-1/2 left-4 size-4 -translate-y-1/2 rounded-full bg-background ring-2 ring-hero-accent/70"
-          />
-          <h1 className="font-heading text-3xl leading-tight font-bold">{order.restaurantName}</h1>
-          <p className="mt-1 text-sm text-hero-foreground/85">
-            A MuteBites × {partner.brand} order · {formatTime(order.createdAt)}
-          </p>
-          <p className="mt-1 flex items-center gap-1.5 text-sm">
-            <MapPin className="size-4 shrink-0 text-hero-accent" aria-hidden="true" />
-            <span>
-              Delivered by <strong className="font-semibold">{partner.brand}</strong> · pay on delivery
-            </span>
-          </p>
-        </section>
-
-        <div className="mt-7 drop-shadow-sm">
+        <div className="mt-5 drop-shadow-sm">
           <div className="fh-receipt bg-card p-5">
             <h2 className="font-heading text-title font-bold">What&apos;s in the bag</h2>
             <ul className="mt-2 divide-y divide-dashed">
@@ -147,6 +130,23 @@ export default async function PartnerOrderPage({ params }: { params: Promise<{ i
             </div>
           </div>
         </div>
+
+        <section className="surface-hero glow-hero relative mt-5 -rotate-1 rounded-[1.4rem] bg-hero p-5 pl-11 text-hero-foreground">
+          <span
+            aria-hidden="true"
+            className="absolute top-1/2 left-4 size-4 -translate-y-1/2 rounded-full bg-background ring-2 ring-hero-accent/70"
+          />
+          <h1 className="font-heading text-3xl leading-tight font-bold">{order.restaurantName}</h1>
+          <p className="mt-1 text-sm text-hero-foreground/85">
+            A MuteBites × {partner.brand} order · {formatTime(order.createdAt)}
+          </p>
+          <p className="mt-1 flex items-center gap-1.5 text-sm">
+            <MapPin className="size-4 shrink-0 text-hero-accent" aria-hidden="true" />
+            <span>
+              Delivered by <strong className="font-semibold">{partner.brand}</strong> · pay on delivery
+            </span>
+          </p>
+        </section>
 
         <div className="mt-4 flex items-center gap-2 rounded-[1.4rem] border bg-card py-2 pr-3 pl-2 shadow-card">
           <Image src="/foodhub/side.webp" alt="" width={56} height={56} className="size-14 object-contain" />
