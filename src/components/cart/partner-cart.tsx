@@ -4,7 +4,6 @@ import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { BadgeCheck, Loader2, MessageCircle, ShieldCheck, Truck } from "lucide-react";
 import { CartLineRow } from "@/components/cart/cart-line-row";
-import { ConfettiBurst } from "@/components/orders/confetti-burst";
 import { IconTile } from "@/components/icon-tile";
 import { cartTotals, clearCart, lineKey, reconcileCart, type Cart } from "@/lib/cart/store";
 import { formatRupees } from "@/lib/format";
@@ -33,7 +32,6 @@ export function PartnerCart({
 }) {
   const router = useRouter();
   const [error, setError] = useState<string | null>(null);
-  const [sent, setSent] = useState<{ url: string; orderId: string } | null>(null);
   const [sending, startSending] = useTransition();
   const { amount } = cartTotals(cart);
 
@@ -51,46 +49,13 @@ export function PartnerCart({
         if (res.removedDishIds?.length) reconcileCart(res.removedDishIds, res.updatedPrices ?? []);
         return;
       }
-      setSent({ url: res.url, orderId: res.orderId });
+      // Straight to the order's tracking page (it has "Send on WhatsApp"
+      // again), with WhatsApp opening over it.
+      clearCart();
+      onDone();
+      router.push(`/orders/fh/${res.orderId}`, { transitionTypes: ["nav-forward"] });
       window.location.href = res.url;
     });
-  }
-
-  if (sent) {
-    return (
-      <div className="relative overflow-hidden px-6 pt-8 pb-[max(1.5rem,env(safe-area-inset-bottom))] text-center">
-        <div className="pointer-events-none absolute inset-0 motion-reduce:hidden">
-          <ConfettiBurst />
-        </div>
-        <span className="offer-stamp mx-auto flex size-20 items-center justify-center rounded-full bg-success text-success-foreground shadow-raised">
-          <MessageCircle className="size-10" strokeWidth={2.25} aria-hidden="true" />
-        </span>
-        <h2 className="mt-5 font-heading text-headline font-bold">Tap Send in WhatsApp</h2>
-        <p className="mx-auto mt-2 max-w-xs text-muted-foreground">
-          Your order is typed out in {partner.brand}&apos;s chat. Send it, and they&apos;ll confirm it there.
-        </p>
-        <div className="mt-7 space-y-3">
-          <a
-            href={sent.url}
-            className="flex h-14 w-full items-center justify-center gap-2 rounded-full bg-success text-lg font-bold text-success-foreground outline-none hover:brightness-110 focus-visible:ring-3 focus-visible:ring-ring/80"
-          >
-            <MessageCircle className="size-5" aria-hidden="true" />
-            Open WhatsApp again
-          </a>
-          <button
-            type="button"
-            onClick={() => {
-              clearCart();
-              onDone();
-              router.push(`/orders/fh/${sent.orderId}`, { transitionTypes: ["nav-forward"] });
-            }}
-            className="flex h-12 w-full items-center justify-center rounded-full bg-secondary font-semibold outline-none hover:bg-border focus-visible:ring-3 focus-visible:ring-ring/80"
-          >
-            I&apos;ve sent it
-          </button>
-        </div>
-      </div>
-    );
   }
 
   return (

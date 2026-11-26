@@ -6,6 +6,7 @@ import {
   PARTNER_MAX_ITEMS,
   PARTNER_MAX_TOTAL,
   partnerOf,
+  partnerWhatsAppUrl,
 } from "@/lib/partners";
 import { formatStoredMobile } from "@/lib/phone";
 import { createClient } from "@/lib/supabase/server";
@@ -99,12 +100,10 @@ export async function preparePartnerOrder(input: {
     .single();
   if (saveError || !saved) return { ok: false, error: "Couldn't place that order. Please try again." };
 
-  // Just the phone number and each dish with its quantity (the client's call).
-  const text = [
-    formatStoredMobile(profile.phone),
-    "",
-    ...items.map(([name, q]) => `${name} - ${q}`),
-  ].join("\n");
-
-  return { ok: true, orderId: saved.id, url: `https://wa.me/${partner.whatsapp}?text=${encodeURIComponent(text)}` };
+  return { ok: true, orderId: saved.id, url: partnerWhatsAppUrl(
+      partner,
+      formatStoredMobile(profile.phone),
+      items.map(([name, quantity]) => ({ name, quantity })),
+    ),
+  };
 }

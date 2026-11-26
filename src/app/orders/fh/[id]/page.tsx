@@ -11,7 +11,8 @@ import { getUploadedPhotos } from "@/lib/data/uploaded-photos";
 import { formatTime } from "@/lib/date";
 import { formatRupees } from "@/lib/format";
 import { NAV_TRANSITION } from "@/lib/nav-transition";
-import { FOODHUB, partnerDeliveredAt, partnerOf } from "@/lib/partners";
+import { FOODHUB, partnerDeliveredAt, partnerOf, partnerWhatsAppUrl } from "@/lib/partners";
+import { formatStoredMobile } from "@/lib/phone";
 import { requireProfile } from "@/lib/profile";
 import { cn } from "@/lib/utils";
 
@@ -28,7 +29,7 @@ const timeFmt = new Intl.DateTimeFormat("en-IN", { timeZone: "Asia/Kolkata", hou
  */
 export default async function PartnerOrderPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
-  await requireProfile();
+  const profile = await requireProfile();
   const [order] = await Promise.all([getPartnerOrder(id), getUploadedPhotos()]);
   if (!order) notFound();
 
@@ -89,6 +90,16 @@ export default async function PartnerOrderPage({ params }: { params: Promise<{ i
             </p>
           </div>
         </section>
+
+        {!delivered && (
+          <a
+            href={partnerWhatsAppUrl(partner, formatStoredMobile(profile.phone), order.items)}
+            className="glow-hero mt-5 flex h-14 w-full items-center justify-center gap-2 rounded-full bg-success text-lg font-bold text-success-foreground outline-none hover:brightness-110 focus-visible:ring-3 focus-visible:ring-ring/80"
+          >
+            <MessageCircle className="size-5" aria-hidden="true" />
+            Open WhatsApp again and send it
+          </a>
+        )}
 
         <section className="surface-hero glow-hero relative mt-5 -rotate-1 rounded-[1.4rem] bg-hero p-5 pl-11 text-hero-foreground">
           <span

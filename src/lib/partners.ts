@@ -54,6 +54,19 @@ export function partnerDeliveredAt(createdAt: string): Date {
   return new Date(placed < due ? due : placed + 60 * 60_000);
 }
 
+/**
+ * FoodHub's WhatsApp link for an order: the student's phone number, then
+ * each dish with its quantity, nothing else (the client's call).
+ */
+export function partnerWhatsAppUrl(
+  partner: Partner,
+  phoneLine: string,
+  items: { name: string; quantity: number }[],
+): string {
+  const text = [phoneLine, ...items.map((i) => `${i.name} - ${i.quantity}`)].join("\n");
+  return `https://wa.me/${partner.whatsapp}?text=${encodeURIComponent(text)}`;
+}
+
 export type PartnerOrder = {
   id: string;
   restaurantName: string;
