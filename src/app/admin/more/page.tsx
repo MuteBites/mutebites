@@ -4,6 +4,7 @@ import { Ban, BookOpen, Hash, History, PackageX, Star, Tag, Users, type LucideIc
 import { InstallAdminButton } from "@/components/admin/install-admin-button";
 import { ThemeTile } from "@/components/admin/theme-tile";
 import { getOffers } from "@/lib/data/offers";
+import { DEALS } from "@/lib/deals";
 
 export const metadata: Metadata = { title: "More · MuteBites Admin" };
 
@@ -51,9 +52,9 @@ export default async function AdminMorePage() {
                   <Icon className="size-5" aria-hidden="true" />
                 </span>
                 {label}
-                {href === "/admin/offers" && offers.active.length + offers.deals.on.length > 0 && (
+                {href === "/admin/offers" && offers.active.length + new Set(offers.deals.on.map((k) => DEALS.find((d) => d.key === k)?.restaurant)).size > 0 && (
                   <span className="absolute top-2 right-2 rounded-full bg-success-soft px-1.5 py-0.5 text-[10px] font-bold text-success">
-                    {offers.active.length + offers.deals.on.length} on
+                    {offers.active.length + new Set(offers.deals.on.map((k) => DEALS.find((d) => d.key === k)?.restaurant)).size} on
                   </span>
                 )}
               </Link>

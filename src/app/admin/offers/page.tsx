@@ -29,14 +29,14 @@ export default async function AdminOffersPage() {
         </p>
       </div>
 
+      <DealsCard on={deals.on} />
+
       <OffersCard
         active={active}
         restaurantName={where}
         restaurants={restaurants.map(({ id, name }) => ({ id, name }))}
         excluded={excluded}
       />
-
-      <DealsCard on={deals.on} />
 
       <p className="text-sm text-muted-foreground">
         Changes apply straight away. Orders already placed keep their discount.

@@ -795,9 +795,10 @@ columns). A free biryani is left out of "Your usual" (`usual.ts`) so a
 re-order never adds it as paid.
 
 **Restaurant deals** (26 Nov 2026, `src/lib/deals.ts` + `place_order()`,
-`20261126000000_restaurant_deals.sql`): auto-applied, one admin switch each
-under "Restaurant deals" on the Offers page (`DealsCard`, `setDealEnabled()`,
-`public.deal_switches`, all off by default). A1 Biryani Point (any
+`20261126000000_restaurant_deals.sql`): auto-applied; "Restaurant deals" sits at the top of the Offers page with
+**one switch per restaurant** (`DealsCard`, `setDealEnabled(restaurant)` flips
+all its rows in `public.deal_switches` together, all off by default; the
+client's call, 26 Nov 2026). A1 Biryani Point (any
 "Biryani Specials" dish): 5 → 1 L Thums Up, 10 → Chicken 65 Biryani (full).
 Shawarma Hub ("Chicken Shawarma" only): 5 → ₹50 off, 11 → ₹210 off.
 Bheemasena full biryanis (Veg / Non-Veg Biryani): 2 → Thums Up pet bottle,
