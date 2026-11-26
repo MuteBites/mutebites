@@ -5,7 +5,7 @@ import { offlineResponse, type SiteMode } from "@/lib/site-status/offline-page";
 // Routes a signed-out visitor may open. Everything else bounces to /login.
 // /privacy and /terms must stay public — Google's OAuth consent-screen
 // review fetches them signed out.
-const PUBLIC_PATHS = ["/login", "/auth", "/privacy", "/terms", "/v"];
+const PUBLIC_PATHS = ["/login", "/auth", "/privacy", "/terms"];
 
 function isPublicPath(pathname: string) {
   return PUBLIC_PATHS.some(

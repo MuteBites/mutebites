@@ -7,6 +7,8 @@ import { EmptyState } from "@/components/empty-state";
 import { getDishPhoto } from "@/lib/data/dish-photos";
 import { getUploadedPhotos } from "@/lib/data/uploaded-photos";
 import { getOrderHistory, type OrderSummary } from "@/lib/data/orders";
+import { getPartnerOrders } from "@/lib/data/partner-orders";
+import { partnerDeliveredAt, partnerOf, type PartnerOrder } from "@/lib/partners";
 import { deliveryLine, orderPromise, type DeliveryPromise } from "@/lib/delivery";
 import { formatDayHeading, formatTime, istDayKey } from "@/lib/date";
 import { formatRupees } from "@/lib/format";
@@ -28,7 +30,8 @@ export const metadata: Metadata = { title: "Your orders · MuteBites", robots: {
 export default async function OrdersPage() {
   const profile = await requireProfile();
   // Uploaded photos registered before getDishPhoto() runs below.
-  const [orders] = await Promise.all([getOrderHistory(profile.id), getUploadedPhotos()]);
+  const [orders, partnerOrders] = await Promise.all([getOrderHistory(profile.id), getPartnerOrders(profile.id), getUploadedPhotos()]);
+  const total = orders.length + partnerOrders.length;
 
   const inProgress = orders.filter((o) => isActiveStatus(o.status));
   const past = orders.filter((o) => !isActiveStatus(o.status));
@@ -46,12 +49,25 @@ export default async function OrdersPage() {
         <ViewTransition {...REVEAL_ENTER}>
           <h1 className="font-display text-headline font-bold">Your orders</h1>
           <p className="mt-1 text-muted-foreground">
-            {orders.length === 0
-              ? "No orders yet"
-              : `${orders.length} ${orders.length === 1 ? "order" : "orders"} · all handed over at the gate`}
+            {total === 0 ? "No orders yet" : `${total} ${total === 1 ? "order" : "orders"}`}
           </p>
 
-          {orders.length === 0 && <EmptyOrders />}
+          {total === 0 && <EmptyOrders />}
+
+          {partnerOrders.length > 0 && (
+            <section aria-labelledby="foodhub-orders" className="mt-6">
+              <h2 id="foodhub-orders" className="text-label text-muted-foreground">
+                From FoodHub
+              </h2>
+              <ul className="mt-2.5 flex flex-col gap-3">
+                {partnerOrders.slice(0, 20).map((o) => (
+                  <li key={o.id}>
+                    <PartnerOrderCard order={o} />
+                  </li>
+                ))}
+              </ul>
+            </section>
+          )}
 
           {inProgress.length > 0 && (
             <section aria-labelledby="in-progress" className="mt-6">
@@ -239,5 +255,45 @@ function PastOrderRow({ order }: { order: OrderSummary }) {
         </Link>
       )}
     </li>
+  );
+}
+
+const istTime = new Intl.DateTimeFormat("en-IN", { timeZone: "Asia/Kolkata", hour: "numeric", minute: "2-digit" });
+
+/** A FoodHub restaurant's order (Spice Magic): its dark pine card, delivered from 8:30 PM. */
+function PartnerOrderCard({ order }: { order: PartnerOrder }) {
+  const due = partnerDeliveredAt(order.createdAt);
+  // eslint-disable-next-line react-hooks/purity -- server render, once per request
+  const delivered = Date.now() >= due.getTime();
+  const photo = order.items.map((i) => getDishPhoto(order.restaurantName, i.name)).find(Boolean);
+  const brand = partnerOf(order.restaurantName)?.brand ?? "FoodHub";
+  return (
+    <Link
+      href={`/orders/fh/${order.id}`}
+      transitionTypes={["nav-forward"]}
+      className="foodhub dark pressable flex items-center gap-3.5 rounded-[1.5rem] border p-3 pr-4 shadow-card outline-none focus-visible:ring-3 focus-visible:ring-ring/80"
+    >
+      <span className="relative size-14 shrink-0 overflow-hidden rounded-2xl bg-stripes">
+        {photo && <BlurImage src={photo} alt="" sizes="56px" className="object-cover" />}
+      </span>
+      <span className="min-w-0 flex-1">
+        <span className="block truncate font-semibold">{order.restaurantName}</span>
+        <span className="block truncate text-sm text-muted-foreground">
+          {order.items.map((i) => `${i.name} × ${i.quantity}`).join(", ")}
+        </span>
+        <span
+          className={cn(
+            "mt-1 inline-block rounded-full px-2.5 py-0.5 text-xs font-semibold",
+            delivered ? "bg-success-soft text-success" : "bg-amber-soft text-amber-soft-foreground",
+          )}
+        >
+          {delivered ? "Delivered" : `By ${istTime.format(due)} · ${brand}`}
+        </span>
+      </span>
+      <span className="shrink-0 text-right">
+        <span className="block font-heading font-bold text-primary tabular-nums">{formatRupees(order.totalAmount)}</span>
+        <ChevronRight className="ml-auto size-4 text-muted-foreground" aria-hidden="true" />
+      </span>
+    </Link>
   );
 }

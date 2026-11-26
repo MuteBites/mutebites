@@ -2424,3 +2424,21 @@
   0%, 35% { left: -50%; }
   85%, 100% { left: 120%; }
 }
+
+/* FoodHub's order page shapes (Spice Magic tracking, 27 Nov 2026), copied
+   from FoodHub: an arched window inside an arched card, and a bill with a
+   scalloped foot (masked, so its shadow goes on a parent). */
+.fh-arch-card {
+  border-radius: 50% 50% 1.7rem 1.7rem / 7.5rem 7.5rem 1.7rem 1.7rem;
+}
+.fh-arch {
+  border-radius: 50% 50% 1.2rem 1.2rem / 7rem 7rem 1.2rem 1.2rem;
+}
+.fh-receipt {
+  --scallop: 1rem;
+  padding-bottom: calc(var(--scallop) + 1rem);
+  border-radius: 1.4rem 1.4rem 0 0;
+  mask:
+    radial-gradient(circle at 50% 100%, transparent calc(var(--scallop) / 2 - 0.5px), #000 calc(var(--scallop) / 2)) bottom / var(--scallop) var(--scallop) repeat-x,
+    linear-gradient(#000 0 0) top / 100% calc(100% - var(--scallop)) no-repeat;
+}

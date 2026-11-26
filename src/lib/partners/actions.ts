@@ -6,15 +6,12 @@ import {
   PARTNER_MAX_ITEMS,
   PARTNER_MAX_TOTAL,
   partnerOf,
-  type PartnerOrderPayload,
 } from "@/lib/partners";
-import { signPartnerOrder } from "@/lib/partners/sign";
 import { formatStoredMobile } from "@/lib/phone";
-import { SITE_URL } from "@/lib/site";
 import { createClient } from "@/lib/supabase/server";
 
 export type PartnerOrderResult =
-  | { ok: true; url: string }
+  | { ok: true; url: string; orderId: string }
   | { ok: false; error: string; removedDishIds?: string[]; updatedPrices?: { dishId: string; price: number }[] };
 
 /**
@@ -87,31 +84,27 @@ export async function preparePartnerOrder(input: {
   }
 
   const note = input.notes.trim().replace(/\s+/g, " ").slice(0, MAX_NOTES);
-  const payload: PartnerOrderPayload = {
-    v: 1,
-    r: restaurant.name,
-    i: items,
-    t: total,
-    n: profile.full_name,
-    p: profile.phone,
-    o: note,
-    s: Date.now(),
-  };
-  const token = signPartnerOrder(payload);
+  // Kept so the student sees it in Orders (partner_orders); FoodHub takes it on WhatsApp.
+  const { data: saved, error: saveError } = await supabase
+    .from("partner_orders")
+    .insert({
+      user_id: user.id,
+      restaurant_id: restaurant.id,
+      restaurant_name: restaurant.name,
+      items: items.map(([name, quantity, price]) => ({ name, quantity, price })),
+      total_amount: total,
+      notes: note || null,
+    })
+    .select("id")
+    .single();
+  if (saveError || !saved) return { ok: false, error: "Couldn't place that order. Please try again." };
 
+  // Just the phone number and each dish with its quantity (the client's call).
   const text = [
-    `*New order · ${restaurant.name}*`,
-    `_via MuteBites_`,
+    formatStoredMobile(profile.phone),
     "",
-    ...items.map(([name, q, p]) => `${name} - ${q} · ${formatRupees(q * p)}`),
-    "",
-    `*Total: ${formatRupees(total)}*`,
-    ...(note ? [`Note: ${note}`] : []),
-    "",
-    `Name: ${profile.full_name}`,
-    `Phone: ${formatStoredMobile(profile.phone)}`,
-    ...(token ? ["", `Verify: ${SITE_URL}/v/${token}`] : []),
+    ...items.map(([name, q]) => `${name} - ${q}`),
   ].join("\n");
 
-  return { ok: true, url: `https://wa.me/${partner.whatsapp}?text=${encodeURIComponent(text)}` };
+  return { ok: true, orderId: saved.id, url: `https://wa.me/${partner.whatsapp}?text=${encodeURIComponent(text)}` };
 }

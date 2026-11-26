@@ -13,9 +13,9 @@ import type { Dish, MenuSection } from "@/lib/data/types";
 // not a size. A new sized dish just needs one of these spellings (or a new
 // entry here and in ORDER). Ported from College Bites (Single / Full).
 
-const TAGGED = /^(.*\S)\s+(?:\((500 g|1 kg|Glass|1 Bottle)\)|(Half|Full))$/;
+const TAGGED = /^(.*\S)\s+(?:\((500 g|1 kg|Glass|1 Bottle)\)|(Mini|Half|Full))$/;
 /** Smallest first, so the picker reads small → big. */
-const ORDER = ["Half", "Full", "500 g", "1 kg", "Glass", "1 Bottle"];
+const ORDER = ["Mini", "Half", "Full", "500 g", "1 kg", "Glass", "1 Bottle"];
 
 /** "Apples (500 g)" → { base: "Apples", portion: "500 g" }; any other name → portion null. */
 export function splitPortion(name: string): { base: string; portion: string | null } {

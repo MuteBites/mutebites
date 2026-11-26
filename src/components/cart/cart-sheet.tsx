@@ -67,7 +67,7 @@ export function CartSheet({
       <SheetContent
         side="bottom"
         showCloseButton={false}
-        className={cn("mx-auto max-h-[92dvh] w-full max-w-md gap-0 rounded-t-[2rem] border-t-0 bg-background p-0 text-base", partner && "foodhub")}
+        className={cn("mx-auto max-h-[92dvh] w-full max-w-md gap-0 rounded-t-[2rem] border-t-0 bg-background p-0 text-base", partner && "foodhub dark")}
       >
         <header className="flex items-start gap-3 border-b px-6 pt-6 pb-4">
           <div className="min-w-0 flex-1">
@@ -95,7 +95,6 @@ export function CartSheet({
             cart={cart}
             partner={partner}
             orderingEnabled
-            suggestedNote={spiceNote(spiceLevel)}
             onDone={() => onOpenChange(false)}
           />
         ) : (

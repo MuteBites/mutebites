@@ -100,7 +100,7 @@ export default async function RestaurantPage({ params, searchParams }: PageProps
   // its bottom edge as a rounded sheet carrying the name, the facts as chips
   // (cuisines, free delivery to Main Gate) and the lit "tried N of M" bar.
   return (
-    <main className={cn("mx-auto w-full max-w-md", partner && "foodhub min-h-dvh")}>
+    <main className={cn("mx-auto w-full max-w-md", partner && "foodhub dark min-h-dvh")}>
       <ViewTransition {...NAV_TRANSITION}>
         <ViewTransition {...REVEAL_ENTER}>
           <div className={cn("relative aspect-[16/10] bg-stripes", !active && "grayscale")}>

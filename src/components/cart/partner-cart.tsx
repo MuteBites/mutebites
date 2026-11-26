@@ -1,12 +1,11 @@
 "use client";
 
 import { useState, useTransition } from "react";
+import { useRouter } from "next/navigation";
 import { BadgeCheck, Loader2, MessageCircle, ShieldCheck, Truck } from "lucide-react";
 import { CartLineRow } from "@/components/cart/cart-line-row";
 import { ConfettiBurst } from "@/components/orders/confetti-burst";
 import { IconTile } from "@/components/icon-tile";
-import { Textarea } from "@/components/ui/textarea";
-import { MAX_NOTES } from "@/lib/cart/limits";
 import { cartTotals, clearCart, lineKey, reconcileCart, type Cart } from "@/lib/cart/store";
 import { formatRupees } from "@/lib/format";
 import type { Partner } from "@/lib/partners";
@@ -24,19 +23,17 @@ export function PartnerCart({
   cart,
   partner,
   orderingEnabled,
-  suggestedNote,
   onDone,
 }: {
   cart: Cart;
   partner: Partner;
   /** The restaurant's own Kitchen switch. */
   orderingEnabled: boolean;
-  suggestedNote: string | null;
   onDone: () => void;
 }) {
-  const [notes, setNotes] = useState("");
+  const router = useRouter();
   const [error, setError] = useState<string | null>(null);
-  const [sentUrl, setSentUrl] = useState<string | null>(null);
+  const [sent, setSent] = useState<{ url: string; orderId: string } | null>(null);
   const [sending, startSending] = useTransition();
   const { amount } = cartTotals(cart);
 
@@ -47,19 +44,19 @@ export function PartnerCart({
       const res = await preparePartnerOrder({
         restaurantId: cart.restaurantId!,
         lines: cart.lines.map((l) => ({ dishId: l.dishId, quantity: l.quantity })),
-        notes,
+        notes: "",
       });
       if (!res.ok) {
         setError(res.error);
         if (res.removedDishIds?.length) reconcileCart(res.removedDishIds, res.updatedPrices ?? []);
         return;
       }
-      setSentUrl(res.url);
+      setSent({ url: res.url, orderId: res.orderId });
       window.location.href = res.url;
     });
   }
 
-  if (sentUrl) {
+  if (sent) {
     return (
       <div className="relative overflow-hidden px-6 pt-8 pb-[max(1.5rem,env(safe-area-inset-bottom))] text-center">
         <div className="pointer-events-none absolute inset-0 motion-reduce:hidden">
@@ -70,12 +67,11 @@ export function PartnerCart({
         </span>
         <h2 className="mt-5 font-heading text-headline font-bold">Tap Send in WhatsApp</h2>
         <p className="mx-auto mt-2 max-w-xs text-muted-foreground">
-          Your order is typed out in {partner.brand}&apos;s chat. Send it, and they&apos;ll confirm it and the
-          delivery time there.
+          Your order is typed out in {partner.brand}&apos;s chat. Send it, and they&apos;ll confirm it there.
         </p>
         <div className="mt-7 space-y-3">
           <a
-            href={sentUrl}
+            href={sent.url}
             className="flex h-14 w-full items-center justify-center gap-2 rounded-full bg-success text-lg font-bold text-success-foreground outline-none hover:brightness-110 focus-visible:ring-3 focus-visible:ring-ring/80"
           >
             <MessageCircle className="size-5" aria-hidden="true" />
@@ -86,6 +82,7 @@ export function PartnerCart({
             onClick={() => {
               clearCart();
               onDone();
+              router.push(`/orders/fh/${sent.orderId}`, { transitionTypes: ["nav-forward"] });
             }}
             className="flex h-12 w-full items-center justify-center rounded-full bg-secondary font-semibold outline-none hover:bg-border focus-visible:ring-3 focus-visible:ring-ring/80"
           >
@@ -105,27 +102,6 @@ export function PartnerCart({
           ))}
         </ul>
 
-        <label className="mt-5 block">
-          <span className="sr-only">Note for {partner.brand}</span>
-          <Textarea
-            value={notes}
-            onChange={(e) => setNotes(e.target.value)}
-            maxLength={MAX_NOTES}
-            rows={2}
-            placeholder={`Note for ${partner.brand}, e.g. “less spicy”`}
-            className="min-h-14 resize-none rounded-2xl bg-card px-5 py-4 text-base shadow-card md:text-base"
-          />
-        </label>
-        {suggestedNote && !notes.toLowerCase().includes(suggestedNote.toLowerCase()) && (
-          <button
-            type="button"
-            onClick={() => setNotes((n) => (n.trim() ? `${n.trim()}. ${suggestedNote}` : suggestedNote))}
-            className="mt-2 inline-flex h-9 items-center rounded-full bg-brand-soft px-3.5 text-sm font-semibold text-brand-soft-foreground outline-none hover:brightness-95 focus-visible:ring-3 focus-visible:ring-ring/80"
-          >
-            + {suggestedNote}
-          </button>
-        )}
-
         <div className="mt-4 divide-y overflow-hidden rounded-[1.5rem] border bg-card shadow-card">
           <div className="flex items-center gap-3.5 px-5 py-4">
             <IconTile>
@@ -144,7 +120,7 @@ export function PartnerCart({
             </IconTile>
             <div>
               <p className="font-semibold">Sent from your WhatsApp</p>
-              <p className="text-sm text-muted-foreground">With your name, phone and a MuteBites verify link.</p>
+              <p className="text-sm text-muted-foreground">Your phone number and the dishes, typed out for you.</p>
             </div>
           </div>
         </div>

@@ -124,10 +124,9 @@ student's stars once they've rated it.
 Spice Magic is FoodHub's restaurant, shown on MuteBites. Turn it on or
 off with its own switch on the **Kitchen** tab. It doesn't need a
 delivery time, and closing MuteBites ordering doesn't switch it off.
-Students' orders go straight to FoodHub's WhatsApp, so they never show
-up on your Orders board. Each message ends with a **Verify** link: FoodHub
-taps it to check the order is real and unchanged. If FoodHub reports a
-fake order, ban that number on the **Banned** page.
+Students' orders go straight to FoodHub's WhatsApp (their phone number
+and the dishes), so they never show up on your Orders board. If FoodHub
+reports a fake order, ban that number on the **Banned** page.
 
 ### Telling the restaurants (Kitchen)
 

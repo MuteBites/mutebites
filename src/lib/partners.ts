@@ -40,23 +40,25 @@ export function isPartnerRestaurant(restaurantName: string | null | undefined) {
 /** Caps per WhatsApp order, so a prank can't be a 40-biryani one. */
 export const PARTNER_MAX_ITEMS = 15;
 export const PARTNER_MAX_TOTAL = 3000;
-/** How long a verify link stays valid. */
-export const VERIFY_TTL_MS = 24 * 60 * 60 * 1000;
+/**
+ * When a Spice Magic order counts as delivered on its tracking page (no
+ * status is kept — the client's call): 8:30 PM IST on the day it was
+ * placed, or an hour after it if it came in later than that.
+ */
+export function partnerDeliveredAt(createdAt: string): Date {
+  const IST = 330 * 60_000;
+  const placed = new Date(createdAt).getTime();
+  const day = new Date(placed + IST);
+  day.setUTCHours(20, 30, 0, 0);
+  const due = day.getTime() - IST;
+  return new Date(placed < due ? due : placed + 60 * 60_000);
+}
 
-/** What a verify link carries (signed, so it can't be edited). */
-export type PartnerOrderPayload = {
-  v: 1;
-  /** Restaurant name. */
-  r: string;
-  /** Items: [name, quantity, unit price]. */
-  i: [string, number, number][];
-  /** Total. */
-  t: number;
-  /** Student's name and phone. */
-  n: string;
-  p: string;
-  /** Note (may be empty). */
-  o: string;
-  /** Sent at, ms. */
-  s: number;
+export type PartnerOrder = {
+  id: string;
+  restaurantName: string;
+  items: { name: string; quantity: number; price: number }[];
+  totalAmount: number;
+  notes: string | null;
+  createdAt: string;
 };
