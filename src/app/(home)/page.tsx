@@ -4,15 +4,14 @@ import { HomeHeader } from "@/components/home/home-header";
 import { OrderingPausedBanner } from "@/components/home/ordering-paused-banner";
 import { RestaurantList } from "@/components/home/restaurant-list";
 import { SignInWelcomeToast } from "@/components/home/sign-in-welcome-toast";
-import { ThursdayNudge } from "@/components/home/thursday-nudge";
 import { YourUsualChip } from "@/components/home/your-usual-chip";
-import { getRestaurantMenuStats, getRestaurants, getSearchableDishes, getThursdaySpecial } from "@/lib/data/restaurants";
+import { getRestaurantMenuStats, getRestaurants, getSearchableDishes } from "@/lib/data/restaurants";
 import { getOrderingState } from "@/lib/data/settings";
 import { getDishOrderCounts, getTrendingDishes } from "@/lib/data/trending";
 import { getUsualCart } from "@/lib/data/usual";
 import { getRatePromptOrder } from "@/lib/data/orders";
 import { RatePrompt } from "@/components/home/rate-prompt";
-import { getTimeOfDayIST, isThursdayIST } from "@/lib/date";
+import { getTimeOfDayIST } from "@/lib/date";
 import { getTodaysBatches } from "@/lib/data/delivery";
 import { promoDelivery } from "@/lib/delivery";
 import { NAV_TRANSITION, REVEAL_ENTER } from "@/lib/nav-transition";
@@ -37,7 +36,6 @@ export default async function Home({ searchParams }: PageProps<"/">) {
   const orderingPromise = getOrderingState();
   const trendingDishesPromise = getTrendingDishes();
   const dishOrderCountsPromise = getDishOrderCounts();
-  const thursdaySpecialPromise = isThursdayIST() ? getThursdaySpecial() : Promise.resolve(null);
   const deliveryPromise = getTodaysBatches();
 
   const profile = await profilePromise;
@@ -47,7 +45,6 @@ export default async function Home({ searchParams }: PageProps<"/">) {
     dishes,
     ordering,
     usual,
-    thursdaySpecial,
     trendingDishes,
     ratePrompt,
     dishOrderCounts,
@@ -61,7 +58,6 @@ export default async function Home({ searchParams }: PageProps<"/">) {
     dishesPromise,
     orderingPromise,
     getUsualCart(profile.id),
-    thursdaySpecialPromise,
     trendingDishesPromise,
     getRatePromptOrder(profile.id),
     dishOrderCountsPromise,
@@ -85,7 +81,6 @@ export default async function Home({ searchParams }: PageProps<"/">) {
         <ViewTransition {...REVEAL_ENTER}>
           <HomeHeader fullName={profile.full_name} timeOfDay={timeOfDay} avatar={taste.avatar} />
           {usual && orderingEnabled && <YourUsualChip usual={usual} />}
-          {thursdaySpecial && <ThursdayNudge special={thursdaySpecial} />}
           {!orderingEnabled && <OrderingPausedBanner ordering={ordering} />}
           <RestaurantList
             // A restaurant the admin just added (no dishes yet) stays hidden.

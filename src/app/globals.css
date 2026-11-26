@@ -2032,54 +2032,58 @@
   pointer-events: none;
 }
 
-/* Restaurant deals' "Offer applied!" pop (cart, DealsCard), 26 Nov 2026:
-   the card springs in, a light sweeps across, six sparks burst from the
-   gift and it wiggles; the tag pulses once. Reduced motion: static. */
+/* Offer applied (cart DealsCard, 26 Nov 2026 — FoodHub's moment in
+   MuteBites colours): the card's border rings out green twice, the gift
+   tile stamps in with a twist, an amber band of light runs through the
+   saving line, a "Free!" / "−₹50" chip floats up and away, and the
+   confetti (ConfettiBurst) fades out. Reduced motion: none of it. */
 @media (prefers-reduced-motion: no-preference) {
-  .deal-pop {
-    animation: deal-pop 620ms var(--ease-spring) both;
+  .offer-glow {
+    animation: offer-glow 1.6s var(--ease-out-expo) both;
   }
-  .deal-shine {
-    background: linear-gradient(105deg, transparent 30%, oklch(1 0 0 / 0.28) 50%, transparent 70%);
-    transform: translateX(-120%);
-    animation: deal-shine 1100ms 250ms var(--ease-out-expo) forwards;
+  .offer-stamp {
+    animation: offer-stamp 700ms var(--ease-spring) both;
   }
-  .deal-spark {
-    background: var(--hero-accent);
-    opacity: 0;
-    animation: deal-spark 750ms calc(180ms + var(--i) * 25ms) var(--ease-out-expo) forwards;
+  .offer-shine {
+    background: linear-gradient(100deg, var(--success) 35%, var(--confetti-1) 50%, var(--success) 65%) 0 0 / 250% 100%;
+    background-clip: text;
+    -webkit-background-clip: text;
+    color: transparent;
+    animation: offer-shine 1.4s var(--ease-out-expo) 250ms both;
   }
-  .deal-spark:nth-child(even) {
-    background: var(--hero-success);
+  .offer-rise {
+    animation: offer-rise 1.9s var(--ease-out-expo) 200ms both;
   }
-  .deal-gift {
-    animation: deal-gift 700ms 300ms var(--ease-spring) both;
-  }
-  .deal-tag {
-    animation: deal-tag 900ms 200ms var(--ease-out-expo) both;
+  .offer-celebration {
+    animation: offer-fade 2.2s linear both;
   }
 }
-@keyframes deal-pop {
-  0% { opacity: 0; transform: translateY(14px) scale(0.92); }
-  60% { opacity: 1; transform: translateY(-2px) scale(1.02); }
-  100% { opacity: 1; transform: none; }
+@keyframes offer-glow {
+  0% { box-shadow: 0 0 0 0 color-mix(in oklab, var(--success) 55%, transparent); }
+  35% { box-shadow: 0 0 0 10px color-mix(in oklab, var(--success) 0%, transparent); }
+  36% { box-shadow: 0 0 0 0 color-mix(in oklab, var(--success) 45%, transparent); }
+  75%, 100% { box-shadow: 0 0 0 12px color-mix(in oklab, var(--success) 0%, transparent); }
 }
-@keyframes deal-shine {
-  to { transform: translateX(120%); }
+@keyframes offer-stamp {
+  0% { transform: scale(0.3) rotate(-30deg); opacity: 0; }
+  55% { transform: scale(1.25) rotate(10deg); opacity: 1; }
+  80% { transform: scale(0.95) rotate(-4deg); }
+  100% { transform: scale(1) rotate(0); }
 }
-@keyframes deal-spark {
-  0% { opacity: 1; transform: translate(-50%, -50%) rotate(calc(var(--i) * 60deg)) translateX(0) scale(1); }
-  100% { opacity: 0; transform: translate(-50%, -50%) rotate(calc(var(--i) * 60deg)) translateX(34px) scale(0.4); }
+@keyframes offer-shine {
+  from { background-position: 100% 0; }
+  to { background-position: 0 0; }
 }
-@keyframes deal-gift {
-  0% { transform: scale(0.6) rotate(-12deg); }
-  45% { transform: scale(1.15) rotate(8deg); }
-  70% { transform: scale(0.97) rotate(-4deg); }
-  100% { transform: none; }
+@keyframes offer-rise {
+  0% { opacity: 0; transform: translateY(14px) scale(0.6); }
+  20% { opacity: 1; transform: translateY(0) scale(1.1); }
+  30% { transform: translateY(0) scale(1); }
+  75% { opacity: 1; transform: translateY(-10px); }
+  100% { opacity: 0; transform: translateY(-28px); }
 }
-@keyframes deal-tag {
-  0% { opacity: 0; letter-spacing: 0.08em; }
-  100% { opacity: 1; letter-spacing: 0; }
+@keyframes offer-fade {
+  0%, 70% { opacity: 1; }
+  100% { opacity: 0; }
 }
 
 @media (prefers-reduced-motion: reduce) {

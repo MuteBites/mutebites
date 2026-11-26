@@ -426,7 +426,7 @@ Food delivery site for VIT-AP University students.
 - **Dish deep links**: `/restaurants/<id>?dish=<dishId>` opens the menu
   scrolled to that dish with a brief rose outline (`focusDishId` in
   `MenuView`). Used by Home's dish grid (search / filters), the "Campus
-  favourites" row and the Thursday banner (`getThursdaySpecial()` returns `dishId`).
+  favourites" row.
 - **Home search** searches dishes as well as restaurants: every dish ships
   with the page (`getSearchableDishes()`, ~100 rows) and `searchDishes()`
   (`src/lib/search.ts`) filters on the client — every typed word must start
@@ -810,10 +810,11 @@ Restaurants, sections and "Chicken Shawarma" are matched **by name** in
 both places — renaming one breaks its deal until both are updated. Gifts
 are only labels (`orders.deals` jsonb `[{key, label, off}]`, no
 order_items); Shawarma's money off is `orders.deal_amount` (total =
-items − discount_amount − deal_amount). The cart shows each as a lit
-"Offer applied!" card (`components/cart/deals-card.tsx`, `.deal-pop` /
-`.deal-shine` / `.deal-spark` / `.deal-gift` in `globals.css`) with gift
-chips to pick, plus an "Add N more … for …" nudge; picks go as
+items − discount_amount − deal_amount). The cart shows each as an
+"Offer applied" card (`components/cart/deals-card.tsx`; FoodHub's moment in
+MuteBites colours, 26 Nov 2026: `.offer-glow` green ring, `ConfettiBurst`,
+`.offer-stamp` gift tile, `.offer-shine` amber band, `.offer-rise` floating
+"Free!" / "−₹50" chip, in `globals.css`) with gift chips to pick, plus an "Add N more … for …" nudge; picks go as
 `p_deal_choices` (bad / missing → the first option). Every order view,
 WhatsApp / copy text, Kitchen (gifts as free lines) and the CSV show them.
 

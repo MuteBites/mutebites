@@ -48,13 +48,6 @@ const hourMinuteFmt = new Intl.DateTimeFormat("en-GB", {
 // The old fixed delivery slots (deliveryWindow / slotEndTime) are gone
 // since 12 Nov 2026 — delivery times live in src/lib/delivery.ts.
 
-const weekdayFmt = new Intl.DateTimeFormat("en-US", { timeZone: IST, weekday: "long" });
-
-/** True on Thursdays, IST wall-clock — powers the Thursday-special nudge on Home. */
-export function isThursdayIST(now: Date = new Date()): boolean {
-  return weekdayFmt.format(now) === "Thursday";
-}
-
 const adminDayFmt = new Intl.DateTimeFormat("en-IN", {
   timeZone: IST,
   weekday: "long",
