@@ -5,6 +5,7 @@ import { istDayKey } from "@/lib/date";
 import { REVIEW_WINDOW_MS } from "@/lib/reviews/limits";
 import { createClient } from "@/lib/supabase/server";
 import type { OfferKey } from "@/lib/offers";
+import { parseOrderDeals, type OrderDeal } from "@/lib/deals";
 import { isUuid } from "@/lib/ids";
 import { ACTIVE_STATUSES } from "@/lib/orders/status";
 import type { OrderStatus } from "./types";
@@ -88,6 +89,8 @@ export type OrderDetail = {
   /** The discount offer used, if any; totalAmount is already after it. */
   discountOffer: OfferKey | null;
   discountAmount: number;
+  /** Restaurant deals it got (gifts, or Shawarma's money off — in totalAmount already). */
+  deals: OrderDeal[];
   /** Its delivery batch (null for lunch) and promised time. */
   batchId: string | null;
   promisedAt: string | null;
@@ -210,6 +213,7 @@ type OrderDetailRow = {
   daily_number: number;
   discount_offer: OfferKey | null;
   discount_amount: number;
+  deals: unknown;
   delivered_at: string | null;
   batch_id: string | null;
   promised_at: string | null;
@@ -366,7 +370,7 @@ export const getOrder = cache(async function getOrder(
   const { data, error } = await supabase
     .from("orders")
     .select(
-      "id, status, total_amount, created_at, updated_at, delivered_at, contact_phone, notes, restaurant_id, restaurants(name, phone), order_items(id, dish_name, unit_price, addons_price, quantity, subtotal, is_free, order_item_addons(addon_name)), daily_number, discount_offer, discount_amount, batch_id, promised_at, order_reviews(note, created_at, order_item_ratings(order_item_id, rating))",
+      "id, status, total_amount, created_at, updated_at, delivered_at, contact_phone, notes, restaurant_id, restaurants(name, phone), order_items(id, dish_name, unit_price, addons_price, quantity, subtotal, is_free, order_item_addons(addon_name)), daily_number, discount_offer, discount_amount, deals, batch_id, promised_at, order_reviews(note, created_at, order_item_ratings(order_item_id, rating))",
     )
     .eq("id", id)
     .eq("user_id", userId)
@@ -400,6 +404,7 @@ export const getOrder = cache(async function getOrder(
     dailyNumber: data.daily_number,
     discountOffer: data.discount_offer,
     discountAmount: Number(data.discount_amount),
+    deals: parseOrderDeals(data.deals),
     batchId: data.batch_id,
     promisedAt: data.promised_at,
   };

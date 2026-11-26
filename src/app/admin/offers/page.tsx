@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { BackToDashboardLink } from "@/components/admin/back-to-dashboard-link";
+import { DealsCard } from "@/components/admin/deals-card";
 import { OffersCard } from "@/components/admin/offers-card";
 import { getAdminRestaurants } from "@/lib/data/admin";
 import { getOffers } from "@/lib/data/offers";
@@ -13,7 +14,7 @@ export const metadata: Metadata = { title: "Offers · MuteBites Admin" };
  * offer is on and computes the discount. Ported from College Bites.
  */
 export default async function AdminOffersPage() {
-  const [{ active, restaurantName, excluded }, restaurants] = await Promise.all([getOffers(), getAdminRestaurants()]);
+  const [{ active, restaurantName, excluded, deals }, restaurants] = await Promise.all([getOffers(), getAdminRestaurants()]);
   const where = restaurantName || "the offer restaurant";
 
   return (
@@ -24,7 +25,7 @@ export default async function AdminOffersPage() {
         <p className="mt-1 text-muted-foreground">
           {active.length === 0
             ? "No offers on. Turn one on and students see an “Apply discount” bar in their cart."
-            : `${active.length} of 3 on. Students pick one per order in their cart.`}
+            : `${active.length} of 4 on. Students pick one per order in their cart.`}
         </p>
       </div>
 
@@ -34,6 +35,8 @@ export default async function AdminOffersPage() {
         restaurants={restaurants.map(({ id, name }) => ({ id, name }))}
         excluded={excluded}
       />
+
+      <DealsCard on={deals.on} />
 
       <p className="text-sm text-muted-foreground">
         Changes apply straight away. Orders already placed keep their discount.

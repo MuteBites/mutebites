@@ -1,5 +1,6 @@
 "use server";
 
+import { isDealKey, type DealKey } from "@/lib/deals";
 import { revalidatePath } from "next/cache";
 import { after } from "next/server";
 import { assertAdmin } from "@/lib/admin/assert";
@@ -39,6 +40,21 @@ export async function setOfferEnabled(offer: OfferKey, enabled: boolean): Promis
   if (error) return { ok: false, error: "Couldn't update the offer. Please try again." };
 
   revalidatePath("/", "layout"); // the cart on Home and every menu
+  return { ok: true };
+}
+
+/** Switches a restaurant deal (src/lib/deals.ts) on or off — public.deal_switches. */
+export async function setDealEnabled(key: DealKey, enabled: boolean): Promise<AdminActionResult> {
+  const denied = await assertAdmin();
+  if (denied) return denied;
+  if (!isDealKey(key) || typeof enabled !== "boolean") return { ok: false, error: "Unknown offer." };
+  const supabase = await createClient();
+  const { error } = await supabase
+    .from("deal_switches")
+    .update({ enabled, updated_at: new Date().toISOString() })
+    .eq("key", key);
+  if (error) return { ok: false, error: "Couldn't update the offer. Please try again." };
+  revalidatePath("/", "layout");
   return { ok: true };
 }
 

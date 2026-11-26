@@ -120,6 +120,12 @@ export function OrderSummaryBox({ order, className }: { order: AdminOrder; class
             <span className="shrink-0 tabular-nums">−{formatRupees(order.discountAmount)}</span>
           </li>
         )}
+        {order.deals.map((d) => (
+          <li key={d.key} className="flex items-baseline justify-between gap-3 font-semibold text-success">
+            <span className="min-w-0">{d.label}</span>
+            <span className="shrink-0 tabular-nums">{d.off > 0 ? `−${formatRupees(d.off)}` : "Free"}</span>
+          </li>
+        ))}
       </ul>
       {order.notes && <p className="mt-2 text-sm text-muted-foreground italic">“{order.notes}”</p>}
       <div className="mt-2.5 border-t border-foreground/10 pt-2.5">

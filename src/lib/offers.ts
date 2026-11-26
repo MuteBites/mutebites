@@ -15,6 +15,8 @@
 // "(Single)"), the same section names place_order() checks. The server
 // sends the matching dish ids (getOffers()), so the cart never guesses.
 
+import { NO_DEALS, type DealsState } from "@/lib/deals";
+
 export type OfferKey = "pct5" | "pct10" | "pct20" | "biryani";
 
 export const OFFER_KEYS: OfferKey[] = ["pct5", "pct10", "pct20", "biryani"];
@@ -61,6 +63,8 @@ export type OffersState = {
   fullDishIds: string[];
   /** Its single biryanis (SINGLE_BIRYANI_SECTION), while the biryani offer is on. */
   freeChoices: FreeChoice[];
+  /** Restaurant deals (src/lib/deals.ts), applied automatically. */
+  deals: DealsState;
 };
 
 export const NO_OFFERS: OffersState = {
@@ -70,6 +74,7 @@ export const NO_OFFERS: OffersState = {
   restaurantName: "",
   fullDishIds: [],
   freeChoices: [],
+  deals: NO_DEALS,
 };
 
 export function isOfferKey(value: unknown): value is OfferKey {

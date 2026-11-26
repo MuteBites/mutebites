@@ -99,6 +99,12 @@ export function OrderDetailView({ order, batches = [] }: { order: AdminOrderDeta
             <span className="shrink-0 tabular-nums">−{formatRupees(order.discountAmount)}</span>
           </div>
         )}
+        {order.deals.map((d) => (
+          <div key={d.key} className="mt-2 flex items-center justify-between gap-3 border-t pt-3 font-semibold text-success">
+            <span>Deal · {d.label}</span>
+            <span className="shrink-0 tabular-nums">{d.off > 0 ? `−${formatRupees(d.off)}` : "Free"}</span>
+          </div>
+        ))}
         <div className="mt-2 flex items-center justify-between border-t pt-3">
           <span className="font-semibold">Total · cash on delivery</span>
           <span className="font-heading text-xl font-bold tabular-nums">{formatRupees(order.totalAmount)}</span>

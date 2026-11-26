@@ -17,12 +17,19 @@ export function offerLine(order: Pick<AdminOrder, "discountOffer" | "discountAmo
   return `${OFFERS[order.discountOffer].short}: -${formatRupees(order.discountAmount)}`;
 }
 
-/** Each dish on its own line with its price; the offer, then a total line when there's more than one dish or a discount. */
+/** "Free Thums Up (pet bottle)" / "₹50 off on 5 Chicken Shawarmas: -₹50" — restaurant deals, for admin text. */
+export function dealLines(order: Pick<AdminOrder, "deals">): string[] {
+  return order.deals.map((d) => (d.off > 0 ? `${d.label}: -${formatRupees(d.off)}` : d.label));
+}
+
+/** Each dish on its own line with its price; the offer and deals, then a total line when there's more than one dish or a discount. */
 function itemLinesWithPrices(order: AdminOrder): string[] {
   const lines = order.items.map((i) => `${itemLine(i)} (${i.isFree ? "free" : formatRupees(i.subtotal)})`);
   const offer = offerLine(order);
   if (offer) lines.push(offer);
-  if (order.items.length > 1 || offer) lines.push(`Total: ${formatRupees(order.totalAmount)}`);
+  const deals = dealLines(order);
+  lines.push(...deals);
+  if (order.items.length > 1 || offer || deals.length) lines.push(`Total: ${formatRupees(order.totalAmount)}`);
   return lines;
 }
 
@@ -42,5 +49,10 @@ export function whatsAppConfirmation(order: AdminOrder): string {
  * 12 Nov 2026).
  */
 export function orderDetailsText(order: AdminOrder): string {
-  return [formatStoredMobile(order.contactPhone), ...order.items.map(itemLine)].join("\n");
+  return [
+    formatStoredMobile(order.contactPhone),
+    ...order.items.map(itemLine),
+    // Gifts the restaurant packs with it.
+    ...order.deals.filter((d) => d.off === 0).map((d) => d.label),
+  ].join("\n");
 }

@@ -437,8 +437,10 @@ function BoardCard({
               {order.studentBanned && (
                 <span className="rounded-full bg-destructive/10 px-2 py-0.5 font-bold text-destructive">Banned</span>
               )}
-              {order.discountOffer && (
-                <span className="rounded-full bg-success-soft px-2 py-0.5 font-bold text-success">Offer</span>
+              {(order.discountOffer || order.deals.length > 0) && (
+                <span className="rounded-full bg-success-soft px-2 py-0.5 font-bold text-success">
+                  {order.deals.some((d) => d.off === 0) ? "Offer · gift" : "Offer"}
+                </span>
               )}
             </div>
           </div>

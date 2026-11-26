@@ -794,6 +794,28 @@ admin card and detail page, WhatsApp text (`offerLine()`), the copy text
 columns). A free biryani is left out of "Your usual" (`usual.ts`) so a
 re-order never adds it as paid.
 
+**Restaurant deals** (26 Nov 2026, `src/lib/deals.ts` + `place_order()`,
+`20261126000000_restaurant_deals.sql`): auto-applied, one admin switch each
+under "Restaurant deals" on the Offers page (`DealsCard`, `setDealEnabled()`,
+`public.deal_switches`, all off by default). A1 Biryani Point (any
+"Biryani Specials" dish): 5 → 1 L Thums Up, 10 → Chicken 65 Biryani (full).
+Shawarma Hub ("Chicken Shawarma" only): 5 → ₹50 off, 11 → ₹210 off.
+Bheemasena full biryanis (Veg / Non-Veg Biryani): 2 → Thums Up pet bottle,
+5 → Chicken Curry or Half Chicken 65 (student picks), 10 → any 2 mini
+(Single Biryani) biryanis (student picks); mini biryanis: 10 → Chicken Fry
+Biryani (full). Per group only the biggest deal reached applies, once per
+order (user's call); they **stack with** the picked discount (user's call).
+Restaurants, sections and "Chicken Shawarma" are matched **by name** in
+both places — renaming one breaks its deal until both are updated. Gifts
+are only labels (`orders.deals` jsonb `[{key, label, off}]`, no
+order_items); Shawarma's money off is `orders.deal_amount` (total =
+items − discount_amount − deal_amount). The cart shows each as a lit
+"Offer applied!" card (`components/cart/deals-card.tsx`, `.deal-pop` /
+`.deal-shine` / `.deal-spark` / `.deal-gift` in `globals.css`) with gift
+chips to pick, plus an "Add N more … for …" nudge; picks go as
+`p_deal_choices` (bad / missing → the first option). Every order view,
+WhatsApp / copy text, Kitchen (gifts as free lines) and the CSV show them.
+
 **Menus** (`/admin/menus`, a "Menus" pill on the dashboard, 17 Oct 2026):
 the admin keeps the menus — no migration needed for a new restaurant,
 section or dish. The list shows every restaurant (cover, dish / section

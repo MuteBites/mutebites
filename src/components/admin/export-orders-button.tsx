@@ -27,8 +27,8 @@ export function ordersToCsv(orders: AdminOrder[]): string {
       formatStoredMobile(o.contactPhone),
       o.restaurantName,
       o.items.map((i) => `${[i.dishName, ...i.extras].join(" + ")} x${i.quantity}${i.isFree ? " (free)" : ""}`).join("; "),
-      o.discountOffer ? OFFERS[o.discountOffer].short : "",
-      o.discountOffer ? formatRupees(o.discountAmount) : "",
+      [o.discountOffer ? OFFERS[o.discountOffer].short : "", ...o.deals.map((d) => d.label)].filter(Boolean).join("; "),
+      o.discountOffer || o.deals.length ? formatRupees(o.discountAmount + o.deals.reduce((n, d) => n + d.off, 0)) : "",
       formatRupees(o.totalAmount),
       statusBadge(o.status).label,
     ]

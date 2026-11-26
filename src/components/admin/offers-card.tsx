@@ -166,7 +166,7 @@ function toKeys(excluded: Record<PercentOfferKey, string[]>): Set<string> {
   );
 }
 
-function Switch({
+export function Switch({
   checked,
   labelledBy,
   disabled,

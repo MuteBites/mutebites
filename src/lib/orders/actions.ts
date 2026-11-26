@@ -10,6 +10,7 @@ import { formatRupees } from "@/lib/format";
 import { formatOrderNumber } from "@/lib/orders/status";
 import { createClient } from "@/lib/supabase/server";
 import { isOfferKey, type OfferKey } from "@/lib/offers";
+import { isDealKey, type DealKey } from "@/lib/deals";
 
 export type PlaceOrderInput = {
   restaurantId: string;
@@ -20,6 +21,8 @@ export type PlaceOrderInput = {
   contactPhone: string;
   /** The discount the student picked, if any — place_order() decides if it applies. */
   offer?: OfferKey | null;
+  /** Gifts picked for restaurant deals (place_order() checks them; bad or missing = its default). */
+  dealChoices?: Partial<Record<DealKey, string[]>>;
   /** The free single biryanis picked for the "buy 3 full" offer. */
   freeItems?: { dishId: string; quantity: number }[];
 };
@@ -147,6 +150,7 @@ export async function placeOrder(input: PlaceOrderInput): Promise<PlaceOrderResu
     p_notes: notes || null,
     p_offer: offer,
     p_free_items: freeItems.length ? freeItems.map((f) => ({ dish_id: f.dishId, quantity: f.quantity })) : null,
+    p_deal_choices: cleanDealChoices(input.dealChoices),
   });
 
   if (error || typeof orderId !== "string") {
@@ -208,3 +212,14 @@ const PLACE_ORDER_ERRORS: Record<string, string> = {
   offer_wrong_restaurant: "That offer isn't for this restaurant, so it's been removed. Check the total and place your order again.",
   offer_not_eligible: "Your cart doesn't qualify for that many free biryanis. Every 3 full biryanis get 1 single free.",
 };
+
+/** Only known deals, a few short strings each — place_order() validates the rest. */
+function cleanDealChoices(raw: unknown): Record<string, string[]> | null {
+  if (!raw || typeof raw !== "object" || Array.isArray(raw)) return null;
+  const out: Record<string, string[]> = {};
+  for (const [k, v] of Object.entries(raw)) {
+    if (!isDealKey(k) || !Array.isArray(v)) continue;
+    out[k] = v.filter((x): x is string => typeof x === "string" && x.length <= 80).slice(0, 2);
+  }
+  return Object.keys(out).length ? out : null;
+}

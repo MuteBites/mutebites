@@ -435,6 +435,12 @@ export function OrderTracking({
                 <span className="tabular-nums">−{formatRupees(initialOrder.discountAmount)}</span>
               </div>
             )}
+            {initialOrder.deals.map((d) => (
+              <div key={d.key} className="mt-1 flex items-center justify-between gap-3 border-t pt-3 text-sm font-semibold text-success">
+                <span>{d.label}</span>
+                <span className="tabular-nums">{d.off > 0 ? `−${formatRupees(d.off)}` : "Free"}</span>
+              </div>
+            ))}
             {initialOrder.notes && (
               <p className="mt-3 rounded-xl bg-secondary px-4 py-2.5 text-sm text-muted-foreground">
                 “{initialOrder.notes}”

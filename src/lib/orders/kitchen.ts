@@ -87,6 +87,19 @@ function byRestaurant(orders: AdminOrder[]): KitchenRestaurant[] {
       }
       r.items += item.quantity;
     }
+    // Restaurant-deal gifts ("Free Thums Up (pet bottle)") go in the bag too.
+    for (const deal of order.deals) {
+      if (deal.off > 0) continue;
+      const name = deal.label.replace(/^Free /, "");
+      const key = `${name}|true`;
+      const line = r.index.get(key);
+      if (line) line.quantity += 1;
+      else {
+        const next = { name, quantity: 1, free: true };
+        r.index.set(key, next);
+        r.lines.push(next);
+      }
+    }
     map.set(order.restaurantId, r);
   }
   return [...map.values()]

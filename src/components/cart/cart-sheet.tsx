@@ -13,6 +13,8 @@ import { Textarea } from "@/components/ui/textarea";
 import { MAX_NOTES } from "@/lib/cart/limits";
 import { spiceNote } from "@/lib/taste/options";
 import { DiscountPicker, type OfferOption } from "@/components/cart/discount-picker";
+import { DealsCard } from "@/components/cart/deals-card";
+import { cartDeals, type DealKey } from "@/lib/deals";
 import {
   discountAmount,
   freeAllowance,
@@ -149,6 +151,7 @@ function CartContents({
   const { amount } = cartTotals(cart);
   const [offer, setOffer] = useState<OfferKey | null>(null);
   const [rawPicks, setRawPicks] = useState<Record<string, number>>({});
+  const [dealPicks, setDealPicks] = useState<Partial<Record<DealKey, string[]>>>({});
 
   // Offers (ported from College Bites). Everything below is derived from the
   // cart, so changing the cart can never leave a discount it no longer earns
@@ -190,7 +193,10 @@ function CartContents({
   // student pays exactly the paid lines — the same sum place_order() makes.
   const freeValue = appliedOffer === "biryani" ? discount : 0;
   const itemTotal = amount + freeValue;
-  const toPay = itemTotal - discount;
+  // Restaurant deals apply on their own, on top of the picked discount.
+  const deals = cartDeals(cart.lines, offers.deals, dealPicks);
+  const dealOff = deals.applied.reduce((n, d) => n + d.off, 0);
+  const toPay = Math.max(itemTotal - discount - dealOff, 0);
   // From the taste profile: a one-tap note, offered until it's in the box.
   const suggestedNote = spiceNote(spiceLevel);
   const showSuggestion =
@@ -213,6 +219,7 @@ function CartContents({
         contactPhone,
         offer: appliedOffer,
         freeItems: appliedOffer === "biryani" ? freeItems.map((f) => ({ dishId: f.id, quantity: f.quantity })) : [],
+        dealChoices: dealPicks,
       });
       if (result.ok) {
         clearCart();
@@ -286,6 +293,13 @@ function CartContents({
           <ContactPhone value={contactPhone} onChange={setContactPhone} />
         </div>
 
+        <DealsCard
+          applied={deals.applied}
+          next={deals.next}
+          picks={dealPicks}
+          onPick={(key, choice) => setDealPicks((p) => ({ ...p, [key]: choice }))}
+        />
+
         {offerOptions.length > 0 && (
           <DiscountPicker
             options={offerOptions}
@@ -314,6 +328,12 @@ function CartContents({
                 <dd className="shrink-0 tabular-nums">−{formatRupees(discount)}</dd>
               </div>
             )}
+            {deals.applied.map((d) => (
+              <div key={d.key} className="flex justify-between gap-3 font-semibold text-success">
+                <dt className="min-w-0">{d.label}</dt>
+                <dd className="shrink-0 tabular-nums">{d.off > 0 ? `−${formatRupees(d.off)}` : "Free"}</dd>
+              </div>
+            ))}
             <div className="flex justify-between text-muted-foreground">
               <dt>Delivery</dt>
               <dd className="rounded-full bg-success-soft px-2.5 py-0.5 text-sm font-semibold text-success">Free</dd>

@@ -4,6 +4,7 @@ import { createClient } from "@/lib/supabase/server";
 import { fetchAllRows } from "@/lib/supabase/fetch-all";
 import { startOfTodayIST } from "@/lib/date";
 import type { OfferKey } from "@/lib/offers";
+import { parseOrderDeals, type OrderDeal } from "@/lib/deals";
 import { getUnlockedMilestones, MILESTONES } from "@/components/profile/milestone-badges";
 import { isUuid } from "@/lib/ids";
 import { getRestaurantCount } from "./restaurants";
@@ -115,6 +116,8 @@ export type AdminOrder = {
   /** The discount offer the student used, if any; totalAmount is already after it. */
   discountOffer: OfferKey | null;
   discountAmount: number;
+  /** Restaurant deals it got — gifts to hand over, or money off (already in totalAmount). */
+  deals: OrderDeal[];
   dailyNumber: number;
   /** The delivery batch it joined (null for lunch) and when it's due (orders.promised_at). */
   batchId: string | null;
@@ -136,12 +139,13 @@ type AdminOrderRow = {
   order_items: { dish_name: string; quantity: number; subtotal: number; is_free: boolean; order_item_addons?: { addon_name: string }[] | null }[];
   discount_offer: OfferKey | null;
   discount_amount: number;
+  deals: unknown;
   batch_id: string | null;
   promised_at: string | null;
 };
 
 const ADMIN_ORDER_COLUMNS =
-  "id, status, total_amount, created_at, contact_phone, notes, user_id, restaurant_id, restaurants(name), users(full_name, is_banned), order_items(dish_name, quantity, subtotal, is_free, order_item_addons(addon_name)), daily_number, discount_offer, discount_amount, batch_id, promised_at";
+  "id, status, total_amount, created_at, contact_phone, notes, user_id, restaurant_id, restaurants(name), users(full_name, is_banned), order_items(dish_name, quantity, subtotal, is_free, order_item_addons(addon_name)), daily_number, discount_offer, discount_amount, deals, batch_id, promised_at";
 
 function toAdminOrder(o: AdminOrderRow): AdminOrder {
   return {
@@ -166,6 +170,7 @@ function toAdminOrder(o: AdminOrderRow): AdminOrder {
     dailyNumber: o.daily_number,
     discountOffer: o.discount_offer,
     discountAmount: Number(o.discount_amount),
+    deals: parseOrderDeals(o.deals),
     batchId: o.batch_id,
     promisedAt: o.promised_at,
   };
@@ -188,7 +193,7 @@ export async function getAdminOrderDetail(id: string): Promise<AdminOrderDetail 
     supabase
       .from("orders")
       .select(
-        "id, status, total_amount, created_at, delivered_at, contact_phone, notes, user_id, restaurant_id, daily_number, restaurants(name), users(full_name, is_banned, email, registration_number), order_items(id, dish_name, quantity, unit_price, addons_price, subtotal, is_free, order_item_addons(addon_name)), discount_offer, discount_amount, batch_id, promised_at",
+        "id, status, total_amount, created_at, delivered_at, contact_phone, notes, user_id, restaurant_id, daily_number, restaurants(name), users(full_name, is_banned, email, registration_number), order_items(id, dish_name, quantity, unit_price, addons_price, subtotal, is_free, order_item_addons(addon_name)), discount_offer, discount_amount, deals, batch_id, promised_at",
       )
       .eq("id", id)
       .maybeSingle<
