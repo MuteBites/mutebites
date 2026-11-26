@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { ViewTransition } from "react";
-import { ArrowLeft, ExternalLink, MapPin, Truck } from "lucide-react";
+import { ArrowLeft, ExternalLink, MapPin, MessageCircle, Truck } from "lucide-react";
 import { BlurImage } from "@/components/blur-image";
 import { MenuProgress } from "@/components/menu/menu-progress";
 import { MenuView } from "@/components/menu/menu-view";
@@ -140,6 +140,15 @@ export default async function RestaurantPage({ params, searchParams }: PageProps
                   >
                     Visit {partner.brand}
                     <ExternalLink className="size-4" aria-hidden="true" />
+                  </a>
+                  <a
+                    href={partner.group}
+                    target="_blank"
+                    rel="noopener"
+                    className="inline-flex h-10 items-center gap-1.5 rounded-full bg-success px-4 text-sm font-bold text-success-foreground outline-none hover:brightness-110 focus-visible:ring-3 focus-visible:ring-hero-foreground/60"
+                  >
+                    <MessageCircle className="size-4" aria-hidden="true" />
+                    Join {partner.brand}
                   </a>
                 </div>
               </div>

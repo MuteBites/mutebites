@@ -14,6 +14,8 @@ export type Partner = {
   whatsapp: string;
   url: string;
   urlLabel: string;
+  /** Its WhatsApp group invite ("Join FoodHub" on the menu). */
+  group: string;
 };
 
 export const FOODHUB: Partner = {
@@ -21,6 +23,7 @@ export const FOODHUB: Partner = {
   whatsapp: "918464975652",
   url: "https://foodhub-vitap.vercel.app/",
   urlLabel: "foodhub-vitap.vercel.app",
+  group: "https://chat.whatsapp.com/BCtFahx158W2ts4ogJlgDW",
 };
 
 const PARTNERS: Record<string, Partner> = {
