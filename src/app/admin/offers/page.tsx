@@ -2,6 +2,8 @@ import { isPartnerRestaurant } from "@/lib/partners";
 import type { Metadata } from "next";
 import { BackToDashboardLink } from "@/components/admin/back-to-dashboard-link";
 import { DealsCard } from "@/components/admin/deals-card";
+import { SpecialPriceCard } from "@/components/admin/special-price-card";
+import { getSpecialPriceOn } from "@/lib/data/special-price";
 import { OffersCard } from "@/components/admin/offers-card";
 import { getAdminRestaurants } from "@/lib/data/admin";
 import { getOffers } from "@/lib/data/offers";
@@ -15,7 +17,11 @@ export const metadata: Metadata = { title: "Offers · MuteBites Admin" };
  * offer is on and computes the discount. Ported from College Bites.
  */
 export default async function AdminOffersPage() {
-  const [{ active, restaurantName, excluded, deals }, restaurants] = await Promise.all([getOffers(), getAdminRestaurants()]);
+  const [{ active, restaurantName, excluded, deals }, restaurants, specialOn] = await Promise.all([
+    getOffers(),
+    getAdminRestaurants(),
+    getSpecialPriceOn(),
+  ]);
   const where = restaurantName || "the offer restaurant";
 
   return (
@@ -31,6 +37,8 @@ export default async function AdminOffersPage() {
       </div>
 
       <DealsCard on={deals.on} />
+
+      <SpecialPriceCard on={specialOn} />
 
       <OffersCard
         active={active}

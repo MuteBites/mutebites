@@ -8,6 +8,8 @@ import {
   PARTNER_MAX_TOTAL,
   partnerOf,
   partnerWhatsAppUrl,
+  specialPrice,
+  SPECIAL_PRICE,
 } from "@/lib/partners";
 import { formatStoredMobile } from "@/lib/phone";
 import { createClient } from "@/lib/supabase/server";
@@ -74,9 +76,15 @@ export async function preparePartnerOrder(input: {
     return { ok: false, error: "Some dishes just sold out. We took them out of your cart.", removedDishIds: removed };
   }
 
+  const { data: special } = await supabase
+    .from("deal_switches")
+    .select("enabled")
+    .eq("key", SPECIAL_PRICE.key)
+    .maybeSingle();
+  const specialOn = special?.enabled === true;
   const items: [string, number, number][] = [...qty].map(([id, q]) => {
     const d = byId.get(id)!;
-    return [d.name, q, d.price];
+    return [d.name, q, specialPrice(restaurant.name, d.name, Number(d.price), specialOn)];
   });
   // The restaurant's deal (FoodHub's), same rule as the cart's cartDeals():
   // dishes in its "Biryanis" section count; the biggest tier that's on.
@@ -126,6 +134,7 @@ export async function preparePartnerOrder(input: {
 
   return { ok: true, orderId: saved.id, url: partnerWhatsAppUrl(
       partner,
+      restaurant.name,
       formatStoredMobile(profile.phone),
       [...items, ...gifts].map(([name, quantity]) => ({ name, quantity })),
     ),

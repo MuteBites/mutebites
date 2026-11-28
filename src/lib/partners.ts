@@ -58,16 +58,38 @@ export function partnerDeliveredAt(createdAt: string): Date {
 }
 
 /**
- * FoodHub's WhatsApp link for an order: the student's phone number, then
- * each dish with its quantity, nothing else (the client's call).
+ * FoodHub's WhatsApp link for an order: "<restaurant> order", the
+ * student's phone number, then each dish with its quantity, nothing else
+ * (the client's call, 28 Nov 2026).
  */
 export function partnerWhatsAppUrl(
   partner: Partner,
+  restaurantName: string,
   phoneLine: string,
   items: { name: string; quantity: number }[],
 ): string {
-  const text = [phoneLine, ...items.map((i) => `${i.name} - ${i.quantity}`)].join("\n");
+  const text = [`${restaurantName} order`, phoneLine, ...items.map((i) => `${i.name} - ${i.quantity}`)].join("\n");
   return `https://wa.me/${partner.whatsapp}?text=${encodeURIComponent(text)}`;
+}
+
+/**
+ * Spice Magic's ₹170 offer (28 Nov 2026): while its admin switch is on
+ * (deal_switches key "sm_170", Offers page), these full biryanis cost ₹170.
+ * The menu, Home search and preparePartnerOrder() all price through
+ * specialPrice(). Matched by name.
+ */
+export const SPECIAL_PRICE = {
+  key: "sm_170",
+  restaurant: "Spice Magic",
+  price: 170,
+  dishes: ["Chicken Dum Full", "Chicken Fry Full", "Chicken Mixed"],
+  title: "Chicken Dum, Fry & Mixed (full) at ₹170",
+} as const;
+
+export function specialPrice(restaurantName: string, dishName: string, price: number, on: boolean): number {
+  return on && restaurantName === SPECIAL_PRICE.restaurant && (SPECIAL_PRICE.dishes as readonly string[]).includes(dishName)
+    ? Math.min(price, SPECIAL_PRICE.price)
+    : price;
 }
 
 export type PartnerOrder = {

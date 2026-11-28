@@ -157,10 +157,10 @@ export function RestaurantList({
             (from.size === 0 || from.has(r.id))),
       )
     : restaurants;
-  // Order (27 Nov 2026): MuteBites' open restaurants, then Spice Magic
-  // (FoodHub's collab), then the switched-off ones.
+  // Order (28 Nov 2026): Spice Magic (FoodHub collab) first while it's on,
+  // then MuteBites' open restaurants, then the switched-off ones.
   const rank = (r: (typeof restaurants)[number]) =>
-    isPartnerRestaurant(r.name) ? (r.is_active ? 1 : 2) : r.is_active ? 0 : 3;
+    isPartnerRestaurant(r.name) ? (r.is_active ? 0 : 2) : r.is_active ? 1 : 3;
   const ordered = [...visible].sort((a, b) => rank(a) - rank(b));
 
   // When the filters change while you're scrolled past the chips (they're

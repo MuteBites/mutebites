@@ -93,7 +93,7 @@ export default async function PartnerOrderPage({ params }: { params: Promise<{ i
 
         {!delivered && (
           <a
-            href={partnerWhatsAppUrl(partner, formatStoredMobile(profile.phone), order.items)}
+            href={partnerWhatsAppUrl(partner, order.restaurantName, formatStoredMobile(profile.phone), order.items)}
             className="glow-hero mt-4 flex h-14 w-full items-center justify-center gap-2 rounded-full bg-success text-lg font-bold text-success-foreground outline-none hover:brightness-110 focus-visible:ring-3 focus-visible:ring-ring/80"
           >
             <MessageCircle className="size-5" aria-hidden="true" />

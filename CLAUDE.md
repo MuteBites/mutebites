@@ -826,7 +826,14 @@ switch "Spice Magic" in Offers → Restaurant deals, off by default): its
 "Biryanis" section counts; 5 → a Mini Fry or Mini Dum Biryani free, 10 → a
 Chicken Starter or 2 Mini Biryanis free (student picks); the cart shows it
 like the other deals, and `preparePartnerOrder()` re-checks it and adds the
-gift as a "(free)" line to the saved order and the WhatsApp message. Spice
+gift as a "(free)" line to the saved order and the WhatsApp message. Spice Magic also has a **₹170 offer** (28 Nov 2026,
+`SPECIAL_PRICE` / `specialPrice()` in `partners.ts`, switch "Spice Magic ·
+₹170 biryanis" on the Offers page = `deal_switches` key `sm_170`,
+`getSpecialPriceOn()`): Chicken Dum Full, Chicken Fry Full and Chicken
+Mixed cost ₹170 on the menu, Home search and in `preparePartnerOrder()`.
+Its offers show as a slim strip of chips (`DealBanner compact`). While
+it's on, Spice Magic is listed **first** on Home. The WhatsApp message is
+"Spice Magic order", the phone number, then each dish - quantity. Spice
 Magic's Mini / Full biryanis are one card with a size picker ("Mini" is a
 size word in `portions.ts`). Adding FoodHub restaurants from the admin is
 planned, not built.

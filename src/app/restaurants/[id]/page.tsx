@@ -12,7 +12,8 @@ import { getLikedDishes } from "@/lib/data/favorites";
 import { getTasteProfile } from "@/lib/data/taste";
 import { getOffers } from "@/lib/data/offers";
 import { NO_OFFERS } from "@/lib/offers";
-import { partnerOf } from "@/lib/partners";
+import { partnerOf, SPECIAL_PRICE } from "@/lib/partners";
+import { getSpecialPriceOn } from "@/lib/data/special-price";
 import { DealBanner } from "@/components/menu/deal-banner";
 import { getFavoriteDishId, getTriedDishIds } from "@/lib/data/orders";
 import { menuItems } from "@/lib/menu/portions";
@@ -51,7 +52,7 @@ export default async function RestaurantPage({ params, searchParams }: PageProps
   const focusDishId = typeof dish === "string" && isUuid(dish) ? dish : null;
 
   const profile = await profilePromise;
-  const [menu, ordering, triedDishIds, favoriteDishId, highlyReorderedDishIds, liked, taste, offers] = await Promise.all([
+  const [menu, ordering, triedDishIds, favoriteDishId, highlyReorderedDishIds, liked, taste, offers, specialOn] = await Promise.all([
     menuPromise,
     orderingPromise,
     getTriedDishIds(profile.id, id),
@@ -60,6 +61,7 @@ export default async function RestaurantPage({ params, searchParams }: PageProps
     getLikedDishes(profile.id),
     getTasteProfile(profile.id),
     getOffers(),
+    getSpecialPriceOn(),
     getUploadedPhotos(), // registered before getRestaurantCoverPhoto() below
   ]);
   if (!menu) notFound();
@@ -177,7 +179,12 @@ export default async function RestaurantPage({ params, searchParams }: PageProps
                 )}
               </ul>
               <MenuProgress restaurantName={restaurant.name} tried={dishesTried} total={totalDishes} />
-              <DealBanner restaurantName={restaurant.name} on={offers.deals.on} />
+              <DealBanner
+                restaurantName={restaurant.name}
+                on={offers.deals.on}
+                compact={!!partner}
+                extra={partner && specialOn && restaurant.name === SPECIAL_PRICE.restaurant ? [SPECIAL_PRICE.title] : []}
+              />
               {!active && (
                 <p className="mt-4 rounded-2xl bg-secondary px-4 py-3 text-sm">
                   <strong className="font-semibold">Closed right now.</strong> You can browse the

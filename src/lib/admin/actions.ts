@@ -1,6 +1,6 @@
 "use server";
 
-import { isPartnerRestaurant, PARTNER_NAMES } from "@/lib/partners";
+import { isPartnerRestaurant, PARTNER_NAMES, SPECIAL_PRICE } from "@/lib/partners";
 import { DEALS } from "@/lib/deals";
 import { revalidatePath } from "next/cache";
 import { after } from "next/server";
@@ -55,6 +55,21 @@ export async function setDealEnabled(restaurant: string, enabled: boolean): Prom
     .from("deal_switches")
     .update({ enabled, updated_at: new Date().toISOString() })
     .in("key", keys);
+  if (error) return { ok: false, error: "Couldn't update the offer. Please try again." };
+  revalidatePath("/", "layout");
+  return { ok: true };
+}
+
+/** Spice Magic's ₹170 offer switch (deal_switches key "sm_170"). */
+export async function setSpecialPriceEnabled(enabled: boolean): Promise<AdminActionResult> {
+  const denied = await assertAdmin();
+  if (denied) return denied;
+  if (typeof enabled !== "boolean") return { ok: false, error: "Unknown offer." };
+  const supabase = await createClient();
+  const { error } = await supabase
+    .from("deal_switches")
+    .update({ enabled, updated_at: new Date().toISOString() })
+    .eq("key", SPECIAL_PRICE.key);
   if (error) return { ok: false, error: "Couldn't update the offer. Please try again." };
   revalidatePath("/", "layout");
   return { ok: true };

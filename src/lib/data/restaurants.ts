@@ -1,5 +1,7 @@
 import "server-only";
 
+import { getSpecialPriceOn } from "@/lib/data/special-price";
+import { specialPrice } from "@/lib/partners";
 import { cache } from "react";
 import { createClient } from "@/lib/supabase/server";
 import { isUuid } from "@/lib/ids";
@@ -41,7 +43,7 @@ export async function getSearchableDishes(): Promise<SearchableDish[]> {
   const supabase = await createClient();
   const { data, error } = await supabase
     .from("dishes")
-    .select("id, name, price, is_veg, is_available, restaurant_id, sort_order, dish_categories(name), restaurants!inner(archived_at)")
+    .select("id, name, price, is_veg, is_available, restaurant_id, sort_order, dish_categories(name), restaurants!inner(archived_at, name)")
     .is("restaurants.archived_at", null)
     .order("sort_order")
     .returns<
@@ -53,14 +55,16 @@ export async function getSearchableDishes(): Promise<SearchableDish[]> {
         is_available: boolean;
         restaurant_id: string;
         dish_categories: { name: string } | null;
+        restaurants: { name: string };
       }[]
     >();
 
   if (error) throw error;
+  const specialOn = await getSpecialPriceOn();
   return data.map((d) => ({
     id: d.id,
     name: d.name,
-    price: Number(d.price),
+    price: specialPrice(d.restaurants.name, d.name, Number(d.price), specialOn),
     isVeg: d.is_veg,
     isAvailable: d.is_available,
     restaurantId: d.restaurant_id,
@@ -162,7 +166,12 @@ export const getRestaurantMenu = cache(async function getRestaurantMenu(
   if (!restaurant) return null;
 
   const categories = categoriesResult.data ?? [];
-  const dishes = dishesResult.data ?? [];
+  // Spice Magic's ₹170 offer prices its three full biryanis while it's on.
+  const specialOn = await getSpecialPriceOn();
+  const dishes = (dishesResult.data ?? []).map((d) => ({
+    ...d,
+    price: specialPrice(restaurant.name, d.name, Number(d.price), specialOn),
+  }));
 
   const addonsByCategory = new Map<string, { id: string; name: string; price: number; sort_order: number }[]>();
   for (const row of addonsResult.data ?? []) {
