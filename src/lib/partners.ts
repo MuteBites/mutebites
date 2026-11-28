@@ -84,7 +84,14 @@ export const SPECIAL_PRICE = {
   price: 170,
   dishes: ["Chicken Dum Full", "Chicken Fry Full", "Chicken Mixed"],
   title: "Chicken Dum, Fry & Mixed (full) at ₹170",
+  /** Today only (the client's call): off by itself from midnight IST. */
+  until: "2026-11-29T00:00:00+05:30",
 } as const;
+
+/** The switch is on and the day isn't over. */
+export function specialPriceLive(switchOn: boolean, now: number = Date.now()): boolean {
+  return switchOn && now < Date.parse(SPECIAL_PRICE.until);
+}
 
 export function specialPrice(restaurantName: string, dishName: string, price: number, on: boolean): number {
   return on && restaurantName === SPECIAL_PRICE.restaurant && (SPECIAL_PRICE.dishes as readonly string[]).includes(dishName)

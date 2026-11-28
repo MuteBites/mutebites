@@ -10,6 +10,7 @@ import {
   partnerWhatsAppUrl,
   specialPrice,
   SPECIAL_PRICE,
+  specialPriceLive,
 } from "@/lib/partners";
 import { formatStoredMobile } from "@/lib/phone";
 import { createClient } from "@/lib/supabase/server";
@@ -81,7 +82,7 @@ export async function preparePartnerOrder(input: {
     .select("enabled")
     .eq("key", SPECIAL_PRICE.key)
     .maybeSingle();
-  const specialOn = special?.enabled === true;
+  const specialOn = specialPriceLive(special?.enabled === true);
   const items: [string, number, number][] = [...qty].map(([id, q]) => {
     const d = byId.get(id)!;
     return [d.name, q, specialPrice(restaurant.name, d.name, Number(d.price), specialOn)];

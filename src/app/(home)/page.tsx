@@ -22,6 +22,10 @@ import { TasteSheetHost } from "@/components/taste/taste-sheet";
 import { getLikedDishes } from "@/lib/data/favorites";
 import { getTasteProfile, hasPlacedOrder } from "@/lib/data/taste";
 import { getOffers } from "@/lib/data/offers";
+import { getSpecialPriceOn } from "@/lib/data/special-price";
+import { CollabOfferBanner } from "@/components/home/collab-offer-banner";
+import { SPECIAL_PRICE } from "@/lib/partners";
+import { DEALS } from "@/lib/deals";
 import { answeredCount, cravingOrder, heartCravings } from "@/lib/taste/options";
 
 export default async function Home({ searchParams }: PageProps<"/">) {
@@ -66,6 +70,9 @@ export default async function Home({ searchParams }: PageProps<"/">) {
     getLikedDishes(profile.id),
     getOffers(),
   ]);
+  // Spice Magic's today-only ₹170 offer, while it's on (28 Nov 2026).
+  const specialOn = await getSpecialPriceOn();
+  const spiceMagic = restaurants.find((r) => r.name === SPECIAL_PRICE.restaurant && r.is_active);
   const fromHearts = heartCravings(liked);
   const initials = initialsOf(profile.full_name);
   const timeOfDay = getTimeOfDayIST();
@@ -82,6 +89,16 @@ export default async function Home({ searchParams }: PageProps<"/">) {
           <HomeHeader fullName={profile.full_name} timeOfDay={timeOfDay} avatar={taste.avatar} />
           {usual && orderingEnabled && <YourUsualChip usual={usual} />}
           {!orderingEnabled && <OrderingPausedBanner ordering={ordering} />}
+          {specialOn && spiceMagic && (
+            <CollabOfferBanner
+              restaurantId={spiceMagic.id}
+              restaurantName={spiceMagic.name}
+              title={SPECIAL_PRICE.title}
+              deals={DEALS.filter((d) => d.restaurant === spiceMagic.name && offers.deals.on.includes(d.key))
+                .sort((a, b) => a.min - b.min)
+                .map((d) => d.title)}
+            />
+          )}
           <RestaurantList
             // A restaurant the admin just added (no dishes yet) stays hidden.
             restaurants={restaurants.filter((r) => dishes.some((d) => d.restaurantId === r.id))}

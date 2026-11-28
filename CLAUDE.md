@@ -831,8 +831,13 @@ gift as a "(free)" line to the saved order and the WhatsApp message. Spice Magic
 ₹170 biryanis" on the Offers page = `deal_switches` key `sm_170`,
 `getSpecialPriceOn()`): Chicken Dum Full, Chicken Fry Full and Chicken
 Mixed cost ₹170 on the menu, Home search and in `preparePartnerOrder()`.
-Its offers show as a slim strip of chips (`DealBanner compact`). While
-it's on, Spice Magic is listed **first** on Home. The WhatsApp message is
+It is **today only**: `SPECIAL_PRICE.until` (29 Nov 2026 00:00 IST) —
+`specialPriceLive()` turns it off by itself at midnight, switch or not.
+FoodHub restaurants' menu pages show **no offer banner**; instead Home
+shows `CollabOfferBanner` (collab light, "Today only · Spice Magic ×
+FoodHub", the ₹170 line and Spice Magic's deals that are on as chips, →
+its menu) while Spice Magic is on and the offer is live. While it's on,
+Spice Magic is listed **first** on Home. The WhatsApp message is
 "Spice Magic order", the phone number, then each dish - quantity. Spice
 Magic's Mini / Full biryanis are one card with a size picker ("Mini" is a
 size word in `portions.ts`). Adding FoodHub restaurants from the admin is
